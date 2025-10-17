@@ -789,16 +789,13 @@ public enum Talent {
 
 	public static final int TALENT_NUMBER = 44;
 
-	//warrior talent's buff
-	//2-4
-	public static class LethalMomentumTracker extends FlavourBuff{};
-	//2-5
 	public static class ImprovisedProjectileCooldown extends FlavourBuff{
-		public int icon() { return BuffIndicator.TIME; }
-		public void tintIcon(Image icon) { icon.hardlight(0.15f, 0.2f, 0.5f); }
-		public float iconFadePercent() { return Math.max(0, visualcooldown() / 50); }
-	};
-	//Berserker
+        public int icon() { return BuffIndicator.TIME; }
+        public void tintIcon(Image icon) { icon.hardlight(0.15f, 0.2f, 0.5f); }
+        public float iconFadePercent() { return Math.max(0, visualcooldown() / 50); }
+    };
+    public static class LethalMomentumTracker extends FlavourBuff{};
+    //Berserker
 	public static class MaxRageCooldown extends FlavourBuff{
 		public int icon() { return BuffIndicator.TIME; }
 		public void tintIcon(Image icon) { icon.hardlight(0xFF3333); }
@@ -809,20 +806,16 @@ public enum Talent {
 	//Shockwave 4-3
 	public static class StrikingWaveTracker extends FlavourBuff{};
 
-
-
-	//mage talent's buff
+	//Mage talent's buff
 	//2-3
 	public static class WandPreservationCounter extends CounterBuff{{revivePersists = true;}};
-	//BattleMage 3-3
+	//Battlemage 3-3
 	public static class EmpoweredStrikeTracker extends FlavourBuff{
 		//blast wave on-hit doesn't resolve instantly, so we delay detaching for it
 		public boolean delayedDetach = false;
 	};
 
-
-
-	//rouge talent's buff
+	//Rogue talent's buff
 	//1-4
 	public static class ProtectiveShadowsTracker extends Buff {
 		float barrierInc = 0.5f;
@@ -897,7 +890,7 @@ public enum Talent {
 	public static class RejuvenatingStepsCooldown extends FlavourBuff{
 		public int icon() { return BuffIndicator.TIME; }
 		public void tintIcon(Image icon) { icon.hardlight(0f, 0.35f, 0.15f); }
-		public float iconFadePercent() { return GameMath.gate(0, visualcooldown() / (15 - 5* hero.pointsInTalent(REJUVENATING_STEPS)), 1); }
+		public float iconFadePercent() { return GameMath.gate(0, visualcooldown() / (15 - 5*Dungeon.hero.pointsInTalent(REJUVENATING_STEPS)), 1); }
 	};
 	public static class RejuvenatingStepsFurrow extends CounterBuff{{revivePersists = true;}};
 	//3-2
@@ -960,7 +953,7 @@ public enum Talent {
 	//1-3
 	public static class PatientStrikeTracker extends Buff {
 		public int pos;
-		{ type = buffType.POSITIVE; }
+		{ type = Buff.buffType.POSITIVE; }
 		public int icon() { return BuffIndicator.TIME; }
 		public void tintIcon(Image icon) { icon.hardlight(0.5f, 0f, 1f); }
 		@Override
@@ -991,7 +984,12 @@ public enum Talent {
 		public float iconFadePercent() { return Math.max(0, visualcooldown() / 50); }
 	};
 	//2-2
-	public static class LiquidAgilEVATracker extends FlavourBuff{};
+	public static class LiquidAgilEVATracker extends FlavourBuff{
+		{
+			//detaches after hero acts, not after mobs act
+			actPriority = HERO_PRIO+1;
+		}
+	};
 	public static class LiquidAgilACCTracker extends FlavourBuff{
 		public int uses;
 
@@ -1055,7 +1053,7 @@ public enum Talent {
 	//3-2
 	public static class DeadlyFollowupTracker extends FlavourBuff{
 		public int object;
-		{ type = buffType.POSITIVE; }
+		{ type = Buff.buffType.POSITIVE; }
 		public int icon() { return BuffIndicator.INVERT_MARK; }
 		public void tintIcon(Image icon) { icon.hardlight(0.5f, 0f, 1f); }
 		public float iconFadePercent() { return Math.max(0, 1f - (visualcooldown() / 5)); }
@@ -1071,6 +1069,12 @@ public enum Talent {
 			object = bundle.getInt(OBJECT);
 		}
 	}
+	public static class PreciseAssaultTracker extends FlavourBuff{
+		{ type = buffType.POSITIVE; }
+		public int icon() { return BuffIndicator.INVERT_MARK; }
+		public void tintIcon(Image icon) { icon.hardlight(1f, 1f, 0.0f); }
+		public float iconFadePercent() { return Math.max(0, 1f - (visualcooldown() / 5)); }
+	};
 	public static class VariedChargeTracker extends Buff{
 		public Class weapon;
 
@@ -1554,8 +1558,6 @@ public enum Talent {
 			Buff.affect(hero, ParryTracker.class);
 		}
 
-
-
 		//rouge
 		if (talent == THIEFS_INTUITION && hero.pointsInTalent(THIEFS_INTUITION) == 2){
 			if (hero.belongings.ring instanceof Ring && !ShardOfOblivion.passiveIDDisabled()) {
@@ -1582,7 +1584,7 @@ public enum Talent {
 		}
 
 		if (talent == PROTECTIVE_SHADOWS && hero.invisible > 0){
-			Buff.affect(hero, ProtectiveShadowsTracker.class);
+			Buff.affect(hero, Talent.ProtectiveShadowsTracker.class);
 		}
 
 		if (talent == LIGHT_CLOAK && hero.heroClass == HeroClass.ROGUE){
@@ -1608,11 +1610,11 @@ public enum Talent {
 		if (talent == UNENCUMBERED_SPIRIT && hero.pointsInTalent(talent) == 3){
 			Item toGive = new ClothArmor().identify();
 			if (!toGive.collect()){
-				level.drop(toGive, hero.pos).sprite.drop();
+				Dungeon.level.drop(toGive, hero.pos).sprite.drop();
 			}
 			toGive = new Gloves().identify();
 			if (!toGive.collect()){
-				level.drop(toGive, hero.pos).sprite.drop();
+				Dungeon.level.drop(toGive, hero.pos).sprite.drop();
 			}
 		}
 
@@ -1630,7 +1632,6 @@ public enum Talent {
 		if (talent == SPIRIT_FORM){
 			Dungeon.hero.updateHT(false);
 		}
-
 
 		//gunner
 		if ((talent == GUNNERS_INTUITION && hero.belongings.weapon instanceof Gun) && !ShardOfOblivion.passiveIDDisabled()){
@@ -1939,9 +1940,9 @@ public enum Talent {
 					//1/2 turns of roots
 					Buff.affect(ch, Roots.class, factor * hero.pointsInTalent(LIQUID_NATURE));
 				}
-				if (level.map[grassCell] == Terrain.EMPTY ||
-						level.map[grassCell] == Terrain.EMBERS ||
-						level.map[grassCell] == Terrain.EMPTY_DECO){
+				if (Dungeon.level.map[grassCell] == Terrain.EMPTY ||
+						Dungeon.level.map[grassCell] == Terrain.EMBERS ||
+						Dungeon.level.map[grassCell] == Terrain.EMPTY_DECO){
 					Level.set(grassCell, Terrain.GRASS);
 					GameScene.updateMap(grassCell);
 				}
@@ -1953,10 +1954,10 @@ public enum Talent {
 				grassCells.remove(0);
 			}
 			for (int grassCell : grassCells){
-				int t = level.map[grassCell];
+				int t = Dungeon.level.map[grassCell];
 				if ((t == Terrain.EMPTY || t == Terrain.EMPTY_DECO || t == Terrain.EMBERS
 						|| t == Terrain.GRASS || t == Terrain.FURROWED_GRASS)
-						&& level.plants.get(grassCell) == null){
+						&& Dungeon.level.plants.get(grassCell) == null){
 					Level.set(grassCell, Terrain.HIGH_GRASS);
 					GameScene.updateMap(grassCell);
 				}
@@ -2018,7 +2019,7 @@ public enum Talent {
 				// 10/15%
 				if (Random.Int(20) < 1 + hero.pointsInTalent(RECALL_INSCRIPTION)){
 					Reflection.newInstance(cls).collect();
-					GLog.p("refunded!");
+					GLog.p(Messages.get(Talent.class, RECALL_INSCRIPTION.name() + ".refunded"));
 				}
 			}
 		}
@@ -2037,7 +2038,7 @@ public enum Talent {
 				// 10/15%
 				if (Random.Int(20) < 1 + hero.pointsInTalent(RECALL_INSCRIPTION)){
 					Reflection.newInstance(cls).collect();
-					GLog.p("refunded!");
+					GLog.p(Messages.get(Talent.class, RECALL_INSCRIPTION.name() + ".refunded"));
 				}
 			}
 		}
@@ -2086,20 +2087,47 @@ public enum Talent {
 			identify = true;
 		}
 
-		if (identify && !ShardOfOblivion.passiveIDDisabled()){
-			item.identify();
-		}
+		if (identify) {
+			if (ShardOfOblivion.passiveIDDisabled()) {
+				if (item instanceof Weapon){
+					((Weapon) item).setIDReady();
+				} else if (item instanceof Armor){
+					((Armor) item).setIDReady();
+				} else if (item instanceof Ring){
+					((Ring) item).setIDReady();
+				}
+			} else {
+				item.identify();
+			}
+        }
+
 		if (hero.hasTalent(GUNNERS_INTUITION) && item instanceof Gun) {
-			item.identify();
+            if (ShardOfOblivion.passiveIDDisabled()) {
+                ((Gun) item).setIDReady();
+            } else {
+                item.identify();
+            }
 		}
 		if (hero.hasTalent(MASTERS_INTUITION) && item instanceof MeleeWeapon && !(item instanceof Gun)) {
-			item.identify();
+            if (ShardOfOblivion.passiveIDDisabled()) {
+                ((Weapon) item).setIDReady();
+            } else {
+                item.identify();
+            }
 		}
 		if (hero.hasTalent(KNIGHTS_INTUITION) && item instanceof Armor) {
-			item.identify();
+            if (ShardOfOblivion.passiveIDDisabled()) {
+                ((Armor) item).setIDReady();
+            } else {
+                item.identify();
+            }
 		}
 		if (hero.hasTalent(ARCHERS_INTUITION) && item instanceof BowWeapon) {
-			item.identify();
+            if (ShardOfOblivion.passiveIDDisabled()) {
+                ((BowWeapon) item).setIDReady();
+            } else {
+                item.identify();
+            }
 		}
 	}
 
@@ -2121,7 +2149,7 @@ public enum Talent {
 		}
 	}
 
-	public static int onAttackProc( Hero hero, Char enemy, int damage ){
+	public static int onAttackProc( Hero hero, Char enemy, int dmg ){
 		KindOfWeapon wep;
 		if (RingOfForce.fightingUnarmed(hero) && !RingOfForce.unarmedGetsWeaponEnchantment(hero)){
 			wep = null;
@@ -2130,26 +2158,26 @@ public enum Talent {
 		}
 
 		if (hero.buff(MeleeWeapon.DashAttack.class) != null) {
-			damage = Math.round(damage * hero.buff(MeleeWeapon.DashAttack.class).getDmgMulti());
+			dmg = Math.round(dmg * hero.buff(MeleeWeapon.DashAttack.class).getDmgMulti());
 			hero.buff(MeleeWeapon.DashAttack.class).detach();
 		}
 
 		if (hero.hasTalent(Talent.PROVOKED_ANGER)
 			&& hero.buff(ProvokedAngerTracker.class) != null){
-			damage += 1 + hero.pointsInTalent(Talent.PROVOKED_ANGER);
+			dmg += 1 + 2*hero.pointsInTalent(Talent.PROVOKED_ANGER);
 			hero.buff(ProvokedAngerTracker.class).detach();
 		}
 
 		if (hero.hasTalent(Talent.LINGERING_MAGIC)
 				&& hero.buff(LingeringMagicTracker.class) != null){
-			damage += Random.IntRange(hero.pointsInTalent(Talent.LINGERING_MAGIC) , 2);
+			dmg += Random.IntRange(hero.pointsInTalent(Talent.LINGERING_MAGIC) , 2);
 			hero.buff(LingeringMagicTracker.class).detach();
 		}
 
 		if (hero.hasTalent(Talent.SUCKER_PUNCH)
 				&& enemy instanceof Mob && ((Mob) enemy).surprisedBy(hero)
 				&& enemy.buff(SuckerPunchTracker.class) == null){
-			damage += Random.IntRange(hero.pointsInTalent(Talent.SUCKER_PUNCH) , 2);
+			dmg += Random.IntRange(hero.pointsInTalent(Talent.SUCKER_PUNCH) , 2);
 			Buff.affect(enemy, SuckerPunchTracker.class);
 		}
 
@@ -2158,7 +2186,7 @@ public enum Talent {
 				Buff.prolong(hero, FollowupStrikeTracker.class, 5f).object = enemy.id();
 			} else if (hero.buff(FollowupStrikeTracker.class) != null
 					&& hero.buff(FollowupStrikeTracker.class).object == enemy.id()){
-				damage += 1 + hero.pointsInTalent(FOLLOWUP_STRIKE);
+				dmg += 1 + hero.pointsInTalent(FOLLOWUP_STRIKE);
 				if (hero.belongings.weapon == null && hero.subClass == HeroSubClass.FIGHTER) {
 					Buff.affect( enemy, Paralysis.class, 1f );
 				}
@@ -2166,18 +2194,18 @@ public enum Talent {
 			}
 		}
 
-		if (hero.buff(SpiritBladesTracker.class) != null
+		if (hero.buff(Talent.SpiritBladesTracker.class) != null
 				&& Random.Int(10) < 3*hero.pointsInTalent(Talent.SPIRIT_BLADES)){
 			SpiritBow bow = hero.belongings.getItem(SpiritBow.class);
-			if (bow != null) damage = bow.proc( hero, enemy, damage );
-			hero.buff(SpiritBladesTracker.class).detach();
+			if (bow != null) dmg = bow.proc( hero, enemy, dmg );
+			hero.buff(Talent.SpiritBladesTracker.class).detach();
 		}
 
 		if (hero.hasTalent(PATIENT_STRIKE)){
 			if (hero.buff(PatientStrikeTracker.class) != null
 					&& !(hero.belongings.attackingWeapon() instanceof MissileWeapon)){
 				hero.buff(PatientStrikeTracker.class).detach();
-				damage += Random.IntRange(hero.pointsInTalent(Talent.PATIENT_STRIKE), 2);
+				dmg += Random.IntRange(hero.pointsInTalent(Talent.PATIENT_STRIKE), 2);
 			}
 		}
 
@@ -2188,7 +2216,7 @@ public enum Talent {
 				}
 			} else if (hero.buff(DeadlyFollowupTracker.class) != null
 					&& hero.buff(DeadlyFollowupTracker.class).object == enemy.id()){
-				damage = Math.round(damage * (1.0f + .1f*hero.pointsInTalent(DEADLY_FOLLOWUP)));
+				dmg = Math.round(dmg * (1.0f + .1f*hero.pointsInTalent(DEADLY_FOLLOWUP)));
 			}
 		}
 
@@ -2197,12 +2225,12 @@ public enum Talent {
 				Buff.prolong(hero, FollowupShootTracker.class, 5f).object = enemy.id();
 			} else if (hero.buff(FollowupShootTracker.class) != null
 					&& hero.buff(FollowupShootTracker.class).object == enemy.id()){
-				damage = Math.round(damage * (1.0f + .1f*hero.pointsInTalent(FOLLOWUP_SHOOT)));
+				dmg = Math.round(dmg * (1.0f + .1f*hero.pointsInTalent(FOLLOWUP_SHOOT)));
 			}
 		}
 
 		if (hero.hasTalent(DRAWING_ENHANCE) && hero.buff(Sheath.Sheathing.class) != null) {
-			damage += 1+hero.pointsInTalent(DRAWING_ENHANCE);
+			dmg += 1+hero.pointsInTalent(DRAWING_ENHANCE);
 		}
 
 		if (hero.heroClass != HeroClass.SAMURAI && hero.hasTalent(DRAWING_ENHANCE) && enemy.buff(DrawEnhanceMetaTracker.class) == null ) {
@@ -2211,28 +2239,28 @@ public enum Talent {
 		}
 
 		if (hero.hasTalent(Talent.WATER_FRIENDLY) && level.map[hero.pos] == Terrain.WATER) {
-			damage += Hero.heroDamageIntRange(1, hero.pointsInTalent(Talent.WATER_FRIENDLY));
+			dmg += Hero.heroDamageIntRange(1, hero.pointsInTalent(Talent.WATER_FRIENDLY));
 			Sample.INSTANCE.play(Assets.Sounds.HIT_STRONG);
 		}
 
 		if (hero.buff(SkilledHandTracker.class) != null) {
-			damage += 1+hero.pointsInTalent(Talent.SKILLED_HAND);
+            dmg += 1+hero.pointsInTalent(Talent.SKILLED_HAND);
 			hero.buff(SkilledHandTracker.class).detach();
 			Sample.INSTANCE.play(Assets.Sounds.HIT_STRONG);
 		}
 
 		if (hero.hasTalent(Talent.SKILLED_HAND) && hero.heroClass != HeroClass.DUELIST) {
-			damage += Random.NormalIntRange(0, 1+hero.pointsInTalent(Talent.SKILLED_HAND));
+            dmg += Random.NormalIntRange(0, 1+hero.pointsInTalent(Talent.SKILLED_HAND));
 		}
 
 
 
 		if (hero.buff(KineticBattle.class) != null) {
-			damage = hero.buff(KineticBattle.class).proc(damage);
+            dmg = hero.buff(KineticBattle.class).proc(damage);
 		}
 
 		if (hero.hasTalent(Talent.TACKLE) && level.adjacent(enemy.pos, hero. pos) && hero.belongings.armor != null && (hero.belongings.attackingWeapon() instanceof MeleeWeapon || (hero.belongings.attackingWeapon() == null))) {
-			damage += Math.round(hero.belongings.armor.DRMax()*0.05f*hero.pointsInTalent(Talent.TACKLE));
+            dmg += Math.round(hero.belongings.armor.DRMax()*0.05f*hero.pointsInTalent(Talent.TACKLE));
 		}
 
 		//attacking procs
@@ -2296,12 +2324,12 @@ public enum Talent {
 		if (hero.hasTalent(Talent.ANTI_DEMON) &&
 				hero.buff(Bless.class) != null &&
 				(Char.hasProp(enemy, Char.Property.DEMONIC) || Char.hasProp(enemy, Char.Property.UNDEAD))) {
-			damage = Math.round(damage * 1f+hero.pointsInTalent(Talent.ANTI_DEMON)/3f);
+            dmg = Math.round(dmg * 1f+hero.pointsInTalent(Talent.ANTI_DEMON)/3f);
 		}
 
 		if (hero.hasTalent(Talent.ARMY_OF_DEATH)) {
 			float procChance = 0.1f * hero.pointsInTalent(Talent.ARMY_OF_DEATH);
-			if (damage >= enemy.HP
+			if (dmg >= enemy.HP
 					&& Random.Float() < procChance
 					&& !enemy.isImmune(Corruption.class)
 					&& enemy.buff(Corruption.class) == null
@@ -2309,7 +2337,7 @@ public enum Talent {
 					&& enemy.isAlive()){
 				Corruption.corruptionHeal(enemy);
 				AllyBuff.affectAndLoot((Mob) enemy, hero, Corruption.class);
-				damage = 0;
+                dmg = 0;
 			}
 
 		}
@@ -2317,12 +2345,12 @@ public enum Talent {
 		if (hero.hasTalent(Talent.SCAR_ATTACK)) {
 			int debuffs = enemy.buffs().size();
 			if (debuffs > 0) {
-				damage += debuffs * Random.NormalIntRange(1, hero.pointsInTalent(Talent.SCAR_ATTACK));
+                dmg += debuffs * Random.NormalIntRange(1, hero.pointsInTalent(Talent.SCAR_ATTACK));
 			}
 		}
 
 		if (hero.hasTalent(Talent.FINISH_ATTACK) && enemy.HP <= enemy.HT*0.25f) {
-			damage += 1+hero.pointsInTalent(Talent.FINISH_ATTACK);
+            dmg += 1+hero.pointsInTalent(Talent.FINISH_ATTACK);
 			Sample.INSTANCE.play(Assets.Sounds.HIT_STRONG);
 		}
 
@@ -2354,7 +2382,7 @@ public enum Talent {
 				Buff.prolong(hero, Sheath.DashAttackAcceleration.class, Sheath.DashAttackAcceleration.DURATION).hit();
 				Sheath.DashAttackAcceleration buff = hero.buff(Sheath.DashAttackAcceleration.class);
 				if (buff != null) {
-					damage = Math.round(damage*buff.getDmgMulti());
+                    dmg = Math.round(dmg*buff.getDmgMulti());
 				}
 			}
 			hero.buff(Sheath.DashAttackTracker.class).detach();
@@ -2374,11 +2402,11 @@ public enum Talent {
 		}
 
 		if (hero.buff(UnholyBible.Demon.class) != null) {
-			damage = Math.round(damage * 1.33f);
+            dmg = Math.round(dmg * 1.33f);
 		}
 
 		if (hero.buff(DualDagger.ReverseBlade.class) != null) {
-			damage = Math.round(damage * 0.5f);
+            dmg = Math.round(dmg * 0.5f);
 			Buff.affect(enemy, Bleeding.class).add(Random.NormalIntRange(1, 3));
 			if (enemy.sprite.visible) {
 				Splash.at( enemy.sprite.center(), -PointF.PI / 2, PointF.PI / 6,
@@ -2387,7 +2415,7 @@ public enum Talent {
 		}
 
 		if (hero.buff(ShadowBlade.shadowBladeTracker.class) != null) {
-			damage = Math.round(damage * 0.5f);
+            dmg = Math.round(dmg * 0.5f);
 		}
 
 		if (hero.hasTalent(Talent.BIOLOGY_PROJECT)) {
@@ -2395,18 +2423,18 @@ public enum Talent {
 				enemy.sprite.emitter().start( ShadowParticle.UP, 0.05f, 3 );
 				Sample.INSTANCE.play(Assets.Sounds.BURNING);
 
-				damage = damage * (int)Math.pow(1.1f, hero.pointsInTalent(Talent.BIOLOGY_PROJECT));
+                dmg = dmg * (int)Math.pow(1.1f, hero.pointsInTalent(Talent.BIOLOGY_PROJECT));
 			}
 		}
 
 		if (hero.belongings.attackingWeapon() instanceof MeleeWeapon && hero.heroClass != HeroClass.ADVENTURER && hero.hasTalent(Talent.LONG_MACHETE)) {
 			int dist = level.distance(hero.pos, enemy.pos)-1;
 			dist = Math.min(dist, hero.pointsInTalent(Talent.LONG_MACHETE));
-			damage = (int)Math.round(damage * Math.pow(0.8f, dist));
+            dmg = (int)Math.round(dmg * Math.pow(0.8f, dist));
 		}
 
 		if (hero.buff(TreasureMap.GoldTracker.class) != null) {
-			damage = Math.round(1 + 0.1f * hero.pointsInTalent(Talent.GOLD_HUNTER));
+            dmg = Math.round(1 + 0.1f * hero.pointsInTalent(Talent.GOLD_HUNTER));
 			hero.buff(TreasureMap.GoldTracker.class).detach();
 		}
 
@@ -2432,12 +2460,12 @@ public enum Talent {
 		}
 
 		if (hero.buff(TreasureMap.LuckTracker.class) != null
-				&& enemy.HP <= damage) {
+				&& enemy.HP <= dmg) {
 			Buff.affect(enemy, Lucky.LuckProc.class);
 		}
 
 		if (hero.subClass == HeroSubClass.CRUSADER && hero.buff(Bless.class) != null) {
-			int healAmt = Math.round(damage*0.4f);
+			int healAmt = Math.round(dmg*0.4f);
 			int excessHeal = healAmt - (hero.HT - hero.HP);
 			hero.heal(healAmt);
 			if (hero.hasTalent(Talent.HOLY_SHIELD) && excessHeal > 0) {
@@ -2482,7 +2510,7 @@ public enum Talent {
 		}
 
 		if (hero.buff(KineticAttackTracker.class) != null) {
-			damage += Random.IntRange(hero.pointsInTalent(Talent.KINETIC_ATTACK), 2); //1~2 at +1, 2 at +2
+            dmg += Random.IntRange(hero.pointsInTalent(Talent.KINETIC_ATTACK), 2); //1~2 at +1, 2 at +2
 			Sample.INSTANCE.play(Assets.Sounds.HIT_STRONG);
 			hero.buff(KineticAttackTracker.class).detach();
 		}
@@ -2522,7 +2550,7 @@ public enum Talent {
 			}
 		}
 
-		return damage;
+		return dmg;
 	}
 
 	public static int onDefenseProc(Hero hero, Char enemy, int damage) {
@@ -2625,13 +2653,13 @@ public enum Talent {
 		}
 	}
 	public static class ProvokedAngerTracker extends FlavourBuff{
-		{ type = buffType.POSITIVE; }
+		{ type = Buff.buffType.POSITIVE; }
 		public int icon() { return BuffIndicator.WEAPON; }
 		public void tintIcon(Image icon) { icon.hardlight(1.43f, 1.43f, 1.43f); }
 		public float iconFadePercent() { return Math.max(0, 1f - (visualcooldown() / 5)); }
 	}
 	public static class LingeringMagicTracker extends FlavourBuff{
-		{ type = buffType.POSITIVE; }
+		{ type = Buff.buffType.POSITIVE; }
 		public int icon() { return BuffIndicator.WEAPON; }
 		public void tintIcon(Image icon) { icon.hardlight(1.43f, 1.43f, 0f); }
 		public float iconFadePercent() { return Math.max(0, 1f - (visualcooldown() / 5)); }
@@ -2639,7 +2667,7 @@ public enum Talent {
 	public static class SuckerPunchTracker extends Buff{};
 	public static class FollowupStrikeTracker extends FlavourBuff{
 		public int object;
-		{ type = buffType.POSITIVE; }
+		{ type = Buff.buffType.POSITIVE; }
 		public int icon() { return BuffIndicator.INVERT_MARK; }
 		public void tintIcon(Image icon) { icon.hardlight(0f, 0.75f, 1f); }
 		public float iconFadePercent() { return Math.max(0, 1f - (visualcooldown() / 5)); }

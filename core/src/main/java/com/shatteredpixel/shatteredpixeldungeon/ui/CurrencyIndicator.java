@@ -61,32 +61,32 @@ public class CurrencyIndicator extends Component {
 
 		bullet = new BitmapText( PixelScene.pixelFont);
 		add( bullet );
-		
+
 		gold.visible = energy.visible = bullet.visible = false;
 	}
 	
 	@Override
 	protected void layout() {
-		bullet.x = x + (width - bullet.width()) / 2;
-		bullet.y = bottom() - bullet.height();
+		gold.x = x+1;
+		gold.y = top() + 1;
 
-		energy.x = x + (width - energy.width()) / 2;
-		gold.x = x + (width - gold.width()) / 2;
-		if (bullet.visible) {
-			energy.y = bottom() - bullet.height() - energy.height()+1;
-			if (energy.visible) {
-				gold.y = bottom() - bullet.height() - energy.height() - gold.height()+2;
-			} else {
-				gold.y = bottom() - bullet.height() - gold.height()+1;
-			}
-		} else {
-			energy.y = bottom() - energy.height();
-			if (energy.visible) {
-				gold.y = bottom() - energy.height() - gold.height()+1;
-			} else {
-				gold.y = bottom() - gold.height();
-			}
-		}
+		energy.x = x+1;
+        bullet.x = x+1;
+        if (gold.visible) {
+            energy.y = top() + energy.height() - 1;
+            if (energy.visible) {
+                bullet.y = top() + energy.height() + bullet.height() - 2;
+            } else {
+                bullet.y = top() + bullet.height() - 1;
+            }
+        } else {
+            energy.y = top() + 1;
+            if (energy.visible) {
+                bullet.y = top() + bullet.height() - 1;
+            } else {
+                bullet.y = top() + 1;
+            }
+        }
 	}
 	
 	@Override

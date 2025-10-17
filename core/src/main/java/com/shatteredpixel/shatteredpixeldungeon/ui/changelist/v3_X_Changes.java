@@ -38,6 +38,7 @@ import com.shatteredpixel.shatteredpixeldungeon.ui.Icons;
 import com.shatteredpixel.shatteredpixeldungeon.ui.TalentIcon;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Window;
 import com.watabou.noosa.Image;
+import com.watabou.utils.DeviceCompat;
 
 import java.util.ArrayList;
 
@@ -84,6 +85,223 @@ public class v3_X_Changes {
 		ChangeInfo changes = new ChangeInfo("v3.2", true, "");
 		changes.hardlight(Window.TITLE_COLOR);
 		changeInfos.add(changes);
+
+		changes = new ChangeInfo("v3.2.5", false, null);
+		changes.hardlight(Window.TITLE_COLOR);
+		changeInfos.add(changes);
+
+		changes.addButton( new ChangeButton(Icons.get(Icons.SHPX), "Dev Commentary",
+				"v3.2.5 has a couple more small interface improvements and a bunch of little fixes. This should hopefully be the final patch for v3.2 as I move on to early work on the next update!"));
+
+		changes.addButton(new ChangeButton(Icons.get(Icons.DISPLAY), "Interface Changes",
+				"Two additions have been made to the game's UI:\n" +
+				"**-** The Boss health bar is now larger on full size UI, taking advantage of the bigger space.\n" +
+				"**-** The main menu now has a button to hide the interface, letting players look at the new background.\n" +
+				"\n" +
+				"Further tweaks have been made to the game's UI:\n" +
+				"**-** Health bars now display shielding in addition to HP, instead of on top of it.\n" +
+				"**-** The Hero status pane can now extend to the right to avoid cutouts on the top-left of the display, if there is room to do so.\n" +
+				"**-** Improved how the hero buff bar handles large cutouts like the dynamic island\n" +
+				"**-** Further increased the permissiveness of what cutouts the game tries to render around\n" +
+				"**-** Brightened the background of the game version indicator to make it look less like an empty health bar.\n" +
+				"**-** Fixed cases where Shattered would attempt to draw into cutouts when they weren't properly reported by the device."));
+
+		changes.addButton(new ChangeButton(Icons.get(Icons.PREFS), Messages.get(ChangesScene.class, "misc"),
+				"**-** Updated code libraries used to build Shattered's macOS distribution. This should fix the game taking unreasonably long to launch on some newer macs, but also means Shattered now requires at least macOS 10.12 Sierra, up from 10.10 Yosemite.\n" +
+				"\n" +
+				"**-** DM-300's rockfall attack now deals 6-12 damage (10-20 with badder bosses). This is for consistency with the rockfall attack done by the gnoll geomancer, and to prevent specific exploits where DM-300 couldn't damage hiding inorganic allies.\n" +
+				"\n" +
+				"**-** Levelling up the dried rose while the ghost hero is summoned now heals it for the same amount that the upgrade increases max HP."));
+
+		changes.addButton(new ChangeButton(new Image(Assets.Sprites.SPINNER, 144, 0, 16, 16), Messages.get(ChangesScene.class, "bugfixes"),
+				"Fixed the following bugs:\n" +
+				"**Caused by v3.2.X:**\n" +
+				"**-** Thrown weapon merging prioritizing properties on weapons already stuck to enemies, instead of incoming ones\n" +
+				"**-** Thrown weapons not being properly set to ID-ready by wells of awareness when hero has the shard of oblivion\n" +
+				"**-** Rats attacking the hero when they should be neutral in specific cases\n" +
+				"**-** Picking up throwing clubs and hammers taking time if done during time freeze\n" +
+				"**-** Various minor visual/textual errors\n" +
+				"**-** Various rare crash errors",
+
+				"**Existed Prior to v3.2.0:**\n" +
+				"**-** Specific cases where bits of hidden walls could be seen through the fog of war\n" +
+				"**-** Specific errors with inter-floor teleports\n" +
+				"**-** DM-201s retaliating to corruption dmg\n" +
+				"**-** Crossbow's charged shot melee not triggering in some cases\n" +
+				"**-** Tab cycling not working correctly with inventory window\n" +
+				"**-** Golden bees not preferring potential targets affected by aggression debuff\n" +
+				"**-** Aggression debuff effect persisting on downed ghouls once they revive\n" +
+				"**-** Radiance stunning enemies are they are killed by it triggering illuminate\n" +
+				"**-** Prison guards being able to pull large characters into enclosed spaces\n" +
+				"**-** Various minor visual/textual errors"));
+
+		changes = new ChangeInfo("v3.2.4", false, null);
+		changes.hardlight(Window.TITLE_COLOR);
+		changeInfos.add(changes);
+
+		changes.addButton( new ChangeButton(Icons.get(Icons.SHPX), "Dev Commentary",
+				"Hey Folks, here's what is hopefully the last patch with major changes following v3.2, but it's a doozy!\n" +
+				"\n" +
+				"In addition to more mobile improvements, there's also a just recently finished overhaul to the title screen background!\n" +
+				"\n" +
+				"Note that both of the big new things in this update are likely to have a few quirks. If something seems out of place please let me know! I do expect to do one or two more patches after v3.2.4 to fix any minor issues that crop up."));
+
+		changes.addButton(new ChangeButton(Icons.get(Icons.DISPLAY_LAND), "New Title Screen Background!",
+				"**Shattered Pixel Dungeon has a new title screen background, with art by Aleksandar Komitov!**\n" +
+				"\n" +
+				"This new background is meant to both extend the classis archs, and tie the title screens more directly to the region splash arts! It features randomly selected floating fully rendered chunks of dungeon in front of an arch back-layer.\n" +
+				"\n" +
+				"Currently the background most strongly ties into the sewers region, but we have plans to add more variants in the future, one for each dungeon region!"));
+
+		changes.addButton(new ChangeButton(Icons.get(Icons.DISPLAY_PORT), "Mobile Layout Changes",
+				"**Shattered's in-game screen now renders in true fullscreen on most mobile devices!**\n" +
+				"\n" +
+				"The status bar at the top of the in-game UI has been modified to work around small and medium sized hole punches and rounded corners on modern displays! This includes the dynamic island on modern iPhones. Thanks to these adjustments it's now possible for the UI to move up and for the game to display in true fullscreen during gameplay! Devices with larger cutouts like full-sized notches will unfortunately still have a dark bar on the top, as there isn't room for the UI.\n" +
+				"\n" +
+				"This also comes with a few other benefits for all mobile players. The XP bar has been moved and is now much more visible, and the hero buff bar now supports two rows, rather than compressing as heavily when there are many buffs at once."));
+
+		changes.addButton(new ChangeButton(Icons.get(Icons.PREFS), "v3.2.4 Beta Tweaks",
+				"During v3.2.4's short beta I got a lot of good feedback about the new UI, and have made the following tweaks to address feedback before full release:\n" +
+				"\n" +
+				"**-** The HP bar can now shrink and/or reposition slightly if it would otherwise be cut off by a display cutout. The HP bar should shrink by about 20% at most.\n" +
+				"**-** Adjusted buff bar layout logic to reduce cases of top row getting slightly cut off by display cutouts on Android.\n" +
+				"**-** The menu pane on the right will now move to the left if there is room to do so and it would otherwise be cut off by a display cutout.\n" +
+				"**-** Slightly increased the permissiveness for what cutouts the game will try to render into. This should let the game render in true fullscreen on some devices with hole punches that it couldn't previously.\n" +
+				"**-** Improved how buff bar layout handles iOS dynamic island at smaller scale values.\n" +
+				"**-** Renamed the mobile fullscreen setting to 'hide navigation bar' or 'hide gesture bar'"));
+
+		changes = new ChangeInfo("v3.2.2 & v3.2.3", false, null);
+		changes.hardlight(Window.TITLE_COLOR);
+		changeInfos.add(changes);
+
+		changes.addButton( new ChangeButton(Icons.get(Icons.SHPX), "Dev Commentary",
+				"These are the first of those 'technical improvements' patches I mentioned previously. Several changes have been made to modernize some aspects of Shattered Pixel Dungeon on Android, as well as a few smaller changes on iOS and internal changes on other platforms.\n" +
+				"\n" +
+				"I expect to be releasing one more major patch for v3.2 with further improvements, plus whatever else is needed for handling tech fixes."));
+
+		changes.addButton(new ChangeButton(Icons.get(Icons.PREFS), Messages.get(ChangesScene.class, "misc"),
+				"**Mobile UI Changes:**\n" +
+				"**-** Shattered's menu screens now render in true edge-to-edge fullscreen on Android 9+ and iOS devices.\n" +
+				"**-** Android now defaults to device orientation instead of forced portrait, but there is a 'force landscape' setting.\n" +
+				"**-** 'Fullscreen' (hiding the nav bar or gesture bar) now defaults to on, and is forced on if no nav or gesture bar is present.\n" +
+				"**-** Fully removed Android Power Saver setting, which was already hidden for Android 4.4+ devices anyway.\n" +
+				"\n" +
+				"**Other Changes:**\n" +
+				"**-** Updated various internal code libraries.\n" +
+				"**-** Shattered Pixel Dungeon now requires Android 5.0+, up from 4.0+.\n" +
+				"**-** Sharing Gameplay Data now requires Android 6.0+, up from 4.1+.\n" +
+				"**-** Desktop JAR build now requires Java 11+, up from 8+.\n" +
+				"**-** Slightly adjusted the visuals at the end of the prison region."));
+
+		changes.addButton(new ChangeButton(new Image(Assets.Sprites.SPINNER, 144, 0, 16, 16), Messages.get(ChangesScene.class, "bugfixes"),
+				"Fixed the following bugs:\n" +
+				"**Caused by v3.2.1:**\n" +
+				"**-** Text resolution on mac retina displays being reduced to 0.25x from 0.5x instead of increased to 1x (sorry!)\n" +
+				"**-** Thrown clubs and hammers giving hero extra turns in rare cases\n" +
+				"**-** Rare crash bugs\n" +
+				"\n" +
+				"**Caused by v3.2.0:**\n" +
+				"**-** Potential exploits relating to explosive curse and thrown weapons\n" +
+				"**-** Liquid metal stating upgrades increase cost by 33% when it is actually 35%\n" +
+				"**-** Hero rarely dodging while affected by stone glyph.\n" +
+				"**-** Minor textual errors",
+
+				"**Existed prior to v3.2.0:**\n" +
+				"**-** Upgrade window not accounting for metamorphed runic transference talent\n" +
+				"**-** Keyboard on iOS not showing return key on multiline text windows\n" +
+				"**-** UI layout issues with long custom seeds\n" +
+				"**-** On-equip ID talents not setting items to be ready to be IDed by Oblivion Shard\n" +
+				"**-** 'Taking the Mick' badge not unlocking if the final boss was killed via pickaxe's explosive curse\n" +
+				"**-** Shield of Light not applying to skeleton bone explosion\n" +
+				"**-** Paralysis resist not functioning correctly over multiple applications of paralysis\n" +
+				"**-** Transmogrified statues not always clearing their journal landmark entry on death"));
+
+		changes = new ChangeInfo("v3.2.1", false, null);
+		changes.hardlight(Window.TITLE_COLOR);
+		changeInfos.add(changes);
+
+		changes.addButton(new ChangeButton(new ItemSprite(ItemSpriteSheet.THROWING_HAMMER), "Thrown Weapon Changes",
+				"Thrown weapons are doing very well overall since the changes in v3.2.0! In general balance is working well and thrown weapons are competitive with same-tier melee weapons. While they're still a lot less popular, people are actually upgrading thrown weapons now, which means I can make some changes based on balance data!\n" +
+				"\n" +
+				"**Buffs:**\n" +
+				"**- Throwing Clubs and Hammers** have a new upside: they can now be picked up from the ground instantly!\n" +
+				"**- Kunai** base durability up to 8 from 5.\n" +
+				"**- Kunai** damage scaling up to 1-3 from 1-2. (this is actually a bug fix but I'm listing it here for clarity)\n" +
+				"**- Force Cube** base damage back up to 5-25 from 5-20/"
+				,
+				"**Nerfs:**\n" +
+				"**- Bolas** cripple duration down to 5 from 10.\n" +
+				"**- Heavy Boomerang** damage scaling down to 1-3 from 1-4.\n" +
+				"**- Heavy Boomerang** circle back delay up to 4 from 3. This should make them a bit less spammable.\n" +
+				"\n" +
+				"Lastly, I've received quite a few complaints relating to the nerfs to shurikens, tomahawks, and the shared upgrades talent in v3.2.0. I made these nerfs pre-emptively because I expected these three would benefit massively from upgraded thrown weapons having more quantity. Unfortunately that looks to be correct; all three of these are still doing quite well and there is no room to restore some of their previous power."));
+
+		changes.addButton(new ChangeButton(Icons.get(Icons.PREFS), Messages.get(ChangesScene.class, "misc"),
+				"I've made some changes to two of the new **Battlemage** staff on-hit effects, as they didn't end up as powerful as I wanted:\n" +
+				"**- Fireblast** on-hit damage scaling increased to 2-4 from 1-2\n" +
+				"**- Blast Wave** on-hit base damage up to 8-12 from 6-12\n" +
+				"**- Blast Wave** on-hit damage scaling up to 2-3 from 1-2\n" +
+				"**- Blast Wave** knockback at sides of explosion up very slightly, which should make it a bit easier to knock enemies to the side and into walls.\n" +
+				"\n" +
+				"And one other change:\n" +
+				"**-** 'Enchanting' vfx now follows the hero as they move"));
+
+		changes.addButton(new ChangeButton(new Image(Assets.Sprites.SPINNER, 144, 0, 16, 16), Messages.get(ChangesScene.class, "bugfixes"),
+				"Fixed the following bugs:\n" +
+				"**Caused by v3.2.0:**\n" +
+				"**-** Free guiding light cooldown debuff stating that the cooldown is 100 turns, not 50\n" +
+				"**-** New hit/miss icons not working correctly with circling back boomerangs\n" +
+				"**-** Rare crash on launch bugs on iOS (hopefully)\n" +
+				"\n" +
+				"**Existed prior to v3.2.0:**\n" +
+				"**-** Liquid Agility evasion buff ending after enemies take their turn, instead of after the hero takes their turn.\n" +
+				"**-** Game text rendering at 1/2 resolution on mac retina displays\n" +
+				"**-** Revive via unblessed ankh resetting Duelist's weapon charge\n" +
+				"**-** Scroll empower buff overriding itself with weaker values in some cases\n" +
+				"**-** Noisemaker bombs being collectable after activation in some cases\n" +
+				"**-** Camera follow on enemies working when they aren't visible\n" +
+				"**-** Some specific Chinese characters not rendering on iOS and Desktop"));
+
+		if (DeviceCompat.isAndroid()){
+
+			//5.0 lollipop
+			if (DeviceCompat.getPlatformVersion() < 21){
+				String androidVersion;
+				switch (DeviceCompat.getPlatformVersion()){
+					default: case 14: case 15: androidVersion = "4.0"; break;
+					case 16: androidVersion = "4.1"; break;
+					case 17: androidVersion = "4.2"; break;
+					case 18: androidVersion = "4.3"; break;
+					case 19: case 20: androidVersion = "4.4"; break;
+				}
+
+				changes.addButton(new ChangeButton(Icons.get(Icons.WARNING), "Ending Android 4.0-4.4 Support",
+						"Unless any immediate issues pop up, v3.2.1 will be the last Shattered Pixel Dungeon update that supports Android versions below 5.0. This includes Android " + androidVersion + ", which your device is currently using.\n" +
+						"\n" +
+						"I am making this change as the latest versions of certain code libraries no longer support Android versions below 5.0, and updating to these version is becoming mandatory.\n" +
+						"\n" +
+						"Future updates to Shattered Pixel Dungeon will not be compatible with your device. Of course you can continue playing Shattered v3.2.1 indefinitely."));
+
+			}
+
+		} else if (DeviceCompat.isDesktop()) {
+			int javaVersion = Integer.parseInt(System.getProperty("java.version").split("\\.")[0]);
+			//version is reported as "1.X" before java 9
+			if (javaVersion == 1) {
+				javaVersion = Integer.parseInt(System.getProperty("java.version").split("\\.")[1]);
+			}
+
+			if (javaVersion < 11) {
+				changes.addButton(new ChangeButton(Icons.get(Icons.WARNING), "Ending Java 8-10 Support",
+						"Unless any immediate issues pop up, v3.2.1 will be the last Shattered Pixel Dungeon update that supports Java versions below 11 on the JAR distribution. This includes Java " +  javaVersion + ", which your device is currently using.\n" +
+						"\n" +
+						"I am making this change as upcoming versions of Shattered's development tools are dropping support Java versions below 11.\n" +
+						"\n" +
+						"Future updates to Shattered Pixel Dungeon will not be compatible with your version of Java. Of course you can continue playing Shattered v3.2.1 indefinitely.\n" +
+						"\n" +
+						"If your operating system is supported by Java 11+, you can continue playing future updates by updating to a newer version of Java. You can also try switching to the native desktop builds of Shattered, which currently come bundled with Java 16."));
+			}
+		}
 
 		changes = new ChangeInfo(Messages.get(ChangesScene.class, "new"), false, null);
 		changes.hardlight(Window.TITLE_COLOR);
@@ -163,7 +381,7 @@ public class v3_X_Changes {
 				"**-** Made tweaks to tunnel and maze rooms to reduce the chance of them generating certain shapes\n" +
 				"**-** Made piranha description text more helpful\n" +
 				"**-** Updated code libraries on iOS (Android and Desktop lib updates will come in a patch later)\n" +
-				"**-** Added dev commentary for v2.2.0\n"));
+				"**-** Added dev commentary for v2.2.0"));
 
 		changes.addButton(new ChangeButton(new Image(Assets.Sprites.SPINNER, 144, 0, 16, 16), Messages.get(ChangesScene.class, "bugfixes"),
 				"Fixed the following bugs:\n" +

@@ -35,7 +35,12 @@ public class ThrowingClub extends MissileWeapon {
 		baseUses = 12;
 		sticky = false;
 	}
-	
+
+	@Override
+	public float pickupDelay() {
+		return 0; //picked up instantly
+	}
+
 	@Override
 	public int max(int lvl) {
 		return  4 * tier +                  //8 base, down from 10

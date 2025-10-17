@@ -139,6 +139,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.Sheath;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.ClassArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.ClothArmor;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Stone;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Afterimage;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.AntiMagic;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Brimstone;
@@ -189,8 +190,8 @@ import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.ThirteenLeafClove
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfBlastWave;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfLivingEarth;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.SpiritBow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.bow.SpiritBow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Crossbow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.DeathSword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.DualDagger;
@@ -788,6 +789,11 @@ public class Hero extends Char {
 
 		if (belongings.armor() != null) {
 			evasion = belongings.armor().evasionFactor(this, evasion);
+
+			//stone specifically overrides to 0 always, guaranteed hit
+			if (belongings.armor().hasGlyph(Stone.class, this) && !Stone.testingEvasion()){
+				return 0;
+			}
 		}
 
 		if (belongings.getItem(KnightsShield.class) != null && belongings.getItem(KnightsShield.class).hasGlyph(Afterimage.class, this)) {
@@ -814,7 +820,7 @@ public class Hero extends Char {
 		Combo.ParryTracker parry = buff(Combo.ParryTracker.class);
 		if (parry != null){
 			parry.parried = true;
-			if (buff(Combo.class).getComboCount() < 9 || pointsInTalent(Talent.ENHANCED_COMBO) < 2){
+			if (buff(Combo.class) == null || buff(Combo.class).getComboCount() < 9 || pointsInTalent(Talent.ENHANCED_COMBO) < 2){
 				parry.detach();
 			}
 			return Messages.get(Monk.class, "parried");
@@ -1079,6 +1085,11 @@ public class Hero extends Char {
 	}
 	
 	public float attackDelay() {
+//		if (buff(Talent.LethalMomentumTracker.class) != null){
+//			buff(Talent.LethalMomentumTracker.class).detach();
+//			return 0;
+//		}
+
 		float delay = 1f;
 
 		if ( buff(Adrenaline.class) != null) delay /= 1.5f;
@@ -1964,7 +1975,7 @@ public class Hero extends Char {
 			wep = belongings.attackingWeapon();
 		}
 
-		damage = Talent.onAttackProc(this, enemy, damage);
+		damage = Talent.onAttackProc( this, enemy, damage );
 
 		if (wep != null) {
 			damage = wep.proc( this, enemy, damage );
@@ -2001,11 +2012,11 @@ public class Hero extends Char {
 		case SNIPER:
 			if (wep instanceof MissileWeapon && !(wep instanceof SpiritBow.SpiritArrow) && enemy != this) {
 				Actor.add(new Actor() {
-
+					
 					{
 						actPriority = VFX_PRIO;
 					}
-
+					
 					@Override
 					protected boolean act() {
 						if (enemy.isAlive()) {
@@ -2402,7 +2413,7 @@ public class Hero extends Char {
 		//unused, could be removed
 		CapeOfThorns.Thorns thorns = buff( CapeOfThorns.Thorns.class );
 		if (thorns != null) {
-			damage = thorns.proc(dmg, (src instanceof Char ? (Char)src : null),  this);
+			damage = thorns.proc((int)damage, (src instanceof Char ? (Char)src : null),  this);
 		}
 
 		if (buff(Talent.WarriorFoodImmunity.class) != null){
@@ -2420,13 +2431,6 @@ public class Hero extends Char {
 		LargeSword.LargeSwordBuff largeSwordBuff = buff(LargeSword.LargeSwordBuff.class);
 		if (largeSwordBuff != null) {
 			dmg = (int)Math.ceil(dmg * largeSwordBuff.getDefenseFactor());
-		}
-
-		//TODO improve this when I have proper damage source logic
-		if (belongings.armor() != null && belongings.armor().hasGlyph(AntiMagic.class, this)
-				&& AntiMagic.RESISTS.contains(src.getClass())){
-			dmg -= AntiMagic.drRoll(this, belongings.armor().buffedLvl());
-			dmg = Math.max(dmg, 0);
 		}
 
 		if (belongings.getItem(KnightsShield.class) != null && belongings.getItem(KnightsShield.class).hasGlyph(AntiMagic.class, this)
@@ -2745,7 +2749,7 @@ public class Hero extends Char {
 
 			spend( delay );
 			justMoved = true;
-			
+
 			search(false);
 
 			return true;
