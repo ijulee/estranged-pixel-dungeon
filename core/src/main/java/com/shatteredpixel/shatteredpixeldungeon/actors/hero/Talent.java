@@ -35,7 +35,6 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AllyBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Amok;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ArmorEnhance;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ArtifactRecharge;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Awakening;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Barrier;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Bleeding;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Bless;
@@ -1069,12 +1068,6 @@ public enum Talent {
 			object = bundle.getInt(OBJECT);
 		}
 	}
-	public static class PreciseAssaultTracker extends FlavourBuff{
-		{ type = buffType.POSITIVE; }
-		public int icon() { return BuffIndicator.INVERT_MARK; }
-		public void tintIcon(Image icon) { icon.hardlight(1f, 1f, 0.0f); }
-		public float iconFadePercent() { return Math.max(0, 1f - (visualcooldown() / 5)); }
-	};
 	public static class VariedChargeTracker extends Buff{
 		public Class weapon;
 
@@ -2088,27 +2081,27 @@ public enum Talent {
 		}
 
 		if (identify) {
-			if (ShardOfOblivion.passiveIDDisabled()) {
-				if (item instanceof Weapon){
-					((Weapon) item).setIDReady();
-				} else if (item instanceof Armor){
-					((Armor) item).setIDReady();
-				} else if (item instanceof Ring){
-					((Ring) item).setIDReady();
-				}
-			} else {
-				item.identify();
-			}
+            if (ShardOfOblivion.passiveIDDisabled()) {
+                if (item instanceof Weapon) {
+                    ((Weapon) item).setIDReady();
+                } else if (item instanceof Armor) {
+                    ((Armor) item).setIDReady();
+                } else if (item instanceof Ring) {
+                    ((Ring) item).setIDReady();
+                }
+            } else {
+                item.identify();
+            }
         }
 
-		if (hero.hasTalent(GUNNERS_INTUITION) && item instanceof Gun) {
+        if (hero.hasTalent(GUNNERS_INTUITION) && item instanceof Gun) {
             if (ShardOfOblivion.passiveIDDisabled()) {
                 ((Gun) item).setIDReady();
             } else {
                 item.identify();
             }
-		}
-		if (hero.hasTalent(MASTERS_INTUITION) && item instanceof MeleeWeapon && !(item instanceof Gun)) {
+        }
+        if (hero.hasTalent(MASTERS_INTUITION) && item instanceof MeleeWeapon && !(item instanceof Gun)) {
             if (ShardOfOblivion.passiveIDDisabled()) {
                 ((Weapon) item).setIDReady();
             } else {
@@ -2234,7 +2227,7 @@ public enum Talent {
 		}
 
 		if (hero.heroClass != HeroClass.SAMURAI && hero.hasTalent(DRAWING_ENHANCE) && enemy.buff(DrawEnhanceMetaTracker.class) == null ) {
-			damage += Hero.heroDamageIntRange(hero.pointsInTalent(Talent.DRAWING_ENHANCE), 2);
+			dmg += Hero.heroDamageIntRange(hero.pointsInTalent(Talent.DRAWING_ENHANCE), 2);
 			Buff.affect(enemy, DrawEnhanceMetaTracker.class);
 		}
 
@@ -2256,7 +2249,7 @@ public enum Talent {
 
 
 		if (hero.buff(KineticBattle.class) != null) {
-            dmg = hero.buff(KineticBattle.class).proc(damage);
+            dmg = hero.buff(KineticBattle.class).proc(dmg);
 		}
 
 		if (hero.hasTalent(Talent.TACKLE) && level.adjacent(enemy.pos, hero. pos) && hero.belongings.armor != null && (hero.belongings.attackingWeapon() instanceof MeleeWeapon || (hero.belongings.attackingWeapon() == null))) {
@@ -2273,7 +2266,7 @@ public enum Talent {
 			if (hero.hasTalent(Talent.POISONOUS_BLADE)) {
 				Buff.affect(enemy, Poison.class).set(2+hero.pointsInTalent(Talent.POISONOUS_BLADE));
 			}
-			if (hero.hasTalent(Talent.SOUL_COLLECT) && damage >= enemy.HP) {
+			if (hero.hasTalent(Talent.SOUL_COLLECT) && dmg >= enemy.HP) {
 				int healAmt = 3*hero.pointsInTalent(Talent.SOUL_COLLECT);
 				healAmt = Math.min( healAmt, hero.HT - hero.HP );
 				if (healAmt > 0 && hero.isAlive()) {
@@ -2282,7 +2275,7 @@ public enum Talent {
 					hero.sprite.showStatus( CharSprite.POSITIVE, Integer.toString( healAmt ) );
 				}
 			}
-			if (hero.hasTalent(Talent.TRAIL_TRACKING) && damage >= enemy.HP) {
+			if (hero.hasTalent(Talent.TRAIL_TRACKING) && dmg >= enemy.HP) {
 				Buff.affect(hero, MindVision.class, hero.pointsInTalent(Talent.TRAIL_TRACKING));
 			}
 
@@ -2398,7 +2391,7 @@ public enum Talent {
 		}
 
 		if (hero.buff(Bible.Angel.class) != null) {
-			hero.heal(Math.max(Math.round(0.2f*damage), 1));
+			hero.heal(Math.max(Math.round(0.2f*dmg), 1));
 		}
 
 		if (hero.buff(UnholyBible.Demon.class) != null) {
@@ -2451,7 +2444,7 @@ public enum Talent {
 		}
 
 		if (hero.subClass == HeroSubClass.SLASHER) {
-			Buff.affect(hero, SwordAura.class).hit(damage);
+			Buff.affect(hero, SwordAura.class).hit(dmg);
 		}
 
 
@@ -2485,7 +2478,7 @@ public enum Talent {
 		}
 
 		if (hero.buff(Pray.Punishment.class) != null) {
-			hero.buff(Pray.Punishment.class).hit(enemy, damage);
+			hero.buff(Pray.Punishment.class).hit(enemy, dmg);
 		}
 
 		if (wep instanceof Gun && hero.hasTalent(Talent.BULLET_COLLECT)) {
@@ -2499,7 +2492,7 @@ public enum Talent {
 		}
 
 		if (hero.buff(PowerOfLife.PowerOfLifeBarrier.class) != null) {
-			hero.buff(PowerOfLife.PowerOfLifeBarrier.class).proc(damage);
+			hero.buff(PowerOfLife.PowerOfLifeBarrier.class).proc(dmg);
 		}
 
 		if (hero.hasTalent(Talent.PROTECTIVE_SLASH)

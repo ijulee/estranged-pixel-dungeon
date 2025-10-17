@@ -193,9 +193,9 @@ public class TitleScene extends PixelScene {
 		btnJournal.icon(Icons.get(Icons.JOURNAL));
 		add(btnJournal);
 
-//		btnNews = new NewsButton(GREY_TR, Messages.get(this, "news"));
-//		btnNews.icon(Icons.get(Icons.NEWS));
-//		add(btnNews);
+		btnNews = new NewsButton(GREY_TR, Messages.get(this, "news"));
+		btnNews.icon(Icons.get(Icons.NEWS));
+		add(btnNews);
 
 		btnChanges = new ChangesButton(GREY_TR, Messages.get(this, "changes"));
 		btnChanges.icon(Icons.get(Icons.CHANGES));

@@ -67,13 +67,19 @@ public class AboutScene extends PixelScene {
 		Component content = list.content();
 		content.clear();
 
+		//*** ReArranged Pixel Dungeon Credits ***
 		CreditsBlock arranged = new CreditsBlock(true, Window.WHITE,
 				"Re-ARranged Pixel Dungeon",
 				Icons.ARRANGED.get(),
 				"Developed by: _Cocoa_\nBased on Shattered Pixel Dungeon's open source",
 				"github repository",
 				"https://github.com/Hoto-Mocha/Re-ARranged-Pixel-Dungeon");
-		arranged.setRect((w - fullWidth)/2f, 6, 120, 0);
+
+		if (landscape()){
+			arranged.setRect((w - fullWidth)/2f - 6, insets.top + 10, 120, 0);
+		} else {
+			arranged.setRect((w - fullWidth)/2f, insets.top + 6, 120, 0);
+		}
 		content.add(arranged);
 
 		CreditsBlock splash = new CreditsBlock(false, Window.WHITE,
@@ -149,9 +155,9 @@ public class AboutScene extends PixelScene {
 				"ShatteredPixel.com",
 				"https://ShatteredPixel.com");
 		if (landscape()){
-			shpx.setRect((w - fullWidth)/2f - 6, insets.top + 10, 120, 0);
+			shpx.setRect(arranged.left(), whiteSupporter.bottom() + 12, colWidth, 0);
 		} else {
-			shpx.setRect((w - fullWidth)/2f, insets.top + 6, 120, 0);
+			shpx.setRect(arranged.left(), whiteSupporter.bottom() + 12, colWidth, 0);
 		}
 		content.add(shpx);
 
