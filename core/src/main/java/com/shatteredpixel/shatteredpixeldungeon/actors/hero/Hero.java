@@ -21,7 +21,6 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.hero;
 
-import static com.shatteredpixel.shatteredpixeldungeon.Dungeon.hero;
 import static com.shatteredpixel.shatteredpixeldungeon.Dungeon.level;
 import static com.shatteredpixel.shatteredpixeldungeon.items.Item.updateQuickslot;
 
@@ -53,9 +52,11 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Blindness;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.BowMasterSkill;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Burning;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ChampionEnemy;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Charm;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Cloaking;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Combo;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Daze;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Drowsy;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Enduring;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnhancedRingsCombo;
@@ -66,6 +67,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Foresight;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.GreaterHaste;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Haste;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.HeroDisguise;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Hex;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.HoldFast;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.HorseRiding;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Hunger;
@@ -185,6 +187,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.Scroll;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfMagicMapping;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ScrollOfChallenge;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.BrokenMagnifyingGlass;
+import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.FerretTuft;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.Necklace;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.ThirteenLeafClover;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
@@ -248,7 +251,6 @@ import com.watabou.noosa.tweeners.Delayer;
 import com.watabou.utils.BArray;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.Callback;
-import com.watabou.utils.DeviceCompat;
 import com.watabou.utils.GameMath;
 import com.watabou.utils.PathFinder;
 import com.watabou.utils.Point;
@@ -796,8 +798,10 @@ public class Hero extends Char {
 			}
 		}
 
-		if (belongings.getItem(KnightsShield.class) != null && belongings.getItem(KnightsShield.class).hasGlyph(Afterimage.class, this)) {
-			evasion *= Math.pow(1.2f, belongings.getItem(KnightsShield.class).buffedLvl()) * RingOfArcana.enchantPowerMultiplier(this);
+		if (belongings.getItem(KnightsShield.class) != null &&
+				belongings.getItem(KnightsShield.class).hasGlyph(Afterimage.class, this)) {
+			evasion *= Math.pow(1.2f, belongings.getItem(KnightsShield.class).buffedLvl()) *
+					RingOfArcana.enchantPowerMultiplier(this);
 		}
 
 		if (hasTalent(Talent.BREAKTHROUGH)) {
@@ -903,8 +907,8 @@ public class Hero extends Char {
 			dr += buff(HoldFast.class).armorBonus();
 		}
 
-		if (hasTalent(Talent.PARRING)) {
-			dr += Random.NormalIntRange(0, 1+pointsInTalent(Talent.PARRING));
+		if (hasTalent(Talent.PARRYING)) {
+			dr += Random.NormalIntRange(0, 1+pointsInTalent(Talent.PARRYING));
 		}
 
 		ReinforcedArmor.ReinforcedArmorTracker reArmor = buff(ReinforcedArmor.ReinforcedArmorTracker.class);
@@ -1017,23 +1021,19 @@ public class Hero extends Char {
 			speed *= Math.pow(1.2f, pointsInTalent(Talent.JUNGLE_EXPLORE));
 		}
 
+		Armor amr = belongings.armor();
 		if (buff(HorseRiding.class) != null
 				&& hasTalent(Talent.PILOTING)
-				&& belongings.armor != null
-				&& STR() > belongings.armor.STRReq()) {
-			int aEnc = STR() - belongings.armor.STRReq();
-			speed *= Math.pow(1+0.03f*pointsInTalent(Talent.PILOTING), aEnc);
+				&& amr != null) {
+			speed *= Math.pow(1+0.03f*pointsInTalent(Talent.PILOTING), amrSTRExcess(amr));
 		}
 
 		if (buff(AngelWing.AngelWingBuff.class) != null) {
 			speed *= 3f;
 		}
 
-		if (hasTalent(Talent.LIGHT_MOVEMENT)) {
-			int aEnc = belongings.armor.STRReq() - STR();
-			if (aEnc < 0) {
-				speed *= 1 + 0.05f * pointsInTalent(Talent.LIGHT_MOVEMENT) * (-aEnc);
-			}
+		if (hasTalent(Talent.LIGHT_MOVEMENT) && amr != null) {
+				speed *= 1 + 0.05f * pointsInTalent(Talent.LIGHT_MOVEMENT) * amrSTRExcess(amr);
 		}
 
 		speed *= BowMasterSkill.speedBoost(this);
@@ -1104,11 +1104,11 @@ public class Hero extends Char {
 			//This is for that one guy, you shall get your fists of fury!
 			float speed = RingOfFuror.attackSpeedMultiplier(this);
 
-			if (hasTalent(Talent.LESS_RESIST) && belongings.attackingWeapon() == null) {
-				int aEnc = belongings.armor.STRReq() - STR();
-				if (aEnc < 0) {
-					speed *= 1 + 0.05f * pointsInTalent(Talent.LESS_RESIST) * (-aEnc);
-				}
+			Armor amr = belongings.armor();
+			if (hasTalent(Talent.LESS_RESIST) &&
+					belongings.attackingWeapon() == null &&
+					amr != null) {
+				speed *= 1 + 0.05f * pointsInTalent(Talent.LESS_RESIST) * amrSTRExcess(amr);
 			}
 
 			if (hasTalent(Talent.QUICK_FOLLOWUP) && buff(Talent.QuickFollowupTracker.class) != null) {
@@ -1856,20 +1856,69 @@ public class Hero extends Char {
 		resting = fullRest;
 	}
 
+	public int wepSTRExcess(final Weapon wep) {
+		return Math.max(0, STR() - wep.STRReq());
+	}
+
+	public int amrSTRExcess(final Armor amr) {
+		return Math.max(0, STR() - amr.STRReq());
+	}
+
 	public float critChance(final Weapon wep) {
 		float chance = 0;
 
 		if (heroClass == HeroClass.SAMURAI) {
 			chance = 0.01f;
 			chance += 0.01f * (lvl - 1);
-			chance += Math.max(0, (0.02f + 0.005f*pointsInTalent(Talent.WEAPON_MASTERY)) * (STR() - wep.STRReq()));
+			chance += 0.02f * wepSTRExcess(wep);
+
+			if (subClass == HeroSubClass.SLAYER) {
+				Awakening awakening = buff(Awakening.class);
+				if (awakening != null && awakening.isAwaken()) {
+					if (hasTalent(Talent.ACCELERATED_LETHALITY)) {
+						chance += 0.1f*pointsInTalent(Talent.ACCELERATED_LETHALITY);
+					}
+
+					// Hero.defenseSkill() as of SPD v3.2.5 only captures part of a char's evasion.
+					// The remainder is in Char.hit(), copy-pasted below.
+					// FIXME correct this when SPD consolidates acc/eva logic
+					float evasion = defenseSkill(null);
+					if (buff(Bless.class) != null) evasion *= 1.25f;
+					if (buff(  Hex.class) != null) evasion *= 0.8f;
+					if (buff( Daze.class) != null) evasion *= 0.5f;
+					for (ChampionEnemy buff : buffs(ChampionEnemy.class)){
+						evasion *= buff.evasionAndAccuracyFactor();
+					}
+					evasion *= AscensionChallenge.statModifier(this);
+					if (Dungeon.hero.heroClass != HeroClass.CLERIC
+							&& Dungeon.hero.hasTalent(Talent.BLESS)
+							&& this.alignment == Char.Alignment.ALLY){
+						// + 3%/5%
+						evasion *= 1.01f + 0.02f*Dungeon.hero.pointsInTalent(Talent.BLESS);
+					}
+					evasion *= FerretTuft.evasionMultiplier();
+					// end copy-pasta
+
+					chance += Math.max(0, 0.01f*(evasion - (lvl+4)));
+				}
+			}
+
+			if (buff(Sheath.Sheathing.class) != null) {
+				if (subClass == HeroSubClass.MASTER &&
+						buff(Sheath.FlashSlashCooldown.class) == null &&
+						buff(Sheath.DashAttackTracker.class) == null &&
+						wep instanceof MeleeWeapon) {
+					chance *= 1.4f + 0.2f * pointsInTalent(Talent.ENHANCED_CRIT);
+				} else {
+					chance *= 1.2f;
+				}
+				chance += 0.05f + 0.1f * pointsInTalent(Talent.UNEXPECTED_SLASH);;
+			}
 		}
 
 		if (heroClass == HeroClass.ARCHER && wep instanceof MissileWeapon) {
-			chance = 0.03f;
-			chance += 0.03f*(lvl-1);
-			chance = Math.min(chance, 0.3f);
-			chance += Math.max(0, 0.03f*(STR()-wep.STRReq()));
+			chance = Math.min(0.03f * lvl, 0.3f);
+			chance += 0.03f * wepSTRExcess(wep);
 		}
 
 		if (buff(Sheath.CertainCrit.class) != null) {
@@ -1880,45 +1929,16 @@ public class Hero extends Char {
 			chance += 0.02f * pointsInTalent(Talent.BASIC_PRACTICE);
 		}
 
+		if (hasTalent(Talent.WEAPON_MASTERY)) {
+			chance += 0.005f * pointsInTalent(Talent.WEAPON_MASTERY) * wepSTRExcess(wep);
+		}
+
+		if (heroClass != HeroClass.SAMURAI && hasTalent(Talent.UNEXPECTED_SLASH)) {
+			chance += 0.03f * pointsInTalent(Talent.UNEXPECTED_SLASH);
+		}
+
 		if (wep instanceof MissileWeapon && hasTalent(Talent.CRITICAL_THROW)) {
 			chance += 0.125f * pointsInTalent(Talent.CRITICAL_THROW);
-		}
-
-		Awakening awakening = buff(Awakening.class);
-		if (awakening != null && awakening.isAwaken()) {
-			if (hasTalent(Talent.ACCELERATED_LETHALITY)) {
-				chance += 0.1f*pointsInTalent(Talent.ACCELERATED_LETHALITY);
-			}
-			chance += Math.max(0, 0.01f*(defenseSkill(null) - (4 + lvl)));
-		}
-
-		if (hasTalent(Talent.UNEXPECTED_SLASH) && buff(Sheath.Sheathing.class) != null) {
-			chance += 0.1f*pointsInTalent(Talent.UNEXPECTED_SLASH);
-		}
-
-		if (buff(Sheath.Sheathing.class) != null) {
-			if (subClass == HeroSubClass.MASTER &&
-					buff(Sheath.FlashSlashCooldown.class) == null &&
-					buff(Sheath.DashAttackTracker.class) == null &&
-					this.belongings.attackingWeapon() instanceof MeleeWeapon) {
-				switch (pointsInTalent(Talent.ENHANCED_CRIT)) {
-					case 0: default:
-						chance *= 1.5f;
-						break;
-					case 1:
-						chance *= 1.6f;
-						break;
-					case 2:
-						chance *= 1.75f;
-						break;
-					case 3:
-						chance *= 2f;
-						break;
-				}
-			} else {
-				chance *= 1.2f;
-			}
-			chance += 0.05f;
 		}
 
 		return GameMath.gate(0, chance, 2);
@@ -1926,8 +1946,8 @@ public class Hero extends Char {
 
 	public int criticalDamage(int damage, Weapon wep) {
 		int max = wep.max();
-		if (STR() > wep.STRReq() && !(wep instanceof Gun.Bullet)) {
-			max += STR()-wep.STRReq();
+		if (!(wep instanceof Gun.Bullet)) {
+			max += wepSTRExcess(wep);
 		}
 		float multi = 1f+Math.max(0, critChance(wep)-1);
 		int bonusDamage = 0;

@@ -539,7 +539,6 @@ public class Armor extends EquipableItem {
 			}
 		}
 
-		
 		return evasion + augment.evasionFactor(buffedLvl());
 	}
 	

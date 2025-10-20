@@ -48,7 +48,7 @@ public class GrippingTrap extends Trap {
 			if (c instanceof Mob) {
 				Buff.prolong(c, Trap.HazardAssistTracker.class, HazardAssistTracker.DURATION);
 			}
-			int damage = Math.max( 0,  (2 + scalingDepth()/2) - c.drRoll()/2 );
+			int damage = Math.max( 0,  (2 + scalingDepth()/2) - Math.max(0, c.drRoll())/2 ); // In case Grindstone results in negative dr roll
 			Buff.affect( c, Bleeding.class ).set( damage );
 			Buff.prolong( c, Cripple.class, Cripple.DURATION);
 			Wound.hit( c );

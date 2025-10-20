@@ -97,7 +97,7 @@ public class WornDartTrap extends Trap {
 								reset(pos, finalTarget.sprite, new Dart(), new Callback() {
 									@Override
 									public void call() {
-										int dmg = Random.NormalIntRange(4, 8) - finalTarget.drRoll();
+										int dmg = Random.NormalIntRange(4, 8) - Math.max(0, finalTarget.drRoll()); // In case Grindstone results in negative dr roll
 										finalTarget.damage(dmg, WornDartTrap.this);
 										if (finalTarget == Dungeon.hero && !finalTarget.isAlive()){
 											Dungeon.fail( WornDartTrap.this  );
@@ -112,7 +112,7 @@ public class WornDartTrap extends Trap {
 								});
 						return false;
 					} else {
-						finalTarget.damage(Random.NormalIntRange(4, 8) - finalTarget.drRoll(), WornDartTrap.this);
+						finalTarget.damage(Random.NormalIntRange(4, 8) - Math.max(0, finalTarget.drRoll()), WornDartTrap.this); // In case Grindstone results in negative dr roll
 						return true;
 					}
 				} else {

@@ -112,7 +112,7 @@ public class Skeleton extends Mob {
 				}
 
 				//apply DR twice (with 2 rolls for more consistency)
-				damage = Math.max( 0,  damage - (ch.drRoll() + ch.drRoll()) );
+				damage = Math.max( 0,  damage - (Math.max(0, ch.drRoll()) + Math.max(0, ch.drRoll())) ); // In case Grindstone results in negative dr roll
 				ch.damage( damage, this );
 				if (ch == Dungeon.hero && !ch.isAlive()) {
 					heroKilled = true;

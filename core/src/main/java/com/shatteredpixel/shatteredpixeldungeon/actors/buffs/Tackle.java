@@ -148,7 +148,8 @@ public class Tackle extends FlavourBuff implements ActionIndicator.Action {
 			public void call() {
 				AttackIndicator.target(ch);
 				float damageMulti = 0.4f + 0.2f*hero.pointsInTalent(Talent.POWERFUL_TACKLE);
-				int damage = Math.round(hero.drRoll() * damageMulti); //deals 40%+(20*Talent.POWERFUL_TACKLE level)% of hero's dr
+				int heroDr = Math.max(0, hero.drRoll()); // In case Grindstone results in negative dr roll
+				int damage = Math.round(heroDr * damageMulti); //deals 40%+(20*Talent.POWERFUL_TACKLE level)% of hero's dr
 				Buff.affect(hero, TackleTracker.class);
 
 				if (hero.attack(ch, 0f, damage, Char.INFINITE_ACCURACY)){

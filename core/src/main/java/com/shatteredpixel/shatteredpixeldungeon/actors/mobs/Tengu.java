@@ -631,7 +631,7 @@ public class Tengu extends Mob {
 						Char ch = Actor.findChar(cell);
 						if (ch != null && !(ch instanceof Tengu)) {
 							int dmg = Random.NormalIntRange(5 + Dungeon.scalingDepth(), 10 + Dungeon.scalingDepth() * 2);
-							dmg -= ch.drRoll();
+							dmg -= Math.max(0, ch.drRoll()); // In case Grindstone results in negative dr roll
 
 							if (dmg > 0) {
 								ch.damage(dmg, Bomb.class);

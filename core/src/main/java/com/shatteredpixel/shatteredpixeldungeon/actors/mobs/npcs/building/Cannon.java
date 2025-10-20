@@ -129,7 +129,7 @@ public class Cannon extends Building {
                 dmg = Math.round(dmg*0.67f);
             }
 
-            dmg -= ch.drRoll();
+            dmg -= Math.max(0, ch.drRoll()); // In case Grindstone results in negative dr roll
 
             if (dmg > 0) {
                 ch.damage(dmg, this);

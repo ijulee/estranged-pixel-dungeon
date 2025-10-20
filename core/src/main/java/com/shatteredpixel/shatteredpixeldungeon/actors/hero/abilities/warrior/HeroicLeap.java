@@ -100,8 +100,9 @@ public class HeroicLeap extends ArmorAbility {
 						if (mob != null && mob != hero && mob.alignment != Char.Alignment.ALLY) {
 							if (hero.hasTalent(Talent.BODY_SLAM)){
 								int damage = Hero.heroDamageIntRange(hero.pointsInTalent(Talent.BODY_SLAM), 4*hero.pointsInTalent(Talent.BODY_SLAM));
-								damage += Math.round(hero.drRoll()*0.25f*hero.pointsInTalent(Talent.BODY_SLAM));
-								damage -= mob.drRoll();
+								int heroDr = Math.max(0, hero.drRoll()); // In case Grindstone results in negative dr roll
+								damage += Math.round(heroDr*0.25f*hero.pointsInTalent(Talent.BODY_SLAM));
+								damage -= Math.max(0, mob.drRoll()); // In case Grindstone results in negative dr roll
 								mob.damage(damage, hero);
 							}
 							if (mob.pos == hero.pos + i && hero.hasTalent(Talent.IMPACT_WAVE)){

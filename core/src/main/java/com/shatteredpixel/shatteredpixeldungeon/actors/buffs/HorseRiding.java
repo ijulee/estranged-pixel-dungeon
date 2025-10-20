@@ -227,7 +227,7 @@ public class HorseRiding extends Buff implements ActionIndicator.Action, Hero.Do
                         Dungeon.level.occupyCell(hero);
                         hero.spendAndNext(Actor.TICK);
                         int damage = dash.dist * 5;
-                        damage -= hero.drRoll();
+                        damage -= Math.max(0, hero.drRoll()); // In case Grindstone results in negative dr roll
                         for (int i = 0; i < chars.size(); i++) {
                             damage -= Random.NormalIntRange(hero.pointsInTalent(Talent.BUFFER), 3*hero.pointsInTalent(Talent.BUFFER));
                         }

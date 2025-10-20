@@ -118,7 +118,7 @@ public class Shockwave extends ArmorAbility {
 								int scalingStr = hero.STR()-10;
 								int damage = Hero.heroDamageIntRange(5 + scalingStr, 10 + 2*scalingStr);
 								damage = Math.round(damage * (1f + 0.2f*hero.pointsInTalent(Talent.SHOCK_FORCE)));
-								damage -= ch.drRoll();
+								damage -= Math.max(0, ch.drRoll()); // In case Grindstone results in negative dr roll
 
 								if (hero.pointsInTalent(Talent.STRIKING_WAVE) == 4){
 									Buff.affect(hero, Talent.StrikingWaveTracker.class, 0f);

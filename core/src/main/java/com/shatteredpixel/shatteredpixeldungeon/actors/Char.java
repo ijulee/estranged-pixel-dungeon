@@ -459,7 +459,7 @@ public abstract class Char extends Actor {
 			}
 
 			int dr = Math.round(enemy.drRoll() * AscensionChallenge.statModifier(enemy));
-			
+
 			if (this instanceof Hero){
 				Hero h = (Hero)this;
 				if (h.belongings.attackingWeapon() instanceof MissileWeapon
@@ -492,6 +492,8 @@ public abstract class Char extends Actor {
 					dr = 0;
 				}
 			}
+
+			dr = Math.max(0, dr); // In case Grindstone results in negative dr roll
 
 			//we use a float here briefly so that we don't have to constantly round while
 			// potentially applying various multiplier effects
@@ -866,6 +868,9 @@ public abstract class Char extends Actor {
 
 		dr += Random.NormalIntRange( 0 , Barkskin.currentLevel(this) );
 
+		/*FIXME: Grindstone applying to ALL characters makes it hard to check for negative defense.
+		*   This function is overridden many times, and used in many places. The current solution
+		*  	is to do a check for negative def whenever this function is used.  */
 		dr -= GrindStone.drRoll();
 
 		return dr;

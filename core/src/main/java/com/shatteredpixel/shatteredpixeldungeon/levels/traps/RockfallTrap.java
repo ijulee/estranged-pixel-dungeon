@@ -100,7 +100,7 @@ public class RockfallTrap extends Trap {
 					Buff.prolong(ch, Trap.HazardAssistTracker.class, HazardAssistTracker.DURATION);
 				}
 				int damage = Random.NormalIntRange(5+scalingDepth(), 10+scalingDepth()*2);
-				damage -= ch.drRoll();
+				damage -= Math.max(0,ch.drRoll()); // In case Grindstone results in negative dr roll
 				ch.damage( Math.max(damage, 0) , this);
 
 				if (ch.isActive()) {

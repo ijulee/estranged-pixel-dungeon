@@ -110,7 +110,7 @@ public class ChaliceOfBlood extends Artifact {
 			damage = rockArmor.absorb(damage);
 		}
 
-		damage -= hero.drRoll();
+		damage -= Math.max(0, hero.drRoll()); // In case Grindstone results in negative dr roll
 
 		hero.sprite.operate( hero.pos );
 		hero.busy();
