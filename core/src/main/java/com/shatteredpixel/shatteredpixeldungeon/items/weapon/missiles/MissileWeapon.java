@@ -217,12 +217,13 @@ abstract public class MissileWeapon extends Weapon {
 			return dst;
 		}
 
+		//FIXME Projecting doesn't seem to actually work with sword aura
 		if (this instanceof SwordAura.Aura) {
 			Ballistica aim = new Ballistica(hero.pos, dst, Ballistica.DASH);
-			if (Random.Float() < hero.pointsInTalent(Talent.ARCANE_POWER)/3f &&
+			if (Random.Int(3) < hero.pointsInTalent(Talent.ARCANE_POWER) &&
 					hero.belongings.weapon instanceof MeleeWeapon &&
 					((MeleeWeapon)hero.belongings.weapon).hasEnchant(Projecting.class, user)) {
-				projecting += 3;
+				projecting += 4;
 			} else {
 				return aim.collisionPos;
 			}
@@ -369,9 +370,9 @@ abstract public class MissileWeapon extends Weapon {
 			Buff.prolong(curUser, ShardOfOblivion.ThrownUseTracker.class, 50f);
 		}
 
-        SharpShooterBuff.SharpShootingCoolDown.missileHit(attacker);
+		SharpShooterBuff.SharpShootingCoolDown.missileHit(attacker);
 
-        SharpShooterBuff.channel(attacker, defender, damage);
+		SharpShooterBuff.channel(attacker, defender, damage);
 
 		return result;
 	}
@@ -817,7 +818,7 @@ abstract public class MissileWeapon extends Weapon {
 				this.detach(hero.belongings.backpack);
 			}
 			if (i instanceof MissileWeapon) {
-				Buff.affect(hero, Juggling.class).juggle(hero, (MissileWeapon) i, true);
+				Buff.affect(hero, Juggling.class).juggle((MissileWeapon) i, true);
 			}
 			updateQuickslot();
 		}

@@ -2757,7 +2757,7 @@ public class Hero extends Char {
 
 			BowMasterSkill.move();
 
-			Juggling.move();
+			if (subClass == HeroSubClass.JUGGLER) Juggling.onMove();
 
 			sprite.move(pos, step);
 			move(step);
