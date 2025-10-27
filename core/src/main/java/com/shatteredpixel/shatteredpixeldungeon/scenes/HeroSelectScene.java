@@ -253,7 +253,8 @@ public class HeroSelectScene extends PixelScene {
 				btnHeight += 6;
 			}
 
-			int cols = (int)Math.ceil(heroBtns.size()/2f);
+			int cols = 5;
+//			int cols = (int)Math.ceil(heroBtns.size()/2f);
 			float curX = insets.left + (leftArea - btnWidth * cols + (cols-1))/2f;
 			float curY = title.bottom() + uiSpacing;
 
@@ -264,19 +265,12 @@ public class HeroSelectScene extends PixelScene {
 				curX += btnWidth+1;
 				count++;
 //				if (count >= (1+heroBtns.size())/2){
-//					curX -= btnWidth*count + count;
-//					curY += btnHeight+1;
-//					if (heroBtns.size()%2 != 0){
-//						curX += btnWidth/2f;
-//					}
-//					count = 0;
-//				}
-				if (count >= 5){ //버튼 5개마다 줄바꿈
+				if (count >= 5){
 					curX -= btnWidth*count + count;
 					curY += btnHeight+1;
-//					if (heroBtns.size()%3 != 0){
-//						curX += btnWidth/2f;
-//					}
+					if (heroBtns.size()%2 != 0){
+						curX += btnWidth/2f;
+					}
 					count = 0;
 				}
 			}
@@ -327,20 +321,15 @@ public class HeroSelectScene extends PixelScene {
 
 			int btnWidth = HeroBtn.MIN_WIDTH;
 
-			float curX = insets.left + (w - btnWidth * heroBtns.size()) / 2f;
+			float curX = insets.left + (w - btnWidth * heroBtns.size() / 2f) / 2f;
 			if (curX > 0) {
-				btnWidth += Math.min(curX / (heroBtns.size() / 2f), 15);
-				curX = insets.left + (w - btnWidth * heroBtns.size()) / 2f;
+				btnWidth += Math.min(curX / (heroBtns.size() / 4f), 15);
+				curX = insets.left + (w - btnWidth * heroBtns.size() / 2f) / 2f;
 			}
 			float curY = insets.top + h - HeroBtn.HEIGHT + 3;
 
-			//for (StyledButton button : heroBtns) {
-			//	button.setRect(curX, curY, btnWidth, HeroBtn.HEIGHT);
-			//	curX += btnWidth;
-			//}
-
 			int count = 0;
-			for (StyledButton button : heroBtns){
+			for (StyledButton button : heroBtns) {
 				button.setRect(curX, curY, btnWidth, HeroBtn.HEIGHT + insets.bottom);
 				curX += btnWidth;
 				count++;
