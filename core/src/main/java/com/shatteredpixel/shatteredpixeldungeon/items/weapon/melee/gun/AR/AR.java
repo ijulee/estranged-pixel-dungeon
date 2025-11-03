@@ -6,8 +6,8 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 public class AR extends Gun {
 
     {
-        max_round = 4;
-        round = max_round;
+        maxRounds = 4;
+        rounds = maxRounds;
     }
 
     @Override
@@ -17,7 +17,7 @@ public class AR extends Gun {
     }
 
     @Override
-    public Bullet knockBullet(){
+    public Bullet getMissile(){
         return new ARBullet();
     }
 

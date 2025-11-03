@@ -602,7 +602,7 @@ public class DriedRose extends Artifact {
 					&& enemy != null
 					&& rose.weapon instanceof Gun
 					&& (!Dungeon.level.adjacent( this.pos, enemy.pos ) || rose.weapon instanceof SG)
-					&& ((Gun)rose.weapon).round() > 0; //도달의 마법 등으로 멀리 있는 적을 공격 가능해도 장탄수가 1 이상이면 총을 우선으로 사용함
+					&& ((Gun)rose.weapon).rounds() > 0;
 		}
 
 		@Override
@@ -620,12 +620,12 @@ public class DriedRose extends Artifact {
 			if (rose != null) {
 				if (rose.weapon instanceof Gun) {
 					if (shouldEmpty) {
-						if (((Gun)rose.weapon).round() <= 0) {
+						if (((Gun)rose.weapon).rounds() <= 0) {
 							reload();
 							return true;
 						}
 					} else {
-						if (((Gun)rose.weapon).round() < ((Gun)rose.weapon).maxRound()) {
+						if (((Gun)rose.weapon).rounds() < ((Gun)rose.weapon).maxRounds()) {
 							reload();
 							return true;
 						}
@@ -730,7 +730,7 @@ public class DriedRose extends Artifact {
 		@Override
 		protected boolean canAttack(Char enemy) {
 			if (willingToShoot()) {
-				nextBullet = ((Gun)rose.weapon).knockBullet();
+				nextBullet = ((Gun)rose.weapon).getMissile();
 				if (nextBullet instanceof LG.LGBullet) {
 					return new Ballistica( this.pos, enemy.pos, Ballistica.STOP_TARGET).collisionPos == enemy.pos;
 				} else if (nextBullet instanceof FT.FTBullet) {
@@ -762,8 +762,8 @@ public class DriedRose extends Artifact {
 		@Override
 		public boolean attack(Char enemy, float dmgMulti, float dmgBonus, float accMulti) {
 			//nextBullet != null이면 rose.ghostWeapon()은 항상 Gun인데 왜인지 모르게 ClassCastException이 떠서 일단 인스턴스 확인 조건 추가함
-			if (nextBullet != null && rose.ghostWeapon() instanceof Gun && ((Gun) rose.ghostWeapon()).shotPerShoot() > 1) {
-				for (int i = 0; i < ((Gun) rose.ghostWeapon()).shotPerShoot() - 1; i++) { //이 코드는 한 발에 여러 번 타격하는 총기에 한해서 발동할 것
+			if (nextBullet != null && rose.ghostWeapon() instanceof Gun && ((Gun) rose.ghostWeapon()).shotsPerRound() > 1) {
+				for (int i = 0; i < ((Gun) rose.ghostWeapon()).shotsPerRound() - 1; i++) { //이 코드는 한 발에 여러 번 타격하는 총기에 한해서 발동할 것
 					super.attack(enemy, dmgMulti, dmgBonus, accMulti);
 				}
 			}

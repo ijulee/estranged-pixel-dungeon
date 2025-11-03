@@ -28,9 +28,9 @@ import java.util.ArrayList;
 public class FT extends Gun {
 
     {
-        max_round = 2;
-        round = max_round;
-        shootingAccuracy = 1.5f;
+        maxRounds = 2;
+        rounds = maxRounds;
+        shootingAcc = 1.5f;
     }
 
     @Override
@@ -40,12 +40,12 @@ public class FT extends Gun {
     }
 
     @Override
-    public int bulletUse() {
-        return Math.max(0, (maxRound()-round)*2);
+    public int reloadAmmoUse() {
+        return Math.max(0, (maxRounds()- rounds)*2);
     }
 
     @Override
-    public Bullet knockBullet(){
+    public Bullet getMissile(){
         return new FTBullet();
     }
 
@@ -93,7 +93,7 @@ public class FT extends Gun {
                     }
                 }
                 for (Char ch : chars) {
-                    for (int i=0; i<shotPerShoot(); i++) {
+                    for (int i = 0; i< shotsPerRound(); i++) {
                         curUser.shoot(ch, this);
                     }
                     if (ch == hero && !ch.isAlive()) {

@@ -73,6 +73,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Poison;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Pray;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Preparation;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.RadioactiveMutation;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.SharpShooterBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ShieldBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Sleep;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Slow;
@@ -156,6 +157,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Blazin
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Grim;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Kinetic;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Shocking;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.GunWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Sickle;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.bow.BowWeapon;
@@ -329,7 +331,7 @@ public abstract class Char extends Actor {
 				Buff.affect(Dungeon.hero, Momentum.class).gainStack();
 			}
 
-			BowMasterSkill.move();
+			BowMasterSkill.onMove(Dungeon.hero);
 
 			Juggling.onMove();
 
@@ -474,7 +476,7 @@ public abstract class Char extends Actor {
 				}
 
 				if (h.belongings.attackingWeapon() instanceof Gun.Bullet) {
-					dr *= ((Gun.Bullet) h.belongings.attackingWeapon()).whatBullet().armorFactor();
+					dr *= ((Gun.Bullet) h.belongings.attackingWeapon()).bulletMod().armorFactor();
 				}
 
 				if (hero.buff(ShadowBlade.shadowBladeTracker.class) != null && Random.Int(2) == 0) {
@@ -703,6 +705,16 @@ public abstract class Char extends Actor {
 					}
 				}
 				judgement.detach();
+			}
+
+            if (buff(SharpShooterBuff.class) != null && this instanceof Hero) {
+				KindOfWeapon wep = ((Hero) this).belongings.attackingWeapon();
+				if (((Hero) this).hasTalent(Talent.RANGED_LETHALITY) &&
+						wep instanceof GunWeapon.GunMissile &&
+						((GunWeapon.GunMissile) wep).isBurst()) {
+					SharpShooterBuff.procRangedLethal(enemy,
+							(GunWeapon.GunMissile) wep);
+				}
 			}
 
 			if (enemy.sprite != null) {

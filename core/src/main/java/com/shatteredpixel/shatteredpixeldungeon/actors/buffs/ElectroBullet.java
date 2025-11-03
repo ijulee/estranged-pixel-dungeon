@@ -30,15 +30,7 @@ import com.watabou.noosa.Image;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Random;
 
-public class ElectroBullet extends FlavourBuff {
-
-    {
-        type = buffType.POSITIVE;
-        announced = true;
-    }
-
-    public static final float DURATION	= 100f;
-
+public class ElectroBullet extends ElementalBullet {
     public void proc(Char enemy){
         if (Random.Float() < 0.25f) {
             Buff.affect(enemy, Paralysis.class, 2f);
@@ -49,27 +41,7 @@ public class ElectroBullet extends FlavourBuff {
     }
 
     @Override
-    public int icon() {
-        return BuffIndicator.BULLET;
-    }
-
-    @Override
     public void tintIcon(Image icon) {
         icon.hardlight(1f, 1f, 0f);
-    }
-
-    @Override
-    public float iconFadePercent() {
-        return Math.max(0, (DURATION - visualcooldown()) / DURATION);
-    }
-
-    @Override
-    public String toString() {
-        return Messages.get(this, "name");
-    }
-
-    @Override
-    public String desc() {
-        return Messages.get(this, "desc", dispTurns());
     }
 }

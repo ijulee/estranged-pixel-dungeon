@@ -1,7 +1,5 @@
 package com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.gun;
 
-import static com.shatteredpixel.shatteredpixeldungeon.Dungeon.hero;
-
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
@@ -11,34 +9,27 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Barrier;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Blindness;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ElectroBullet;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ElementalBullet;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FireBullet;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FrostBullet;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.InfiniteBullet;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.RouletteOfDeath;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.SharpShooterBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.gunner.Riot;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.rogue.DeathMark;
-import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Brute;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.BlastParticle;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.SmokeParticle;
-import com.shatteredpixel.shatteredpixeldungeon.items.GunSmithingTool;
-import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.DriedRose;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfSharpshooting;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.bow.SpiritBow;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.DisposableMissileWeapon;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.GunWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.CellSelector;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
-import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Bundle;
@@ -47,22 +38,21 @@ import com.watabou.utils.Random;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.HashSet;
 
-public class Gun extends MeleeWeapon {
-	public static final String AC_SHOOT		= "SHOOT";
+public class Gun extends GunWeapon {
 	public static final String AC_RELOAD    = "RELOAD";
 
-	protected int max_round; //최대 장탄수
-	protected int round; //현재 장탄수
-	protected float reload_time = 2f; //재장전 시간
-	protected int shotPerShoot = 1; //발사 당 탄환의 개수
-	protected float shootingSpeed = 1f; //발사 시 소모하는 턴의 배율. 낮을수록 빠르다
-	protected float shootingAccuracy = 1f; //발사 시 탄환 정확성의 배율. 높을 수록 정확하다.
-	protected float adjacentShootingAccuracy = 1f; //발사 시 근접한 상황에서 탄환 정확성의 배율. 높을 수록 정확하다.
-	//총기의 정확성은 근접할 때에는 떨어지지만, 멀리 있다고 증가하진 않는다. Hero.attackSkill()참고
-	protected boolean explode = false; //탄환 폭발 여부
+	protected int rounds;
+	protected int maxRounds;
+	protected float reloadTime = 2f;
+	protected int shotsPerRound = 1;
+	protected int ammoPerRound = 1;
+	protected float shootingSpeed = 1f;
+	protected float shootingAcc = 1f;
+	protected float adjShootingAcc = 1f;
+	protected boolean explode = false;
 	protected boolean spread = false; //산탄 여부 = 거리에 따른 탄환 위력 감소 여부.
-	public static final String TXT_STATUS = "%d/%d";
 
 	public enum BarrelMod {
 		NORMAL_BARREL(1, 1),
@@ -184,10 +174,27 @@ public class Gun extends MeleeWeapon {
 	public EnchantMod enchantMod = EnchantMod.NORMAL_ENCHANT;
 	public InscribeMod inscribeMod = InscribeMod.NORMAL;
 
-	{
-		defaultAction = AC_SHOOT;
-		usesTargeting = true;
+	private Enum[] gunMods = {
+			BarrelMod.NORMAL_BARREL,
+			MagazineMod.NORMAL_MAGAZINE,
+			BulletMod.NORMAL_BULLET,
+			WeightMod.NORMAL_WEIGHT,
+			AttachMod.NORMAL_ATTACH,
+			EnchantMod.NORMAL_ENCHANT,
+			InscribeMod.NORMAL
+	};
 
+	private final Class[] gunModOrder = {
+			BarrelMod.class,
+			MagazineMod.class,
+			BulletMod.class,
+			WeightMod.class,
+			AttachMod.class,
+			EnchantMod.class,
+			InscribeMod.class
+	};
+
+	{
 		hitSound = Assets.Sounds.HIT_CRUSH;
 		hitSoundPitch = 0.8f;
 	}
@@ -204,7 +211,7 @@ public class Gun extends MeleeWeapon {
 	@Override
 	public void storeInBundle(Bundle bundle) {
 		super.storeInBundle(bundle);
-		bundle.put(ROUND, round);
+		bundle.put(ROUND, rounds);
 		bundle.put(BARREL_MOD, barrelMod);
 		bundle.put(MAGAZINE_MOD, magazineMod);
 		bundle.put(BULLET_MOD, bulletMod);
@@ -217,7 +224,7 @@ public class Gun extends MeleeWeapon {
 	@Override
 	public void restoreFromBundle(Bundle bundle) {
 		super.restoreFromBundle(bundle);
-		round = bundle.getInt(ROUND);
+		rounds = bundle.getInt(ROUND);
 		barrelMod = bundle.getEnum(BARREL_MOD, BarrelMod.class);
 		magazineMod = bundle.getEnum(MAGAZINE_MOD, MagazineMod.class);
 		bulletMod = bundle.getEnum(BULLET_MOD, BulletMod.class);
@@ -241,36 +248,35 @@ public class Gun extends MeleeWeapon {
 	public void execute(Hero hero, String action) {
 		super.execute(hero, action);
 
-		if (action.equals(AC_SHOOT)) {
-			if (!isEquipped( hero )) {
-				usesTargeting = false;
-				GLog.w(Messages.get(this, "not_equipped"));
-			} else {
-				if (round <= 0) { //현재 탄창이 0이면 AC_RELOAD 버튼을 눌렀을 때처럼 작동
-					execute(hero, AC_RELOAD);
-				} else {
-					usesTargeting = true;
-					curUser = hero;
-					curItem = this;
-					GameScene.selectCell(shooter);
-				}
-			}
-		}
 		if (action.equals(AC_RELOAD)) {
-			if (isAllLoaded()){
+			usesTargeting = false;
+			if (fullyLoaded()){
 				if (hero.heroClass == HeroClass.DUELIST) {
 					execute(hero, AC_ABILITY);
 				} else {
 					GLog.w(Messages.get(this, "already_loaded"));
 				}
 			} else {
-				reload();
+				reloadAction(hero);
 			}
 		}
 	}
 
-	public boolean isAllLoaded() {
-		return round >= maxRound();
+	@Override
+	public boolean canShoot() {
+		if (isEquipped(Dungeon.hero) && Dungeon.hero.buff(InfiniteBullet.class)!=null)
+			return true;
+		else
+			return rounds >= 1;
+	}
+
+	@Override
+	public void noAmmoAction(Hero hero) {
+		execute(hero, AC_RELOAD);
+	}
+
+	public boolean fullyLoaded() {
+		return rounds >= maxRounds();
 	}
 
 	@Override
@@ -280,45 +286,45 @@ public class Gun extends MeleeWeapon {
 
 	@Override
 	protected void duelistAbility(Hero hero, Integer target) {
-		if (round >= maxRound()*2) {
+		if (rounds >= maxRounds()*2) {
 			GLog.w(Messages.get(this, "overloaded"));
 			return;
 		}
 
 		beforeAbilityUsed(hero, null);
-		if (isAllLoaded()) {
-			onReload();
-			manualReload(maxRound(), true);
+
+		onReload(hero);
+		if (fullyLoaded()) {
+			manualReload(maxRounds(), true);
 		} else {
-			onReload();
 			quickReload();
 		}
 		hero.sprite.operate(hero.pos);
 		Sample.INSTANCE.play(Assets.Sounds.UNLOCK);
 		hero.next();
+
 		afterAbilityUsed(hero);
 	}
 
-	public void reload() {
-		onReload();
+	public void reloadAction(Hero hero) {
+		onReload(hero);
 
-		if (Dungeon.bullet < shotPerShoot()) {
+		if (Dungeon.bullet < ammoPerRound()) {
 			if (hero.heroClass == HeroClass.DUELIST) {
 				execute(hero, AC_ABILITY);
 				return;
 			}
-			usesTargeting = false;
 			GLog.w(Messages.get(this, "less_bullet"));
 			return;
 		}
 
-		if (Dungeon.bullet < bulletUse()) {
-			while (Dungeon.bullet >= shotPerShoot()) {
-				Dungeon.bullet -= shotPerShoot();
-				manualReload();
+		if (Dungeon.bullet < reloadAmmoUse()) {
+			while (Dungeon.bullet >= ammoPerRound()) {
+				Dungeon.bullet -= ammoPerRound();
+				singleReload();
 			}
 		} else {
-			Dungeon.bullet -= bulletUse();
+			Dungeon.bullet -= reloadAmmoUse();
 			quickReload();
 		}
 
@@ -329,126 +335,124 @@ public class Gun extends MeleeWeapon {
 		GLog.i(Messages.get(this, "reload"));
 	}
 
-	public void onReload() {	//재장전 시 작동하는 메서드. 특히 현재 장탄수가 바뀌기 전에 동작해야 한다
-		Buff.detach(hero, FrostBullet.class);
-		Buff.detach(hero, FireBullet.class);
-		Buff.detach(hero, ElectroBullet.class);
+	private int ammoPerRound() {
+		return ammoPerRound + inscribeMod.shotBonus();
+	}
+
+	public void onReload(Hero hero) {
+		Buff.detach(hero, ElementalBullet.class);
 
 		if (hero.hasTalent(Talent.SAFE_RELOAD)) {
 			Buff.affect(hero, Barrier.class).setShield( 1 + 2 * hero.pointsInTalent(Talent.SAFE_RELOAD));
 		}
 
-		if (hero.hasTalent(Talent.ELEMENTAL_BULLET) && round == 0) {
+		if (hero.hasTalent(Talent.ELEMENTAL_BULLET) && rounds == 0) {
 			int chance = Random.Int(6);
 			int point = Dungeon.hero.pointsInTalent(Talent.ELEMENTAL_BULLET);
 			switch (chance) {
-				default:
-					break;
-				case 0:
+                case 0:
 					if (point >= 1) {
-						Buff.affect(hero, FrostBullet.class, 100f);
+						Buff.affect(hero, FrostBullet.class, FrostBullet.DURATION);
 					}
 					break;
 				case 1:
 					if (point >= 2) {
-						Buff.affect(hero, FireBullet.class, 100f);
+						Buff.affect(hero, FireBullet.class, FireBullet.DURATION);
 					}
 					break;
 				case 2:
 					if (point >= 3) {
-						Buff.affect(hero, ElectroBullet.class, 100f);
+						Buff.affect(hero, ElectroBullet.class, ElectroBullet.DURATION);
 					}
 					break;
-			}
+                default:
+                    break;
+            }
 		}
 	}
 
-	public void quickReload() {	//다른 것들을 작동시키지 않고 탄창만 완전히 재장전하는 메서드
-		round = maxRound();
+	public void quickReload() {
+		rounds = maxRounds();
 		updateQuickslot();
 	}
 
-	public void manualReload() {	//탄환을 1발 장전하는 메서드
+	public void singleReload() {
 		manualReload(1, false);
 	}
 
-	public void manualReload(int amount, boolean overReload) {	//탄환을 지정한 수만큼 장전하는 메서드. overReload가 true일 경우 최대 장탄수를 넘어서 장전할 수 있다.
-		round += amount;
-		if (overReload) {
-			if (round > maxRound() + amount) { //최대 장탄수를 넘을 수는 있지만, 중첩은 불가
-				round = maxRound() + amount;
+	public void manualReload(int amount, boolean overload) {
+		if (overload) {
+			// only overload if it would exceed current rounds
+			if (rounds < maxRounds() + amount) {
+				rounds += amount;
 			}
 		} else {
-			if (round > maxRound()) {
-				round = maxRound();
-			}
-		}
+            if (rounds + amount < maxRounds()) {
+                rounds += amount;
+            } else {
+                rounds = maxRounds();
+            }
+        }
 
 		updateQuickslot();
 	}
 
 	public boolean isReloaded() {
-		return round >= maxRound();
+		return rounds >= maxRounds();
 	}
 
-	public int shotPerShoot() { //발사 당 탄환의 수
-		return shotPerShoot + inscribeMod.shotBonus();
+	public int shotsPerRound() {
+		return shotsPerRound + inscribeMod.shotBonus();
 	}
 
-	public int maxRound() { //최대 장탄수
-		int amount = max_round;
+	public int maxRounds() {
+		int maxRounds = this.magazineMod.magazineFactor(this.maxRounds);
 
-		amount = this.magazineMod.magazineFactor(amount);
-
-		if (hero != null) {
-			amount += hero.pointsInTalent(Talent.LARGER_MAGAZINE);
+		if (isEquipped(Dungeon.hero)) {
+			maxRounds += Dungeon.hero.pointsInTalent(Talent.LARGER_MAGAZINE);
 		}
 
-		return amount;
+		return maxRounds;
 	}
 
-	public int round() {
-		return round;
+	public int rounds() {
+		return rounds;
 	}
 
 	public void useRound() {
-		round--;
+		rounds--;
 	}
 
-	public float reloadTime(Char user) { //재장전에 소모하는 턴
-		float amount = reload_time;
+	public float reloadTime(Char user) {
+		float time = reloadTime;
 
-		amount = this.magazineMod.reloadTimeFactor(amount);
+		time = this.magazineMod.reloadTimeFactor(time);
 
-		if (hero != null && user == hero) {
-			amount -= hero.pointsInTalent(Talent.FAST_RELOAD);
+		if (isEquipped(Dungeon.hero)) {
+			time -= Dungeon.hero.pointsInTalent(Talent.FAST_RELOAD);
 			if (((Hero)user).heroClass == HeroClass.GUNNER) {
-				amount -= 1;
+				time -= 1;
 			}
 		}
 
-		amount = Math.max(0, amount);
-		return amount;
+		time = Math.max(0, time);
+		return time;
 	}
 
-	public int bulletUse() {
-		return Math.max(0, (maxRound()-round)*shotPerShoot());
+	public int reloadAmmoUse() {
+		return Math.max(0, (maxRounds() - rounds) * ammoPerRound());
 	}
 
 	@Override
 	public int tier() {
-		int t = this.tier;
 		switch (this.weightMod) {
 			case NORMAL_WEIGHT: default:
-				break;
+				return tier;
 			case HEAVY_WEIGHT:
-				t++;
-				break;
+				return tier + 1;
 			case LIGHT_WEIGHT:
-				t--;
-				break;
+				return tier - 1;
 		}
-		return t;
 	}
 
 	@Override
@@ -462,37 +466,18 @@ public class Gun extends MeleeWeapon {
 
 	@Override
 	public int max(int lvl) {
-		int damage;
 		int talentBonus = 0;
-		if (Dungeon.hero != null && hero.hasTalent(Talent.CLOSE_COMBAT)) {
-			talentBonus += 2*hero.pointsInTalent(Talent.CLOSE_COMBAT);
-		}
 		if (Dungeon.hero != null) {
-			damage = 3*(tier()+1) +
-					lvl*(tier()+1) +
-					talentBonus; //근접 무기로서의 최대 데미지
-		} else {
-			damage = 3*(tier()+1) +
-					lvl*(tier()+1);
+			talentBonus += 2 * Dungeon.hero.pointsInTalent(Talent.CLOSE_COMBAT);
 		}
-		return damage;
+		return (tier()+1) * (lvl + 3) + talentBonus;
 
 	}
 
-	public int bulletMin(int lvl) {
-		if (Dungeon.hero != null) {
-			return tier() +
-					lvl +
-					RingOfSharpshooting.levelDamageBonus(hero);
-		} else {
-			return tier() +
-					lvl;
-		}
-
-	}
-
-	public int bulletMin() {
-		return bulletMin(this.buffedLvl());
+	@Override
+    public int missileMin(int lvl) {
+		return tier() + lvl +
+				(isEquipped(Dungeon.hero) ? RingOfSharpshooting.levelDamageBonus(Dungeon.hero) : 0);
 	}
 
 	//need to be overridden
@@ -500,29 +485,10 @@ public class Gun extends MeleeWeapon {
 		return 0;
 	}
 
-	public int bulletMax(int lvl) {
-		if (Dungeon.hero != null) {
-			return baseBulletMax(lvl) +
-					RingOfSharpshooting.levelDamageBonus(hero);
-		} else {
-			return baseBulletMax(lvl);
-		}
-	}
-
-	public int bulletMax() {
-		return bulletMax(this.buffedLvl());
-	}
-
-	protected int bulletDamage() {
-		int damage = Random.NormalIntRange(bulletMin(), bulletMax());
-
-		damage = augment.damageFactor(damage);  //증강에 따라 변화하는 효과
-		return damage;
-	}
-
 	@Override
-	protected float baseDelay(Char owner) {
-		return super.baseDelay(owner);
+    public int missileMax(int lvl) {
+		return baseBulletMax(lvl) +
+				(isEquipped(Dungeon.hero) ? RingOfSharpshooting.levelDamageBonus(Dungeon.hero) : 0);
 	}
 
 	@Override
@@ -540,18 +506,29 @@ public class Gun extends MeleeWeapon {
 	@Override
 	public String info() {
 		String info = super.info();
-		//근접 무기의 설명을 모두 가져옴, 여기에서 할 것은 근접 무기의 설명에 추가로 생기는 문장을 더하는 것
-		if (levelKnown) { //감정되어 있을 때
-			info += "\n\n" + Messages.get(Gun.class, "gun_desc",
-					shotPerShoot(), augment.damageFactor(bulletMin(buffedLvl())), augment.damageFactor(bulletMax(buffedLvl())), round, maxRound(), new DecimalFormat("#.##").format(reloadTime(hero)), bulletUse());
-		} else { //감정되어 있지 않을 때
-			info += "\n\n" + Messages.get(Gun.class, "gun_typical_desc",
-					shotPerShoot(), augment.damageFactor(bulletMin(0)), augment.damageFactor(bulletMax(0)), round, maxRound(), new DecimalFormat("#.##").format(reloadTime(hero)), bulletUse());
-		}
-		//DecimalFormat("#.##")은 .format()에 들어가는 매개변수(실수)를 "#.##"형식으로 표시하는데 사용된다.
-		//가령 5.55555가 .format()안에 들어가서 .format(5.55555)라면, new DecimalFormat("#.##").format(5.55555)는 5.55라는 String 타입의 값을 반환한다.
 
-		boolean isModded = false;
+		if (levelKnown) {
+			info += "\n\n" + Messages.get(Gun.class, "gun_desc",
+					shotsPerRound(), augment.damageFactor(missileMin()), augment.damageFactor(missileMax()));
+		} else {
+			info += "\n\n" + Messages.get(Gun.class, "gun_typical_desc",
+					shotsPerRound(), augment.damageFactor(missileMin(0)), augment.damageFactor(missileMax(0)));
+		}
+		info += " " + Messages.get(Gun.class, "gun_reload_info", rounds, maxRounds(), new DecimalFormat("#.##").format(reloadTime(Dungeon.hero)), reloadAmmoUse());
+
+		StringBuilder gunModsSB = new StringBuilder();
+
+		for (Enum mod : gunMods) {
+            if (mod.ordinal() != 0) {
+                gunModsSB.append(mod.name()).append(", ");
+            }
+        }
+
+		if (gunModsSB.length() != 0) {
+			info += "\n\n" + Messages.get(this, gunModsSB.substring(0, gunModsSB.length()-2));
+		}
+
+		/*boolean isModded = false;
 		boolean[] whatModded = {false, false, false, false, false, false, false};
 
 		if (barrelMod != BarrelMod.NORMAL_BARREL) {
@@ -625,27 +602,22 @@ public class Gun extends MeleeWeapon {
 				info += Messages.get(Gun.class, inscribeMod.name());
 			}
 			info += Messages.get(this, "modded_end");
-		}
+		}*/
 
 		return info;
 	}
 
 	@Override
-	public String status() { //아이템 칸 오른쪽 위에 나타내는 글자
-		return Messages.format(TXT_STATUS, round, maxRound()); //TXT_STATUS 형식(%d/%d)으로, round, maxRound() 변수를 순서대로 %d부분에 출력
-	}
-
-	@Override
-	public int targetingPos(Hero user, int dst) {
-		return knockBullet().targetingPos(user, dst);
+	public String status() {
+		return Messages.format("%d/%d", rounds, maxRounds());
 	}
 
 	//needs to be overridden
-	public Bullet knockBullet(){
+	public Bullet getMissile(){
 		return new Bullet();
 	}
 
-	public class Bullet extends DisposableMissileWeapon {
+	public class Bullet extends GunMissile {
 
 		{
 			hitSound = Assets.Sounds.PUFF;
@@ -654,72 +626,54 @@ public class Gun extends MeleeWeapon {
 
 		public boolean isBurst = false;
 
-		@Override
-		public int min() {
-			return bulletMin();
-		}
-
-		@Override
+        @Override
 		public int min(int lvl) {
-			return bulletMin(lvl);
+			return missileMin(lvl);
 		}
 
-		@Override
-		public int max() {
-			return bulletMax();
-		}
-
-		@Override
+        @Override
 		public int max(int lvl) {
-			return bulletMax(lvl);
+			return missileMax(lvl);
 		}
 
-		public BulletMod whatBullet() { //현재 탄환이 어떤 개조인지를 반환함. 탄환 피해의 적 방어력 적용량 결정에 쓰임
+		public BulletMod bulletMod() { //현재 탄환이 어떤 개조인지를 반환함. 탄환 피해의 적 방어력 적용량 결정에 쓰임
 			return Gun.this.bulletMod;
 		}
 
-		public EnchantMod whatEnchant() {
+		public EnchantMod enchantMod() {
 			return Gun.this.enchantMod;
 		}
 
 		@Override
 		public int proc(Char attacker, Char defender, int damage) {
-			boolean isDebuffed = false;
-			for (Buff buff : defender.buffs()) {
-				if (buff.type == Buff.buffType.NEGATIVE) {
-					isDebuffed = true;
-					break;
-				}
-			}
+			damage = this.bulletMod().damageFactor(damage);
+			damage = this.enchantMod().damageFactor(damage);
 
-			damage = this.whatBullet().damageFactor(damage);
-			damage = this.whatEnchant().damageFactor(damage);
-
-			if (hero.buff(FrostBullet.class) != null) {
-				hero.buff(FrostBullet.class).proc(defender);
-			}
-			if (hero.buff(FireBullet.class) != null) {
-				hero.buff(FireBullet.class).proc(defender);
-			}
-			if (hero.buff(ElectroBullet.class) != null) {
-				hero.buff(ElectroBullet.class).proc(defender);
-			}
-
-			int distance = Dungeon.level.distance(attacker.pos, defender.pos) - 1; //적과 나 사이의 간격, 근접한 경우 0
-			float multiplier = Math.min(2.5f, (float)Math.pow(1 + 0.025f * hero.pointsInTalent(Talent.RANGED_SNIPING), distance));
-			damage = Math.round(damage * multiplier);
+			int distance = Dungeon.level.distance(attacker.pos, defender.pos) - 1;
 
 			if (spread) {
-				multiplier = multiplier * (float) Math.pow(0.9f, distance);
+				damage = Math.round(damage * (float) Math.pow(0.9f, distance));
 			}
-			damage = Math.round(damage * multiplier);
 
-			if (hero.buff(Riot.RiotTracker.class) != null) {
-				if (hero.hasTalent(Talent.SHOT_CONCENTRATION)) {
-					hero.buff(Riot.RiotTracker.class).extend();
+			if (isEquipped(Dungeon.hero)) {
+				HashSet<ElementalBullet> bulletBuffs = Dungeon.hero.buffs(ElementalBullet.class);
+				for (ElementalBullet b : bulletBuffs) {
+					b.proc(defender);
 				}
-				Math.round(damage * 0.5f);
-			}
+
+				if (Dungeon.hero.subClass == HeroSubClass.SPECIALIST && Dungeon.hero.hasTalent(Talent.RANGED_SNIPING)) {
+					float snipingBonus = 1 + 0.025f * Dungeon.hero.pointsInTalent(Talent.RANGED_SNIPING);
+					float snipingMulti = Math.min(2.5f, (float) Math.pow(snipingBonus, distance));
+					damage = Math.round(damage * snipingMulti);
+				}
+
+				if (Dungeon.hero.buff(Riot.RiotTracker.class) != null) {
+					if (Dungeon.hero.hasTalent(Talent.SHOT_CONCENTRATION)) {
+						Dungeon.hero.buff(Riot.RiotTracker.class).extend();
+					}
+					damage = Math.round(damage * 0.5f);
+				}
+            }
 
 			return super.proc(attacker, defender, damage);
 		}
@@ -730,21 +684,9 @@ public class Gun extends MeleeWeapon {
 		}
 
 		@Override
-		public int damageRoll(Char owner) {
-			int damage = bulletDamage();
-//			System.out.println("damage: "+damage);
-			return damage;
-		}
-
-		@Override
-		public boolean hasEnchant(Class<? extends Enchantment> type, Char owner) {
-			return Gun.this.hasEnchant(type, owner);
-		}
-
-		@Override
 		public float delayFactor(Char user) {
 			float speed = Gun.this.delayFactor(user) * shootingSpeed;
-			if (hero.buff(Riot.RiotTracker.class) != null) {
+			if (Dungeon.hero.buff(Riot.RiotTracker.class) != null) {
 				speed *= 0.5f;
 			}
 			return speed;
@@ -752,7 +694,7 @@ public class Gun extends MeleeWeapon {
 
 		@Override
 		public float castDelay(Char user, int dst) {
-			if (hero.subClass == HeroSubClass.GUNSLINGER) {
+			if (Dungeon.hero.subClass == HeroSubClass.GUNSLINGER) {
 				if (user instanceof Hero && ((Hero) user).justMoved)  return 0;
 				else                                                  return delayFactor( user );
 			} else {
@@ -763,34 +705,26 @@ public class Gun extends MeleeWeapon {
 		@Override
 		public float accuracyFactor(Char owner, Char target) {
 			float ACC = super.accuracyFactor(owner, target);
-			ACC *= shootingAccuracy;
 			if (Gun.this.attachMod == AttachMod.LASER_ATTACH) {
 				ACC *= 1.25f;
 			}
-			if (hero.hasTalent(Talent.INEVITABLE_DEATH) && hero.buff(RouletteOfDeath.class) != null && hero.buff(RouletteOfDeath.class).timeToDeath()) {
-				ACC *= 1 + hero.pointsInTalent(Talent.INEVITABLE_DEATH);
+			if (Dungeon.hero.hasTalent(Talent.INEVITABLE_DEATH) && Dungeon.hero.buff(RouletteOfDeath.class) != null && Dungeon.hero.buff(RouletteOfDeath.class).timeToDeath()) {
+				ACC *= 1 + Dungeon.hero.pointsInTalent(Talent.INEVITABLE_DEATH);
 			}
 
 			ACC = Gun.this.barrelMod.bulletAccuracyFactor(ACC, Dungeon.level.adjacent(owner.pos, target.pos));
 
-			if (isBurst && owner instanceof Hero && ((Hero) owner).hasTalent(Talent.BULLSEYE)) {
-				switch (((Hero) owner).pointsInTalent(Talent.BULLSEYE)) {
-					case 3:
-						return Hero.INFINITE_ACCURACY;
-					case 2:
-						ACC *= 5;
-						break;
-					case 1: default:
-						ACC *= 2;
-						break;
-				}
-			}
 			return ACC;
 		}
 
 		@Override
 		protected float adjacentAccFactor(Char owner, Char target) {
-			return adjacentShootingAccuracy;
+			if (Dungeon.level.adjacent( owner.pos, target.pos ) || owner.pos == target.pos) {
+				// not affected by Point Blank talent
+				return adjShootingAcc;
+			} else {
+				return shootingAcc;
+			}
 		}
 
 		@Override
@@ -800,7 +734,59 @@ public class Gun extends MeleeWeapon {
 
 		@Override
 		protected void onThrow( int cell ) {
-			boolean killedEnemy = false;
+			// shoot target cell first
+			Char enemy = Actor.findChar(cell);
+			for (int i = 0; i < shotsPerRound(); i++) {
+				if (enemy == null || enemy == curUser) {
+					showPuff(cell);
+					super.onThrow(cell);
+                } else {
+                    super.onThrow(enemy.pos);
+                }
+            }
+
+			// process explosion if needed
+			if (explode) {
+				HashSet<Char> targets = new HashSet<>();
+				int[] aoe = PathFinder.NEIGHBOURS8;
+				for (int i : aoe){
+					int c = cell + i;
+					if (Dungeon.level.insideMap(c)) {
+						if (Dungeon.level.heroFOV[c]) {
+							showPuff(c);
+						}
+						if (Dungeon.level.flamable[c]) {
+							Dungeon.level.destroy(c);
+							GameScene.updateMap(c);
+						}
+						Char ch = Actor.findChar(c);
+						if (ch != null) {
+							targets.add(ch);
+						}
+					}
+				}
+
+				for (Char target : targets){
+					for (int i = 0; i < shotsPerRound(); i++) {
+						if(target.isAlive()) {
+                            if (target != curUser) {
+                                super.onThrow(target.pos);
+                            } else {
+                                // special case not processed by super method
+                                if (!curUser.shoot(target, this)) {
+                                    rangedHit(target, target.pos);
+                                } else {
+                                    rangedMiss(target.pos);
+                                }
+                            }
+                        }
+                    }
+				}
+
+				Sample.INSTANCE.play( Assets.Sounds.BLAST );
+			}
+
+			/*boolean killedEnemy = false;
 			if (explode) {
 				ArrayList<Char> targets = new ArrayList<>();
 				int[] shootArea = PathFinder.NEIGHBOURS9;
@@ -859,46 +845,64 @@ public class Gun extends MeleeWeapon {
 				}
 
 				SharpShooterBuff.rangedLethal(enemy, isBurst, this);
-			}
+			}*/
 
 			onShoot();
 		}
 
-		public void onShoot() {
-			if (curUser.hasTalent(Talent.ROLLING)) {
-				Buff.prolong(curUser, Talent.RollingTracker.class, curUser.pointsInTalent(Talent.ROLLING));
-			}
+		@Override
+		protected void rangedHit(Char enemy, int cell) {
+			super.rangedHit(enemy, cell);
 
+			if (explode && enemy == curUser && !enemy.isAlive()) {
+				Dungeon.fail(getClass());
+				Badges.validateDeathFromFriendlyMagic();
+				GLog.n(Messages.get(Gun.class, "ondeath"));
+			}
+		}
+
+		public void showPuff(int cell) {
+			CellEmitter.get(cell).burst(SmokeParticle.FACTORY, (explode)?4:2);
+			CellEmitter.center(cell).burst(BlastParticle.FACTORY, (explode)?4:2);
+		}
+
+		public void onShoot() {
+			boolean willAggro = true;
 			boolean willUseRound = true;
 
-			if (curUser.buff(InfiniteBullet.class) != null ||
-					(curUser.buff(Riot.RiotTracker.class) != null && Random.Float() < 0.1f*curUser.pointsInTalent(Talent.ROUND_PRESERVE))) {
-				willUseRound = false;
+			if (curUser != null) {
+				if (curUser.hasTalent(Talent.ROLLING)) {
+					Buff.prolong(curUser, Talent.RollingTracker.class, curUser.pointsInTalent(Talent.ROLLING));
+				}
+
+				if (curUser.buff(InfiniteBullet.class) != null ||
+						(curUser.buff(Riot.RiotTracker.class) != null &&
+								Random.Float() < 0.1f * curUser.pointsInTalent(Talent.ROUND_PRESERVE))) {
+					willUseRound = false;
+				}
+
+				if (curUser.subClass == HeroSubClass.SPECIALIST && curUser.buff(Invisibility.class) != null ||
+						curUser.hasTalent(Talent.STEALTH_MASTER)) {
+					willAggro = false;
+				}
 			}
 
 			if (willUseRound) {
-				round --;
+				rounds--;
 			}
 
-			if (round == 0 && curUser.hasTalent(Talent.IMPROVISATION)) {
+			if (rounds == 0 && curUser != null && curUser.hasTalent(Talent.IMPROVISATION)) {
 				Buff.affect(curUser, Barrier.class).setShield(8*curUser.pointsInTalent(Talent.IMPROVISATION));
 			}
 
-			boolean willAggroEnemy = true;
-
-			if (curUser.subClass == HeroSubClass.SPECIALIST && curUser.buff(Invisibility.class) != null ||
-					curUser.hasTalent(Talent.STEALTH_MASTER)) {
-				willAggroEnemy = false;
-			}
-
-			if (willAggroEnemy) {
+			if (willAggro) {
 				aggro();
 			}
 
 			updateQuickslot();
 		}
 
-		private void aggro() { //주변의 적들을 영웅의 위치로 모이게 하는 구문
+		private void aggro() {
 			for (Mob mob : Dungeon.level.mobs.toArray( new Mob[0] )) {
 				if (mob.paralysed <= 0
 						&& Dungeon.level.distance(curUser.pos, mob.pos) <= 4
@@ -919,14 +923,18 @@ public class Gun extends MeleeWeapon {
 		}
 	}
 
-	private CellSelector.Listener shooter = new CellSelector.Listener() {
+	protected CellSelector.Listener shooter = new CellSelector.Listener() {
 		@Override
 		public void onSelect( Integer target ) {
 			if (target != null) {
-				if (target == curUser.pos) {
-					execute(hero, AC_RELOAD);
+				if (target == curUser.pos ) {
+					if (curUser.heroClass == HeroClass.DUELIST) {
+						execute(Dungeon.hero, AC_ABILITY);
+					} else {
+						execute(Dungeon.hero, AC_RELOAD);
+					}
 				} else {
-					knockBullet().cast(curUser, target);
+					getMissile().cast(curUser, target);
 				}
 			}
 		}

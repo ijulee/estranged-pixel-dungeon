@@ -6,8 +6,8 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 public class GL extends Gun {
 
     {
-        max_round = 2;
-        round = max_round;
+        maxRounds = 2;
+        rounds = maxRounds;
         explode = true;
     }
 
@@ -18,7 +18,7 @@ public class GL extends Gun {
     }
 
     @Override
-    public Bullet knockBullet(){
+    public Bullet getMissile(){
         return new GLBullet();
     }
 

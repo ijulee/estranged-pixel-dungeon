@@ -341,16 +341,16 @@ public class WndUpgrade extends Window {
 		if (toUpgrade instanceof BowWeapon) {
 			BowWeapon bow = (BowWeapon) toUpgrade;
 			bottom = fillFields(Messages.get(this, "arrow_damage"),
-					bow.arrowMin(levelFrom)+"-"+bow.arrowMax(levelFrom),
-					bow.arrowMin(levelTo)+"-"+bow.arrowMax(levelTo),
+					bow.missileMin(levelFrom)+"-"+bow.missileMax(levelFrom),
+					bow.missileMin(levelTo)+"-"+bow.missileMax(levelTo),
 					bottom);
 		}
 
 		if (toUpgrade instanceof Gun) {
 			Gun gun = (Gun) toUpgrade;
 			bottom = fillFields(Messages.get(this, "bullet_damage"),
-					gun.bulletMin(levelFrom)+"-"+gun.bulletMax(levelFrom),
-					gun.bulletMin(levelTo)+"-"+gun.bulletMax(levelTo),
+					gun.missileMin(levelFrom)+"-"+gun.missileMax(levelFrom),
+					gun.missileMin(levelTo)+"-"+gun.missileMax(levelTo),
 					bottom);
 		}
 

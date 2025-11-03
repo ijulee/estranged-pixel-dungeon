@@ -26,9 +26,9 @@ import java.util.ArrayList;
 public class LG extends Gun {
 
     {
-        max_round = 2;
-        round = max_round;
-        shootingAccuracy = 1.5f;
+        maxRounds = 2;
+        rounds = maxRounds;
+        shootingAcc = 1.5f;
     }
 
     @Override
@@ -38,12 +38,12 @@ public class LG extends Gun {
     }
 
     @Override
-    public int bulletUse() {
-        return Math.max(0, (maxRound()-round)*3);
+    public int reloadAmmoUse() {
+        return Math.max(0, (maxRounds()- rounds)*3);
     }
 
     @Override
-    public Bullet knockBullet(){
+    public Bullet getMissile(){
         return new LGBullet();
     }
 
@@ -97,7 +97,7 @@ public class LG extends Gun {
                 curUser.sprite.parent.add(new Beam.SuperNovaRay(curUser.sprite.center(), DungeonTilemap.raisedTileCenterToWorld( cells ), multi));
 
                 for (Char ch : chars) {
-                    for (int i=0; i<shotPerShoot(); i++) {
+                    for (int i = 0; i< shotsPerRound(); i++) {
                         if (curUser.shoot(ch, this)) {
                             ch.sprite.emitter().start( ShadowParticle.UP, 0.05f, 10+buffedLvl() );
                         }

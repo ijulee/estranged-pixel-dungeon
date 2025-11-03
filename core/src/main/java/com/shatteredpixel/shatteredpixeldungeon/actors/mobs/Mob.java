@@ -1038,7 +1038,7 @@ public abstract class Mob extends Char {
 
 			Juggling.onKill();
 
-			SharpShooterBuff.kill();
+			SharpShooterBuff.onKill();
 
 			Saddle.kill(this);
 		}

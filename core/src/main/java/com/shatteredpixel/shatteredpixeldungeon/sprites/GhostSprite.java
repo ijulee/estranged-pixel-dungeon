@@ -40,8 +40,6 @@ import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ShadowParticle
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ShaftParticle;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.SmokeParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.DriedRose;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.gun.FT.FT;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.gun.Gun;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.gun.LG.LG;
@@ -128,7 +126,7 @@ public class GhostSprite extends MobSprite {
 			idle();
 			DriedRose rose = Dungeon.hero.belongings.getItem(DriedRose.class);
 			if (rose != null && rose.ghostWeapon() instanceof Gun) {
-				Gun.Bullet bullet = ((Gun)rose.ghostWeapon()).knockBullet();
+				Gun.Bullet bullet = ((Gun)rose.ghostWeapon()).getMissile();
 
 				if (bullet instanceof LG.LGBullet) {
 					if (cellToAttack != ch.pos) {

@@ -5,11 +5,11 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 public class HG extends Gun {
 
     {
-        max_round = 4;
-        round = max_round;
+        maxRounds = 4;
+        rounds = maxRounds;
         shootingSpeed = 0.5f;
-        reload_time = 1f;
-        adjacentShootingAccuracy = 2f;
+        reloadTime = 1f;
+        adjShootingAcc = 2f;
     }
 
     @Override
@@ -19,7 +19,7 @@ public class HG extends Gun {
     }
 
     @Override
-    public Bullet knockBullet(){
+    public Bullet getMissile(){
         return new HGBullet();
     }
 

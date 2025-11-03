@@ -2738,7 +2738,7 @@ public class Hero extends Char {
 
 			if (buff(Talent.RollingTracker.class) != null && belongings.weapon instanceof Gun && Dungeon.bullet > 1 && !((Gun) belongings.weapon).isReloaded()) {
 				Dungeon.bullet --;
-				((Gun)belongings.weapon).manualReload();
+				((Gun)belongings.weapon).singleReload();
 				buff(Talent.RollingTracker.class).detach();
 			}
 
@@ -2748,14 +2748,14 @@ public class Hero extends Char {
 					&& Dungeon.bullet > 1
 					&& !((Gun) belongings.weapon).isReloaded()) {
 				Dungeon.bullet --;
-				((Gun)belongings.weapon).manualReload();
+				((Gun)belongings.weapon).singleReload();
 			}
 
 			if (hasTalent(Talent.MIND_VISION) && Random.Float() < 0.01f*pointsInTalent(Talent.MIND_VISION)) {
 				Buff.affect(this, MindVision.class, 1f);
 			}
 
-			BowMasterSkill.move();
+			BowMasterSkill.onMove(this);
 
 			if (subClass == HeroSubClass.JUGGLER) Juggling.onMove();
 

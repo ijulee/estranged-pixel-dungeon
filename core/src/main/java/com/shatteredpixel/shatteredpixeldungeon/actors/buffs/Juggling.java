@@ -13,7 +13,6 @@ import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.bow.SpiritBow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.bow.BowWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
-import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.CellSelector;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
@@ -233,7 +232,7 @@ public class Juggling extends Buff implements ActionIndicator.Action {
         if (Dungeon.hero.subClass == HeroSubClass.JUGGLER && Dungeon.bullet > 1 && Dungeon.hero.hasTalent(Talent.HABITUAL_HAND)) {
             for (int i = 0; i < Dungeon.hero.pointsInTalent(Talent.HABITUAL_HAND); i++) {
                 if (Dungeon.bullet <= 0) break;
-                BowWeapon.Arrow arrow = getBow().knockArrow();
+                BowWeapon.Arrow arrow = getBow().getMissile();
                 Buff.affect(Dungeon.hero, Juggling.class).juggle(arrow, false);
             }
             Item.updateQuickslot();
@@ -252,7 +251,7 @@ public class Juggling extends Buff implements ActionIndicator.Action {
         if (Dungeon.bullet >= 1 &&
                 Random.Float() < 0.01f*Dungeon.hero.pointsInTalent(Talent.TOUR_PERFORMANCE)) {
 
-            BowWeapon.Arrow arrow = getBow().knockArrow();
+            BowWeapon.Arrow arrow = getBow().getMissile();
             Buff.affect(Dungeon.hero, Juggling.class).juggle(arrow, false);
             Item.updateQuickslot();
         }

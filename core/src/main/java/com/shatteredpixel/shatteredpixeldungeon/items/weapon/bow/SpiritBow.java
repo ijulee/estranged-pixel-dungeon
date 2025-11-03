@@ -303,7 +303,7 @@ public class SpiritBow extends Weapon {
 		return new SpiritArrow();
 	}
 	
-	public class SpiritArrow extends DisposableMissileWeapon {
+	public class SpiritArrow extends MissileWeapon {
 		
 		{
 			image = ItemSpriteSheet.SPIRIT_ARROW;

@@ -5,11 +5,11 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 public class SR extends Gun {
 
     {
-        max_round = 2;
-        round = max_round;
-        reload_time = 3f;
-        shootingAccuracy = 2f;
-        adjacentShootingAccuracy = 0.3f;
+        maxRounds = 2;
+        rounds = maxRounds;
+        reloadTime = 3f;
+        shootingAcc = 2f;
+        adjShootingAcc = 0.3f;
     }
 
     @Override
@@ -19,7 +19,7 @@ public class SR extends Gun {
     }
 
     @Override
-    public Bullet knockBullet(){
+    public Bullet getMissile(){
         return new SRBullet();
     }
 

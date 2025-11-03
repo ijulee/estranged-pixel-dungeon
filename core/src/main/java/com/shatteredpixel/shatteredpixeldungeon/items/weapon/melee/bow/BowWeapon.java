@@ -1,7 +1,5 @@
 package com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.bow;
 
-import static com.shatteredpixel.shatteredpixeldungeon.Dungeon.hero;
-
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
@@ -11,26 +9,19 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.BowMasterSkill;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.CountCooldownBuff;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.GreaterHaste;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.SharpShooterBuff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Vertigo;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.items.ArrowBag;
 import com.shatteredpixel.shatteredpixeldungeon.items.ArrowItem;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfSharpshooting;
-import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.ShardOfOblivion;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfBlastWave;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.bow.SpiritBow;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.DisposableMissileWeapon;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.GunWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
-import com.shatteredpixel.shatteredpixeldungeon.scenes.CellSelector;
-import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
@@ -39,63 +30,26 @@ import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.Random;
 
-import java.util.ArrayList;
-
 // TODO allow ghost to shoot bows when equipped (this will be a nightmare)
-public class BowWeapon extends MeleeWeapon {
-
-    public static final String AC_SHOOT		= "SHOOT";
-
-    {
-        defaultAction = AC_SHOOT;
-        usesTargeting = true;
-    }
+public class BowWeapon extends GunWeapon {
 
     private static final int MAX_SHOTS = 3;
 
     @Override
-    public ArrayList<String> actions(Hero hero) {
-        ArrayList<String> actions = super.actions(hero);
-        if (isEquipped( hero )) {
-            actions.add(AC_SHOOT);
-        }
-        return actions;
+    public boolean canShoot() {
+        if (isEquipped(Dungeon.hero))
+            return Dungeon.bullet >= 1;
+        else
+            return true;
     }
 
     @Override
-    public void execute(Hero hero, String action) {
-        super.execute(hero, action);
-
-        if (action.equals(AC_SHOOT)) {
-            if (!isEquipped( hero )) {
-                usesTargeting = false;
-                if (hero.hasTalent(Talent.SWIFT_EQUIP)){
-                    if (hero.buff(Talent.SwiftEquipCooldown.class) == null
-                            || hero.buff(Talent.SwiftEquipCooldown.class).hasSecondUse()){
-                        execute(hero, AC_EQUIP);
-                    } else if (hero.heroClass == HeroClass.DUELIST) {
-                        GLog.w(Messages.get(this, "ability_need_equip"));
-                    }
-                } else if (hero.heroClass == HeroClass.DUELIST) {
-                    GLog.w(Messages.get(this, "ability_need_equip"));
-                }  else {
-                    GLog.w(Messages.get(this, "not_equipped"));
-                }
-            } else {
-                if (Dungeon.bullet <= 0) {
-                    usesTargeting = false;
-                    GLog.w(Messages.get(this, "no_arrow"));
-                } else {
-                    usesTargeting = true;
-                    curUser = hero;
-                    curItem = this;
-                    GameScene.selectCell(shooter);
-                }
-            }
-        }
+    public void noAmmoAction(Hero hero) {
+        GLog.w(Messages.get(this, "no_ammo"));
     }
 
-    protected void duelistAbility( Hero hero, Integer target ){
+    @Override
+    protected void duelistAbility(Hero hero, Integer target ){
         if (hero.buff(PenetrationShotBuff.class) != null) {
             GLog.w(Messages.get(this, "already_used"));
             return;
@@ -114,8 +68,8 @@ public class BowWeapon extends MeleeWeapon {
     @Override
     public String abilityInfo() {
         int lvl = levelKnown ? buffedLvl() : 0;
-        int min = arrowMin(lvl) + lvl + Math.round(arrowMin(lvl)*(7-tier())*0.1f);
-        int max = arrowMax(lvl) + lvl + Math.round(arrowMax(lvl)*(7-tier())*0.1f);
+        int min = missileMin(lvl) + lvl + Math.round(missileMin(lvl)*(7-tier())*0.1f);
+        int max = missileMax(lvl) + lvl + Math.round(missileMax(lvl)*(7-tier())*0.1f);
         if (levelKnown){
             return Messages.get(this, "ability_desc", augment.damageFactor(min), augment.damageFactor(max));
         } else {
@@ -125,46 +79,13 @@ public class BowWeapon extends MeleeWeapon {
 
     @Override
     public int max(int lvl) {
-        return 2+tier()
-                +lvl;
+        return 2 + tier() + lvl;
     }
 
-    public int arrowMin(int lvl) {
-        if (hero != null) {
-            return tier() +
-                    lvl +
-                    RingOfSharpshooting.levelDamageBonus(hero);
-        } else {
-            return tier() +
-                    lvl;
-        }
-
-    }
-
-    public int arrowMin() {
-        return arrowMin(this.buffedLvl());
-    }
-
-    public int arrowMax(int lvl) {
-        if (hero != null) {
-            return 4*(tier()+1) +
-                    lvl*(tier()+1) +
-                    RingOfSharpshooting.levelDamageBonus(hero);
-        } else {
-            return 4*(tier()+1) +
-                    lvl*(tier()+1);
-        }
-    }
-
-    public int arrowMax() {
-        return arrowMax(this.buffedLvl());
-    }
-
-    public int arrowDamage() {
-        int damage = Random.NormalIntRange(arrowMin(), arrowMax());
-
-        damage = augment.damageFactor(damage);  //증강에 따라 변화하는 효과
-        return damage;
+    @Override
+    public int missileMax(int lvl) {
+        return (tier() + 1) * (lvl + 4) +
+                (isEquipped(Dungeon.hero) ? RingOfSharpshooting.levelDamageBonus(Dungeon.hero) : 0);
     }
 
     @Override
@@ -173,7 +94,8 @@ public class BowWeapon extends MeleeWeapon {
         if (Dungeon.level.adjacent(attacker.pos, defender.pos) &&
                 ((defender instanceof Mob && ((Mob) defender).surprisedBy(attacker)) ||
                         Random.Float() < 0.4f)) {
-            pushEnemy(this, attacker, defender, 2 + hero.pointsInTalent(Talent.PUSHBACK));
+            pushEnemy(this, attacker, defender,
+                    2 + (isEquipped(Dungeon.hero) ? Dungeon.hero.pointsInTalent(Talent.PUSHBACK) : 0));
         }
 
         return super.proc(attacker, defender, damage);
@@ -192,15 +114,14 @@ public class BowWeapon extends MeleeWeapon {
 
         if (levelKnown) {
             info += "\n\n" + Messages.get(this, "bow_desc",
-                    augment.damageFactor(arrowMin()), augment.damageFactor(arrowMax()));
+                    augment.damageFactor(missileMin()), augment.damageFactor(missileMax()));
         } else {
             info += "\n\n" + Messages.get(this, "bow_typical_desc",
-                    augment.damageFactor(arrowMin(0)), augment.damageFactor(arrowMax(0)));
+                    augment.damageFactor(missileMin(0)), augment.damageFactor(missileMax(0)));
         }
 
-        // TODO add crit rate to arrow desc
-        if (hero != null && isEquipped(hero)) {
-            float arrowCritChance = hero.critChance(new Arrow());
+        if (isEquipped(Dungeon.hero)) {
+            float arrowCritChance = Dungeon.hero.critChance(getMissile());
             if (arrowCritChance > 0) {
                 info += "\n\n" + Messages.get(Weapon.class, "shooting_critchance", 100f * arrowCritChance);
             }
@@ -211,63 +132,30 @@ public class BowWeapon extends MeleeWeapon {
 
     @Override
     public int targetingPos(Hero user, int dst) {
-        return knockArrow().targetingPos(user, dst);
+        return getMissile().targetingPos(user, dst);
     }
 
-    public Arrow knockArrow(){
+    @Override
+    public Arrow getMissile(){
         return new Arrow();
     }
 
-    public class Arrow extends DisposableMissileWeapon {
+    public class Arrow extends GunMissile {
         {
             image = ItemSpriteSheet.NORMAL_ARROW;
 
             hitSound = Assets.Sounds.HIT_ARROW;
 
-            setID = 0;
         }
 
         public boolean dropAmmo = false;
-        public boolean isBurst = false;
 
         private static final String DROP_AMMO = "dropAmmo";
-        private static final String IS_BURST = "isBurst";
 
         public Arrow() {
             super();
 
-            augment = BowWeapon.this.augment;
-            enchantment = BowWeapon.this.enchantment;
-            spawnedForEffect = true;
-
             dropAmmo = (curUser != null) && (Random.Float() <= arrowPinChance());
-
-            identify(false); // identify to prevent cursed arrow message
-        }
-
-        @Override
-        public int defaultQuantity() {
-            return 1;
-        }
-
-        @Override
-        public int min() {
-            return BowWeapon.this.arrowMin();
-        }
-
-        @Override
-        public int min(int lvl) {
-            return BowWeapon.this.arrowMin(lvl);
-        }
-
-        @Override
-        public int max() {
-            return BowWeapon.this.arrowMax();
-        }
-
-        @Override
-        public int max(int lvl) {
-            return BowWeapon.this.arrowMax(lvl);
         }
 
         @Override
@@ -275,7 +163,6 @@ public class BowWeapon extends MeleeWeapon {
             super.storeInBundle(bundle);
 
             bundle.put(DROP_AMMO, dropAmmo);
-            bundle.put(IS_BURST, isBurst);
         }
 
         @Override
@@ -283,70 +170,21 @@ public class BowWeapon extends MeleeWeapon {
             super.restoreFromBundle(bundle);
 
             dropAmmo = bundle.getBoolean(DROP_AMMO);
-            isBurst = bundle.getBoolean(IS_BURST);
-        }
-
-        @Override
-        public int proc(Char attacker, Char defender, int damage) {
-            BowWeapon bow = BowWeapon.this;
-            if (attacker == curUser) {
-                if (curUser.belongings.getItem(ArrowBag.class) != null) {
-                    ArrowBag arrowBag = curUser.belongings.getItem(ArrowBag.class);
-                    damage = arrowBag.proc((Hero) attacker, defender, damage);
-                }
-                if (BowMasterSkill.isFastShot((Hero) attacker)) {
-                    damage = Math.round(damage * BowMasterSkill.fastShotDamageMultiplier((Hero) attacker));
-                }
-                if (attacker.buff(BowMasterSkill.class) != null) {
-                    damage = attacker.buff(BowMasterSkill.class).proc(damage);
-                }
-
-                // track identify progress of source bow
-                if (!bow.levelKnown) {
-                    float uses = Math.min( bow.availableUsesToID,
-                            Talent.itemIDSpeedFactor(curUser, bow) );
-                    bow.availableUsesToID -= uses;
-                    bow.usesLeftToID -= uses;
-                    if (bow.usesLeftToID <= 0) {
-                        if (ShardOfOblivion.passiveIDDisabled()){
-                            if (bow.usesLeftToID > -1){
-                                GLog.p(Messages.get(ShardOfOblivion.class, "identify_ready"), bow.name());
-                            }
-                            bow.setIDReady();
-                        } else {
-                            bow.identify();
-                            GLog.p(Messages.get(Weapon.class, "identify"));
-                            Badges.validateItemLevelAquired(bow);
-                        }
-                    }
-                }
-            }
-
-            return super.proc(attacker, defender, damage);
-        }
-
-        @Override
-        public int level() {
-            return BowWeapon.this.level();
-        }
-
-        @Override
-        public int buffedLvl() {
-            return BowWeapon.this.buffedLvl();
         }
 
         @Override
         public int damageRoll(Char owner) {
             BowWeapon bow = BowWeapon.this;
-            int damage = bow.arrowDamage();
+            int damage = bow.missileDamageRoll(owner);
             if (owner == curUser) {
                 Char enemy = curUser.attackTarget();
                 if (enemy instanceof Mob && ((Mob) enemy).surprisedBy(curUser)) {
-                    //deals 50% toward max to max on surprise, instead of min to max.
-                    int diff = bow.arrowMax() - bow.arrowMin();
+                    // deals increased min dmg on surprise
+                    // min dmg increased to 75%/60%/50%/43%/38% by tier
+                    int diff = bow.missileMax() - bow.missileMin();
                     damage = augment.damageFactor(Hero.heroDamageIntRange(
-                            bow.arrowMin() + Math.round(diff*(3/(3f+tier))), //75%, 60%, 50%, 43%, 38% toward max
-                            bow.arrowMax()));
+                            bow.missileMin() + Math.round(diff*(3/(3f+tier))),
+                            bow.missileMax()));
                 }
 
                 if (curUser.buff(PenetrationShotBuff.class) != null) {
@@ -362,11 +200,29 @@ public class BowWeapon extends MeleeWeapon {
         }
 
         @Override
+        public int proc(Char attacker, Char defender, int damage) {
+            if (attacker == curUser) {
+                if (curUser.belongings.getItem(ArrowBag.class) != null) {
+                    ArrowBag arrowBag = curUser.belongings.getItem(ArrowBag.class);
+                    damage = arrowBag.proc(curUser, defender, damage);
+                }
+                if (BowMasterSkill.isFastShot(curUser)) {
+                    damage = Math.round(damage * BowMasterSkill.fastShotDamageMultiplier(curUser));
+                }
+                if (curUser.buff(BowMasterSkill.class) != null) {
+                    damage = curUser.buff(BowMasterSkill.class).proc(damage);
+                }
+            }
+
+            return super.proc(attacker, defender, damage);
+        }
+
+        @Override
         public float delayFactor(Char owner) {
             if (owner == curUser && BowMasterSkill.isFastShot(curUser)) {
                 return 0;
             }
-            return BowWeapon.this.delayFactor(owner);
+            return super.delayFactor(owner);
         }
 
         @Override
@@ -379,25 +235,7 @@ public class BowWeapon extends MeleeWeapon {
                 return Char.INFINITE_ACCURACY;
             }
 
-            if (isBurst && owner == curUser && curUser.hasTalent(Talent.BULLSEYE)) {
-                switch (curUser.pointsInTalent(Talent.BULLSEYE)) {
-                    case 3:
-                        return Char.INFINITE_ACCURACY;
-                    case 2:
-                        ACC *= 5;
-                        break;
-                    case 1: default:
-                        ACC *= 2;
-                        break;
-                }
-            }
-
             return ACC;
-        }
-
-        @Override
-        public int STRReq() {
-            return BowWeapon.this.STRReq();
         }
 
         private float arrowPinChance() {
@@ -409,7 +247,7 @@ public class BowWeapon extends MeleeWeapon {
                 if (isBurst && curUser.hasTalent(Talent.PERFECT_SHOT)) {
                     chance = Math.max(chance, curUser.pointsInTalent(Talent.PERFECT_SHOT) / 3f);
                 } else if (curUser.hasTalent(Talent.SPECTRE_ARROW)) {
-                    chance += hero.pointsInTalent(Talent.SPECTRE_ARROW) / 6f;
+                    chance += curUser.pointsInTalent(Talent.SPECTRE_ARROW) / 6f;
                 }
                 return chance;
             } else {
@@ -429,14 +267,26 @@ public class BowWeapon extends MeleeWeapon {
                 }
             }
 
+            if (curUser != null) {
+                Dungeon.bullet--;
 
-            SharpShooterBuff.rangedLethal(enemy, isBurst, this);
+                if (curUser.buff(PenetrationShotBuff.class) != null &&
+                        enemy != null && enemy != curUser) {
+                    curUser.buff(PenetrationShotBuff.class).detach();
+                }
 
-            onShoot();
+                if (curUser.subClass != HeroSubClass.BOWMASTER) {
+                    Buff.affect(curUser, BowFatigue.class, BowFatigue.MAX_DURATION);
+                }
+
+                updateQuickslot();
+            }
         }
 
         @Override
         protected void rangedHit(Char enemy, int cell) {
+            super.rangedHit(enemy, cell);
+
             if (dropAmmo) {
                 if (enemy.isAlive()) {
                     Buff.affect(enemy, ArrowAttached.class, ArrowAttached.DURATION);
@@ -445,9 +295,10 @@ public class BowWeapon extends MeleeWeapon {
                 }
             }
 
-            if (isBurst && !enemy.isAlive() && curUser != null &&
-                    curUser.hasTalent(Talent.HURRICANE)) {
-                Buff.affect(curUser, GreaterHaste.class).set(1+curUser.pointsInTalent(Talent.HURRICANE));
+            if (curUser != null) {
+                if (curUser.subClass == HeroSubClass.BOWMASTER) {
+                    Buff.affect(curUser, BowMasterSkill.class).onShoot();
+                }
             }
         }
 
@@ -458,55 +309,11 @@ public class BowWeapon extends MeleeWeapon {
             }
         }
 
-        public void onShoot() {
-            if (curUser != null) {
-                Dungeon.bullet--;
-
-                if (curUser.buff(PenetrationShotBuff.class) != null) {
-                    curUser.buff(PenetrationShotBuff.class).detach();
-                }
-                if (curUser.subClass != HeroSubClass.BOWMASTER) {
-                    Buff.affect(hero, BowFatigue.class, BowFatigue.MAX_DURATION);
-                }
-                if (curUser.subClass == HeroSubClass.BOWMASTER) {
-                    Buff.affect(curUser, BowMasterSkill.class).shoot();
-                }
-
-                updateQuickslot();
-            }
-        }
-
         @Override
         public void throwSound() {
             Sample.INSTANCE.play( Assets.Sounds.ATK_SPIRITBOW, 1, Random.Float(0.87f, 1.15f) );
         }
     }
-
-    private CellSelector.Listener shooter = new CellSelector.Listener() {
-        @Override
-        public void onSelect( Integer target ) {
-            if (target != null) {
-                if (target == curUser.pos &&
-                        curUser.heroClass == HeroClass.DUELIST &&
-                        curUser.buff(Charger.class) != null) {
-
-                    Charger charger = curUser.buff(Charger.class);
-                    if (charger.charges >= 1) {
-                        duelistAbility(curUser, target);
-                    } else {
-                        GLog.w(Messages.get(MeleeWeapon.class, "ability_no_charge"));
-                    }
-
-                } else {
-                    knockArrow().cast(curUser, target);
-                }
-            }
-        }
-        @Override
-        public String prompt() {
-            return Messages.get(SpiritBow.class, "prompt");
-        }
-    };
 
     public static void dropArrow(int cell) {
         Dungeon.level.drop(new ArrowItem(), cell).sprite.drop(cell);
@@ -516,20 +323,21 @@ public class BowWeapon extends MeleeWeapon {
         Dungeon.level.drop((new ArrowItem()).quantity(qty), cell).sprite.drop(cell);
     }
 
-    public static void pushEnemy(Weapon weapon, Char attacker, Char defender, int power) {
+    public static void pushEnemy(Weapon weapon, Char attacker, Char defender, int dist) {
          /* TODO nerf this: prevent knocking into pits. */
 
         //trace a ballistica to our target (which will also extend past them
         Ballistica trajectory = new Ballistica(attacker.pos, defender.pos, Ballistica.STOP_TARGET);
         //trim it to just be the part that goes past them
         trajectory = new Ballistica(trajectory.collisionPos, trajectory.path.get(trajectory.path.size()-1), Ballistica.PROJECTILE);
-        //knock them back along that ballistica
-        WandOfBlastWave.throwChar(defender,
-                trajectory,
-                power,
-                false,
-                false,
-                BowWeapon.class);
+        //knock them back along that ballistica, ensuring they don't fall into a pit
+        if (!defender.flying) {
+            while (dist > trajectory.dist ||
+                    (dist > 0 && Dungeon.level.pit[trajectory.path.get(dist)])) {
+                dist--;
+            }
+        }
+        WandOfBlastWave.throwChar(defender, trajectory, dist, true, false, attacker);
     }
 
     public static class ArrowAttached extends CountCooldownBuff {

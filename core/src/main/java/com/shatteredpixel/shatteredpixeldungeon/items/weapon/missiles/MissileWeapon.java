@@ -370,9 +370,9 @@ abstract public class MissileWeapon extends Weapon {
 			Buff.prolong(curUser, ShardOfOblivion.ThrownUseTracker.class, 50f);
 		}
 
-		SharpShooterBuff.SharpShootingCoolDown.missileHit(attacker);
+		SharpShooterBuff.BurstShotCooldown.onHit(attacker, defender);
 
-		SharpShooterBuff.channel(attacker, defender, damage);
+		SharpShooterBuff.procChanneling(attacker, defender, damage);
 
 		return result;
 	}

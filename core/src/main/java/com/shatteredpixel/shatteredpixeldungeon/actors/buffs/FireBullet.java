@@ -28,15 +28,7 @@ import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.watabou.noosa.Image;
 import com.watabou.utils.Random;
 
-public class FireBullet extends FlavourBuff {
-
-    {
-        type = buffType.POSITIVE;
-        announced = true;
-    }
-
-    public static final float DURATION	= 100f;
-
+public class FireBullet extends ElementalBullet {
     public void proc(Char enemy){
         if (Random.Float() < 0.5f)
             Buff.affect( enemy, Burning.class ).reignite( enemy );
@@ -45,27 +37,7 @@ public class FireBullet extends FlavourBuff {
     }
 
     @Override
-    public int icon() {
-        return BuffIndicator.BULLET;
-    }
-
-    @Override
     public void tintIcon(Image icon) {
         icon.hardlight(1f, 0.2f, 0.2f);
-    }
-
-    @Override
-    public float iconFadePercent() {
-        return Math.max(0, (DURATION - visualcooldown()) / DURATION);
-    }
-
-    @Override
-    public String toString() {
-        return Messages.get(this, "name");
-    }
-
-    @Override
-    public String desc() {
-        return Messages.get(this, "desc", dispTurns());
     }
 }

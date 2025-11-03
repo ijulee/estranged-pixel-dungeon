@@ -1,7 +1,5 @@
 package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 
-import static com.shatteredpixel.shatteredpixeldungeon.Dungeon.hero;
-
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
@@ -10,10 +8,14 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfRecharging;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.ui.ActionIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.ui.HeroIcon;
+import com.watabou.noosa.BitmapText;
 import com.watabou.noosa.Image;
+import com.watabou.noosa.Visual;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.PathFinder;
@@ -24,8 +26,8 @@ public class BowMasterSkill extends Buff implements ActionIndicator.Action {
         type = buffType.NEUTRAL;
     }
 
-    private boolean shoot = false;
-    private boolean moved = false;
+    private boolean justShot = false;
+    private boolean justMoved = false;
     private boolean powerShot = false;
     private int charge = 0;
     private final int MAX_CHARGE = 4;
@@ -51,7 +53,7 @@ public class BowMasterSkill extends Buff implements ActionIndicator.Action {
 
     @Override
     public float iconFadePercent() {
-        return Math.min(1, charge/(float)maxCharge());
+        return Math.min(1, (maxCharge() - charge) / ((float) maxCharge()));
     }
 
     @Override
@@ -59,83 +61,88 @@ public class BowMasterSkill extends Buff implements ActionIndicator.Action {
         return Integer.toString(charge);
     }
 
-    private String descString() {
-        return 2*charge + "+" + Messages.decimalFormat("#", ((float)(Math.pow(dmgMulti(), charge)-1) + (isPowerShot() ? powerShotMulti() : 0))*100) + "%";
-    }
-
     @Override
     public String desc() {
-        return Messages.get(this, "desc", descString());
+        return Messages.get(this, "desc", charge, maxCharge(), 100*dmgMulti(), comboDmgBonus());
     }
 
-    public void shoot() {
+    public void onShoot() {
         if (isPowerShot()) {
-            this.moved = false;
-            this.shoot = false;
+            this.justMoved = false;
+            this.justShot = false;
             this.powerShot = false;
-            return;
+            this.charge = 0;
+        } else {
+            this.justMoved = false;
+            this.justShot = true;
+            this.charge = Math.min(maxCharge(), charge+1);
         }
 
-        this.moved = false;
-        this.shoot = true;
-        this.charge = Math.min(maxCharge(), charge+1);
-        if (charge >= MAX_CHARGE) {
-            ActionIndicator.setAction(this);
-        }
+        ActionIndicator.setAction(this);
     }
 
-    public void moveCharge(int charge) {
-        if (isPowerShot()) {
-            this.moved = true;
-            this.shoot = true;
-            return;
-        }
-        if (charge < 0) {
-            if (Random.Float() < 0.8f) {
-                return;
-            } else {
-                charge = 0;
+    public static void onMove(Hero hero) {
+        BowMasterSkill bm = hero.buff(BowMasterSkill.class);
+
+        if (bm != null && !bm.justMoved) {
+            switch (hero.pointsInTalent(Talent.MOVING_FOCUS)) {
+                case 3:
+                    // behave as if the hero has made a shot
+                    if (!bm.isPowerShot()) {
+                        bm.onShoot();
+                    }
+                    break;
+                case 2:
+                    // do nothing
+                    break;
+                case 1:
+                    if (Random.Float() < 0.8f) {
+                        // do nothing
+                    } else {
+                        bm.detach();
+                    }
+                    break;
+                case 0:
+                default:
+                    bm.detach();
+                    break;
             }
+            bm.justShot = false;
+            bm.justMoved = true;
+        } else {
+            Buff.detach(hero, BowMasterSkill.class);
         }
-
-        this.moved = true;
-        this.shoot = true;
-        this.charge = Math.min(maxCharge(), this.charge+charge);
-
-        if (charge >= MAX_CHARGE) {
-            ActionIndicator.setAction(this);
-        }
-    }
-
-    public boolean isMoved() {
-        return this.moved;
     }
 
     public boolean isPowerShot() {
         return this.powerShot;
     }
 
-    public float powerShotMulti() {
-        return 1f;
+    private float powerShotMulti() {
+        return (isPowerShot()) ? 1f : 0f;
+    }
+
+    private float comboMulti() {
+        return (float) Math.pow(1.05f, charge);
+    }
+    private int comboDmgBonus() {
+        return 2 * charge;
     }
 
     private float dmgMulti() {
-        return 1.05f;
+        return comboMulti() + powerShotMulti();
     }
 
     public int proc(int damage) {
-        float result = damage * (float)Math.pow(dmgMulti(), charge) + 2*charge;
-        if (isPowerShot()) {
-            result += damage * powerShotMulti();
-        }
+        float result = damage * dmgMulti() + comboDmgBonus();
         return Math.round(result);
     }
 
     @Override
     public boolean act() {
-        if (!shoot) detach();
-        spend(TICK);
-        shoot = false;
+        if (!justShot) detach();
+        spend(target.cooldown()); // hopefully acts after next hero action?
+        justShot = false;
 
         return true;
     }
@@ -145,7 +152,6 @@ public class BowMasterSkill extends Buff implements ActionIndicator.Action {
         ActionIndicator.clearAction();
         super.detach();
     }
-
     private static final String CHARGE   = "charge";
     private static final String MOVED   = "moved";
     private static final String SHOOT   = "shoot";
@@ -157,8 +163,8 @@ public class BowMasterSkill extends Buff implements ActionIndicator.Action {
         super.storeInBundle(bundle);
 
         bundle.put(CHARGE, charge);
-        bundle.put(MOVED, moved);
-        bundle.put(SHOOT, shoot);
+        bundle.put(MOVED, justMoved);
+        bundle.put(SHOOT, justShot);
         bundle.put(POWER_SHOT, powerShot);
     }
 
@@ -167,13 +173,11 @@ public class BowMasterSkill extends Buff implements ActionIndicator.Action {
         super.restoreFromBundle(bundle);
 
         charge = bundle.getInt(CHARGE);
-        moved = bundle.getBoolean(MOVED);
-        shoot = bundle.getBoolean(SHOOT);
+        justMoved = bundle.getBoolean(MOVED);
+        justShot = bundle.getBoolean(SHOOT);
         powerShot = bundle.getBoolean(POWER_SHOT);
 
-        if (charge >= MAX_CHARGE && !isPowerShot()) {
-            ActionIndicator.setAction(this);
-        }
+        ActionIndicator.setAction(this);
     }
 
     public static boolean isFastShot(Hero hero) {
@@ -185,6 +189,7 @@ public class BowMasterSkill extends Buff implements ActionIndicator.Action {
         else return 0.2f * hero.pointsInTalent(Talent.FASTSHOT);
     }
 
+    // FIXME this doesn't seem to belong here
     public static float speedBoost(Hero hero){
         if (!hero.hasTalent(Talent.UNENCUMBERED_STEP)){
             return 1;
@@ -226,23 +231,35 @@ public class BowMasterSkill extends Buff implements ActionIndicator.Action {
     }
 
     @Override
+    public Visual secondaryVisual() {
+        BitmapText txt = new BitmapText(PixelScene.pixelFont);
+        txt.text(String.format("%d", charge));
+        if (charge >= MAX_CHARGE) {
+            txt.hardlight(CharSprite.POSITIVE);
+        }
+        txt.measure();
+        return txt;
+    }
+
+    @Override
     public int indicatorColor() {
-        return 0xCC0022;
+        if (isPowerShot()) {
+            return 0xEE8091;
+        } else if (charge >= MAX_CHARGE) {
+            return 0xCC0022;
+        } else {
+            return 0x808080;
+        }
     }
 
     @Override
     public void doAction() {
-        ScrollOfRecharging.charge(Dungeon.hero);
-        powerShot = true;
-        BuffIndicator.refreshHero();
-        Dungeon.hero.sprite.operate(Dungeon.hero.pos);
-        Sample.INSTANCE.play(Assets.Sounds.CHARGEUP);
-        ActionIndicator.clearAction();
-    }
-
-    public static void move() {
-        if (hero.hasTalent(Talent.MOVING_FOCUS) && hero.buff(BowMasterSkill.class) != null && !hero.buff(BowMasterSkill.class).isMoved()) {
-            hero.buff(BowMasterSkill.class).moveCharge(Math.max(-1, hero.pointsInTalent(Talent.MOVING_FOCUS)-2));
+        if (charge >= MAX_CHARGE) {
+            ScrollOfRecharging.charge(Dungeon.hero);
+            powerShot = true;
+            BuffIndicator.refreshHero();
+            Dungeon.hero.sprite.operate(Dungeon.hero.pos);
+            Sample.INSTANCE.play(Assets.Sounds.CHARGEUP);
         }
     }
 }
