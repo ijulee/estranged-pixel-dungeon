@@ -254,7 +254,7 @@ public class BowMasterSkill extends Buff implements ActionIndicator.Action {
 
     @Override
     public void doAction() {
-        if (charge >= MAX_CHARGE) {
+        if (charge >= MAX_CHARGE && !isPowerShot()) {
             ScrollOfRecharging.charge(Dungeon.hero);
             powerShot = true;
             BuffIndicator.refreshHero();

@@ -60,14 +60,38 @@ import com.watabou.utils.RectF;
 import java.util.ArrayList;
 
 public class ChangesScene extends PixelScene {
-	
-	public static int changesSelected = 0;
 
+	public static enum MOD_VERS {
+		SPD,
+		RPD,
+		EPD;
+	}
+	public static enum CHANGE_ID {
+		V3_X(MOD_VERS.SPD),
+		V2_X(MOD_VERS.SPD),
+		V1_X(MOD_VERS.SPD),
+		V0_9_X(MOD_VERS.SPD),
+		V0_8_X(MOD_VERS.SPD),
+		V0_7_X(MOD_VERS.SPD),
+		V0_6_X(MOD_VERS.SPD),
+		V_OLD(MOD_VERS.SPD),
+		RPD_MSG(MOD_VERS.RPD),
+		EPD_V0_X(MOD_VERS.EPD);
+
+		public final MOD_VERS mod;
+		CHANGE_ID(MOD_VERS mod){
+			this.mod = mod;
+		}
+	}
+
+	public static final CHANGE_ID LATEST = CHANGE_ID.EPD_V0_X;
+	public static CHANGE_ID changesSelected = LATEST;
 	private NinePatch rightPanel;
 	private ScrollPane rightScroll;
 	private IconTitle changeTitle;
+
 	private RenderedTextBlock changeBody;
-	
+
 	@Override
 	public void create() {
 		super.create();
@@ -101,20 +125,70 @@ public class ChangesScene extends PixelScene {
 		btnExit.setPos( insets.left + w - btnExit.width(), insets.top );
 		add( btnExit );
 
+		final int modBtnSize = 19;
+
+		StyledButton spd = new StyledButton(
+				(changesSelected.mod==MOD_VERS.SPD) ? Chrome.Type.RED_BUTTON : Chrome.Type.GREY_BUTTON,
+				"", 8) {
+			@Override
+			protected void onClick() {
+				super.onClick();
+				if (changesSelected != CHANGE_ID.V3_X) {
+					changesSelected = CHANGE_ID.V3_X;
+					ShatteredPixelDungeon.seamlessResetScene();
+				}
+			}
+		};
+		spd.icon(Icons.SHPX.get());
+		spd.setRect(insets.left + w/2 + (modBtnSize+1)*0.5f, title.bottom(), modBtnSize, modBtnSize);
+		add(spd);
+
+		StyledButton rpd = new StyledButton(
+				(changesSelected.mod==MOD_VERS.RPD) ? Chrome.Type.RED_BUTTON : Chrome.Type.GREY_BUTTON,
+				"", 8) {
+			@Override
+			protected void onClick() {
+				super.onClick();
+				if (changesSelected != CHANGE_ID.RPD_MSG) {
+					changesSelected = CHANGE_ID.RPD_MSG;
+					ShatteredPixelDungeon.seamlessResetScene();
+				}
+			}
+		};
+		rpd.icon(Icons.ARRANGED.get());
+		rpd.setRect(insets.left + w/2 - (modBtnSize+1)*0.5f, title.bottom(), modBtnSize, modBtnSize);
+		add(rpd);
+
+		StyledButton epd = new StyledButton(
+				(changesSelected.mod==MOD_VERS.EPD) ? Chrome.Type.RED_BUTTON : Chrome.Type.GREY_BUTTON,
+				"", 8) {
+			@Override
+			protected void onClick() {
+				super.onClick();
+				if (changesSelected != CHANGE_ID.EPD_V0_X) {
+					changesSelected = CHANGE_ID.EPD_V0_X;
+					ShatteredPixelDungeon.seamlessResetScene();
+				}
+			}
+		};
+		epd.icon(Icons.ESTRANGED.get());
+		epd.setRect(insets.left + w/2 - (modBtnSize+1)*1.5f, title.bottom(), modBtnSize, modBtnSize);
+		add(epd);
+
 		NinePatch panel = Chrome.get(Chrome.Type.TOAST);
 
 		int pw = 135 + panel.marginLeft() + panel.marginRight() - 2;
-		int ph = h - 36;
+		int ph = h - 36 - (modBtnSize+1) + 5;
 
 		if (h >= PixelScene.MIN_HEIGHT_FULL && w >= 300) {
 			panel.size( pw, ph );
 			panel.x = insets.left + (w - pw) / 2f - pw/2 - 1;
-			panel.y = insets.top + 20;
+			panel.y = insets.top + 20 + (modBtnSize+1);
 
 			rightPanel = Chrome.get(Chrome.Type.TOAST);
 			rightPanel.size( pw, ph );
 			rightPanel.x = (w - pw) / 2f + pw/2 + 1;
-			rightPanel.y = 20;
+			rightPanel.y = 20 + (modBtnSize+1);
 			add(rightPanel);
 
 			rightScroll = new ScrollPane(new Component());
@@ -141,7 +215,7 @@ public class ChangesScene extends PixelScene {
 		} else {
 			panel.size( pw, ph );
 			panel.x = insets.left + (w - pw) / 2f;
-			panel.y = insets.top + 20;
+			panel.y = insets.top + 20 + (modBtnSize+1);
 		}
 		align( panel );
 		add( panel );
@@ -155,34 +229,39 @@ public class ChangesScene extends PixelScene {
 		}
 		
 		switch (changesSelected){
-			case 0: default:
+			case V3_X: default:
 				v3_X_Changes.addAllChanges(changeInfos);
 				break;
-			case 1:
+			case V2_X:
 				v2_X_Changes.addAllChanges(changeInfos);
 				break;
-			case 2:
+			case V1_X:
 				v1_X_Changes.addAllChanges(changeInfos);
 				break;
-			case 3:
+			case V0_9_X:
 				v0_9_X_Changes.addAllChanges(changeInfos);
 				break;
-			case 4:
+			case V0_8_X:
 				v0_8_X_Changes.addAllChanges(changeInfos);
 				break;
-			case 5:
+			case V0_7_X:
 				v0_7_X_Changes.addAllChanges(changeInfos);
 				break;
-			case 6:
+			case V0_6_X:
 				v0_6_X_Changes.addAllChanges(changeInfos);
 				break;
-			case 7:
+			case V_OLD:
 				v0_5_X_Changes.addAllChanges(changeInfos);
 				v0_4_X_Changes.addAllChanges(changeInfos);
 				v0_3_X_Changes.addAllChanges(changeInfos);
 				v0_2_X_Changes.addAllChanges(changeInfos);
 				v0_1_X_Changes.addAllChanges(changeInfos);
 				break;
+			case RPD_MSG:
+				RPD_Changes.addAllChanges(changeInfos);
+				break;
+			case EPD_V0_X:
+				EPD_v0_X_Changes.addAllChanges(changeInfos);
 		}
 
 		ScrollPane list = new ScrollPane( new Component() ){
@@ -237,118 +316,125 @@ public class ChangesScene extends PixelScene {
 				panel.innerHeight() + 2);
 		list.scrollTo(0, 0);
 
-		StyledButton btn3_X = new StyledButton(Chrome.Type.GREY_BUTTON_TR, "3.X", 8){
-			@Override
-			protected void onClick() {
-				super.onClick();
-				if (changesSelected != 0) {
-					changesSelected = 0;
-					ShatteredPixelDungeon.seamlessResetScene();
-				}
-			}
-		};
-		if (changesSelected != 0) btn3_X.textColor( 0xBBBBBB );
-		btn3_X.setRect(list.left()-4f, list.bottom(), 19, changesSelected == 0 ? 19 : 15);
-		addToBack(btn3_X);
+		if (changesSelected.mod == MOD_VERS.SPD) {
 
-		StyledButton btn2_X = new StyledButton(Chrome.Type.GREY_BUTTON_TR, "2.X", 8){
-			@Override
-			protected void onClick() {
-				super.onClick();
-				if (changesSelected != 1) {
-					changesSelected = 1;
-					ShatteredPixelDungeon.seamlessResetScene();
-				}
-			}
-		};
-		if (changesSelected != 1) btn2_X.textColor( 0xBBBBBB );
-		btn2_X.setRect(btn3_X.right()-2, list.bottom(), 19, changesSelected == 1 ? 19 : 15);
-		addToBack(btn2_X);
 
-		StyledButton btn1_X = new StyledButton(Chrome.Type.GREY_BUTTON_TR, "1.X", 8){
-			@Override
-			protected void onClick() {
-				super.onClick();
-				if (changesSelected != 2) {
-					changesSelected = 2;
-					ShatteredPixelDungeon.seamlessResetScene();
+			StyledButton btn3_X = new StyledButton(Chrome.Type.GREY_BUTTON_TR, "3.X", 8) {
+				@Override
+				protected void onClick() {
+					super.onClick();
+					if (changesSelected != CHANGE_ID.V3_X) {
+						changesSelected = CHANGE_ID.V3_X;
+						ShatteredPixelDungeon.seamlessResetScene();
+					}
 				}
-			}
-		};
-		if (changesSelected != 2) btn1_X.textColor( 0xBBBBBB );
-		btn1_X.setRect(btn2_X.right()-2, list.bottom(), 19, changesSelected == 2 ? 19 : 15);
-		addToBack(btn1_X);
+			};
+			if (changesSelected != CHANGE_ID.V3_X) btn3_X.textColor(0xBBBBBB);
+			btn3_X.setRect(list.left() - 4f, list.bottom(), 19, changesSelected == CHANGE_ID.V3_X ? 19 : 15);
+			addToBack(btn3_X);
 
-		StyledButton btn0_9 = new StyledButton(Chrome.Type.GREY_BUTTON_TR, "0.9", 8){
-			@Override
-			protected void onClick() {
-				super.onClick();
-				if (changesSelected != 3) {
-					changesSelected = 3;
-					ShatteredPixelDungeon.seamlessResetScene();
+			StyledButton btn2_X = new StyledButton(Chrome.Type.GREY_BUTTON_TR, "2.X", 8) {
+				@Override
+				protected void onClick() {
+					super.onClick();
+					if (changesSelected != CHANGE_ID.V2_X) {
+						changesSelected = CHANGE_ID.V2_X;
+						ShatteredPixelDungeon.seamlessResetScene();
+					}
 				}
-			}
-		};
-		if (changesSelected != 3) btn0_9.textColor( 0xBBBBBB );
-		btn0_9.setRect(btn1_X.right()-2, list.bottom(), 19, changesSelected == 3 ? 19 : 15);
-		addToBack(btn0_9);
+			};
+			if (changesSelected != CHANGE_ID.V2_X) btn2_X.textColor(0xBBBBBB);
+			btn2_X.setRect(btn3_X.right() - 2, list.bottom(), 19, changesSelected == CHANGE_ID.V2_X ? 19 : 15);
+			addToBack(btn2_X);
 
-		StyledButton btn0_8 = new StyledButton(Chrome.Type.GREY_BUTTON_TR, "0.8", 8){
-			@Override
-			protected void onClick() {
-				super.onClick();
-				if (changesSelected != 4) {
-					changesSelected = 4;
-					ShatteredPixelDungeon.seamlessResetScene();
+			StyledButton btn1_X = new StyledButton(Chrome.Type.GREY_BUTTON_TR, "1.X", 8) {
+				@Override
+				protected void onClick() {
+					super.onClick();
+					if (changesSelected != CHANGE_ID.V1_X) {
+						changesSelected = CHANGE_ID.V1_X;
+						ShatteredPixelDungeon.seamlessResetScene();
+					}
 				}
-			}
-		};
-		if (changesSelected != 4) btn0_8.textColor( 0xBBBBBB );
-		btn0_8.setRect(btn0_9.right()-2, list.bottom(), 19, changesSelected == 4 ? 19 : 15);
-		addToBack(btn0_8);
-		
-		StyledButton btn0_7 = new StyledButton(Chrome.Type.GREY_BUTTON_TR, "0.7", 8){
-			@Override
-			protected void onClick() {
-				super.onClick();
-				if (changesSelected != 5) {
-					changesSelected = 5;
-					ShatteredPixelDungeon.seamlessResetScene();
-				}
-			}
-		};
-		if (changesSelected != 5) btn0_7.textColor( 0xBBBBBB );
-		btn0_7.setRect(btn0_8.right()-2, btn0_8.top(), 19, changesSelected == 5 ? 19 : 15);
-		addToBack(btn0_7);
-		
-		StyledButton btn0_6 = new StyledButton(Chrome.Type.GREY_BUTTON_TR, "0.6", 8){
-			@Override
-			protected void onClick() {
-				super.onClick();
-				if (changesSelected != 6) {
-					changesSelected = 6;
-					ShatteredPixelDungeon.seamlessResetScene();
-				}
-			}
-		};
-		if (changesSelected != 6) btn0_6.textColor( 0xBBBBBB );
-		btn0_6.setRect(btn0_7.right()-2, btn0_8.top(), 19, changesSelected == 6 ? 19 : 15);
-		addToBack(btn0_6);
-		
-		StyledButton btnOld = new StyledButton(Chrome.Type.GREY_BUTTON_TR, "0.5-", 8){
-			@Override
-			protected void onClick() {
-				super.onClick();
-				if (changesSelected != 7) {
-					changesSelected = 7;
-					ShatteredPixelDungeon.seamlessResetScene();
-				}
-			}
-		};
-		if (changesSelected != 7) btnOld.textColor( 0xBBBBBB );
-		btnOld.setRect(btn0_6.right()-2, btn0_8.top(), 22, changesSelected == 7 ? 19 : 15);
-		addToBack(btnOld);
+			};
+			if (changesSelected != CHANGE_ID.V1_X) btn1_X.textColor(0xBBBBBB);
+			btn1_X.setRect(btn2_X.right() - 2, list.bottom(), 19, changesSelected == CHANGE_ID.V1_X ? 19 : 15);
+			addToBack(btn1_X);
 
+			StyledButton btn0_9 = new StyledButton(Chrome.Type.GREY_BUTTON_TR, "0.9", 8) {
+				@Override
+				protected void onClick() {
+					super.onClick();
+					if (changesSelected != CHANGE_ID.V0_9_X) {
+						changesSelected = CHANGE_ID.V0_9_X;
+						ShatteredPixelDungeon.seamlessResetScene();
+					}
+				}
+			};
+			if (changesSelected != CHANGE_ID.V0_9_X) btn0_9.textColor(0xBBBBBB);
+			btn0_9.setRect(btn1_X.right() - 2, list.bottom(), 19, changesSelected == CHANGE_ID.V0_9_X ? 19 : 15);
+			addToBack(btn0_9);
+
+			StyledButton btn0_8 = new StyledButton(Chrome.Type.GREY_BUTTON_TR, "0.8", 8) {
+				@Override
+				protected void onClick() {
+					super.onClick();
+					if (changesSelected != CHANGE_ID.V0_8_X) {
+						changesSelected = CHANGE_ID.V0_8_X;
+						ShatteredPixelDungeon.seamlessResetScene();
+					}
+				}
+			};
+			if (changesSelected != CHANGE_ID.V0_8_X) btn0_8.textColor(0xBBBBBB);
+			btn0_8.setRect(btn0_9.right() - 2, list.bottom(), 19, changesSelected == CHANGE_ID.V0_8_X ? 19 : 15);
+			addToBack(btn0_8);
+
+			StyledButton btn0_7 = new StyledButton(Chrome.Type.GREY_BUTTON_TR, "0.7", 8) {
+				@Override
+				protected void onClick() {
+					super.onClick();
+					if (changesSelected != CHANGE_ID.V0_7_X) {
+						changesSelected = CHANGE_ID.V0_7_X;
+						ShatteredPixelDungeon.seamlessResetScene();
+					}
+				}
+			};
+			if (changesSelected != CHANGE_ID.V0_7_X) btn0_7.textColor(0xBBBBBB);
+			btn0_7.setRect(btn0_8.right() - 2, btn0_8.top(), 19, changesSelected == CHANGE_ID.V0_7_X ? 19 : 15);
+			addToBack(btn0_7);
+
+			StyledButton btn0_6 = new StyledButton(Chrome.Type.GREY_BUTTON_TR, "0.6", 8) {
+				@Override
+				protected void onClick() {
+					super.onClick();
+					if (changesSelected != CHANGE_ID.V0_6_X) {
+						changesSelected = CHANGE_ID.V0_6_X;
+						ShatteredPixelDungeon.seamlessResetScene();
+					}
+				}
+			};
+			if (changesSelected != CHANGE_ID.V0_6_X) btn0_6.textColor(0xBBBBBB);
+			btn0_6.setRect(btn0_7.right() - 2, btn0_8.top(), 19, changesSelected == CHANGE_ID.V0_6_X ? 19 : 15);
+			addToBack(btn0_6);
+
+			StyledButton btnOld = new StyledButton(Chrome.Type.GREY_BUTTON_TR, "0.5-", 8) {
+				@Override
+				protected void onClick() {
+					super.onClick();
+					if (changesSelected != CHANGE_ID.V_OLD) {
+						changesSelected = CHANGE_ID.V_OLD;
+						ShatteredPixelDungeon.seamlessResetScene();
+					}
+				}
+			};
+			if (changesSelected != CHANGE_ID.V_OLD) btnOld.textColor(0xBBBBBB);
+			btnOld.setRect(btn0_6.right() - 2, btn0_8.top(), 22, changesSelected == CHANGE_ID.V_OLD ? 19 : 15);
+			addToBack(btnOld);
+		} else if (changesSelected.mod == MOD_VERS.RPD) {
+			// no tabs
+		} else { // changesSelected.mod == MOD_VERS.EPD
+			// currently no tabs
+		}
 		addToBack( BG );
 
 		fadeIn();

@@ -47,6 +47,7 @@ public enum Icons {
 	GITHUB,
 	HEART,
 	JOURNAL,
+	ESTRANGED,
 
 	//grey icons, mainly used for buttons, spacing for 16x16
 	EXIT,
@@ -190,6 +191,9 @@ public enum Icons {
 				break;
 			case JOURNAL:
 				icon.frame( icon.texture.uvRectBySize( 136, 0, 17, 15 ) );
+				break;
+			case ESTRANGED:
+				icon.frame( icon.texture.uvRectBySize( 48, 144, 16, 16 ) );
 				break;
 
 			case EXIT:

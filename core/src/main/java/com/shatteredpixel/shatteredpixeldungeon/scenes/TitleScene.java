@@ -440,7 +440,7 @@ public class TitleScene extends PixelScene {
 				});
 
 			} else {
-				ChangesScene.changesSelected = 0;
+				ChangesScene.changesSelected = ChangesScene.LATEST;
 				ShatteredPixelDungeon.switchNoFade( ChangesScene.class );
 			}
 		}

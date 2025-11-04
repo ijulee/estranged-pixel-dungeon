@@ -21,10 +21,12 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.scenes;
 
+import com.shatteredpixel.shatteredpixeldungeon.Chrome;
 import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Flare;
 import com.shatteredpixel.shatteredpixeldungeon.ui.ExitButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Icons;
+import com.shatteredpixel.shatteredpixeldungeon.ui.StyledButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.TitleBackground;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RenderedTextBlock;
 import com.shatteredpixel.shatteredpixeldungeon.ui.ScrollPane;
@@ -42,6 +44,8 @@ import com.watabou.utils.PointF;
 import java.util.ArrayList;
 
 public class AboutScene extends PixelScene {
+
+	public static ChangesScene.MOD_VERS selectedVersion = ChangesScene.MOD_VERS.EPD;
 
 	@Override
 	public void create() {
@@ -67,258 +71,330 @@ public class AboutScene extends PixelScene {
 		Component content = list.content();
 		content.clear();
 
-		//*** ReArranged Pixel Dungeon Credits ***
-		CreditsBlock arranged = new CreditsBlock(true, Window.WHITE,
-				"Re-ARranged Pixel Dungeon",
-				Icons.ARRANGED.get(),
-				"Developed by: _Cocoa_\nBased on Shattered Pixel Dungeon's open source",
-				"github repository",
-				"https://github.com/Hoto-Mocha/Re-ARranged-Pixel-Dungeon");
+		final int modBtnSize = 19;
+		final int padding = 5;
 
-		if (landscape()){
-			arranged.setRect((w - fullWidth)/2f - 6, insets.top + 10, 120, 0);
-		} else {
-			arranged.setRect((w - fullWidth)/2f, insets.top + 6, 120, 0);
+		StyledButton spd = new StyledButton(
+				(selectedVersion == ChangesScene.MOD_VERS.SPD) ? Chrome.Type.RED_BUTTON : Chrome.Type.GREY_BUTTON,
+				"", 8) {
+			@Override
+			protected void onClick() {
+				super.onClick();
+				if (selectedVersion != ChangesScene.MOD_VERS.SPD) {
+					selectedVersion = ChangesScene.MOD_VERS.SPD;
+					ShatteredPixelDungeon.seamlessResetScene();
+				}
+			}
+		};
+		spd.icon(Icons.SHPX.get());
+		spd.setRect(insets.left + w/2 + (modBtnSize+1)*0.5f, insets.top+padding, modBtnSize, modBtnSize);
+		add(spd);
+
+		StyledButton rpd = new StyledButton(
+				(selectedVersion == ChangesScene.MOD_VERS.RPD) ? Chrome.Type.RED_BUTTON : Chrome.Type.GREY_BUTTON,
+				"", 8) {
+			@Override
+			protected void onClick() {
+				super.onClick();
+				if (selectedVersion != ChangesScene.MOD_VERS.RPD) {
+					selectedVersion = ChangesScene.MOD_VERS.RPD;
+					ShatteredPixelDungeon.seamlessResetScene();
+				}
+			}
+		};
+		rpd.icon(Icons.ARRANGED.get());
+		rpd.setRect(insets.left + w/2 - (modBtnSize+1)*0.5f, insets.top+padding, modBtnSize, modBtnSize);
+		add(rpd);
+
+		StyledButton epd = new StyledButton(
+				(selectedVersion == ChangesScene.MOD_VERS.EPD) ? Chrome.Type.RED_BUTTON : Chrome.Type.GREY_BUTTON,
+				"", 8) {
+			@Override
+			protected void onClick() {
+				super.onClick();
+				if (selectedVersion != ChangesScene.MOD_VERS.EPD) {
+					selectedVersion = ChangesScene.MOD_VERS.EPD;
+					ShatteredPixelDungeon.seamlessResetScene();
+				}
+			}
+		};
+		epd.icon(Icons.ESTRANGED.get());
+		epd.setRect(insets.left + w/2 - (modBtnSize+1)*1.5f, insets.top+padding, modBtnSize, modBtnSize);
+		add(epd);
+
+		if (selectedVersion == ChangesScene.MOD_VERS.EPD) {
+			CreditsBlock estranged = new CreditsBlock(true, Window.WHITE,
+					"EstRanged Pixel Dungeon",
+					Icons.ESTRANGED.get(),
+					"Developed by: _miaomix_\nBased on Re-Arranged Pixel Dungeon and Shattered Pixel Dungeon's open source",
+					"GitHub repository",
+					"");
+
+			if (landscape()){
+				estranged.setRect((w - fullWidth)/2f - 6, spd.bottom()+5, 120, 0);
+			} else {
+				estranged.setRect((w - fullWidth)/2f, spd.bottom()+5, 120, 0);
+			}
+			content.add(estranged);
+
+			content.setSize( fullWidth, estranged.bottom()+10 + insets.bottom );
+
+		} else if (selectedVersion == ChangesScene.MOD_VERS.RPD) {
+			//*** ReArranged Pixel Dungeon Credits ***
+			CreditsBlock arranged = new CreditsBlock(true, Window.WHITE,
+                    "Re-ARranged Pixel Dungeon",
+                    Icons.ARRANGED.get(),
+                    "Developed by: _Cocoa_\nBased on Shattered Pixel Dungeon's open source",
+                    "github repository",
+                    "https://github.com/Hoto-Mocha/Re-ARranged-Pixel-Dungeon");
+
+            if (landscape()){
+                arranged.setRect((w - fullWidth)/2f - 6, spd.bottom()+5, 120, 0);
+            } else {
+                arranged.setRect((w - fullWidth)/2f, spd.bottom()+5, 120, 0);
+            }
+            content.add(arranged);
+
+            CreditsBlock splash = new CreditsBlock(false, Window.WHITE,
+                    "Hero Splash Art",
+                    Icons.DCINSIDE.get(),
+                    "oo(211.195)",
+                    null,
+                    null);
+            splash.setSize(colWidth/2f, 0);
+            if (landscape()){
+                splash.setPos(arranged.right(), arranged.top());
+            } else {
+                splash.setPos(w/2f - colWidth/2f + splash.width()/2f, arranged.bottom()+12);
+            }
+            content.add(splash);
+
+            if (!landscape()){
+                addLine(splash.top() - 4, content);
+            }
+
+            CreditsBlock arrangedTransifex = new CreditsBlock(true,
+                    Window.TITLE_COLOR,
+                    null,
+                    null,
+                    "ReARrangedPD is also being community-translated via _Transifex_ now, please consider joining our translation team.",
+                    "transifex.com/rearranged-pixel-dungeon/...",
+                    "https://explore.transifex.com/rearranged-pixel-dungeon/rearranged-pixel-dungeon/");
+            arrangedTransifex.setRect((Camera.main.width - colWidth)/2f, arranged.bottom() + 12, colWidth, 0);
+            content.add(arrangedTransifex);
+
+            if (!landscape()){
+                arrangedTransifex.setPos(w/2f - colWidth/2f, splash.bottom()+8);
+            }
+
+            addLine(arrangedTransifex.top() - 4, content);
+
+            CreditsBlock supporter = new CreditsBlock(true, Window.RED,
+                    "ARPD Supporters",
+                    Icons.HEART.get(),
+                    "Game Supporter Credit",
+                    "patreon",
+                    "https://patreon.com/Hot_Mocha?utm_medium=unknown&utm_source=join_link&utm_campaign=creatorshare_creator&utm_content=copyLink");
+            supporter.setRect((Camera.main.width - colWidth)/2f, arrangedTransifex.bottom() + 12, colWidth, 0);
+            content.add(supporter);
+
+            ArrayList<String> diamondSupporters = new ArrayList<>();
+            diamondSupporters.add("Pernant");
+
+            ArrayList<String> goldSupporters = new ArrayList<>();
+            goldSupporters.add("Drunkendove");
+
+            ArrayList<String> whiteSupporters = new ArrayList<>();
+            whiteSupporters.add("Great Thanks name example");
+
+            DiamondSupporterCreditsBlock diamondSupporter = new DiamondSupporterCreditsBlock(true, "Special Thanks", null, diamondSupporters, 6);
+            diamondSupporter.setRect((Camera.main.width - colWidth)/2f, supporter.bottom() + 12, colWidth, 0);
+            content.add(diamondSupporter);
+
+            GoldSupporterCreditsBlock goldSupporter = new GoldSupporterCreditsBlock(true, "Superior Thanks", null, goldSupporters, 6);
+            goldSupporter.setRect((Camera.main.width - colWidth)/2f, diamondSupporter.bottom() + 12, colWidth, 0);
+            content.add(goldSupporter);
+
+			WhiteSupporterCreditsBlock whiteSupporter = new WhiteSupporterCreditsBlock(true, "Great Thanks", null, whiteSupporters, 6);
+            whiteSupporter.setRect((Camera.main.width - colWidth)/2f, goldSupporter.bottom() + 12, colWidth, 0);
+            content.add(whiteSupporter);
+
+			content.setSize( fullWidth, whiteSupporter.bottom()+10 + insets.bottom );
+        } else {
+			//*** Shattered Pixel Dungeon Credits ***
+
+			CreditsBlock shpx = new CreditsBlock(true, Window.WHITE,
+					"Shattered Pixel Dungeon",
+					Icons.SHPX.get(),
+					"Developed by: _Evan Debenham_\nBased on Pixel Dungeon's open source",
+					"ShatteredPixel.com",
+					"https://ShatteredPixel.com");
+			if (landscape()) {
+				shpx.setRect((w - fullWidth) / 2f - 6, spd.bottom()+5, 120, 0);
+			} else {
+				shpx.setRect((w - fullWidth) / 2f, spd.bottom()+5, 120, 0);
+			}
+			content.add(shpx);
+
+			CreditsBlock alex = new CreditsBlock(false, Window.SHPX_COLOR,
+					"Splash Art & Design:",
+					Icons.ALEKS.get(),
+					"Aleksandar Komitov",
+					"akomitov.artstation.com",
+					"https://akomitov.artstation.com/");
+			alex.setSize(colWidth / 2f, 0);
+			if (landscape()) {
+				alex.setPos(shpx.right(), shpx.top() + (shpx.height() - alex.height() * 2) / 2f);
+			} else {
+				alex.setPos(w / 2f - colWidth / 2f, shpx.bottom() + 5);
+			}
+			content.add(alex);
+
+			CreditsBlock charlie = new CreditsBlock(false, Window.SHPX_COLOR,
+					"Sound Effects:",
+					Icons.CELESTI.get(),
+					"Celesti",
+					"s9menine.itch.io",
+					"https://s9menine.itch.io");
+			charlie.setRect(alex.right(), alex.top(), colWidth / 2f, 0);
+			content.add(charlie);
+
+			CreditsBlock kristjan = new CreditsBlock(false, Window.SHPX_COLOR,
+					"Music:",
+					Icons.KRISTJAN.get(),
+					"Kristjan Haaristo",
+					"youtube.com/@kristjan...",
+					"https://www.youtube.com/@kristjanthomashaaristo");
+			kristjan.setRect(alex.right() - colWidth / 4f, alex.bottom() + 5, colWidth / 2f, 0);
+			content.add(kristjan);
+
+			addLine(shpx.top() - 8, content);
+
+			//*** Pixel Dungeon Credits ***
+
+			final int WATA_COLOR = 0x55AAFF;
+			CreditsBlock wata = new CreditsBlock(true, WATA_COLOR,
+					"Pixel Dungeon",
+					Icons.WATA.get(),
+					"Developed by: _Watabou_\nInspired by Brian Walker's Brogue",
+					"watabou.itch.io",
+					"https://watabou.itch.io/");
+			if (landscape()) {
+				wata.setRect(shpx.left(), kristjan.bottom() + 8, colWidth, 0);
+			} else {
+				wata.setRect(shpx.left(), kristjan.bottom() + 8, colWidth, 0);
+			}
+			content.add(wata);
+
+			addLine(wata.top() - 4, content);
+
+			CreditsBlock cube = new CreditsBlock(false, WATA_COLOR,
+					"Music:",
+					Icons.CUBE_CODE.get(),
+					"Cube Code",
+					null,
+					null);
+			cube.setSize(colWidth / 2f, 0);
+			if (landscape()) {
+				cube.setPos(wata.right() + colWidth / 4f, wata.top() + (wata.height() - cube.height()) / 2f);
+			} else {
+				cube.setPos(alex.left() + colWidth / 4f, wata.bottom() + 5);
+			}
+			content.add(cube);
+
+			//*** libGDX Credits ***
+
+			final int GDX_COLOR = 0xE44D3C;
+			CreditsBlock gdx = new CreditsBlock(true,
+					GDX_COLOR,
+					"libGDX",
+					Icons.LIBGDX.get(),
+					"ShatteredPD is powered by _libGDX_!",
+					"libgdx.com",
+					"https://libgdx.com/");
+			if (landscape()) {
+				gdx.setRect(wata.left(), wata.bottom() + 8, colWidth, 0);
+			} else {
+				gdx.setRect(wata.left(), cube.bottom() + 8, colWidth, 0);
+			}
+			content.add(gdx);
+
+			addLine(gdx.top() - 4, content);
+
+			CreditsBlock arcnor = new CreditsBlock(false, GDX_COLOR,
+					"Pixel Dungeon GDX:",
+					Icons.ARCNOR.get(),
+					"Edu García",
+					"gamedev.place/@arcnor",
+					"https://mastodon.gamedev.place/@arcnor");
+			arcnor.setSize(colWidth / 2f, 0);
+			if (landscape()) {
+				arcnor.setPos(gdx.right(), gdx.top() + (gdx.height() - arcnor.height()) / 2f);
+			} else {
+				arcnor.setPos(alex.left(), gdx.bottom() + 5);
+			}
+			content.add(arcnor);
+
+			CreditsBlock purigro = new CreditsBlock(false, GDX_COLOR,
+					"Shattered GDX Help:",
+					Icons.PURIGRO.get(),
+					"Kevin MacMartin",
+					"github.com/prurigro",
+					"https://github.com/prurigro/");
+			purigro.setRect(arcnor.right() + 2, arcnor.top(), colWidth / 2f, 0);
+			content.add(purigro);
+
+			//*** Transifex Credits ***
+
+			CreditsBlock transifex = new CreditsBlock(true,
+					Window.TITLE_COLOR,
+					null,
+					null,
+					"ShatteredPD is community-translated via _Transifex_! Thank you so much to all of Shattered's volunteer translators!",
+					"transifex.com/shattered-pixel/...",
+					"https://explore.transifex.com/shattered-pixel/shattered-pixel-dungeon/");
+			transifex.setRect((Camera.main.width - colWidth) / 2f, purigro.bottom() + 12, colWidth, 0);
+			content.add(transifex);
+
+			addLine(transifex.top() - 4, content);
+
+			addLine(transifex.bottom() + 4, content);
+
+			//*** Freesound Credits ***
+
+			CreditsBlock freesound = new CreditsBlock(true,
+					Window.TITLE_COLOR,
+					null,
+					null,
+					"Shattered Pixel Dungeon uses the following sound samples from _freesound.org_:\n\n" +
+
+							"Creative Commons Attribution License:\n" +
+							"_SFX ATTACK SWORD 001.wav_ by _JoelAudio_\n" +
+							"_Pack: Slingshots and Longbows_ by _saturdaysoundguy_\n" +
+							"_Cracking/Crunching, A.wav_ by _InspectorJ_\n" +
+							"_Extracting a sword.mp3_ by _Taira Komori_\n" +
+							"_Pack: Uni Sound Library_ by _timmy h123_\n\n" +
+
+							"Creative Commons Zero License:\n" +
+							"_Pack: Movie Foley: Swords_ by _Black Snow_\n" +
+							"_machine gun shot 2.flac_ by _qubodup_\n" +
+							"_m240h machine gun burst 4.flac_ by _qubodup_\n" +
+							"_Pack: Onomatopoeia_ by _Adam N_\n" +
+							"_Pack: Watermelon_ by _lolamadeus_\n" +
+							"_metal chain_ by _Mediapaja2009_\n" +
+							"_Pack: Sword Clashes Pack_ by _JohnBuhr_\n" +
+							"_Pack: Metal Clangs and Pings_ by _wilhellboy_\n" +
+							"_Pack: Stabbing Stomachs & Crushing Skulls_ by _TheFilmLook_\n" +
+							"_Sheep bleating_ by _zachrau_\n" +
+							"_Lemon,Juicy,Squeeze,Fruit.wav_ by _Filipe Chagas_\n" +
+							"_Lemon,Squeeze,Squishy,Fruit.wav_ by _Filipe Chagas_",
+					"www.freesound.org",
+					"https://www.freesound.org");
+			freesound.setRect(transifex.left() - 10, transifex.bottom() + 8, colWidth + 20, 0);
+			content.add(freesound);
+
+			content.setSize( fullWidth, freesound.bottom()+10 + insets.bottom );
 		}
-		content.add(arranged);
-
-		CreditsBlock splash = new CreditsBlock(false, Window.WHITE,
-				"Hero Splash Art",
-				Icons.DCINSIDE.get(),
-				"oo(211.195)",
-				null,
-				null);
-		splash.setSize(colWidth/2f, 0);
-		if (landscape()){
-			splash.setPos(arranged.right(), arranged.top());
-		} else {
-			splash.setPos(w/2f - colWidth/2f + splash.width()/2f, arranged.bottom()+12);
-		}
-		content.add(splash);
-
-		if (!landscape()){
-			addLine(splash.top() - 4, content);
-		}
-
-		CreditsBlock arrangedTransifex = new CreditsBlock(true,
-				Window.TITLE_COLOR,
-				null,
-				null,
-				"ReARrangedPD is also being community-translated via _Transifex_ now, please consider joining our translation team.",
-				"transifex.com/rearranged-pixel-dungeon/...",
-				"https://explore.transifex.com/rearranged-pixel-dungeon/rearranged-pixel-dungeon/");
-		arrangedTransifex.setRect((Camera.main.width - colWidth)/2f, arranged.bottom() + 12, colWidth, 0);
-		content.add(arrangedTransifex);
-
-		if (!landscape()){
-			arrangedTransifex.setPos(w/2f - colWidth/2f, splash.bottom()+8);
-		}
-
-		addLine(arrangedTransifex.top() - 4, content);
-
-		CreditsBlock supporter = new CreditsBlock(true, Window.RED,
-				"ARPD Supporters",
-				Icons.HEART.get(),
-				"Game Supporter Credit",
-				"patreon",
-				"https://patreon.com/Hot_Mocha?utm_medium=unknown&utm_source=join_link&utm_campaign=creatorshare_creator&utm_content=copyLink");
-		supporter.setRect((Camera.main.width - colWidth)/2f, arrangedTransifex.bottom() + 12, colWidth, 0);
-		content.add(supporter);
-
-		ArrayList<String> diamondSupporters = new ArrayList<>();
-		diamondSupporters.add("Pernant");
-
-		ArrayList<String> goldSupporters = new ArrayList<>();
-		goldSupporters.add("Drunkendove");
-
-		ArrayList<String> whiteSupporters = new ArrayList<>();
-		whiteSupporters.add("Great Thanks name example");
-
-		DiamondSupporterCreditsBlock diamondSupporter = new DiamondSupporterCreditsBlock(true, "Special Thanks", null, diamondSupporters, 6);
-		diamondSupporter.setRect((Camera.main.width - colWidth)/2f, supporter.bottom() + 12, colWidth, 0);
-		content.add(diamondSupporter);
-
-		GoldSupporterCreditsBlock goldSupporter = new GoldSupporterCreditsBlock(true, "Superior Thanks", null, goldSupporters, 6);
-		goldSupporter.setRect((Camera.main.width - colWidth)/2f, diamondSupporter.bottom() + 12, colWidth, 0);
-		content.add(goldSupporter);
-
-		WhiteSupporterCreditsBlock whiteSupporter = new WhiteSupporterCreditsBlock(true, "Great Thanks", null, whiteSupporters, 6);
-		whiteSupporter.setRect((Camera.main.width - colWidth)/2f, goldSupporter.bottom() + 12, colWidth, 0);
-		content.add(whiteSupporter);
-
-		//*** Shattered Pixel Dungeon Credits ***
-
-		CreditsBlock shpx = new CreditsBlock(true, Window.SHPX_COLOR,
-				"Shattered Pixel Dungeon",
-				Icons.SHPX.get(),
-				"Developed by: _Evan Debenham_\nBased on Pixel Dungeon's open source",
-				"ShatteredPixel.com",
-				"https://ShatteredPixel.com");
-		if (landscape()){
-			shpx.setRect(arranged.left(), whiteSupporter.bottom() + 12, colWidth, 0);
-		} else {
-			shpx.setRect(arranged.left(), whiteSupporter.bottom() + 12, colWidth, 0);
-		}
-		content.add(shpx);
-
-		CreditsBlock alex = new CreditsBlock(false, Window.SHPX_COLOR,
-				"Splash Art & Design:",
-				Icons.ALEKS.get(),
-				"Aleksandar Komitov",
-				"akomitov.artstation.com",
-				"https://akomitov.artstation.com/");
-		alex.setSize(colWidth/2f, 0);
-		if (landscape()){
-			alex.setPos(shpx.right(), shpx.top() + (shpx.height() - alex.height()*2)/2f);
-		} else {
-			alex.setPos(w/2f - colWidth/2f, shpx.bottom()+5);
-		}
-		content.add(alex);
-
-		CreditsBlock charlie = new CreditsBlock(false, Window.SHPX_COLOR,
-				"Sound Effects:",
-				Icons.CELESTI.get(),
-				"Celesti",
-				"s9menine.itch.io",
-				"https://s9menine.itch.io");
-		charlie.setRect(alex.right(), alex.top(), colWidth/2f, 0);
-		content.add(charlie);
-
-		CreditsBlock kristjan = new CreditsBlock(false, Window.SHPX_COLOR,
-				"Music:",
-				Icons.KRISTJAN.get(),
-				"Kristjan Haaristo",
-				"youtube.com/@kristjan...",
-				"https://www.youtube.com/@kristjanthomashaaristo");
-		kristjan.setRect(alex.right() - colWidth/4f, alex.bottom() + 5, colWidth/2f, 0);
-		content.add(kristjan);
-
-		addLine(shpx.top() - 8, content);
-
-		//*** Pixel Dungeon Credits ***
-
-		final int WATA_COLOR = 0x55AAFF;
-		CreditsBlock wata = new CreditsBlock(true, WATA_COLOR,
-				"Pixel Dungeon",
-				Icons.WATA.get(),
-				"Developed by: _Watabou_\nInspired by Brian Walker's Brogue",
-				"watabou.itch.io",
-				"https://watabou.itch.io/");
-		if (landscape()){
-			wata.setRect(shpx.left(), kristjan.bottom() + 8, colWidth, 0);
-		} else {
-			wata.setRect(shpx.left(), kristjan.bottom() + 8, colWidth, 0);
-		}
-		content.add(wata);
-
-		addLine(wata.top() - 4, content);
-
-		CreditsBlock cube = new CreditsBlock(false, WATA_COLOR,
-				"Music:",
-				Icons.CUBE_CODE.get(),
-				"Cube Code",
-				null,
-				null);
-		cube.setSize(colWidth/2f, 0);
-		if (landscape()){
-			cube.setPos(wata.right() + colWidth/4f, wata.top() + (wata.height() - cube.height())/2f);
-		} else {
-			cube.setPos(alex.left() + colWidth/4f, wata.bottom()+5);
-		}
-		content.add(cube);
-
-		//*** libGDX Credits ***
-
-		final int GDX_COLOR = 0xE44D3C;
-		CreditsBlock gdx = new CreditsBlock(true,
-				GDX_COLOR,
-				"libGDX",
-				Icons.LIBGDX.get(),
-				"ShatteredPD is powered by _libGDX_!",
-				"libgdx.com",
-				"https://libgdx.com/");
-		if (landscape()){
-			gdx.setRect(wata.left(), wata.bottom() + 8, colWidth, 0);
-		} else {
-			gdx.setRect(wata.left(), cube.bottom() + 8, colWidth, 0);
-		}
-		content.add(gdx);
-
-		addLine(gdx.top() - 4, content);
-
-		CreditsBlock arcnor = new CreditsBlock(false, GDX_COLOR,
-				"Pixel Dungeon GDX:",
-				Icons.ARCNOR.get(),
-				"Edu García",
-				"gamedev.place/@arcnor",
-				"https://mastodon.gamedev.place/@arcnor");
-		arcnor.setSize(colWidth/2f, 0);
-		if (landscape()){
-			arcnor.setPos(gdx.right(), gdx.top() + (gdx.height() - arcnor.height())/2f);
-		} else {
-			arcnor.setPos(alex.left(), gdx.bottom()+5);
-		}
-		content.add(arcnor);
-
-		CreditsBlock purigro = new CreditsBlock(false, GDX_COLOR,
-				"Shattered GDX Help:",
-				Icons.PURIGRO.get(),
-				"Kevin MacMartin",
-				"github.com/prurigro",
-				"https://github.com/prurigro/");
-		purigro.setRect(arcnor.right()+2, arcnor.top(), colWidth/2f, 0);
-		content.add(purigro);
-
-		//*** Transifex Credits ***
-
-		CreditsBlock transifex = new CreditsBlock(true,
-				Window.TITLE_COLOR,
-				null,
-				null,
-				"ShatteredPD is community-translated via _Transifex_! Thank you so much to all of Shattered's volunteer translators!",
-				"transifex.com/shattered-pixel/...",
-				"https://explore.transifex.com/shattered-pixel/shattered-pixel-dungeon/");
-		transifex.setRect((Camera.main.width - colWidth)/2f, purigro.bottom() + 12, colWidth, 0);
-		content.add(transifex);
-
-		addLine(transifex.top() - 4, content);
-
-		addLine(transifex.bottom() + 4, content);
-
-		//*** Freesound Credits ***
-
-		CreditsBlock freesound = new CreditsBlock(true,
-				Window.TITLE_COLOR,
-				null,
-				null,
-				"Shattered Pixel Dungeon uses the following sound samples from _freesound.org_:\n\n" +
-
-				"Creative Commons Attribution License:\n" +
-				"_SFX ATTACK SWORD 001.wav_ by _JoelAudio_\n" +
-				"_Pack: Slingshots and Longbows_ by _saturdaysoundguy_\n" +
-				"_Cracking/Crunching, A.wav_ by _InspectorJ_\n" +
-				"_Extracting a sword.mp3_ by _Taira Komori_\n" +
-				"_Pack: Uni Sound Library_ by _timmy h123_\n\n" +
-
-				"Creative Commons Zero License:\n" +
-				"_Pack: Movie Foley: Swords_ by _Black Snow_\n" +
-				"_machine gun shot 2.flac_ by _qubodup_\n" +
-				"_m240h machine gun burst 4.flac_ by _qubodup_\n" +
-				"_Pack: Onomatopoeia_ by _Adam N_\n" +
-				"_Pack: Watermelon_ by _lolamadeus_\n" +
-				"_metal chain_ by _Mediapaja2009_\n" +
-				"_Pack: Sword Clashes Pack_ by _JohnBuhr_\n" +
-				"_Pack: Metal Clangs and Pings_ by _wilhellboy_\n" +
-				"_Pack: Stabbing Stomachs & Crushing Skulls_ by _TheFilmLook_\n" +
-				"_Sheep bleating_ by _zachrau_\n" +
-				"_Lemon,Juicy,Squeeze,Fruit.wav_ by _Filipe Chagas_\n" +
-				"_Lemon,Squeeze,Squishy,Fruit.wav_ by _Filipe Chagas_",
-				"www.freesound.org",
-				"https://www.freesound.org");
-		freesound.setRect(transifex.left()-10, transifex.bottom() + 8, colWidth+20, 0);
-		content.add(freesound);
-
-		content.setSize( fullWidth, freesound.bottom()+10 + insets.bottom );
 
 		list.setRect( 0, 0, w, h );
 		list.scrollTo(0, 0);

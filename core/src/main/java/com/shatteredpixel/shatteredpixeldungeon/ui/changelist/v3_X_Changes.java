@@ -45,10 +45,22 @@ import java.util.ArrayList;
 public class v3_X_Changes {
 
 	public static void addAllChanges( ArrayList<ChangeInfo> changeInfos ){
-		add_Coming_Soon(changeInfos);
+		add_SPD_Base_Version(changeInfos);
+		// add_Coming_Soon(changeInfos);
 		add_v3_2_Changes(changeInfos);
 		add_v3_1_Changes(changeInfos);
 		add_v3_0_Changes(changeInfos);
+	}
+
+	public static void add_SPD_Base_Version( ArrayList<ChangeInfo> changeInfos ) {
+		ChangeInfo spdTitle = new ChangeInfo("Shattered Pixel Dungeon", true, "");
+		spdTitle.hardlight(Window.TITLE_COLOR);
+		changeInfos.add(spdTitle);
+
+		String baseStr = Messages.get(ChangesScene.class, "spd_prefix");
+		ChangeInfo spdVersion = new ChangeInfo("", true, baseStr);
+		spdVersion.hardlight(0xCCCCCC);
+		changeInfos.add(spdVersion);
 	}
 
 	public static void add_Coming_Soon( ArrayList<ChangeInfo> changeInfos ) {

@@ -21,12 +21,10 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.ui.changelist;
 
-import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.ChangesScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
-import com.shatteredpixel.shatteredpixeldungeon.scenes.SupporterScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.watabou.noosa.Image;
 import com.watabou.noosa.ui.Component;
@@ -55,7 +53,7 @@ public class ChangeButton extends Component {
 	}
 
 	protected void onClick() {
-		ShatteredPixelDungeon.switchNoFade(SupporterScene.class);
+		ChangesScene.showChangeInfo(new Image(icon), title, messages);
 	}
 
 	@Override

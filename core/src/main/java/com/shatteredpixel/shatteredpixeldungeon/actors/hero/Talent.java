@@ -2539,7 +2539,7 @@ public enum Talent {
 		if (hero.hasTalent(Talent.PUSHBACK) && !(wep instanceof BowWeapon)) {
 			if (level.adjacent(hero.pos, enemy.pos)
 					&& ((enemy instanceof Mob && ((Mob) enemy).surprisedBy(hero)) || Random.Float() < 0.4f)) {
-				Elastic.pushEnemy(wep, hero, enemy, hero.pointsInTalent(Talent.PUSHBACK));
+				BowWeapon.pushEnemy(wep, hero, enemy, hero.pointsInTalent(Talent.PUSHBACK));
 			}
 		}
 

@@ -9,13 +9,13 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.BowMasterSkill;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.CountCooldownBuff;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Vertigo;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.items.ArrowBag;
 import com.shatteredpixel.shatteredpixeldungeon.items.ArrowItem;
+import com.shatteredpixel.shatteredpixeldungeon.items.KindOfWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfSharpshooting;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfBlastWave;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
@@ -323,9 +323,7 @@ public class BowWeapon extends GunWeapon {
         Dungeon.level.drop((new ArrowItem()).quantity(qty), cell).sprite.drop(cell);
     }
 
-    public static void pushEnemy(Weapon weapon, Char attacker, Char defender, int dist) {
-         /* TODO nerf this: prevent knocking into pits. */
-
+    public static void pushEnemy(KindOfWeapon weapon, Char attacker, Char defender, int dist) {
         //trace a ballistica to our target (which will also extend past them
         Ballistica trajectory = new Ballistica(attacker.pos, defender.pos, Ballistica.STOP_TARGET);
         //trim it to just be the part that goes past them
@@ -337,7 +335,7 @@ public class BowWeapon extends GunWeapon {
                 dist--;
             }
         }
-        WandOfBlastWave.throwChar(defender, trajectory, dist, true, false, attacker);
+        WandOfBlastWave.throwChar(defender, trajectory, dist, false, false, attacker);
     }
 
     public static class ArrowAttached extends CountCooldownBuff {
