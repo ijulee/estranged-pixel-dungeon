@@ -29,6 +29,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Awakening;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Blindness;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Degrade;
@@ -674,6 +675,13 @@ public class Item implements Bundlable {
 							}
 							if (user.buff(Talent.LethalMomentumTracker.class) != null){
 								user.buff(Talent.LethalMomentumTracker.class).detach();
+								user.next();
+							} else if (Item.this instanceof MissileWeapon &&
+									user.buff(Awakening.class) != null &&
+									user.buff(Awakening.class).isAwaken() &&
+									user.buff(Sheath.CriticalAttack.class) != null){
+								// TODO check if RPD additions to Hero.onAttackComplete() should be repeated here
+								user.buff(Sheath.CriticalAttack.class).detach();
 								user.next();
 							} else {
 								user.spendAndNext(delay);

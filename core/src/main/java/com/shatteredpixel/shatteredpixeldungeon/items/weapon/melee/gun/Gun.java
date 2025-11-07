@@ -238,7 +238,6 @@ public class Gun extends GunWeapon {
 	public ArrayList<String> actions(Hero hero) {
 		ArrayList<String> actions = super.actions(hero);
 		if (isEquipped( hero )) {
-			actions.add(AC_SHOOT);
 			actions.add(AC_RELOAD);
 		}
 		return actions;
@@ -527,82 +526,6 @@ public class Gun extends GunWeapon {
 		if (gunModsSB.length() != 0) {
 			info += "\n\n" + Messages.get(this, gunModsSB.substring(0, gunModsSB.length()-2));
 		}
-
-		/*boolean isModded = false;
-		boolean[] whatModded = {false, false, false, false, false, false, false};
-
-		if (barrelMod != BarrelMod.NORMAL_BARREL) {
-			whatModded[0] = true;
-			isModded = true;
-		}
-		if (magazineMod != MagazineMod.NORMAL_MAGAZINE) {
-			whatModded[1] = true;
-			isModded = true;
-		}
-		if (bulletMod != BulletMod.NORMAL_BULLET) {
-			whatModded[2] = true;
-			isModded = true;
-		}
-		if (weightMod != WeightMod.NORMAL_WEIGHT) {
-			whatModded[3] = true;
-			isModded = true;
-		}
-		if (attachMod != AttachMod.NORMAL_ATTACH) {
-			whatModded[4] = true;
-			isModded = true;
-		}
-		if (enchantMod != EnchantMod.NORMAL_ENCHANT) {
-			whatModded[5] = true;
-			isModded = true;
-		}
-		if (inscribeMod != InscribeMod.NORMAL) {
-			whatModded[6] = true;
-			isModded = true;
-		}
-
-		if (isModded) {
-			info += "\n\n" + Messages.get(this, "modded_start");
-			if (whatModded[0]) {
-				info += Messages.get(GunSmithingTool.WndMod.class, barrelMod.name());
-				if (whatModded[1] || whatModded[2] || whatModded[3] || whatModded[4] || whatModded[5]) { //이 개조 이후에 추가로 개조된 것이 있는지를 확인
-					info += ", ";
-				}
-			}
-			if (whatModded[1]) {
-				info += Messages.get(GunSmithingTool.WndMod.class, magazineMod.name());
-				if (whatModded[2] || whatModded[3] || whatModded[4] || whatModded[5]) { //이 개조 이후에 추가로 개조된 것이 있는지를 확인
-					info += ", ";
-				}
-			}
-			if (whatModded[2]) {
-				info += Messages.get(GunSmithingTool.WndMod.class, bulletMod.name());
-				if (whatModded[3] || whatModded[4] || whatModded[5]) { //이 개조 이후에 추가로 개조된 것이 있는지를 확인
-					info += ", ";
-				}
-			}
-			if (whatModded[3]) {
-				info += Messages.get(GunSmithingTool.WndMod.class, weightMod.name());
-				if (whatModded[4] || whatModded[5]) { //이 개조 이후에 추가로 개조된 것이 있는지를 확인
-					info += ", ";
-				}
-			}
-			if (whatModded[4]) {
-				info += Messages.get(GunSmithingTool.WndMod.class, attachMod.name());
-				if (whatModded[5]) { //이 개조 이후에 추가로 개조된 것이 있는지를 확인
-					info += ", ";
-				}
-			}
-			if (whatModded[5]) {
-				info += Messages.get(GunSmithingTool.WndMod.class, enchantMod.name());
-				if (whatModded[6]) { //이 개조 이후에 추가로 개조된 것이 있는지를 확인
-					info += ", ";
-				}
-			}
-			if (whatModded[6]) {
-				info += Messages.get(Gun.class, inscribeMod.name());
-			}
-			info += Messages.get(this, "modded_end");
-		}*/
 
 		return info;
 	}

@@ -52,7 +52,6 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Blindness;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.BowMasterSkill;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Burning;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ChampionEnemy;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Charm;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Cloaking;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Combo;
@@ -199,6 +198,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Crossbow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.DeathSword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.DualDagger;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Flail;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.GunWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.LargeSword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MagesStaff;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon;
@@ -924,11 +924,9 @@ public class Hero extends Char {
 
 		if (!RingOfForce.fightingUnarmed(this)) {
 			dmg = wep.damageRoll( this );
-
 			if (wep instanceof Weapon) {
-				float randomFloat = Random.Float();
-				if (randomFloat < critChance((Weapon)wep)) {
-					dmg = criticalDamage(dmg, (Weapon)wep);
+				if (Random.Float() < critChance((Weapon)wep)) {
+					dmg = critDamage(dmg, (Weapon)wep);
 				} else {
 					if (Sheath.isFlashSlash()) {
 						Buff.prolong(this, Sheath.FlashSlashCooldown.class, (30-5*pointsInTalent(Talent.STATIC_PREPARATION))-1);
@@ -1085,10 +1083,23 @@ public class Hero extends Char {
 	}
 	
 	public float attackDelay() {
-//		if (buff(Talent.LethalMomentumTracker.class) != null){
-//			buff(Talent.LethalMomentumTracker.class).detach();
-//			return 0;
-//		}
+		if (buff(Talent.LethalMomentumTracker.class) != null){
+			buff(Talent.LethalMomentumTracker.class).detach();
+			return 0;
+		}
+
+		if (buff(Talent.CounterAttackTracker.class) != null && belongings.weapon == null) {
+			buff(Talent.CounterAttackTracker.class).detach();
+			return 0;
+		}
+
+		if (buff(Awakening.class) != null && buff(Awakening.class).isAwaken() && buff(Sheath.CriticalAttack.class) != null) {
+			return 0;
+		}
+
+		if (Sheath.isFlashSlash()) {
+			return 0;
+		}
 
 		float delay = 1f;
 
@@ -1880,26 +1891,22 @@ public class Hero extends Char {
 					}
 
 					// Hero.defenseSkill() as of SPD v3.2.5 only captures part of a char's evasion.
-					// The remainder is in Char.hit(), copy-pasted below.
+					// The remainder is in Char.hit(), partially copied below.
 					// FIXME correct this when SPD consolidates acc/eva logic
 					float evasion = defenseSkill(null);
 					if (buff(Bless.class) != null) evasion *= 1.25f;
 					if (buff(  Hex.class) != null) evasion *= 0.8f;
 					if (buff( Daze.class) != null) evasion *= 0.5f;
-					for (ChampionEnemy buff : buffs(ChampionEnemy.class)){
-						evasion *= buff.evasionAndAccuracyFactor();
-					}
+
 					evasion *= AscensionChallenge.statModifier(this);
-					if (Dungeon.hero.heroClass != HeroClass.CLERIC
-							&& Dungeon.hero.hasTalent(Talent.BLESS)
-							&& this.alignment == Char.Alignment.ALLY){
+					if (Dungeon.hero.hasTalent(Talent.BLESS)){
 						// + 3%/5%
 						evasion *= 1.01f + 0.02f*Dungeon.hero.pointsInTalent(Talent.BLESS);
 					}
 					evasion *= FerretTuft.evasionMultiplier();
 					// end copy-pasta
 
-					chance += Math.max(0, 0.01f*(evasion - (lvl+4)));
+					chance += Math.max(0, 0.01f*(evasion - defenseSkill));
 				}
 			}
 
@@ -1944,15 +1951,14 @@ public class Hero extends Char {
 		return GameMath.gate(0, chance, 2);
 	}
 
-	public int criticalDamage(int damage, Weapon wep) {
-		int max = wep.max();
-		if (!(wep instanceof Gun.Bullet)) {
-			max += wepSTRExcess(wep);
-		}
+	public int critDamage(int damage, Weapon wep) {
+		// mark the attack as critical, should be removed upon completion of attack
+		Buff.affect(this, Sheath.CriticalAttack.class);
+
+		int max = wep.max() + ((wep instanceof GunWeapon.GunMissile)? 0 : wepSTRExcess(wep));
 		float multi = 1f+Math.max(0, critChance(wep)-1);
 		int bonusDamage = 0;
-
-		damage = (int)(max * 0.75f + damage * 0.25f);
+		float critDmg = (int)(max * 0.75f + damage * 0.25f);
 
 		multi += 0.05f * pointsInTalent(Talent.LETHAL_POWER);
 
@@ -1964,24 +1970,24 @@ public class Hero extends Char {
 			multi += 0.15f * pointsInTalent(Talent.POWERFUL_SLASH);
 		}
 
-		Buff.affect(this, Sheath.CriticalAttack.class);
+		// TODO Shouldn't Master's draw attack damage increases be placed here?
 
 		Awakening awakening = buff(Awakening.class);
 		if (awakening != null && awakening.isAwaken()) {
 			if (hasTalent(Talent.STABLE_BARRIER)) {
 				int shield = 1;
 				int maxShield = Math.round(HT * 0.2f * pointsInTalent(Talent.STABLE_BARRIER));
-				int curShield = 0;
-				if (buff(Barrier.class) != null) curShield = buff(Barrier.class).shielding();
+				Barrier barrier = buff(Barrier.class);
+				int curShield = (barrier != null) ? barrier.shielding() : 0;
 				shield = Math.min(shield, maxShield-curShield);
 				if (shield > 0) {
 					Buff.affect(this, Barrier.class).incShield(shield);
-					sprite.showStatus( CharSprite.POSITIVE, Messages.get(Dewdrop.class, "shield", shield) );
+					this.sprite.showStatusWithIcon( CharSprite.POSITIVE, Integer.toString(shield), FloatingText.SHIELDING );
 				}
 			}
 		}
 
-		return Math.round(damage * multi) + bonusDamage;
+		return Math.round(critDmg * multi) + bonusDamage;
 	}
 
 	@Override
@@ -3292,27 +3298,8 @@ public class Hero extends Char {
 		boolean hit = attack(attackTarget);
 		
 		Invisibility.dispel();
-		boolean useTurn = true;
-		if (buff(Talent.LethalMomentumTracker.class) != null){
-			buff(Talent.LethalMomentumTracker.class).detach();
-			useTurn = false;
-		}
 
-		if (buff(Talent.CounterAttackTracker.class) != null && belongings.weapon == null) {
-			buff(Talent.CounterAttackTracker.class).detach();
-			useTurn = false;
-		}
-
-		if (buff(Awakening.class) != null && buff(Awakening.class).isAwaken() && buff(Sheath.CriticalAttack.class) != null) {
-			useTurn = false;
-		}
-
-		if (Sheath.isFlashSlash()) useTurn = false;
-		if (useTurn) {
-			spend( attackDelay() );
-		} else {
-			spend(0);
-		}
+		spend( attackDelay() );
 
 		if (hit && subClass == HeroSubClass.GLADIATOR && wasEnemy){
 			Buff.affect( this, Combo.class ).hit(attackTarget);
