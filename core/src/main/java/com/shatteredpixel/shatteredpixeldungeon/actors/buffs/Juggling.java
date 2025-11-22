@@ -7,6 +7,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mimic;
 import com.shatteredpixel.shatteredpixeldungeon.items.Gold;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.bow.SpiritBow;
@@ -153,7 +154,7 @@ public class Juggling extends Buff implements ActionIndicator.Action {
 
     @Override
     public void doAction() {
-        if (!GameScene.isCellSelecterActive(listener)) {
+        if (!GameScene.isCellSelecterActive(shooter)) {
             if (canAutoAim(lastTarget)) {
                 CharSprite sprite = lastTarget.sprite;
                 if (sprite != null && sprite.parent != null) {
@@ -162,12 +163,12 @@ public class Juggling extends Buff implements ActionIndicator.Action {
                 }
             }
 
-            GameScene.selectCell(listener);
+            GameScene.selectCell(shooter);
         } else {
             if (canAutoAim(lastTarget)) {
                 int cell = QuickSlotButton.autoAim(lastTarget);
                 if (cell == -1) return;
-                listener.onSelect(cell);
+                shooter.onSelect(cell);
             }
         }
     }
@@ -184,7 +185,7 @@ public class Juggling extends Buff implements ActionIndicator.Action {
             lastTarget = target;
 
             Juggling j = Dungeon.hero.buff(Juggling.class);
-            if (j != null && GameScene.isCellSelecterActive(j.listener)) {
+            if (j != null && GameScene.isCellSelecterActive(j.shooter)) {
                 CharSprite sprite = lastTarget.sprite;
                 if (sprite.parent != null) {
                     sprite.parent.addToFront(cross);
@@ -215,7 +216,7 @@ public class Juggling extends Buff implements ActionIndicator.Action {
         ActionIndicator.setAction(this);
     }
 
-    private final CellSelector.Listener listener = new CellSelector.Listener() {
+    private final CellSelector.Listener shooter = new CellSelector.Listener() {
 
         @Override
         public void onSelect(Integer cell) {
@@ -232,7 +233,9 @@ public class Juggling extends Buff implements ActionIndicator.Action {
                                 public void call() {
                                     if (hero.hasTalent(Talent.FANCY_PERFORMANCE)) {
                                         Char ch = Actor.findChar(dst);
-                                        if (ch != null && ch.alignment == Char.Alignment.ENEMY) {
+                                        if (ch != null && ch.alignment == Char.Alignment.ENEMY ||
+                                                (ch instanceof Mimic && ch.alignment == Char.Alignment.NEUTRAL)) {
+                                            lastTarget = ch;
                                             Dungeon.level.drop(
                                                     new Gold(5 * hero.pointsInTalent(Talent.FANCY_PERFORMANCE)), dst)
                                                     .sprite.drop();

@@ -2443,7 +2443,8 @@ public enum Talent {
 			}
 		}
 
-		if (hero.subClass == HeroSubClass.SLASHER) {
+		if (hero.subClass == HeroSubClass.SLASHER &&
+				!(hero.belongings.attackingWeapon() instanceof SwordAura.Aura)) {
 			Buff.affect(hero, SwordAura.class).hit(dmg);
 		}
 

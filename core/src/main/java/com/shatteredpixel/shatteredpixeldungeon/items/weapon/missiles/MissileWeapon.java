@@ -40,6 +40,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
+import com.shatteredpixel.shatteredpixeldungeon.items.KindOfWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.MagicalHolster;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfSharpshooting;
@@ -201,6 +202,9 @@ abstract public class MissileWeapon extends Weapon {
 	
 	@Override
 	public int throwPos(Hero user, int dst) {
+		if (this instanceof LG.LGBullet) {
+			return dst;
+		}
 
 		int projecting = 0;
 		if (hasEnchant(Projecting.class, user)){
@@ -213,27 +217,20 @@ abstract public class MissileWeapon extends Weapon {
 			}
 		}
 
-		if (this instanceof LG.LGBullet) {
-			return dst;
-		}
-
-		//FIXME Projecting doesn't seem to actually work with sword aura
-		if (this instanceof SwordAura.Aura) {
-			Ballistica aim = new Ballistica(hero.pos, dst, Ballistica.DASH);
-			if (Random.Int(3) < hero.pointsInTalent(Talent.ARCANE_POWER) &&
-					hero.belongings.weapon instanceof MeleeWeapon &&
-					((MeleeWeapon)hero.belongings.weapon).hasEnchant(Projecting.class, user)) {
+		if (this instanceof SwordAura.Aura && Random.Int(3) < hero.pointsInTalent(Talent.ARCANE_POWER)) {
+			KindOfWeapon wep = hero.belongings.weapon();
+			if (wep instanceof MeleeWeapon && ((MeleeWeapon) wep).hasEnchant(Projecting.class, user)) {
 				projecting += 4;
 			} else {
-				return aim.collisionPos;
+				return new Ballistica(hero.pos, dst, Ballistica.DASH).collisionPos;
 			}
 		}
 
-		if ((this instanceof Gun.Bullet && (Dungeon.level.passable[dst] || Dungeon.level.avoid[dst])
-                && Dungeon.level.distance(user.pos, dst) <= 1+Dungeon.hero.pointsInTalent(Talent.STREET_BATTLE))
-                || (projecting > 0
-				&& (Dungeon.level.passable[dst] || Dungeon.level.avoid[dst] || Actor.findChar(dst) != null)
-				&& Dungeon.level.distance(user.pos, dst) <= Math.round(projecting * Enchantment.genericProcChanceMultiplier(user)))){
+		if ((projecting > 0
+				&& Dungeon.level.distance(user.pos, dst) <= Math.round(projecting * Enchantment.genericProcChanceMultiplier(user)))
+			|| (this instanceof Gun.Bullet
+				&& Dungeon.level.distance(user.pos, dst) <= 1+Dungeon.hero.pointsInTalent(Talent.STREET_BATTLE))
+			&& (Dungeon.level.passable[dst] || Dungeon.level.avoid[dst] || Actor.findChar(dst) != null)) {
 			return dst;
 		} else {
 			return super.throwPos(user, dst);
@@ -434,6 +431,7 @@ abstract public class MissileWeapon extends Weapon {
 	@Override
 	public float castDelay(Char user, int cell) {
 		if (Actor.findChar(cell) != null && Actor.findChar(cell) != user){
+			// TODO Adrenaline buff on hero doesn't affect missile attacks.
 			return delayFactor( user );
 		} else {
 			return super.castDelay(user, cell);

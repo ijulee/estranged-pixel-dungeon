@@ -159,6 +159,11 @@ public class BowWeapon extends GunWeapon {
         }
 
         @Override
+        public boolean doPickUp(Hero hero, int pos) {
+            return new ArrowItem().doPickUp(hero, pos);
+        }
+
+        @Override
         public void storeInBundle(Bundle bundle) {
             super.storeInBundle(bundle);
 

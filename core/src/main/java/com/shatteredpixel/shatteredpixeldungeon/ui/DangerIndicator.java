@@ -24,6 +24,7 @@ package com.shatteredpixel.shatteredpixeldungeon.ui;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.SPDAction;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Juggling;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.SwordAura;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
@@ -117,6 +118,7 @@ public class DangerIndicator extends Tag {
 
 			QuickSlotButton.target(target);
 			Juggling.target(target);
+			SwordAura.target(target);
 			if (Dungeon.hero.canAttack(target)) AttackIndicator.target(target);
 
 			if (Dungeon.hero.curAction == null && target.sprite != null) {
