@@ -20,6 +20,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.medic.AngelWing;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mimic;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Beam;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
@@ -138,7 +139,8 @@ public class GammaRayGun extends Item {
                     Ballistica beam = new Ballistica(curUser.pos, target, Ballistica.PROJECTILE);
                     Char ch = Actor.findChar(beam.collisionPos);
                     if (ch != null) {
-                        if (ch.alignment == Char.Alignment.ENEMY) {
+                        if (ch.alignment == Char.Alignment.ENEMY ||
+                                (ch instanceof Mimic && ch.alignment == Char.Alignment.NEUTRAL)) {
                             Buff.affect(ch, Poison.class).set( Math.round((3f + 2f*Dungeon.depth / 3f) * powerMulti()) );
                             if (Dungeon.level.heroFOV[ch.pos]) {
                                 CellEmitter.center( ch.pos ).burst( PoisonParticle.SPLASH, 3 );

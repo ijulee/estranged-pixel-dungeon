@@ -1844,9 +1844,17 @@ public enum Talent {
 		if (hero.hasTalent(Talent.IMPREGNABLE_MEAL)) {
 			Buff.affect(hero, ArmorEnhance.class).set(hero.pointsInTalent(Talent.IMPREGNABLE_MEAL), 3);
 		}
-		if (hero.hasTalent(Talent.HEALING_MEAL)) { // 식사 시 디버프 제거 / 디버프가 없을 경우 3의 체력을 회복
+		if (hero.hasTalent(Talent.HEALING_MEAL)) {
 			if (hero.isHeroDebuffed()) {
-				PotionOfCleansing.cleanse(hero);
+				boolean removed = false;
+				for (Buff b : hero.buffs()) {
+					if (b.type == Buff.buffType.NEGATIVE
+							&& !(b instanceof LostInventory)) {
+						b.detach();
+						removed = true;
+					}
+				}
+				if (removed) new Flare( 6, 32 ).color(0xFF4CD2, true).show( hero.sprite, 2f );
 			} else {
 				if (hero.pointsInTalent(Talent.HEALING_MEAL) > 1) {
 					hero.heal(3);

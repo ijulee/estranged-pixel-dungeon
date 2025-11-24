@@ -34,6 +34,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AllyBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Amok;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ArcaneArmor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AscensionChallenge;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Awakening;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Barkskin;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Barrier;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Berserk;
@@ -73,6 +74,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Poison;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Pray;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Preparation;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.RadioactiveMutation;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.RouletteOfDeath;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.SharpShooterBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ShieldBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Sleep;
@@ -707,7 +709,7 @@ public abstract class Char extends Actor {
 				judgement.detach();
 			}
 
-            if (buff(SharpShooterBuff.class) != null && this instanceof Hero) {
+			if (buff(SharpShooterBuff.class) != null && this instanceof Hero) {
 				KindOfWeapon wep = ((Hero) this).belongings.attackingWeapon();
 				if (((Hero) this).hasTalent(Talent.RANGED_LETHALITY) &&
 						wep instanceof GunWeapon.GunMissile &&
@@ -717,7 +719,7 @@ public abstract class Char extends Actor {
 				}
 			}
 
-			if (enemy.sprite != null) {
+            if (enemy.sprite != null) {
 				enemy.sprite.bloodBurstA(sprite.center(), effectiveDamage);
 				enemy.sprite.flash();
 			}
@@ -752,10 +754,25 @@ public abstract class Char extends Actor {
 				if (Random.Int(5) < hero.pointsInTalent(Talent.COUNTER_ATTACK)) {
 					Buff.affect(hero, Talent.CounterAttackTracker.class);
 				}
+
 				if (hero.hasTalent(Talent.QUICK_PREP)) {
 					Momentum momentum = hero.buff(Momentum.class);
 					if (momentum != null) {
 						momentum.quickPrep(hero.pointsInTalent(Talent.QUICK_PREP));
+					}
+				}
+
+				if (hero.hasTalent(Talent.HONORABLE_SHOT)) {
+					RouletteOfDeath roulette = hero.buff(RouletteOfDeath.class);
+					if (roulette != null && roulette.overHalf()) {
+						Buff.prolong(hero, Talent.HonorableShotTracker.class, 1f);
+					}
+				}
+
+				if (hero.hasTalent(Talent.HASTE_EVASION)) {
+					Awakening awakening = hero.buff(Awakening.class);
+					if (awakening != null && awakening.isAwaken()) {
+						Buff.prolong(hero, Haste.class, 1 + hero.pointsInTalent(Talent.HASTE_EVASION));
 					}
 				}
 			}

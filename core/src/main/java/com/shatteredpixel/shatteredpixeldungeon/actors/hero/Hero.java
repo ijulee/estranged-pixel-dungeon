@@ -862,7 +862,7 @@ public class Hero extends Char {
 			return Messages.get(Monk.class, "parried");
 		}
 
-		RouletteOfDeath roulette = buff(RouletteOfDeath.class);
+		/*RouletteOfDeath roulette = buff(RouletteOfDeath.class);
 		if (hasTalent(Talent.HONORABLE_SHOT) && roulette != null && roulette.overHalf()) {
 			Buff.prolong(this, Talent.HonorableShotTracker.class, 1f);
 		}
@@ -870,7 +870,7 @@ public class Hero extends Char {
 		Awakening awakening = buff(Awakening.class);
 		if (awakening != null && awakening.isAwaken() && hasTalent(Talent.HASTE_EVASION)) {
 			Buff.prolong(this, Haste.class, 1+pointsInTalent(Talent.HASTE_EVASION));
-		}
+		}*/
 
 		return super.defenseVerb();
 	}
