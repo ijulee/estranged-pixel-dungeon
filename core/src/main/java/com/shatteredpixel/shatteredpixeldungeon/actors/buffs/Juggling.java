@@ -252,7 +252,7 @@ public class Juggling extends Buff implements ActionIndicator.Action {
                         }
                     }
 
-                    hero.spend(1);
+                    hero.spend(TICK);
                     detach();
                 }
             }

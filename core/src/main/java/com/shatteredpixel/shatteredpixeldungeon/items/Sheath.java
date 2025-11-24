@@ -25,6 +25,7 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.ui.ActionIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.ui.HeroIcon;
+import com.shatteredpixel.shatteredpixeldungeon.ui.QuickSlotButton;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.Image;
 import com.watabou.noosa.audio.Sample;
@@ -47,7 +48,7 @@ public class Sheath extends Item {
     }
 
     @Override
-    public ArrayList<String> actions(Hero hero ) {
+    public ArrayList<String> actions(Hero hero) {
         ArrayList<String> actions = super.actions(hero);
         actions.add(AC_USE);
         return actions;
@@ -57,7 +58,7 @@ public class Sheath extends Item {
     public void execute(Hero hero, String action) {
         super.execute(hero, action);
         if (action.equals( AC_USE )) {
-            if (hero.belongings.weapon instanceof MeleeWeapon) {
+            if (hero.belongings.weapon() instanceof MeleeWeapon) {
                 if (hero.buff(Sheathing.class) != null) {
                     hero.buff(Sheathing.class).detach();
                 } else {
@@ -85,12 +86,12 @@ public class Sheath extends Item {
         return -1;
     }
 
-    public static boolean isFlashSlash() {
-        Hero hero = Dungeon.hero;
+    public static boolean isQuickDraw() {
         return hero.subClass == HeroSubClass.MASTER &&
+                    hero.belongings.attackingWeapon() instanceof MeleeWeapon &&
                     hero.buff(Sheathing.class) != null &&
-                    hero.buff(FlashSlashCooldown.class) == null &&
-                    hero.buff(DashAttackTracker.class) == null;
+                    hero.buff(QuickDrawCooldown.class) == null &&
+                    hero.buff(DashDrawTracker.class) == null;
     }
 
     public static class Sheathing extends Buff implements ActionIndicator.Action {
@@ -106,7 +107,7 @@ public class Sheath extends Item {
             if (super.attachTo(target)){
                 if (hero != null) {
                     Dungeon.observe();
-                    if (hero.subClass == HeroSubClass.MASTER && hero.buff(DashAttackCooldown.class) == null) {
+                    if (hero.subClass == HeroSubClass.MASTER && hero.buff(DashDrawCooldown.class) == null) {
                         ActionIndicator.setAction(this);
                     }
                 }
@@ -129,7 +130,7 @@ public class Sheath extends Item {
         @Override
         public boolean act() {
             if (hero.subClass == HeroSubClass.MASTER) {
-                if (hero.buff(DashAttackCooldown.class) == null) {
+                if (hero.buff(DashDrawCooldown.class) == null) {
                     ActionIndicator.setAction(this);
                 } else {
                     ActionIndicator.clearAction(this);
@@ -152,17 +153,39 @@ public class Sheath extends Item {
 
         @Override
         public int actionIcon() {
-            return HeroIcon.PREPARATION;
+            return HeroIcon.DASH_DRAW;
         }
 
         @Override
         public int indicatorColor() {
-            return 0x171717;
+            return 0x88CCFF;
         }
 
         @Override
         public void doAction() {
-            GameScene.selectCell(attack);
+            /*GameScene.selectCell(attack);*/
+            Sheath s = hero.belongings.getItem(Sheath.class);
+            if (s == null) {
+                detach();
+            }
+
+            if (QuickSlotButton.targetingSlot != -1 &&
+                    Dungeon.quickslot.getItem(QuickSlotButton.targetingSlot) == s) {
+                int cell = QuickSlotButton.autoAim(QuickSlotButton.lastTarget, s);
+
+                if (cell != -1){
+                    GameScene.handleCell(cell);
+                } else {
+                    //couldn't auto-aim, just target the position and hope for the best.
+                    GameScene.handleCell( QuickSlotButton.lastTarget.pos );
+                }
+            } else {
+                GameScene.selectCell(attack);
+
+                if (Dungeon.quickslot.contains(s)) {
+                    QuickSlotButton.useTargeting(Dungeon.quickslot.getSlot(s));
+                }
+            }
         }
 
         private static final String POS = "pos";
@@ -171,7 +194,7 @@ public class Sheath extends Item {
         public void storeInBundle(Bundle bundle) {
             super.storeInBundle(bundle);
             bundle.put( POS, pos );
-            bundle.put( CAN_DASH, (hero.subClass == HeroSubClass.MASTER && hero.buff(DashAttackCooldown.class) == null) );
+            bundle.put( CAN_DASH, (hero.subClass == HeroSubClass.MASTER && hero.buff(DashDrawCooldown.class) == null) );
         }
 
         @Override
@@ -194,30 +217,26 @@ public class Sheath extends Item {
             return Messages.get(this, "name");
         }
 
-        @Override
-        public String desc() {
-            return Messages.get(this, "desc");
-        }
-
         public int blinkDistance(){
             return 500;
         }
 
-        private CellSelector.Listener attack = new CellSelector.Listener() {
+        private final CellSelector.Listener attack = new CellSelector.Listener() {
             @Override
             public void onSelect(Integer cell) {
                 if (cell == null) return;
                 final Char enemy = Actor.findChar( cell );
                 if (enemy != null) {
-                    if (Dungeon.hero.isCharmedBy(enemy) || enemy instanceof NPC || enemy == Dungeon.hero) {
+                    if (Dungeon.hero.isCharmedBy(enemy) || enemy instanceof NPC || enemy == Dungeon.hero ||
+                            Dungeon.level.adjacent(target.pos, enemy.pos)) {
                         GLog.w(Messages.get(Sheathing.class, "no_target"));
                     } else {
-                        //just attack them then!
-                        if (Dungeon.hero.canAttack(enemy)){
+                        //DON'T attack targets without blinking.
+                        /*if (Dungeon.hero.canAttack(enemy)){
                             Dungeon.hero.curAction = new HeroAction.Attack( enemy );
                             Dungeon.hero.next();
                             return;
-                        }
+                        }*/
 
                         PathFinder.buildDistanceMap(Dungeon.hero.pos,BArray.or(Dungeon.level.passable, Dungeon.level.avoid, null), blinkDistance());
                         int dest = -1;
@@ -244,9 +263,9 @@ public class Sheath extends Item {
                             return;
                         }
 
-                        Buff.affect(hero, DashAttackTracker.class);
+                        Buff.affect(hero, DashDrawTracker.class);
                         if (hero.hasTalent(Talent.INNER_EYE)) {
-                            Buff.affect(hero, DashAttackVision.class, 2f);
+                            Buff.affect(hero, DashDrawVision.class, 2f);
                         }
 
                         Dungeon.hero.pos = dest;
@@ -294,9 +313,9 @@ public class Sheath extends Item {
                     Dungeon.hero.spendAndNext(Actor.TICK);
 
                     GLog.w(Messages.get(Sheathing.class, "no_target"));
-                    Buff.prolong(hero, DashAttackCooldown.class, (100-10*hero.pointsInTalent(Talent.DYNAMIC_PREPARATION)));
-                    if (hero.buff(DashAttackAcceleration.class) != null) {
-                        hero.buff(DashAttackAcceleration.class).detach();
+                    Buff.prolong(hero, DashDrawCooldown.class, (100-10*hero.pointsInTalent(Talent.DYNAMIC_PREPARATION)));
+                    if (hero.buff(DashDrawAccel.class) != null) {
+                        hero.buff(DashDrawAccel.class).detach();
                     }
                     ActionIndicator.clearAction(Sheathing.this);
                 }
@@ -318,15 +337,15 @@ public class Sheath extends Item {
             announced = true;
         }
 
-        private int hitAmount = 0;
+        private int hitsLeft = 0;
 
         public void set(int amount) {
-            this.hitAmount = amount;
+            this.hitsLeft = amount;
         }
 
         public void hit() {
-            this.hitAmount--;
-            if (this.hitAmount <= 0) {
+            this.hitsLeft--;
+            if (this.hitsLeft <= 0) {
                 detach();
             }
         }
@@ -335,17 +354,17 @@ public class Sheath extends Item {
         @Override
         public void storeInBundle(Bundle bundle) {
             super.storeInBundle(bundle);
-            bundle.put( HIT_AMOUNT, hitAmount );
+            bundle.put( HIT_AMOUNT, hitsLeft);
         }
 
         @Override
         public void restoreFromBundle(Bundle bundle) {
             super.restoreFromBundle(bundle);
-            hitAmount = bundle.getInt( HIT_AMOUNT );
+            hitsLeft = bundle.getInt( HIT_AMOUNT );
         }
 
         public String iconTextDisplay(){
-            return String.valueOf(hitAmount);
+            return String.valueOf(hitsLeft);
         }
 
         @Override
@@ -360,31 +379,27 @@ public class Sheath extends Item {
 
         @Override
         public String desc() {
-            return Messages.get(this, "desc", hitAmount);
+            return Messages.get(this, "desc", hitsLeft);
         }
     }
 
-    public static class FlashSlashCooldown extends FlavourBuff{
+    public static class QuickDrawCooldown extends FlavourBuff{
         public int icon() { return BuffIndicator.TIME; }
         public void tintIcon(Image icon) { icon.hardlight(0x586EDB); }
         public float iconFadePercent() { return Math.max(0, visualcooldown() / 30); }
-    };
+    }
 
-    public static class DashAttackCooldown extends FlavourBuff{
+    public static class DashDrawCooldown extends FlavourBuff{
         public int icon() { return BuffIndicator.TIME; }
         public void tintIcon(Image icon) { icon.hardlight(0xFF7F00); }
         public float iconFadePercent() { return Math.max(0, visualcooldown() / 100); }
-        @Override
-        public void detach() {
-            super.detach();
-        }
-    };
+    }
 
-    public static class DashAttackTracker extends Buff {}
+    public static class DashDrawTracker extends Buff {}
 
-    public static class DashAttackVision extends FlavourBuff {}
+    public static class DashDrawVision extends FlavourBuff {}
 
-    public static class DashAttackAcceleration extends FlavourBuff {
+    public static class DashDrawAccel extends FlavourBuff {
         {
             type = buffType.POSITIVE;
             announced = false;
@@ -405,7 +420,7 @@ public class Sheath extends Item {
 
         @Override
         public float iconFadePercent() {
-            return Math.max(0, (DURATION - visualcooldown()) / DURATION);
+            return Math.max(0, visualcooldown() / DURATION);
         }
 
         private static final String MULTI = "dmgMulti";

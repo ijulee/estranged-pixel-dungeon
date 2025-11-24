@@ -2370,15 +2370,13 @@ public enum Talent {
 			}
 		}
 
-		if (hero.buff(Sheath.DashAttackTracker.class) != null) {
+		if (hero.buff(Sheath.DashDrawTracker.class) != null) {
 			if (hero.hasTalent(Talent.ACCELERATION)) {
-				Buff.prolong(hero, Sheath.DashAttackAcceleration.class, Sheath.DashAttackAcceleration.DURATION).hit();
-				Sheath.DashAttackAcceleration buff = hero.buff(Sheath.DashAttackAcceleration.class);
-				if (buff != null) {
-                    dmg = Math.round(dmg*buff.getDmgMulti());
-				}
+				Sheath.DashDrawAccel buff = Buff.prolong(hero, Sheath.DashDrawAccel.class, Sheath.DashDrawAccel.DURATION);
+				dmg = Math.round(dmg*buff.getDmgMulti());
+				buff.hit();
 			}
-			hero.buff(Sheath.DashAttackTracker.class).detach();
+			hero.buff(Sheath.DashDrawTracker.class).detach();
 		}
 
 		if (Random.Float() < hero.pointsInTalent(Talent.MADNESS)/10f) {

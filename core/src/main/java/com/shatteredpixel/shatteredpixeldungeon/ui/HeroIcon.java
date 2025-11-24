@@ -197,7 +197,7 @@ public class HeroIcon extends Image {
 	public static final int SWORD_AURA		= 128;
 	public static final int AWAKEN_OFF		= 129;
 	public static final int AWAKEN_ON		= 130;
-//	public static final int 				= 131;
+	public static final int DASH_DRAW		= 131;
 
 	public static final int BUILD			= 132;
 //	public static final int 				= 133;

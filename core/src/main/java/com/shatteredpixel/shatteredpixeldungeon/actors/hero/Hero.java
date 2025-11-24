@@ -705,8 +705,8 @@ public class Hero extends Char {
 
 		if (subClass == HeroSubClass.MASTER &&
 				buff(Sheath.Sheathing.class) != null &&
-				buff(Sheath.FlashSlashCooldown.class) == null &&
-				buff(Sheath.DashAttackTracker.class) == null) {
+				buff(Sheath.QuickDrawCooldown.class) == null &&
+				buff(Sheath.DashDrawTracker.class) == null) {
 			accuracy = INFINITE_ACCURACY;
 		}
 
@@ -927,10 +927,6 @@ public class Hero extends Char {
 			if (wep instanceof Weapon) {
 				if (Random.Float() < critChance((Weapon)wep)) {
 					dmg = critDamage(dmg, (Weapon)wep);
-				} else {
-					if (Sheath.isFlashSlash()) {
-						Buff.prolong(this, Sheath.FlashSlashCooldown.class, (30-5*pointsInTalent(Talent.STATIC_PREPARATION))-1);
-					}
 				}
 			}
 
@@ -1097,7 +1093,8 @@ public class Hero extends Char {
 			return 0;
 		}
 
-		if (Sheath.isFlashSlash()) {
+		if (Sheath.isQuickDraw()) {
+			Buff.prolong(this, Sheath.QuickDrawCooldown.class, (30-5*pointsInTalent(Talent.STATIC_PREPARATION)));
 			return 0;
 		}
 
@@ -1912,8 +1909,8 @@ public class Hero extends Char {
 
 			if (buff(Sheath.Sheathing.class) != null) {
 				if (subClass == HeroSubClass.MASTER &&
-						buff(Sheath.FlashSlashCooldown.class) == null &&
-						buff(Sheath.DashAttackTracker.class) == null &&
+						buff(Sheath.QuickDrawCooldown.class) == null &&
+						buff(Sheath.DashDrawTracker.class) == null &&
 						wep instanceof MeleeWeapon) {
 					chance *= 1.4f + 0.2f * pointsInTalent(Talent.ENHANCED_CRIT);
 				} else {
@@ -1966,11 +1963,9 @@ public class Hero extends Char {
 			multi += 0.1f * pointsInTalent(Talent.POWERFUL_CRIT);
 		}
 
-		if (Sheath.isFlashSlash()) {
+		if (Sheath.isQuickDraw()) {
 			multi += 0.15f * pointsInTalent(Talent.POWERFUL_SLASH);
 		}
-
-		// TODO Shouldn't Master's draw attack damage increases be placed here?
 
 		Awakening awakening = buff(Awakening.class);
 		if (awakening != null && awakening.isAwaken()) {

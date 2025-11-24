@@ -113,7 +113,6 @@ import com.shatteredpixel.shatteredpixeldungeon.tiles.CustomTilemap;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.Game;
 import com.watabou.noosa.Group;
-import com.watabou.noosa.audio.Music;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.BArray;
 import com.watabou.utils.Bundlable;
@@ -1482,7 +1481,7 @@ public abstract class Level implements Bundlable {
 				if (((Hero) c).hasTalent(Talent.TACTICAL_SIGHT) && ((Hero) c).buff(ReinforcedArmor.ReinforcedArmorTracker.class) != null) {
 					mindVisRange += 1+((Hero) c).pointsInTalent(Talent.TACTICAL_SIGHT);
 				}
-				if (((Hero) c).hasTalent(Talent.INNER_EYE) && ((Hero) c).buff(Sheath.DashAttackVision.class) != null) {
+				if (((Hero) c).hasTalent(Talent.INNER_EYE) && ((Hero) c).buff(Sheath.DashDrawVision.class) != null) {
 					mindVisRange += 3*((Hero) c).pointsInTalent(Talent.INNER_EYE);
 				}
 				mindVisRange = Math.max(mindVisRange, EyeOfNewt.mindVisionRange());
