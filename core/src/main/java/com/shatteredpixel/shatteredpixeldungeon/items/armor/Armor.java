@@ -222,12 +222,31 @@ public class Armor extends EquipableItem {
 			Game.runOnRenderThread(new Callback() {
 				@Override
 				public void call() {
-					int level = Armor.this.isIdentified() ? Armor.this.level() : 0;
-					int amount = Math.round(5 * (Armor.this.tier+1) * (float)Math.pow(2, Math.min(3, level)));
+					// round at the end
+					float typ_amt = 5 * (Armor.this.tier+1);
+					if (Armor.this.levelKnown) {
+						typ_amt *= (float) Math.pow(1.5, Math.min(3, Armor.this.level()));
+					}
+					if (Armor.this.hasGoodGlyph()) {
+						typ_amt *= 1.5f;
+					}
+					if (Armor.this.visiblyCursed()) {
+						typ_amt *= 2 / 3f;
+					}
+
+					final int typical_amount = Math.round(typ_amt);
+
+					float amt = typ_amt;
+					if (Armor.this.cursed && !Armor.this.cursedKnown) {
+						amt *= 2 / 3f;
+					}
+
+					final int amount = Math.round(amt);
+
 					GameScene.show(
 							new WndOptions( new ItemSprite(Armor.this),
 									Messages.get(MeleeWeapon.class, "scrap_title"),
-									Messages.get(MeleeWeapon.class, "scrap_desc", amount),
+									Messages.get(MeleeWeapon.class, "scrap_desc", Armor.this.name(), typical_amount),
 									Messages.get(MeleeWeapon.class, "scrap_yes"),
 									Messages.get(MeleeWeapon.class, "scrap_no") ) {
 
@@ -249,27 +268,25 @@ public class Armor extends EquipableItem {
 								@Override
 								protected void onSelect( int index ) {
 									if (index == 0 && elapsed > 0.2f) {
-										LiquidMetal metal = new LiquidMetal();
-										int metalQuantity = amount;
-										if (Armor.this.cursed || !Armor.this.isIdentified()) {
-											metalQuantity /= 2;
-										}
+										Armor.this.detach(hero.belongings.backpack);
 
-										metal.quantity(metalQuantity);
-										if (!metal.doPickUp(hero)) {
+										LiquidMetal metal = new LiquidMetal();
+										metal.quantity(amount);
+										if (metal.doPickUp(hero)) {
+											hero.spend(-metal.pickupDelay());
+										} else {
 											Dungeon.level.drop( metal, hero.pos ).sprite.drop();
 										}
 
 										EnergyCrystal crystal = new EnergyCrystal();
 										crystal.quantity(Random.IntRange(1, 2));
 										crystal.doPickUp(hero);
-
-										Armor.this.detach(hero.belongings.backpack);
+										hero.spend(-crystal.pickupDelay());
 
 										hero.sprite.operate(hero.pos);
-										GLog.p(Messages.get(MeleeWeapon.class, "scrap", metalQuantity));
+										GLog.p(Messages.get(MeleeWeapon.class, "scrap", amount));
 										Sample.INSTANCE.play(Assets.Sounds.UNLOCK);
-
+										hero.spend(1);
 										updateQuickslot();
 									}
 								}

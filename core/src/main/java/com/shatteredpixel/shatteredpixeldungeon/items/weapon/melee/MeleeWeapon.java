@@ -187,12 +187,31 @@ public class MeleeWeapon extends Weapon {
 				Game.runOnRenderThread(new Callback() {
 					@Override
 					public void call() {
-						int level = MeleeWeapon.this.isIdentified() ? MeleeWeapon.this.level() : 0;
-						final int amount = Math.round(5 * (MeleeWeapon.this.tier+1) * (float)Math.pow(2, Math.min(3, level)));
+						// round at the end
+						float typ_amt = 5 * (MeleeWeapon.this.tier+1);
+						if (MeleeWeapon.this.levelKnown) {
+							typ_amt *= (float) Math.pow(1.5f, Math.min(3, MeleeWeapon.this.level()));
+						}
+						if (MeleeWeapon.this.hasGoodEnchant()) {
+							typ_amt *= 1.5f;
+						}
+						if (MeleeWeapon.this.visiblyCursed()) {
+							typ_amt *= 2 / 3f;
+						}
+
+						final int typical_amount = Math.round(typ_amt);
+
+						float amt = typ_amt;
+						if (MeleeWeapon.this.cursed && !MeleeWeapon.this.cursedKnown) {
+							amt *= 2 / 3f;
+						}
+
+						final int amount = Math.round(amt);
+
 						GameScene.show(
 								new WndOptions( new ItemSprite(MeleeWeapon.this),
 										Messages.get(MeleeWeapon.class, "scrap_title"),
-										Messages.get(MeleeWeapon.class, "scrap_desc", amount),
+										Messages.get(MeleeWeapon.class, "scrap_desc", MeleeWeapon.this.name(), typical_amount),
 										Messages.get(MeleeWeapon.class, "scrap_yes"),
 										Messages.get(MeleeWeapon.class, "scrap_no") ) {
 
@@ -212,25 +231,27 @@ public class MeleeWeapon extends Weapon {
 									}
 
 									@Override
-									protected void onSelect( int index ) {
-										if (index == 0 && elapsed > 0.2f) {
+									protected void onSelect( int opt ) {
+										if (opt == 0 && elapsed > 0.2f) {
+											MeleeWeapon.this.detach(hero.belongings.backpack);
+
 											LiquidMetal metal = new LiquidMetal();
-
 											metal.quantity(amount);
-											if (!metal.doPickUp(hero)) {
-												Dungeon.level.drop( metal, hero.pos ).sprite.drop();
-											}
+                                            if (metal.doPickUp(hero)) {
+												hero.spend(-metal.pickupDelay());
+                                            } else {
+                                                Dungeon.level.drop( metal, hero.pos ).sprite.drop();
+                                            }
 
-											EnergyCrystal crystal = new EnergyCrystal();
+                                            EnergyCrystal crystal = new EnergyCrystal();
 											crystal.quantity(Random.IntRange(1, 2));
 											crystal.doPickUp(hero);
-
-											MeleeWeapon.this.detach(hero.belongings.backpack);
+											hero.spend(-crystal.pickupDelay());
 
 											hero.sprite.operate(hero.pos);
 											GLog.p(Messages.get(MeleeWeapon.class, "scrap", amount));
 											Sample.INSTANCE.play(Assets.Sounds.UNLOCK);
-
+											hero.spend(1);
 											updateQuickslot();
 										}
 									}
@@ -239,18 +260,55 @@ public class MeleeWeapon extends Weapon {
 					}
 				});
 			} else if (hero.heroClass == HeroClass.ARCHER) {
-				detach(hero.belongings.backpack);
-				hero.sprite.operate(hero.pos);
-				Sample.INSTANCE.play(Assets.Sounds.EVOKE);
-				CellEmitter.center( curUser.pos ).burst( Speck.factory( Speck.STAR ), 7 );
-				GLog.p(Messages.get(this, "scrap_archer"));
-				MissileWeapon result = Generator.randomMissile(true);
-				if (!result.doPickUp(hero, hero.pos)) {
-					GLog.i(Messages.get(Dungeon.hero, "you_now_have", result.name()));
-					hero.spend(-1);
-					Dungeon.level.drop(result, hero.pos).sprite.drop();
-				}
-				updateQuickslot();
+				Game.runOnRenderThread(() -> {
+					GameScene.show(new WndOptions(new ItemSprite(MeleeWeapon.this),
+							Messages.get(MeleeWeapon.class, "scrap_title"),
+							Messages.get(MeleeWeapon.class, "scrap_archer_desc", MeleeWeapon.this.name()),
+							Messages.get(MeleeWeapon.class, "scrap_yes"),
+							Messages.get(MeleeWeapon.class, "scrap_no")) {
+						private float elapsed = 0f;
+
+						@Override
+						public synchronized void update() {
+							super.update();
+							elapsed += Game.elapsed;
+						}
+
+						@Override
+						public void hide() {
+							if (elapsed > 0.2f){
+								super.hide();
+							}
+						}
+
+						@Override
+						protected void onSelect( int opt ) {
+							if (opt == 0 && elapsed > 0.2f) {
+								MeleeWeapon.this.detach(hero.belongings.backpack);
+
+								MissileWeapon result;
+								if (MeleeWeapon.this.hasGoodEnchant() || MeleeWeapon.this.visiblyUpgraded() > 0) {
+									result = Generator.randomMissile(MeleeWeapon.this.tier + 1);
+								} else {
+									result = Generator.randomMissile(MeleeWeapon.this.tier);
+								}
+								GLog.i(Messages.get(MeleeWeapon.class, "scrap_archer", MeleeWeapon.this.name()));
+								if (result.doPickUp(hero)) {
+									hero.spend(-result.pickupDelay());
+									GLog.i(Messages.get(hero, "you_now_have", result.name()));
+								} else {
+									Dungeon.level.drop(result, hero.pos).sprite.drop();
+								}
+
+								hero.sprite.operate(hero.pos);
+								Sample.INSTANCE.play(Assets.Sounds.EVOKE);
+								CellEmitter.center( curUser.pos ).burst( Speck.factory( Speck.STAR ), 7 );
+
+								updateQuickslot();
+							}
+						}
+					});
+				});
 			}
 		}
 	}

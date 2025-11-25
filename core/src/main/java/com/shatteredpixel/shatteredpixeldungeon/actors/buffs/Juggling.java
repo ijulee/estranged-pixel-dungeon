@@ -69,8 +69,6 @@ public class Juggling extends Buff implements ActionIndicator.Action {
                     }
                 } else {
                     Dungeon.level.drop(lastWep, hero.pos).sprite.drop();
-                    GLog.newLine();
-                    GLog.i(Messages.capitalize(Messages.get(hero, "you_cant_have", lastWep.name())));
                 }
             }
         }

@@ -16,6 +16,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.items.ArrowBag;
 import com.shatteredpixel.shatteredpixeldungeon.items.ArrowItem;
 import com.shatteredpixel.shatteredpixeldungeon.items.KindOfWeapon;
+import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfSharpshooting;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfBlastWave;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
@@ -102,10 +103,14 @@ public class BowWeapon extends GunWeapon {
     }
 
     @Override
-    public boolean doPickUp(Hero hero, int pos) {
-        Statistics.bowObtained = true;
-        Badges.validateArcherUnlock();
-        return super.doPickUp(hero, pos);
+    public boolean collect(Bag container) {
+        if (super.collect(container)) {
+            Statistics.bowObtained = true;
+            Badges.validateArcherUnlock();
+            return true;
+        } else {
+            return false;
+        }
     }
 
     @Override
@@ -161,6 +166,11 @@ public class BowWeapon extends GunWeapon {
         @Override
         public boolean doPickUp(Hero hero, int pos) {
             return new ArrowItem().doPickUp(hero, pos);
+        }
+
+        @Override
+        public boolean collect(Bag container) {
+            return new ArrowItem().collect(container);
         }
 
         @Override

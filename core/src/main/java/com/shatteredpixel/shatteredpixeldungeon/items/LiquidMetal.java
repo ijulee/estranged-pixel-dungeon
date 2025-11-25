@@ -27,6 +27,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
+import com.shatteredpixel.shatteredpixeldungeon.effects.Flare;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Splash;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
@@ -93,14 +94,16 @@ public class LiquidMetal extends Item {
 			GameScene.selectItem( itemSelector );
 
 		}
+
 		if (action.equals(AC_MAKE)) {
+			int baseCost = 25 + 25 * (1+Dungeon.depth/5);
 			Game.runOnRenderThread(new Callback() {
 				@Override
 				public void call() {
 					GameScene.show(
 							new WndOptions( new ItemSprite(LiquidMetal.this),
 									Messages.get(LiquidMetal.class, "make_title"),
-									Messages.get(LiquidMetal.class, "make_desc", LiquidMetal.this.quantity, 25 + 25 * (1+Dungeon.depth/5)),
+									Messages.get(LiquidMetal.class, "make_desc", quantity, baseCost),
 									Messages.get(LiquidMetal.class, "make_no_boost"),
 									Messages.get(LiquidMetal.class, "make_boost"),
 									Messages.get(LiquidMetal.class, "make_cancel") ) {
@@ -121,46 +124,51 @@ public class LiquidMetal extends Item {
 								}
 
 								@Override
-								protected void onSelect( int index ) {
-									if (elapsed > 0.2f) {
-										MeleeWeapon item = null;
-										switch (index) {
-											case 0:
-												while (!(item instanceof Gun)) {
-													item = Generator.randomWeapon();
-												}
-												if (!item.doPickUp(hero)) {
-													Dungeon.level.drop( item, hero.pos ).sprite.drop();
-												}
-												hero.spend(-1); //아이템을 얻는 데에 시간을 소모하지 않음
-												hero.busy();
-												LiquidMetal.this.quantity(LiquidMetal.this.quantity-(25 + 25 * (1+Dungeon.depth/5)));
-												hero.sprite.operate(hero.pos);
-												Sample.INSTANCE.play(Assets.Sounds.EVOKE);
-												CellEmitter.center( hero.pos ).burst( Speck.factory( Speck.STAR ), 7 );
-												break;
-											case 1:
-												while (!(item instanceof Gun && !item.cursed)) {
-													item = Generator.randomWeapon(Dungeon.depth / 5 + 1);
-												}
-												item.cursedKnown = true;
-												if (Random.Float() < 0.33f) { //33% 확률로 추가 강화수치와 무작위 마법을 부여함
-													item.upgrade(true);
-												}
-												if (!item.doPickUp(hero)) {
-													Dungeon.level.drop( item, hero.pos ).sprite.drop();
-												} else {
-													hero.spend(-1); //아이템을 얻는 데에 시간을 소모하지 않음
-												}
-												hero.busy();
-												LiquidMetal.this.quantity(LiquidMetal.this.quantity-(25 + 25 * (1+Dungeon.depth/5))*2);
-												hero.sprite.operate(hero.pos);
-												Sample.INSTANCE.play(Assets.Sounds.EVOKE);
-												CellEmitter.center( hero.pos ).burst( Speck.factory( Speck.STAR ), 7 );
-												break;
-											default:
-												break;
+								protected void onSelect( int opt ) {
+									if (elapsed > 0.2f && opt != 2) {
+										int craftCost = (opt == 0) ? baseCost : 2 * baseCost;
+										// detach and collect since qty changes don't update backpack
+										detachAll(Dungeon.hero.belongings.backpack);
+										quantity(quantity-craftCost);
+										if (!collect()) {
+											Dungeon.level.drop( LiquidMetal.this, hero.pos ).sprite.drop();
 										}
+
+										MeleeWeapon wep = null;
+
+										while (!(wep instanceof Gun)) {
+                                            if (opt == 0) {
+                                                wep = Generator.randomWeapon();
+                                            } else {
+                                                wep = Generator.randomWeapon(Dungeon.depth / 5 + 1);
+                                                if (wep.cursed) {
+                                                    wep = null;
+                                                }
+                                            }
+                                        }
+
+                                        if (opt == 0) {
+											new Flare(6, 20).color(0x00FF00, true).show(hero.sprite, 3f);
+                                        } else {
+                                            wep.cursedKnown = true;
+											if (Random.Int(3) < 1) {
+                                                wep.upgrade(true);
+                                            }
+											new Flare(6, 28).color(0xAA00FF, true).show(hero.sprite, 3.67f);
+										}
+
+                                        if (wep.doPickUp(hero)) {
+											hero.spend(-wep.pickupDelay());
+											GLog.i(Messages.capitalize(Messages.get(hero, "you_now_have", wep.name())));
+                                        } else {
+                                            Dungeon.level.drop( wep, hero.pos ).sprite.drop();
+                                        }
+
+                                        hero.busy();
+										hero.sprite.operate(hero.pos);
+										Sample.INSTANCE.play(Assets.Sounds.EVOKE);
+										CellEmitter.center( hero.pos ).burst( Speck.factory( Speck.STAR ), 7);
+										hero.spendAndNext(1);
 									}
 								}
 
@@ -181,9 +189,9 @@ public class LiquidMetal extends Item {
 								protected boolean enabled( int index ){
 									switch (index) {
 										case 0:
-											return LiquidMetal.this.quantity >= (25 + 25 * (1+Dungeon.depth/5));
+											return quantity >= baseCost;
 										case 1:
-											return LiquidMetal.this.quantity >= (25 + 25 * (1+Dungeon.depth/5)) * 2;
+											return quantity >= 2*baseCost;
 										case 2: default:
 											return true;
 									}

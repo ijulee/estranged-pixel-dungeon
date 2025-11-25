@@ -583,7 +583,7 @@ public class AlchemyScene extends PixelScene {
 					for (int i = 0; i < inputs.length; i++) {
 						if (inputs[i].item() == null) {
 							if (item instanceof LiquidMetal || item instanceof MissileWeapon
-                                    || item instanceof UpgradeDust || item instanceof Evolution){
+                                    /*|| item instanceof UpgradeDust || item instanceof Evolution*/){
 								inputs[i].item(item.detachAll(Dungeon.hero.belongings.backpack));
 							} else {
 								inputs[i].item(item.detach(Dungeon.hero.belongings.backpack));
