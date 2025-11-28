@@ -545,6 +545,7 @@ public class Gun extends GunWeapon {
 		{
 			hitSound = Assets.Sounds.PUFF;
 			tier = Gun.this.tier();
+			levelKnown = true;
 		}
 
 		public boolean isBurst = false;
@@ -565,6 +566,11 @@ public class Gun extends GunWeapon {
 
 		public EnchantMod enchantMod() {
 			return Gun.this.enchantMod;
+		}
+
+		@Override
+		public boolean isIdentified() {
+			return true;
 		}
 
 		@Override

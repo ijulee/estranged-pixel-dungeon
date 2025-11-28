@@ -49,6 +49,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.KindOfWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.LiquidMetal;
 import com.shatteredpixel.shatteredpixeldungeon.items.Sheath;
+import com.shatteredpixel.shatteredpixeldungeon.items.quest.Pickaxe;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfBlastWave;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfForce;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfRecharging;
@@ -117,7 +118,7 @@ public class MeleeWeapon extends Weapon {
 		if (isEquipped(hero) && hero.heroClass == HeroClass.DUELIST){
 			actions.add(AC_ABILITY);
 		}
-		if (!isEquipped(hero) && (hero.heroClass == HeroClass.GUNNER || hero.heroClass == HeroClass.ARCHER)) {
+		if (!isEquipped(hero) && (hero.heroClass == HeroClass.GUNNER || hero.heroClass == HeroClass.ARCHER) && !(this instanceof Pickaxe)) {
 			actions.add(AC_SCRAP);
 		}
 		return actions;

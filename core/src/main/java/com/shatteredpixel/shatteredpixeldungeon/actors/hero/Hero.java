@@ -2098,10 +2098,10 @@ public class Hero extends Char {
 				}
 				if (wep == null && Random.Float() < pointsInTalent(Talent.MYSTICAL_PUNCH)/3f) {
 					if (belongings.ring != null) {
-						damage = (int)Ring.onHit(this, enemy, damage, Ring.ringTypes.get(belongings.ring.getClass()));
+						damage = belongings.ring.onHit(this, enemy, damage);
 					}
 					if (belongings.misc instanceof Ring) {
-						damage = (int)Ring.onHit(this, enemy, damage, Ring.ringTypes.get(belongings.misc.getClass()));
+						damage = ((Ring)belongings.misc).onHit(this, enemy, damage);
 					}
 				}
 				break;
@@ -3317,6 +3317,10 @@ public class Hero extends Char {
 			if (!attackTarget.isAlive() && Random.Float() < pointsInTalent(Talent.QUICK_SHEATHING)/3f) {
 				Buff.affect(this, Sheath.Sheathing.class);
 			}
+		}
+		
+		if (heroClass != HeroClass.SAMURAI && hasTalent(Talent.QUICK_SHEATHING) && !attackTarget.isAlive()) {
+			Buff.affect(this, Haste.class, 3f*pointsInTalent(Talent.QUICK_SHEATHING));
 		}
 		curAction = null;
 		attackTarget = null;
