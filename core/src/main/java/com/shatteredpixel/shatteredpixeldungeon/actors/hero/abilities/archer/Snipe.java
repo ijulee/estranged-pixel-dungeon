@@ -13,7 +13,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.ArmorAbili
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.ClassArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.bow.SpiritBow;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.DisposableMissileWeapon;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
@@ -84,9 +84,10 @@ public class Snipe extends ArmorAbility {
         return new SnipeArrow();
     }
 
-    public static class SnipeArrow extends DisposableMissileWeapon {
+    public static class SnipeArrow extends MissileWeapon {
         {
             image = ItemSpriteSheet.NORMAL_ARROW;
+            spawnedForEffect = true;
         }
 
         @Override

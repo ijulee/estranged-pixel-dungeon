@@ -8,6 +8,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Paralysis;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ThunderImbue;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Lightning;
+import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.brews.ShockingBrew;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfSharpshooting;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfRecharging;
@@ -98,7 +99,23 @@ public class PotOThunder extends MissileWeapon {
             cost = 3;
 
             output = PotOThunder.class;
-            outQuantity = 1;
+            outQuantity = 3;
+        }
+
+        @Override
+        public Item brew(ArrayList<Item> ingredients) {
+            Item result = super.brew(ingredients).identify(false);
+            if (result != null) {
+                for (Item m: ingredients) {
+                    if (m instanceof MissileWeapon) {
+                        m.quantity(0);
+                        Buff.affect(Dungeon.hero, MissileWeapon.UpgradedSetTracker.class).
+                                levelThresholds.put(((MissileWeapon)m).setID, Integer.MAX_VALUE);
+
+                    }
+                }
+            }
+            return result;
         }
     }
 }

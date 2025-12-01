@@ -13,7 +13,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.KindOfWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.Sheath;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.bow.SpiritBow;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.DisposableMissileWeapon;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.CellSelector;
@@ -193,11 +193,12 @@ public class SwordAura extends Buff implements ActionIndicator.Action {
         return new Aura();
     }
 
-    public class Aura extends DisposableMissileWeapon {
+    public class Aura extends MissileWeapon {
 
         {
             image = ItemSpriteSheet.SWORD_AURA;
             hitSound = Assets.Sounds.HIT_SLASH;
+            spawnedForEffect = true;
         }
 
         @Override

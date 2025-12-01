@@ -33,7 +33,6 @@ import com.shatteredpixel.shatteredpixeldungeon.effects.Splash;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.MagicalHolster;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.Potion;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.HeroSword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.gun.Gun;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
@@ -150,7 +149,7 @@ public class LiquidMetal extends Item {
                                         if (opt == 0) {
 											new Flare(6, 20).color(0x00FF00, true).show(hero.sprite, 3f);
                                         } else {
-                                            wep.cursedKnown = true;
+											wep.cursedKnown = true;
 											if (Random.Int(3) < 1) {
                                                 wep.upgrade(true);
                                             }
@@ -164,7 +163,7 @@ public class LiquidMetal extends Item {
                                             Dungeon.level.drop( wep, hero.pos ).sprite.drop();
                                         }
 
-                                        hero.busy();
+										hero.busy();
 										hero.sprite.operate(hero.pos);
 										Sample.INSTANCE.play(Assets.Sounds.EVOKE);
 										CellEmitter.center( hero.pos ).burst( Speck.factory( Speck.STAR ), 7);

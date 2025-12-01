@@ -7,6 +7,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ShadowParticle;
+import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.bombs.HolyBomb;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Bible;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.HeavyBoomerang;
@@ -17,6 +18,8 @@ import com.watabou.noosa.audio.Sample;
 import com.watabou.noosa.tweeners.AlphaTweener;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.Callback;
+
+import java.util.ArrayList;
 
 public class Cross extends MissileWeapon {
     {
@@ -36,29 +39,35 @@ public class Cross extends MissileWeapon {
                 tier * lvl; //+5 per level
     }
 
-    boolean circleBackhit = false;
+	boolean circlingBack = false;
 
     @Override
     protected float adjacentAccFactor(Char owner, Char target) {
-        if (circleBackhit){
-            circleBackhit = false;
+        if (circlingBack){
+            circlingBack = false;
             return 1.5f;
         }
         return super.adjacentAccFactor(owner, target);
     }
 
     @Override
+    public float pickupDelay() {
+        //pickup is instant when circling back
+        return circlingBack ? 0f : super.pickupDelay();
+    }
+
+    @Override
     protected void rangedHit(Char enemy, int cell) {
         decrementDurability();
         if (durability > 0){
-            Buff.append(Dungeon.hero, CircleBack.class).setup(this, cell, Dungeon.hero.pos, Dungeon.depth);
+            Buff.append(Dungeon.hero, CircleBack.class).setup(this, cell, Dungeon.hero.pos, Dungeon.depth, Dungeon.branch);
         }
     }
 
     @Override
     protected void rangedMiss(int cell) {
         parent = null;
-        Buff.append(Dungeon.hero, CircleBack.class).setup(this, cell, Dungeon.hero.pos, Dungeon.depth);
+        Buff.append(Dungeon.hero, CircleBack.class).setup(this, cell, Dungeon.hero.pos, Dungeon.depth, Dungeon.branch);
     }
 
     public static class CircleBack extends Buff {
@@ -71,15 +80,17 @@ public class Cross extends MissileWeapon {
         private int thrownPos;
         private int returnPos;
         private int returnDepth;
+        private int returnBranch;
 
         private int left;
 
-        public void setup( Cross cross, int thrownPos, int returnPos, int returnDepth){
+        public void setup( Cross cross, int thrownPos, int returnPos, int returnDepth, int returnBranch){
             this.cross = cross;
             this.thrownPos = thrownPos;
             this.returnPos = returnPos;
             this.returnDepth = returnDepth;
-            left = 3;
+            this.returnBranch = returnBranch;
+            left = 4;
         }
 
         public int returnPos(){
@@ -109,33 +120,33 @@ public class Cross extends MissileWeapon {
                             new Callback() {
                                 @Override
                                 public void call() {
+                                    detach();
+                                    cross.circlingBack = true;
                                     if (returnTarget == target){
-                                        if (target instanceof Hero && cross.doPickUp((Hero) target)) {
-                                            //grabbing the boomerang takes no time
-                                            ((Hero) target).spend(-TIME_TO_PICK_UP);
-                                        } else {
-                                            Dungeon.level.drop(cross, returnPos).sprite.drop();
+                                        if (!cross.spawnedForEffect) {
+                                            if (!(target instanceof Hero) || !cross.doPickUp((Hero) target)) {
+                                                Dungeon.level.drop(cross, returnPos).sprite.drop();
+                                            }
                                         }
 
                                     } else if (returnTarget != null){
-                                        cross.circleBackhit = true;
-                                        if (((Hero)target).shoot( returnTarget, cross)) {
+                                        if (((Hero)target).shoot( returnTarget, cross )) {
                                             cross.decrementDurability();
                                         }
-                                        if (cross.durability > 0) {
+                                        if (!cross.spawnedForEffect && cross.durability > 0) {
                                             Dungeon.level.drop(cross, returnPos).sprite.drop();
                                         }
 
-                                    } else {
+                                    } else if (!cross.spawnedForEffect) {
                                         Dungeon.level.drop(cross, returnPos).sprite.drop();
                                     }
-                                    Cross.CircleBack.this.next();
+                                    cross.circlingBack = false;
+                                    CircleBack.this.next();
                                 }
                             });
                     visual.alpha(0f);
                     float duration = Dungeon.level.trueDistance(thrownPos, returnPos) / 20f;
                     target.sprite.parent.add(new AlphaTweener(visual, 1f, duration));
-                    detach();
                     return false;
                 }
             }
@@ -147,6 +158,7 @@ public class Cross extends MissileWeapon {
         private static final String THROWN_POS = "thrown_pos";
         private static final String RETURN_POS = "return_pos";
         private static final String RETURN_DEPTH = "return_depth";
+        private static final String RETURN_BRANCH = "return_branch";
 
         @Override
         public void storeInBundle(Bundle bundle) {
@@ -155,6 +167,7 @@ public class Cross extends MissileWeapon {
             bundle.put(THROWN_POS, thrownPos);
             bundle.put(RETURN_POS, returnPos);
             bundle.put(RETURN_DEPTH, returnDepth);
+            bundle.put(RETURN_BRANCH, returnBranch);
         }
 
         @Override
@@ -164,6 +177,7 @@ public class Cross extends MissileWeapon {
             thrownPos = bundle.getInt(THROWN_POS);
             returnPos = bundle.getInt(RETURN_POS);
             returnDepth = bundle.getInt(RETURN_DEPTH);
+            returnBranch = bundle.contains(RETURN_BRANCH) ? bundle.getInt(RETURN_BRANCH) : 0;
         }
     }
 
@@ -173,7 +187,7 @@ public class Cross extends MissileWeapon {
             defender.sprite.emitter().start( ShadowParticle.UP, 0.05f, 10 );
             Sample.INSTANCE.play(Assets.Sounds.BURNING);
 
-            damage *= 1.33f; //deals more damage to the demons and the undeads
+            damage = Math.round(damage * 4 / 3f); //deals more damage to the demons and the undeads
         }
         return super.proc(attacker, defender, damage);
     }
@@ -186,7 +200,23 @@ public class Cross extends MissileWeapon {
             cost = 20;
 
             output = Cross.class;
-            outQuantity = 1;
+            outQuantity = 3;
+        }
+
+        @Override
+        public Item brew(ArrayList<Item> ingredients) {
+            Item result = super.brew(ingredients).identify(false);
+            if (result != null) {
+                for (Item m: ingredients) {
+                    if (m instanceof MissileWeapon) {
+                        m.quantity(0);
+                        Buff.affect(Dungeon.hero, MissileWeapon.UpgradedSetTracker.class).
+                                levelThresholds.put(((MissileWeapon)m).setID, Integer.MAX_VALUE);
+
+                    }
+                }
+            }
+            return result;
         }
     }
 }
