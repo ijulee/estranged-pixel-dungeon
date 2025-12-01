@@ -53,6 +53,7 @@ import com.watabou.utils.Random;
 import com.watabou.utils.Reflection;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 public class RingOfWealth extends Ring {
 
@@ -137,12 +138,18 @@ public class RingOfWealth extends Ring {
 				//A second ring of wealth can be at most +1 when calculating wealth bonus for equips
 				//This is to prevent using an upgraded wealth to farm another upgraded wealth and
 				//using the two to get substantially more upgrade value than intended
-				for (Wealth w : target.buffs(Wealth.class)){
-					if (w.buffedLvl() > equipBonus){
-						equipBonus = w.buffedLvl() + Math.min(equipBonus, 2);
-					} else {
-						equipBonus += Math.min(w.buffedLvl(), 2);
+				Wealth maxWealth = null;
+				HashSet<Wealth> wealthBuffs = target.buffs(Wealth.class);
+				for (Wealth w : wealthBuffs) {
+					if (maxWealth == null || w.buffedLvl() > maxWealth.buffedLvl()) {
+						maxWealth = w;
 					}
+				}
+
+				wealthBuffs.remove(maxWealth);
+				equipBonus = maxWealth.buffedLvl();
+				for (Wealth w : wealthBuffs) {
+					equipBonus += Math.min(w.buffedLvl(), 2);
 				}
 
 				Item i;

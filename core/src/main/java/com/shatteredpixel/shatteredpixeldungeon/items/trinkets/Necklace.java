@@ -56,6 +56,7 @@ public class Necklace extends Trinket {
 
     @Override
     protected int upgradeEnergyCost() {
+        //6 -> 15(21) -> 23(44) -> 31(75)
         return 15+8*level();
     }
 
@@ -70,14 +71,14 @@ public class Necklace extends Trinket {
 
     @Override
     public String statsDesc() {
+        String stats;
         if (ring == null) {
-            return Messages.get(this, "stats_desc");
-        }
-        if (isIdentified()) {
-            return Messages.get(this, "stats_desc_ring", buffedLvl(), ring.trueName(), buffedRing(ring).statsInfo());
+            stats = Messages.get(this, "stats_desc");
         } else {
-            return Messages.get(this, "typical_stats_desc_ring", buffedLvl(), ring.trueName(), buffedRing(ring).statsInfo());
+            Ring buffedRing = buffedRing(ring);
+            stats = Messages.get(this, "stats_desc_ring", buffedLvl(), buffedRing.trueName(), buffedRing.statsInfo());
         }
+        return stats + "\n\n" + Messages.get(this, "stats_desc_cost");
     }
 
     @Override
@@ -136,7 +137,8 @@ public class Necklace extends Trinket {
         return super.collect(container);
     }
 
-    protected void onThrow( int cell ) {
+    @Override
+    protected void onThrow(int cell ) {
         Hero hero = Dungeon.hero;
         if (buff != null){
             buff.detach();
@@ -157,6 +159,19 @@ public class Necklace extends Trinket {
         }
         hero.updateHT(false);
         super.onDetach();
+    }
+
+    public static Ring getNecklaceRing() {
+        Necklace n = null;
+        if (Dungeon.hero != null) {
+            n = Dungeon.hero.belongings.getItem(Necklace.class);
+        }
+
+        if (n != null && n.ring != null) {
+            return n.buffedRing(n.ring);
+        } else {
+            return null;
+        }
     }
 
     protected WndBag.ItemSelector itemSelector = new WndBag.ItemSelector() {
@@ -203,7 +218,7 @@ public class Necklace extends Trinket {
         protected void onSelect(int index) {
             if (index == 0) {
                 Hero hero = Dungeon.hero;
-                //반지 삽입 메커니즘
+
                 if (Necklace.buff != null){
                     Necklace.buff.detach();
                     hero.removeNecklaceRing();
@@ -217,7 +232,7 @@ public class Necklace extends Trinket {
                 ring.detach(hero.belongings.backpack);
                 necklace.image = Necklace.gems.get(ring.image());
                 updateQuickslot();
-                //이펙트
+
                 evoke(hero);
                 Sample.INSTANCE.play(Assets.Sounds.EVOKE);
                 hero.spendAndNext(Actor.TICK);

@@ -67,6 +67,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.KindofMisc;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.Artifact;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfRecharging;
 import com.shatteredpixel.shatteredpixeldungeon.items.spells.TelekineticGrab;
+import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.Necklace;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfBlastWave;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Blocking;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Blooming;
@@ -505,6 +506,10 @@ public class Ring extends KindofMisc {
 		}
 		if (hero.belongings.misc() != null && hero.belongings.misc().getClass() == getClass()){
 			bonus += ((Ring)hero.belongings.misc()).soloBuffedBonus();
+		}
+		Ring necklaceRing = Necklace.getNecklaceRing();
+		if (necklaceRing != null && necklaceRing.getClass() == getClass()) {
+			bonus += necklaceRing.soloBuffedBonus();
 		}
 		return bonus;
 	}

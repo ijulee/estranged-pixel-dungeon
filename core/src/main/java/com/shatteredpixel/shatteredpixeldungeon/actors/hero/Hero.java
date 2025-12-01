@@ -429,11 +429,11 @@ public class Hero extends Char {
 		HTBoost = bundle.getInt(HTBOOST);
 
 		necklaceRing = (Ring) bundle.get(NECKLACE_BUFF);
-		if (necklaceRing != null) {
+		/*if (necklaceRing != null) {
 			Ring.RingBuff ringBuff = necklaceRing.buff();
 			ringBuff.attachTo( this );
 			Necklace.buff = ringBuff;
-		}
+		}*/
 
 		super.restoreFromBundle( bundle );
 
