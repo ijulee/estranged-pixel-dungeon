@@ -38,6 +38,7 @@ import com.watabou.utils.Random;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 
 public class Gun extends GunWeapon {
@@ -54,35 +55,31 @@ public class Gun extends GunWeapon {
 	protected boolean explode = false;
 	protected boolean spread = false; //산탄 여부 = 거리에 따른 탄환 위력 감소 여부.
 
-	public enum BarrelMod {
+	public interface GunMod<M extends Enum<M> & GunMod<M>> {
+		String name();
+	}
+
+	public enum BarrelMod implements GunMod<BarrelMod> {
 		NORMAL_BARREL(1, 1),
 		SHORT_BARREL(1.5f, 0.5f),
 		LONG_BARREL(0.75f, 1.25f);
 
-		private float meleeAccFactor;
-		private float rangedAccFactor;
+		private final float adjAccFactor;
+		private final float rangedAccFactor;
 
 		BarrelMod(float meleeMulti, float rangedMulti) {
-			this.meleeAccFactor = meleeMulti;
+			this.adjAccFactor = meleeMulti;
 			this.rangedAccFactor = rangedMulti;
-		}
-
-		public float bulletAccuracyFactor(float accuracy, boolean adjacent) {
-			if (adjacent) {
-				return accuracy * meleeAccFactor;
-			} else {
-				return accuracy * rangedAccFactor;
-			}
 		}
 	}
 
-	public enum MagazineMod {
+	public enum MagazineMod implements GunMod<MagazineMod> {
 		NORMAL_MAGAZINE(1, 0),
 		LARGE_MAGAZINE(1.5f, +1),
 		QUICK_MAGAZINE(0.5f, -1);
 
-		private float magazineFactor;
-		private int reloadTimeFactor;
+		private final float magazineFactor;
+		private final int reloadTimeFactor;
 
 		MagazineMod(float magMulti, int reloadAdd) {
 			this.magazineFactor = magMulti;
@@ -97,13 +94,13 @@ public class Gun extends GunWeapon {
 		}
 	}
 
-	public enum BulletMod {
+	public enum BulletMod implements GunMod<BulletMod> {
 		NORMAL_BULLET(1, 1),
 		AP_BULLET(0, 0.8f),
 		HP_BULLET(2, 1.3f);
 
-		private float armorMulti;
-		private float dmgMulti;
+		private final float armorMulti;
+		private final float dmgMulti;
 
 		BulletMod(float armorMulti, float dmgMulti) {
 			this.armorMulti = armorMulti;
@@ -113,30 +110,33 @@ public class Gun extends GunWeapon {
 		public float armorFactor() {
 			return armorMulti;
 		}
-		public int damageFactor(int damage) {
+
+        public int damageFactor(int damage) {
 			return Math.round(damage*dmgMulti);
 		}
 	}
 
-	public enum WeightMod {
+	public enum WeightMod implements GunMod<WeightMod> {
 		NORMAL_WEIGHT,
 		LIGHT_WEIGHT,
-		HEAVY_WEIGHT;
-	}
+		HEAVY_WEIGHT
 
-	public enum AttachMod {
+
+    }
+
+	public enum AttachMod implements GunMod<AttachMod> {
 		NORMAL_ATTACH,
 		LASER_ATTACH,
-		FLASH_ATTACH;
+		FLASH_ATTACH
 	}
 
-	public enum EnchantMod {
+	public enum EnchantMod implements GunMod<EnchantMod> {
 		NORMAL_ENCHANT(1, 1),
 		AMP_ENCHANT(2, 0.75f),
 		SUP_ENCHANT(0.5f, 1.25f);
 
-		private float enchantMulti;
-		private float dmgMulti;
+		private final float enchantMulti;
+		private final float dmgMulti;
 
 		EnchantMod(float enchantMulti, float dmgMulti) {
 			this.enchantMulti = enchantMulti;
@@ -146,16 +146,17 @@ public class Gun extends GunWeapon {
 		public float enchantFactor() {
 			return enchantMulti;
 		}
-		public int damageFactor(int damage) {
+
+        public int damageFactor(int damage) {
 			return Math.round(damage*dmgMulti);
 		}
 	}
 
-	public enum InscribeMod {
+	public enum InscribeMod implements GunMod<InscribeMod> {
 		NORMAL(0),
 		INSCRIBED(1);
 
-		private int shotBonus;
+		private final int shotBonus;
 
 		InscribeMod(int shotBonus) {
 			this.shotBonus = shotBonus;
@@ -166,35 +167,33 @@ public class Gun extends GunWeapon {
 		}
 	}
 
-	public BarrelMod barrelMod = BarrelMod.NORMAL_BARREL;
+	/*public BarrelMod barrelMod = BarrelMod.NORMAL_BARREL;
 	public MagazineMod magazineMod = MagazineMod.NORMAL_MAGAZINE;
 	public BulletMod bulletMod = BulletMod.NORMAL_BULLET;
 	public WeightMod weightMod = WeightMod.NORMAL_WEIGHT;
 	public AttachMod attachMod = AttachMod.NORMAL_ATTACH;
-	public EnchantMod enchantMod = EnchantMod.NORMAL_ENCHANT;
+	public EnchantMod enchantMod = EnchantMod.NORMAL_ENCHANT;*/
 	public InscribeMod inscribeMod = InscribeMod.NORMAL;
 
-	private Enum[] gunMods = {
-			BarrelMod.NORMAL_BARREL,
-			MagazineMod.NORMAL_MAGAZINE,
-			BulletMod.NORMAL_BULLET,
-			WeightMod.NORMAL_WEIGHT,
-			AttachMod.NORMAL_ATTACH,
-			EnchantMod.NORMAL_ENCHANT,
-			InscribeMod.NORMAL
-	};
+	private Enum<? extends GunMod<?>>[] gunMods = new Enum[]{
+            BarrelMod.NORMAL_BARREL,
+            MagazineMod.NORMAL_MAGAZINE,
+            BulletMod.NORMAL_BULLET,
+            WeightMod.NORMAL_WEIGHT,
+            AttachMod.NORMAL_ATTACH,
+            EnchantMod.NORMAL_ENCHANT,
+            /*InscribeMod.NORMAL*/
+    };
+	
+	public static final Class<GunMod<?>>[] gunModClasses = new Class[]{BarrelMod.class,
+            MagazineMod.class,
+            BulletMod.class,
+            WeightMod.class,
+            AttachMod.class,
+            EnchantMod.class/*,
+            InscribeMod.class*/};
 
-	private final Class[] gunModOrder = {
-			BarrelMod.class,
-			MagazineMod.class,
-			BulletMod.class,
-			WeightMod.class,
-			AttachMod.class,
-			EnchantMod.class,
-			InscribeMod.class
-	};
-
-	{
+    {
 		hitSound = Assets.Sounds.HIT_CRUSH;
 		hitSoundPitch = 0.8f;
 	}
@@ -208,29 +207,57 @@ public class Gun extends GunWeapon {
 	private static final String ATTACH_MOD = "attachMod";
 	private static final String ENCHANT_MOD = "enchantMod";
 	private static final String INSCRIBE_MOD = "inscribeMod";
+
+	public <T extends GunMod<?>> T getGunMod(Class<T> modType) {
+		int index = Arrays.asList(gunModClasses).indexOf(modType);
+		if (index != -1) {
+			return (T) gunMods[index];
+		} else {
+			return null;
+		}
+	}
+
+	public void setGunMod(GunMod<?> mod) {
+		
+		int index = Arrays.asList(gunModClasses).indexOf(mod.getClass());
+		if (index != -1) {
+			gunMods[index] = (Enum<? extends GunMod<?>>) mod;
+		}
+	}
+
+	public void copyGunMods(Gun source) {
+		this.gunMods = Arrays.copyOf(source.gunMods, this.gunMods.length);
+	}
+
 	@Override
 	public void storeInBundle(Bundle bundle) {
 		super.storeInBundle(bundle);
 		bundle.put(ROUND, rounds);
-		bundle.put(BARREL_MOD, barrelMod);
+		/*bundle.put(BARREL_MOD, barrelMod);
 		bundle.put(MAGAZINE_MOD, magazineMod);
 		bundle.put(BULLET_MOD, bulletMod);
 		bundle.put(WEIGHT_MOD, weightMod);
 		bundle.put(ATTACH_MOD, attachMod);
-		bundle.put(ENCHANT_MOD, enchantMod);
-		bundle.put(INSCRIBE_MOD, inscribeMod);
+		bundle.put(ENCHANT_MOD, enchantMod);*/
+		bundle.put(BARREL_MOD, 		gunMods[0]);
+		bundle.put(MAGAZINE_MOD, 	gunMods[1]);
+		bundle.put(BULLET_MOD, 		gunMods[2]);
+		bundle.put(WEIGHT_MOD, 		gunMods[3]);
+		bundle.put(ATTACH_MOD,  	gunMods[4]);
+		bundle.put(ENCHANT_MOD,  	gunMods[5]);
+		bundle.put(INSCRIBE_MOD, 	inscribeMod);
 	}
 
 	@Override
 	public void restoreFromBundle(Bundle bundle) {
 		super.restoreFromBundle(bundle);
 		rounds = bundle.getInt(ROUND);
-		barrelMod = bundle.getEnum(BARREL_MOD, BarrelMod.class);
-		magazineMod = bundle.getEnum(MAGAZINE_MOD, MagazineMod.class);
-		bulletMod = bundle.getEnum(BULLET_MOD, BulletMod.class);
-		weightMod = bundle.getEnum(WEIGHT_MOD, WeightMod.class);
-		attachMod = bundle.getEnum(ATTACH_MOD, AttachMod.class);
-		enchantMod = bundle.getEnum(ENCHANT_MOD, EnchantMod.class);
+		gunMods[0] = bundle.getEnum(BARREL_MOD, BarrelMod.class);
+		gunMods[1] = bundle.getEnum(MAGAZINE_MOD, MagazineMod.class);
+		gunMods[2] = bundle.getEnum(BULLET_MOD, BulletMod.class);
+		gunMods[3] = bundle.getEnum(WEIGHT_MOD, WeightMod.class);
+		gunMods[4] = bundle.getEnum(ATTACH_MOD, AttachMod.class);
+		gunMods[5] = bundle.getEnum(ENCHANT_MOD, EnchantMod.class);
 		inscribeMod = bundle.getEnum(INSCRIBE_MOD, InscribeMod.class);
 	}
 
@@ -405,13 +432,14 @@ public class Gun extends GunWeapon {
 	}
 
 	public int maxRounds() {
-		int maxRounds = this.magazineMod.magazineFactor(this.maxRounds);
+		//int max = this.magazineMod.magazineFactor(maxRounds);
+		int max = getGunMod(MagazineMod.class).magazineFactor(maxRounds);
 
 		if (isEquipped(Dungeon.hero)) {
-			maxRounds += Dungeon.hero.pointsInTalent(Talent.LARGER_MAGAZINE);
+			max += Dungeon.hero.pointsInTalent(Talent.LARGER_MAGAZINE);
 		}
 
-		return maxRounds;
+		return max;
 	}
 
 	public int rounds() {
@@ -425,7 +453,8 @@ public class Gun extends GunWeapon {
 	public float reloadTime(Char user) {
 		float time = reloadTime;
 
-		time = this.magazineMod.reloadTimeFactor(time);
+		time = getGunMod(MagazineMod.class).reloadTimeFactor(time);
+		//time = this.magazineMod.reloadTimeFactor(time);
 
 		if (isEquipped(Dungeon.hero)) {
 			time -= Dungeon.hero.pointsInTalent(Talent.FAST_RELOAD);
@@ -444,7 +473,8 @@ public class Gun extends GunWeapon {
 
 	@Override
 	public int tier() {
-		switch (this.weightMod) {
+		WeightMod weightMod = getGunMod(WeightMod.class);
+		switch (weightMod) {
 			case NORMAL_WEIGHT: default:
 				return tier;
 			case HEAVY_WEIGHT:
@@ -466,7 +496,7 @@ public class Gun extends GunWeapon {
 	@Override
 	public int max(int lvl) {
 		int talentBonus = 0;
-		if (Dungeon.hero != null) {
+		if (Dungeon.hero != null && isEquipped(Dungeon.hero)) {
 			talentBonus += 2 * Dungeon.hero.pointsInTalent(Talent.CLOSE_COMBAT);
 		}
 		return (tier()+1) * (lvl + 3) + talentBonus;
@@ -480,19 +510,32 @@ public class Gun extends GunWeapon {
 	}
 
 	//need to be overridden
-	protected int baseBulletMax(int lvl) {
+	protected int baseMissileMax(int lvl) {
 		return 0;
 	}
 
 	@Override
     public int missileMax(int lvl) {
-		return baseBulletMax(lvl) +
+		return baseMissileMax(lvl) +
 				(isEquipped(Dungeon.hero) ? RingOfSharpshooting.levelDamageBonus(Dungeon.hero) : 0);
+	}
+
+	public int modDamageFactor(int damage) {
+		damage = getGunMod(BulletMod.class).damageFactor(damage);
+		damage = getGunMod(EnchantMod.class).damageFactor(damage);
+		return damage;
+	}
+
+	@Override
+	protected int missileDamageRoll(Char owner) {
+		int damage = super.missileDamageRoll(owner);
+		return modDamageFactor(damage);
 	}
 
 	@Override
 	public int proc(Char attacker, Char defender, int damage) {
-		if (this.attachMod == AttachMod.FLASH_ATTACH) {
+		AttachMod attachMod = getGunMod(AttachMod.class);
+		if (attachMod == AttachMod.FLASH_ATTACH) {
 			if (Random.Int(10) > 5+Dungeon.level.distance(attacker.pos, defender.pos)-1) {
 				Buff.prolong(defender, Blindness.class, 2f);
 			}
@@ -501,30 +544,47 @@ public class Gun extends GunWeapon {
 		return super.proc(attacker, defender, damage);
 	}
 
-
 	@Override
 	public String info() {
 		String info = super.info();
 
 		if (levelKnown) {
-			info += "\n\n" + Messages.get(Gun.class, "gun_desc",
-					shotsPerRound(), augment.damageFactor(missileMin()), augment.damageFactor(missileMax()));
+			int min = modDamageFactor(augment.damageFactor(missileMin())),
+					max = modDamageFactor(augment.damageFactor(missileMax()));
+			info += "\n\n" + Messages.get(this, "gun_desc", shotsPerRound(), min, max);
 		} else {
-			info += "\n\n" + Messages.get(Gun.class, "gun_typical_desc",
-					shotsPerRound(), augment.damageFactor(missileMin(0)), augment.damageFactor(missileMax(0)));
+			int min = modDamageFactor(augment.damageFactor(missileMin(0))),
+					max = modDamageFactor(augment.damageFactor(missileMax(0)));
+			info += "\n\n" + Messages.get(this, "gun_typical_desc", shotsPerRound(), min, max);
 		}
-		info += " " + Messages.get(Gun.class, "gun_reload_info", rounds, maxRounds(), new DecimalFormat("#.##").format(reloadTime(Dungeon.hero)), reloadAmmoUse());
+		info += " " + Messages.get(this, "gun_reload_info",
+				new DecimalFormat("#.##").format(reloadTime(Dungeon.hero)), ammoPerRound());
 
 		StringBuilder gunModsSB = new StringBuilder();
 
-		for (Enum mod : gunMods) {
+		for (Enum<?> mod : gunMods) {
             if (mod.ordinal() != 0) {
-                gunModsSB.append(mod.name()).append(", ");
+                gunModsSB.append(Messages.get(mod, mod.name())).append(", ");
             }
         }
 
 		if (gunModsSB.length() != 0) {
-			info += "\n\n" + Messages.get(this, gunModsSB.substring(0, gunModsSB.length()-2));
+			info += " " + Messages.get(this, "mods_list",
+					gunModsSB.substring(0, gunModsSB.length()-2));
+		}
+
+		if (inscribeMod == InscribeMod.INSCRIBED) {
+			info += " " + Messages.get(this, "inscribed_desc");
+		}
+
+		if (isEquipped(Dungeon.hero)) {
+			float shootingCritChance = Dungeon.hero.critChance(getMissile());
+			if (shootingCritChance > 0 && shootingCritChance != Dungeon.hero.critChance(this)) {
+				info += " " + Messages.get(this, "shooting_critchance", 100 * shootingCritChance);
+				if (shootingCritChance > 1) {
+					info += " " + Messages.get(this, "critbonus");
+				}
+			}
 		}
 
 		return info;
@@ -548,8 +608,6 @@ public class Gun extends GunWeapon {
 			levelKnown = true;
 		}
 
-		public boolean isBurst = false;
-
         @Override
 		public int min(int lvl) {
 			return missileMin(lvl);
@@ -560,12 +618,14 @@ public class Gun extends GunWeapon {
 			return missileMax(lvl);
 		}
 
-		public BulletMod bulletMod() { //현재 탄환이 어떤 개조인지를 반환함. 탄환 피해의 적 방어력 적용량 결정에 쓰임
-			return Gun.this.bulletMod;
+		public BulletMod bulletMod() {
+			//return Gun.this.bulletMod;
+			return getGunMod(BulletMod.class);
 		}
 
 		public EnchantMod enchantMod() {
-			return Gun.this.enchantMod;
+			//return Gun.this.enchantMod;
+			return getGunMod(EnchantMod.class);
 		}
 
 		@Override
@@ -575,8 +635,8 @@ public class Gun extends GunWeapon {
 
 		@Override
 		public int proc(Char attacker, Char defender, int damage) {
-			damage = this.bulletMod().damageFactor(damage);
-			damage = this.enchantMod().damageFactor(damage);
+			/*damage = this.bulletMod().damageFactor(damage);
+			damage = this.enchantMod().damageFactor(damage);*/
 
 			int distance = Dungeon.level.distance(attacker.pos, defender.pos) - 1;
 
@@ -634,25 +694,27 @@ public class Gun extends GunWeapon {
 		@Override
 		public float accuracyFactor(Char owner, Char target) {
 			float ACC = super.accuracyFactor(owner, target);
-			if (Gun.this.attachMod == AttachMod.LASER_ATTACH) {
+			AttachMod attachMod = getGunMod(AttachMod.class);
+			if (attachMod == AttachMod.LASER_ATTACH) {
 				ACC *= 1.25f;
 			}
 			if (Dungeon.hero.hasTalent(Talent.INEVITABLE_DEATH) && Dungeon.hero.buff(RouletteOfDeath.class) != null && Dungeon.hero.buff(RouletteOfDeath.class).timeToDeath()) {
 				ACC *= 1 + Dungeon.hero.pointsInTalent(Talent.INEVITABLE_DEATH);
 			}
 
-			ACC = Gun.this.barrelMod.bulletAccuracyFactor(ACC, Dungeon.level.adjacent(owner.pos, target.pos));
+			// ACC = Gun.this.barrelMod.bulletAccuracyFactor(ACC, Dungeon.level.adjacent(owner.pos, target.pos));
 
 			return ACC;
 		}
 
 		@Override
 		protected float adjacentAccFactor(Char owner, Char target) {
+			BarrelMod mod = getGunMod(BarrelMod.class);
 			if (Dungeon.level.adjacent( owner.pos, target.pos ) || owner.pos == target.pos) {
 				// not affected by Point Blank talent
-				return adjShootingAcc;
+				return adjShootingAcc * mod.adjAccFactor;
 			} else {
-				return shootingAcc;
+				return shootingAcc * mod.rangedAccFactor;
 			}
 		}
 
@@ -702,7 +764,7 @@ public class Gun extends GunWeapon {
                                 super.onThrow(target.pos);
                             } else {
                                 // special case not processed by super method
-                                if (!curUser.shoot(target, this)) {
+                                if (curUser.shoot(target, this)) {
                                     rangedHit(target, target.pos);
                                 } else {
                                     rangedMiss(target.pos);
@@ -784,7 +846,7 @@ public class Gun extends GunWeapon {
 			super.rangedHit(enemy, cell);
 
 			if (explode && enemy == curUser && !enemy.isAlive()) {
-				Dungeon.fail(getClass());
+				Dungeon.fail(Gun.this.getClass());
 				Badges.validateDeathFromFriendlyMagic();
 				GLog.n(Messages.get(Gun.class, "ondeath"));
 			}
@@ -850,6 +912,10 @@ public class Gun extends GunWeapon {
 		public void cast(final Hero user, int dst) {
 			super.cast(user, dst);
 		}
+	}
+
+	public CellSelector.Listener getShooter() {
+		return shooter;
 	}
 
 	protected CellSelector.Listener shooter = new CellSelector.Listener() {

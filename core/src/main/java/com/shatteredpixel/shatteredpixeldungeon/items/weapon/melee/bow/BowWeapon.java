@@ -10,6 +10,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.BowMasterSkill;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.CountCooldownBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
@@ -19,10 +20,11 @@ import com.shatteredpixel.shatteredpixeldungeon.items.KindOfWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfSharpshooting;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfBlastWave;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.bow.SpiritBow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.GunWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.scenes.CellSelector;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
@@ -128,7 +130,7 @@ public class BowWeapon extends GunWeapon {
         if (isEquipped(Dungeon.hero)) {
             float arrowCritChance = Dungeon.hero.critChance(getMissile());
             if (arrowCritChance > 0) {
-                info += "\n\n" + Messages.get(Weapon.class, "shooting_critchance", 100f * arrowCritChance);
+                info += "\n\n" + Messages.get(this, "shooting_critchance", 100f * arrowCritChance);
             }
         }
 
@@ -190,7 +192,7 @@ public class BowWeapon extends GunWeapon {
         @Override
         public int damageRoll(Char owner) {
             BowWeapon bow = BowWeapon.this;
-            int damage = bow.missileDamageRoll(owner);
+            int damage = super.damageRoll(owner);
             if (owner == curUser) {
                 Char enemy = curUser.attackTarget();
                 if (enemy instanceof Mob && ((Mob) enemy).surprisedBy(curUser)) {
@@ -352,6 +354,29 @@ public class BowWeapon extends GunWeapon {
         }
         WandOfBlastWave.throwChar(defender, trajectory, dist, false, false, attacker);
     }
+
+    @Override
+    protected CellSelector.Listener getShooter() {
+        return shooter;
+    }
+
+    protected CellSelector.Listener shooter = new CellSelector.Listener() {
+        @Override
+        public void onSelect(Integer cell) {
+            if (cell != null) {
+                if (cell == curUser.pos && curUser.heroClass == HeroClass.DUELIST) {
+                    execute(curUser, AC_ABILITY);
+                } else {
+                    getMissile().cast(curUser, cell);
+                }
+            }
+        }
+
+        @Override
+        public String prompt() {
+            return Messages.get(SpiritBow.class, "prompt");
+        }
+    };
 
     public static class ArrowAttached extends CountCooldownBuff {
         {

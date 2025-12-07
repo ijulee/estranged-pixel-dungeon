@@ -124,12 +124,7 @@ public class BluePrint extends Item {
         }
 
         if (wep instanceof Gun && result instanceof Gun) {  //재료와 결과물 모두 총기일 경우 총기 개조 효과가 유지됨
-            ((Gun) result).barrelMod = ((Gun) wep).barrelMod;
-            ((Gun) result).magazineMod = ((Gun) wep).magazineMod;
-            ((Gun) result).bulletMod = ((Gun) wep).bulletMod;
-            ((Gun) result).weightMod = ((Gun) wep).weightMod;
-            ((Gun) result).attachMod = ((Gun) wep).attachMod;
-            ((Gun) result).enchantMod = ((Gun) wep).enchantMod;
+            ((Gun) result).copyGunMods((Gun) wep);
             ((Gun) result).inscribeMod = ((Gun) wep).inscribeMod;
         }
 

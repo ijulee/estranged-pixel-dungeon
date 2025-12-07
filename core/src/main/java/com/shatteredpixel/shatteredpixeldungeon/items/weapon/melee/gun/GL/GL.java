@@ -12,7 +12,7 @@ public class GL extends Gun {
     }
 
     @Override
-    public int baseBulletMax(int lvl) {
+    public int baseMissileMax(int lvl) {
         return 6 * (tier() + 1) +
                 lvl * (tier() + 1);
     }

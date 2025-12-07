@@ -187,7 +187,6 @@ import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfMagicMappi
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ScrollOfChallenge;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.BrokenMagnifyingGlass;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.FerretTuft;
-import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.Necklace;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.ThirteenLeafClover;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfBlastWave;
@@ -215,7 +214,6 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.Obsid
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.UnholyBible;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.bow.BowWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.gun.Gun;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.DisposableMissileWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Catalog;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Document;
@@ -2241,7 +2239,7 @@ public class Hero extends Char {
 			}
 
 			if (newEnemy != null) {
-				if (wep instanceof MissileWeapon && !(wep instanceof DisposableMissileWeapon)) {
+				if (wep instanceof MissileWeapon && !((MissileWeapon) wep).spawnedForEffect) {
 					if (((MissileWeapon)wep).durabilityLeft() > 0) {
 						Dungeon.level.drop(wep, enemy.pos).sprite.drop();
 					}
@@ -3037,7 +3035,8 @@ public class Hero extends Char {
 
 		KindOfWeapon wep = belongings.weapon;
 		if (wep instanceof Gun) {
-			switch (((Gun) wep).attachMod) {
+			Gun.AttachMod attachMod = ((Gun) wep).getGunMod(Gun.AttachMod.class);
+			switch (attachMod) {
 				case NORMAL_ATTACH: default:
 					//no effect
 					break;
@@ -3318,7 +3317,7 @@ public class Hero extends Char {
 				Buff.affect(this, Sheath.Sheathing.class);
 			}
 		}
-		
+
 		if (heroClass != HeroClass.SAMURAI && hasTalent(Talent.QUICK_SHEATHING) && !attackTarget.isAlive()) {
 			Buff.affect(this, Haste.class, 3f*pointsInTalent(Talent.QUICK_SHEATHING));
 		}

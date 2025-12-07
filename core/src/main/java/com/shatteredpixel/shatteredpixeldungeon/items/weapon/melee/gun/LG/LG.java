@@ -32,7 +32,7 @@ public class LG extends Gun {
     }
 
     @Override
-    public int baseBulletMax(int lvl) {
+    public int baseMissileMax(int lvl) {
         return 3 * (tier() + 1) +
                 lvl * (tier() + 1);
     }
@@ -83,6 +83,7 @@ public class LG extends Gun {
                 }
 
                 float multi;
+                WeightMod weightMod = (WeightMod) getGunMod(WeightMod.class);
                 switch (weightMod) {
                     case NORMAL_WEIGHT: default:
                         multi = 2f;

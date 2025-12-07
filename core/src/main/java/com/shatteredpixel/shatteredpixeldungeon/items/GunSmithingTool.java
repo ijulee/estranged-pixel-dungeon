@@ -16,17 +16,13 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.gun.Gun;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Catalog;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
-import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Icons;
-import com.shatteredpixel.shatteredpixeldungeon.ui.RedButton;
-import com.shatteredpixel.shatteredpixeldungeon.ui.RenderedTextBlock;
-import com.shatteredpixel.shatteredpixeldungeon.ui.Window;
-import com.shatteredpixel.shatteredpixeldungeon.windows.IconTitle;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndBag;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndOptions;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndTitledMessage;
+import com.watabou.noosa.Game;
 import com.watabou.noosa.audio.Sample;
 
 import java.util.ArrayList;
@@ -34,6 +30,7 @@ import java.util.ArrayList;
 public class GunSmithingTool extends Item {
 
     public static final String AC_USE		= "USE";
+    public static Gun gun = null;
 
     {
         image = ItemSpriteSheet.GUNSMITHING_TOOL;
@@ -90,7 +87,7 @@ public class GunSmithingTool extends Item {
         if (tool != null) {
             tool.detach(Dungeon.hero.belongings.backpack);
         }
-    };
+    }
 
     @Override
     public boolean isUpgradable() {
@@ -109,27 +106,88 @@ public class GunSmithingTool extends Item {
 
     public static class WndModSelect extends WndOptions {
 
-        private static Gun gun;
-        private static String[] mods = {"barrel", "magazine", "bullet", "weight", "attach", "enchant"};
-
-        public WndModSelect(Gun gun){
+        public WndModSelect(){
             super(new ItemSprite(new GunSmithingTool()),
                     Messages.titleCase(new GunSmithingTool().name()),
                     Messages.get(GunSmithingTool.class, "mod_select"),
-                    Messages.get(GunSmithingTool.class, mods[0]),
-                    Messages.get(GunSmithingTool.class, mods[1]),
-                    Messages.get(GunSmithingTool.class, mods[2]),
-                    Messages.get(GunSmithingTool.class, mods[3]),
-                    Messages.get(GunSmithingTool.class, mods[4]),
-                    Messages.get(GunSmithingTool.class, mods[5]),
+                    Messages.titleCase(Messages.get(Gun.gunModClasses[0], "name")),
+                    Messages.titleCase(Messages.get(Gun.gunModClasses[1], "name")),
+                    Messages.titleCase(Messages.get(Gun.gunModClasses[2], "name")),
+                    Messages.titleCase(Messages.get(Gun.gunModClasses[3], "name")),
+                    Messages.titleCase(Messages.get(Gun.gunModClasses[4], "name")),
+                    Messages.titleCase(Messages.get(Gun.gunModClasses[5], "name")),
                     Messages.get(GunSmithingTool.class, "cancel"));
-            this.gun = gun;
         }
 
         @Override
         protected void onSelect(int index) {
             if (index < 6) {
-                GameScene.show(new WndMod(gun, mods[index]));
+                Class<Gun.GunMod<?>> modType = Gun.gunModClasses[index];
+                Gun.GunMod<?>[] options = modType.getEnumConstants();
+                Gun.GunMod<?> current = GunSmithingTool.gun.getGunMod(modType);
+
+                ArrayList<String> optsStr = new ArrayList<>();
+                for (Gun.GunMod<?> m : options) {
+                    if (m != current) {
+                        optsStr.add(Messages.titleCase(Messages.get(m, m.name())));
+                    } else {
+                        optsStr.add(Messages.titleCase("* "+Messages.get(m, m.name())));
+
+                    }
+                }
+                optsStr.add("Back");
+
+                String descStr = Messages.get(modType, "desc") +
+                        "\n\n" + Messages.get(GunSmithingTool.class, "current");
+
+                GameScene.show(new WndOptions(
+                        new ItemSprite(GunSmithingTool.gun),
+                        GunSmithingTool.gun.name(),
+                        descStr,
+                        optsStr.toArray(new String[0]))
+                {
+                    private float elapsed = 0f;
+
+                    @Override
+                    public synchronized void update() {
+                        super.update();
+                        elapsed += Game.elapsed;
+                    }
+
+                    @Override
+                    public void hide() {
+                        if (elapsed > 0.2f) {
+                            super.hide();
+                        }
+                    }
+
+                    @Override
+                    protected void onSelect(int index) {
+                        if (elapsed > 0.2f) {
+                            if (index < optsStr.size() - 1) {
+                                GunSmithingTool.gun.setGunMod(options[index]);
+                                GunSmithingTool.gun = null;
+                                onItemSelected();
+                            } else if (index == optsStr.size() - 1) {
+                                GameScene.show(new WndModSelect());
+                            }
+                        }
+
+                    }
+
+                    @Override
+                    protected boolean enabled(int index) {
+                        return index == optsStr.size()-1 || options[index] != current;
+                    }
+
+                    @Override
+                    protected void onInfo(int index) {
+                        GameScene.show(new WndTitledMessage(
+                                Icons.get(Icons.INFO),
+                                Messages.titleCase(Messages.get(modType, options[index].name())),
+                                Messages.titleCase(Messages.get(modType, options[index].name()+"_desc"))));
+                    }
+                });
             } else {
                 hide();
             }
@@ -142,182 +200,13 @@ public class GunSmithingTool extends Item {
 
         @Override
         protected void onInfo( int index ) {
+            Class<Gun.GunMod<?>> modType = Gun.gunModClasses[index];
             GameScene.show(new WndTitledMessage(
                     Icons.get(Icons.INFO),
-                    Messages.titleCase(Messages.get(GunSmithingTool.class, mods[index])),
-                    Messages.get(GunSmithingTool.class, mods[index] + "_desc")));
+                    Messages.titleCase(Messages.get(modType, "name")),
+                    Messages.get(modType, "desc")));
         }
 
-    }
-
-    public static class WndMod extends Window {
-
-        protected static final int WIDTH_P = 120;
-        protected static final int WIDTH_L = 144;
-
-        private static final int MARGIN 		= 2;
-        private static final int BUTTON_HEIGHT	= 20;
-        int width = PixelScene.landscape() ? WIDTH_L : WIDTH_P;
-
-        public WndMod( final Gun toMod, final String key ) {
-            super();
-
-            IconTitle titlebar = new IconTitle( toMod );
-            titlebar.setRect( 0, 0, width, 0 );
-            add( titlebar );
-
-            RenderedTextBlock tfMesage = PixelScene.renderTextBlock( Messages.get(GunSmithingTool.class, key + "_desc"), 6 );
-            tfMesage.maxWidth(width - MARGIN * 2);
-            tfMesage.setPos(MARGIN, titlebar.bottom() + MARGIN);
-            add( tfMesage );
-
-            float pos = tfMesage.top() + tfMesage.height();
-
-            switch (key) {
-                case "barrel":
-                    for (final Gun.BarrelMod barrel : Gun.BarrelMod.values()) {
-                        if (toMod.barrelMod != barrel) {
-                            RedButton btnMod = new RedButton( Messages.get(this, barrel.name()) ) {
-                                @Override
-                                protected void onClick() {
-                                    hide();
-                                    toMod.barrelMod=barrel;
-                                    onItemSelected();
-                                }
-                            };
-                            btnMod.setRect( MARGIN, pos + MARGIN, width - MARGIN * 2, BUTTON_HEIGHT );
-                            add( btnMod );
-
-                            pos = btnMod.bottom();
-                        }
-                    }
-                    break;
-                case "magazine":
-                    for (final Gun.MagazineMod magazine : Gun.MagazineMod.values()) {
-                        if (toMod.magazineMod != magazine) {
-                            RedButton btnMod = new RedButton( Messages.get(this, magazine.name()) ) {
-                                @Override
-                                protected void onClick() {
-                                    hide();
-                                    toMod.magazineMod=magazine;
-                                    onItemSelected();
-                                }
-                            };
-                            btnMod.setRect( MARGIN, pos + MARGIN, width - MARGIN * 2, BUTTON_HEIGHT );
-                            add( btnMod );
-
-                            pos = btnMod.bottom();
-                        }
-                    }
-                    break;
-                case "bullet":
-                    for (final Gun.BulletMod bullet : Gun.BulletMod.values()) {
-                        if (toMod.bulletMod != bullet) {
-                            RedButton btnMod = new RedButton( Messages.get(this, bullet.name()) ) {
-                                @Override
-                                protected void onClick() {
-                                    hide();
-                                    toMod.bulletMod=bullet;
-                                    onItemSelected();
-                                }
-                            };
-                            btnMod.setRect( MARGIN, pos + MARGIN, width - MARGIN * 2, BUTTON_HEIGHT );
-                            add( btnMod );
-
-                            pos = btnMod.bottom();
-                        }
-                    }
-                    break;
-                case "weight":
-                    for (final Gun.WeightMod weight : Gun.WeightMod.values()) {
-                        if (toMod.weightMod != weight) {
-                            RedButton btnMod = new RedButton( Messages.get(this, weight.name()) ) {
-                                @Override
-                                protected void onClick() {
-                                    hide();
-//                                    switch (toMod.weightMod) {
-//                                        case NORMAL_WEIGHT:
-//                                            if (weight == Gun.WeightMod.LIGHT_WEIGHT) {
-//                                                toMod.tier -= 1;
-//                                            } else {
-//                                                toMod.tier += 1;
-//                                            }
-//                                            break;
-//                                        case LIGHT_WEIGHT:
-//                                            if (weight == Gun.WeightMod.NORMAL_WEIGHT) {
-//                                                toMod.tier += 1;
-//                                            } else {
-//                                                toMod.tier += 2;
-//                                            }
-//                                            break;
-//                                        case HEAVY_WEIGHT:
-//                                            if (weight == Gun.WeightMod.NORMAL_WEIGHT) {
-//                                                toMod.tier -= 1;
-//                                            } else {
-//                                                toMod.tier -= 2;
-//                                            }
-//                                            break;
-//                                    }
-                                    toMod.weightMod=weight;
-                                    onItemSelected();
-                                }
-                            };
-                            btnMod.setRect( MARGIN, pos + MARGIN, width - MARGIN * 2, BUTTON_HEIGHT );
-                            add( btnMod );
-
-                            pos = btnMod.bottom();
-                        }
-                    }
-                    break;
-                case "attach":
-                    for (final Gun.AttachMod attach : Gun.AttachMod.values()) {
-                        if (toMod.attachMod != attach) {
-                            RedButton btnMod = new RedButton( Messages.get(this, attach.name()) ) {
-                                @Override
-                                protected void onClick() {
-                                    hide();
-                                    toMod.attachMod=attach;
-                                    onItemSelected();
-                                }
-                            };
-                            btnMod.setRect( MARGIN, pos + MARGIN, width - MARGIN * 2, BUTTON_HEIGHT );
-                            add( btnMod );
-
-                            pos = btnMod.bottom();
-                        }
-                    }
-                    break;
-                case "enchant":
-                    for (final Gun.EnchantMod enchant : Gun.EnchantMod.values()) {
-                        if (toMod.enchantMod != enchant) {
-                            RedButton btnMod = new RedButton( Messages.get(this, enchant.name()) ) {
-                                @Override
-                                protected void onClick() {
-                                    hide();
-                                    toMod.enchantMod=enchant;
-                                    onItemSelected();
-                                }
-                            };
-                            btnMod.setRect( MARGIN, pos + MARGIN, width - MARGIN * 2, BUTTON_HEIGHT );
-                            add( btnMod );
-
-                            pos = btnMod.bottom();
-                        }
-                    }
-                    break;
-            }
-
-            RedButton btnCancel = new RedButton( Messages.get(GunSmithingTool.class, "cancel") ) {
-                @Override
-                protected void onClick() {
-                    hide();
-                }
-            };
-            btnCancel.setRect( MARGIN, pos + MARGIN, width - MARGIN * 2, BUTTON_HEIGHT );
-            add( btnCancel );
-
-            resize( width, (int)btnCancel.bottom() + MARGIN );
-        }
     }
 
     protected WndBag.ItemSelector itemSelector = new WndBag.ItemSelector() {
@@ -350,8 +239,9 @@ public class GunSmithingTool extends Item {
                 if (item instanceof TacticalBow) {
                     ((TacticalBow) item).modify();
                     onItemSelected();
-                } else {
-                    GameScene.show(new WndModSelect((Gun)item));
+                } else if (item instanceof Gun) {
+                    GunSmithingTool.gun = (Gun) item;
+                    GameScene.show(new WndModSelect());
                 }
             }
         }

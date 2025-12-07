@@ -518,6 +518,16 @@ public class MeleeWeapon extends Weapon {
 			case NONE:
 		}
 
+		if (isEquipped(Dungeon.hero)) {
+			float critChance = Dungeon.hero.critChance(this);
+			if (critChance > 0) {
+				info += " " + Messages.get(Weapon.class, "critchance", 100 * Dungeon.hero.critChance(this));
+				if (critChance > 1) {
+					info += " " + Messages.get(this, "critbonus");
+				}
+			}
+		}
+
 		if (isEquipped(Dungeon.hero) && !hasCurseEnchant() && Dungeon.hero.buff(HolyWeapon.HolyWepBuff.class) != null
 				&& (Dungeon.hero.subClass != HeroSubClass.PALADIN || enchantment == null)){
 			info += "\n\n" + Messages.capitalize(Messages.get(Weapon.class, "enchanted", Messages.get(HolyWeapon.class, "ench_name", Messages.get(Enchantment.class, "enchant"))));
@@ -545,10 +555,6 @@ public class MeleeWeapon extends Weapon {
 		//the mage's staff has no ability as it can only be gained by the mage
 		if (Dungeon.hero != null && Dungeon.hero.heroClass == HeroClass.DUELIST && !(this instanceof MagesStaff)){
 			info += "\n\n" + abilityInfo();
-		}
-
-		if (hero != null && isEquipped(hero) && hero.critChance(this) > 0) {
-			info += "\n\n" + Messages.get(Weapon.class, "critchance", Messages.decimalFormat("#.##", 100*hero.critChance(this)));
 		}
 		
 		return info;

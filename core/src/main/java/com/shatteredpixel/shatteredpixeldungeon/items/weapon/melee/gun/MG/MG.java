@@ -13,7 +13,7 @@ public class MG extends Gun {
     }
 
     @Override
-    public int baseBulletMax(int lvl) {
+    public int baseMissileMax(int lvl) {
         return 2 * (tier()+2) +
                 Math.round(0.5f * lvl * (tier()+2)); //2강 당 3/4/5/6/7 증가
     }

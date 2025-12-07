@@ -71,7 +71,7 @@ public abstract class GunWeapon extends MeleeWeapon {
                     usesTargeting = true;
                     curUser = hero;
                     curItem = this;
-                    GameScene.selectCell(shooter);
+                    GameScene.selectCell(getShooter());
                 } else {
                     usesTargeting = false;
                     noAmmoAction(hero);
@@ -399,7 +399,9 @@ public abstract class GunWeapon extends MeleeWeapon {
         }
     }
 
-    protected CellSelector.Listener shooter = new CellSelector.Listener() {
+    protected abstract CellSelector.Listener getShooter();
+
+    /*protected CellSelector.Listener shooter = new CellSelector.Listener() {
         @Override
         public void onSelect(Integer cell) {
             if (cell != null) {
@@ -415,6 +417,6 @@ public abstract class GunWeapon extends MeleeWeapon {
         public String prompt() {
             return Messages.get(SpiritBow.class, "prompt");
         }
-    };
+    };*/
 
 }
