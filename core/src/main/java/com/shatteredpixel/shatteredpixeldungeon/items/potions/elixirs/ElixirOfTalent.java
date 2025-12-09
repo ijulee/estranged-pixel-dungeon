@@ -28,9 +28,8 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
+import com.shatteredpixel.shatteredpixeldungeon.effects.FloatingText;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfStrength;
-import com.shatteredpixel.shatteredpixeldungeon.items.spells.IceMaker;
-import com.shatteredpixel.shatteredpixeldungeon.items.spells.WildEnergy;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Catalog;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
@@ -59,20 +58,20 @@ public class ElixirOfTalent extends Elixir {
 			Sample.INSTANCE.playDelayed(Assets.Sounds.LEVELUP, 0.4f, 0.7f, 1.2f);
 			Sample.INSTANCE.playDelayed(Assets.Sounds.LEVELUP, 0.6f, 0.7f, 1.2f);
 			Sample.INSTANCE.playDelayed(Assets.Sounds.LEVELUP, 0.8f, 0.7f, 1.2f);
-			hero.sprite.showStatus( CharSprite.NEGATIVE, Messages.get(this, "str_decrease") );
+			hero.sprite.showStatusWithIcon( CharSprite.NEGATIVE, "-2", FloatingText.STRENGTH );
+			hero.sprite.showStatusWithIcon( CharSprite.NEUTRAL, "+4", FloatingText.TALENT );
 			GLog.p(Messages.get(this, "bonus"));
 			GameScene.showlevelUpStars();
 		} else {
 			hero.STR += 2;
 			hero.onSTRGained();
-			if (Dungeon.isChallenged(Challenges.SUPERMAN) || hero.buff(ElixirOfTalentHTBoost.class) != null){
-				hero.sprite.showStatus( CharSprite.POSITIVE, Messages.get(this, "str") );
-			} else {
-				Buff.affect(hero, ElixirOfTalentHTBoost.class);
-				hero.sprite.showStatus( CharSprite.POSITIVE, Messages.get(this, "str_ht") );
-			}
-			hero.updateHT( true );
-			GLog.p( Messages.get(this, "msg_2") );
+			hero.sprite.showStatusWithIcon( CharSprite.POSITIVE, "2", FloatingText.STRENGTH );
+            if (!Dungeon.isChallenged(Challenges.SUPERMAN) && hero.buff(ElixirOfTalentHTBoost.class) == null) {
+                Buff.affect(hero, ElixirOfTalentHTBoost.class);
+                hero.updateHT( true );
+                hero.sprite.showStatusWithIcon( CharSprite.POSITIVE, "10%", FloatingText.MAX_HP );
+            }
+            GLog.p( Messages.get(this, "msg_2") );
 		}
 
 		Badges.validateStrengthAttained();

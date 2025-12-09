@@ -102,10 +102,13 @@ public class FloatingText extends RenderedTextBlock {
 	public static int SHIELDING = 19;
 	public static int EXPERIENCE= 20;
 	public static int STRENGTH  = 21;
+	public static int TALENT  = 22;
+	public static int MAX_HP  = 26;
 
 	//currency icons
 	public static int GOLD      = 23;
 	public static int ENERGY    = 24;
+	public static int AMMO      = 25;
 
 	//hit reason icons
 	public static int HIT_WEP   = 36;

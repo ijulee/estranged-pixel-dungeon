@@ -24,11 +24,10 @@ package com.shatteredpixel.shatteredpixeldungeon.items;
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.effects.FloatingText;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
-import com.shatteredpixel.shatteredpixeldungeon.items.potions.elixirs.ElixirOfArcaneArmor;
-import com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic.PotionOfEarthenArmor;
-import com.shatteredpixel.shatteredpixeldungeon.items.quest.GooBlob;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.watabou.noosa.audio.Sample;
 
@@ -63,8 +62,9 @@ public class BulletItem extends Item {
 		Dungeon.bullet += quantity;
 
 		GameScene.pickUp( this, pos );
-		hero.sprite.showStatus( 0xFFFFFF, TXT_VALUE, quantity );
-		hero.spendAndNext( TIME_TO_PICK_UP );
+		//hero.sprite.showStatus( 0xFFFFFF, TXT_VALUE, quantity );
+		hero.sprite.showStatusWithIcon( CharSprite.DEFAULT, Integer.toString(quantity), FloatingText.AMMO );
+		hero.spendAndNext( pickupDelay() );
 
 		Sample.INSTANCE.play( Assets.Sounds.ITEM );
 

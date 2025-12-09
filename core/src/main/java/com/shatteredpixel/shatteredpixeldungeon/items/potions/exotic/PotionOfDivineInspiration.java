@@ -139,6 +139,7 @@ public class PotionOfDivineInspiration extends ExoticPotion {
 					Sample.INSTANCE.playDelayed(Assets.Sounds.LEVELUP, 0.6f, 0.7f, 1.2f);
 					new Flare( 6, 32 ).color(0xFFFF00, true).show( curUser.sprite, 2f );
 					GLog.p(Messages.get(PotionOfDivineInspiration.class, "bonus"));
+					hero.sprite.showStatusWithIcon( CharSprite.NEUTRAL, "2", FloatingText.TALENT );
 
 					if (!anonymous) {
 						Catalog.countUse(PotionOfDivineInspiration.class);
