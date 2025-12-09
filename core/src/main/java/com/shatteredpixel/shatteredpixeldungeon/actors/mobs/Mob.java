@@ -773,24 +773,21 @@ public abstract class Mob extends Char {
 						&& hero.hasTalent(Talent.LETHAL_SURPRISE)
 						&& !this.isAlive()
 						&& hero.buff(Talent.LethalCooldown.class) == null) {
-					if (hero.pointsInTalent(Talent.LETHAL_SURPRISE) >= 1) {
-						for (Mob mob : Dungeon.level.mobs.toArray( new Mob[0] )) {
-							if (mob.alignment == Alignment.ENEMY && Dungeon.level.heroFOV[mob.pos] && mob.state != mob.SLEEPING) {
-								Buff.affect( mob, Vulnerable.class, 1f);
-							}
-						}
-						Buff.affect(hero, Talent.LethalCooldown.class, 5f);
-					}
-					if (hero.pointsInTalent(Talent.LETHAL_SURPRISE) >= 2) {
-						for (Mob mob : Dungeon.level.mobs.toArray( new Mob[0] )) {
-							if (mob.alignment == Alignment.ENEMY && Dungeon.level.heroFOV[mob.pos] && mob.state != mob.SLEEPING) {
+					for (Mob mob : Dungeon.level.mobs) {
+						if (mob.alignment == Alignment.ENEMY &&
+								Dungeon.level.heroFOV[mob.pos] && mob.state != mob.SLEEPING) {
+							Buff.affect( mob, Vulnerable.class, 1f);
+							if (hero.pointsInTalent(Talent.LETHAL_SURPRISE) >= 2) {
 								Buff.affect( mob, Paralysis.class, 1f);
 							}
 						}
 					}
+
 					if (hero.pointsInTalent(Talent.LETHAL_SURPRISE) == 3) {
 						Buff.affect(hero, Swiftthistle.TimeBubble.class).twoTurns();
 					}
+
+					Buff.affect(hero, Talent.LethalCooldown.class, 5f);
 				}
 			}
 		}

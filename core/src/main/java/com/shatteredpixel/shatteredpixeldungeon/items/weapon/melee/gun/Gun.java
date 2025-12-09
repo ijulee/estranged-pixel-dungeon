@@ -39,6 +39,7 @@ import com.watabou.utils.Random;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 
 public class Gun extends GunWeapon {
@@ -167,12 +168,6 @@ public class Gun extends GunWeapon {
 		}
 	}
 
-	/*public BarrelMod barrelMod = BarrelMod.NORMAL_BARREL;
-	public MagazineMod magazineMod = MagazineMod.NORMAL_MAGAZINE;
-	public BulletMod bulletMod = BulletMod.NORMAL_BULLET;
-	public WeightMod weightMod = WeightMod.NORMAL_WEIGHT;
-	public AttachMod attachMod = AttachMod.NORMAL_ATTACH;
-	public EnchantMod enchantMod = EnchantMod.NORMAL_ENCHANT;*/
 	public InscribeMod inscribeMod = InscribeMod.NORMAL;
 
 	private Enum<? extends GunMod<?>>[] gunMods = new Enum[]{
@@ -233,12 +228,6 @@ public class Gun extends GunWeapon {
 	public void storeInBundle(Bundle bundle) {
 		super.storeInBundle(bundle);
 		bundle.put(ROUND, rounds);
-		/*bundle.put(BARREL_MOD, barrelMod);
-		bundle.put(MAGAZINE_MOD, magazineMod);
-		bundle.put(BULLET_MOD, bulletMod);
-		bundle.put(WEIGHT_MOD, weightMod);
-		bundle.put(ATTACH_MOD, attachMod);
-		bundle.put(ENCHANT_MOD, enchantMod);*/
 		bundle.put(BARREL_MOD, 		gunMods[0]);
 		bundle.put(MAGAZINE_MOD, 	gunMods[1]);
 		bundle.put(BULLET_MOD, 		gunMods[2]);
@@ -635,9 +624,6 @@ public class Gun extends GunWeapon {
 
 		@Override
 		public int proc(Char attacker, Char defender, int damage) {
-			/*damage = this.bulletMod().damageFactor(damage);
-			damage = this.enchantMod().damageFactor(damage);*/
-
 			int distance = Dungeon.level.distance(attacker.pos, defender.pos) - 1;
 
 			if (spread) {
@@ -738,7 +724,7 @@ public class Gun extends GunWeapon {
 
 			// process explosion if needed
 			if (explode) {
-				HashSet<Char> targets = new HashSet<>();
+				ArrayList<Char> targets = new ArrayList<>();
 				int[] aoe = PathFinder.NEIGHBOURS8;
 				for (int i : aoe){
 					int c = cell + i;
@@ -756,6 +742,11 @@ public class Gun extends GunWeapon {
 						}
 					}
 				}
+
+				//furthest to closest, mainly for elastic
+				Collections.sort(targets, (a, b) -> Float.compare(
+						Dungeon.level.trueDistance(b.pos, curUser.pos),
+						Dungeon.level.trueDistance(a.pos, curUser.pos)));
 
 				for (Char target : targets){
 					for (int i = 0; i < shotsPerRound(); i++) {
@@ -776,67 +767,6 @@ public class Gun extends GunWeapon {
 
 				Sample.INSTANCE.play( Assets.Sounds.BLAST );
 			}
-
-			/*boolean killedEnemy = false;
-			if (explode) {
-				ArrayList<Char> targets = new ArrayList<>();
-				int[] shootArea = PathFinder.NEIGHBOURS9;
-
-				for (int i : shootArea){
-					int c = cell + i;
-					if (c >= 0 && c < Dungeon.level.length()) {
-						if (Dungeon.level.heroFOV[c]) {
-							CellEmitter.get(c).burst(SmokeParticle.FACTORY, 4);
-							CellEmitter.center(cell).burst(BlastParticle.FACTORY, 4);
-						}
-						if (Dungeon.level.flamable[c]) {
-							Dungeon.level.destroy(c);
-							GameScene.updateMap(c);
-						}
-						Char ch = Actor.findChar(c);
-						if (ch != null && !targets.contains(ch)) {
-							targets.add(ch);
-						}
-					}
-				}
-
-				for (Char target : targets){
-					for (int i = 0; i < shotPerShoot(); i++) {
-						curUser.shoot(target, this);
-					}
-					if (!target.isAlive()) {
-						killedEnemy = true;
-					}
-					if (target == curUser && !target.isAlive()) {
-						Dungeon.fail(getClass());
-						Badges.validateDeathFromFriendlyMagic();
-						GLog.n(Messages.get(Gun.class, "ondeath"));
-					}
-
-					SharpShooterBuff.rangedLethal(target, isBurst, this);
-				}
-
-				Sample.INSTANCE.play( Assets.Sounds.BLAST );
-			} else {
-				Char enemy = Actor.findChar( cell );
-				for (int i = 0; i < shotPerShoot(); i++) { //데미지 입히는 것과 발사 시 주변에서 나는 연기를 shotPerShoot만큼 반복
-					if (enemy == null || enemy == curUser) {
-						parent = null;
-						CellEmitter.get(cell).burst(SmokeParticle.FACTORY, 2);
-						CellEmitter.center(cell).burst(BlastParticle.FACTORY, 2);
-					} else {
-						if (!curUser.shoot( enemy, this )) {
-							CellEmitter.get(cell).burst(SmokeParticle.FACTORY, 2);
-							CellEmitter.center(cell).burst(BlastParticle.FACTORY, 2);
-						}
-					}
-				}
-				if (enemy != null && !enemy.isAlive()) {
-					killedEnemy = true;
-				}
-
-				SharpShooterBuff.rangedLethal(enemy, isBurst, this);
-			}*/
 
 			onShoot();
 		}

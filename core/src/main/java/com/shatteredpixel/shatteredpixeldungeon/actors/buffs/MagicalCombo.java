@@ -659,9 +659,8 @@ public class MagicalCombo extends Buff implements ActionIndicator.Action {
 		public void onSelect(Integer cell) {
 			if (cell == null) return;
 			final Char enemy = Actor.findChar( cell );
-			if (enemy == null
-					|| enemy == target
-					|| !Dungeon.level.heroFOV[cell]
+			if (!Dungeon.level.heroFOV[cell]
+					|| !Dungeon.hero.canAttack(enemy)
 					|| target.isCharmedBy( enemy )) {
 				GLog.w(Messages.get(MagicalCombo.class, "bad_target"));
 			} else {

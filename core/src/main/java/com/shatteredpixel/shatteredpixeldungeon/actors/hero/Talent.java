@@ -1802,59 +1802,63 @@ public enum Talent {
 		}
 
 		if (hero.hasTalent(Talent.RELOADING_MEAL)) {
-			if (hero.belongings.weapon instanceof Gun) {
-				((Gun)hero.belongings.weapon).quickReload();
+			KindOfWeapon wep = hero.belongings.weapon();
+			if (wep instanceof Gun) {
+				((Gun) wep).quickReload();
 				if (hero.pointsInTalent(Talent.RELOADING_MEAL) > 1) {
-					((Gun)hero.belongings.weapon).manualReload(1, true);
+					((Gun) wep).manualReload(1, true);
+				}
+			}
+
+			KindOfWeapon wep2 = hero.belongings.secondWep();
+			if (wep2 instanceof Gun) {
+				((Gun) wep2).quickReload();
+				if (hero.pointsInTalent(Talent.RELOADING_MEAL) > 1) {
+					((Gun) wep2).manualReload(1, true);
 				}
 			}
 		}
+
 		if (hero.hasTalent(Talent.INFINITE_BULLET_MEAL)) {
 			Buff.affect(hero, InfiniteBullet.class, 1+hero.pointsInTalent(Talent.INFINITE_BULLET_MEAL));
 		}
+
 		if (hero.hasTalent(Talent.CRITICAL_MEAL)) {
 			Buff.affect(hero, Sheath.CertainCrit.class).set(hero.pointsInTalent(Talent.CRITICAL_MEAL));
 		}
+
 		if (hero.hasTalent(Talent.NATURES_MEAL)) {
-			if (hero.pointsInTalent(Talent.NATURES_MEAL) == 1) {
-				for (int i : PathFinder.NEIGHBOURS4) {
-					int c = level.map[hero.pos + i];
-					if (c == Terrain.EMPTY || c == Terrain.EMPTY_DECO
-							|| c == Terrain.EMBERS || c == Terrain.GRASS) {
-						Level.set(hero.pos + i, Terrain.HIGH_GRASS);
-						GameScene.updateMap(hero.pos + i);
-						CellEmitter.get(hero.pos + i).burst(LeafParticle.LEVEL_SPECIFIC, 4);
-					}
-				}
-			} else {
-				for (int i : PathFinder.NEIGHBOURS8) {
-					int c = level.map[hero.pos + i];
-					if (c == Terrain.EMPTY || c == Terrain.EMPTY_DECO
-							|| c == Terrain.EMBERS || c == Terrain.GRASS) {
-						Level.set(hero.pos + i, Terrain.HIGH_GRASS);
-						GameScene.updateMap(hero.pos + i);
-						CellEmitter.get(hero.pos + i).burst(LeafParticle.LEVEL_SPECIFIC, 4);
-					}
+			int[] cells = (hero.pointsInTalent(Talent.NATURES_MEAL) == 1) ? PathFinder.NEIGHBOURS4 : PathFinder.NEIGHBOURS8;
+			for (int i : cells) {
+				int c = level.map[hero.pos + i];
+				if (c == Terrain.EMPTY || c == Terrain.EMPTY_DECO
+						|| c == Terrain.EMBERS || c == Terrain.GRASS) {
+					Level.set(hero.pos + i, Terrain.HIGH_GRASS);
+					GameScene.updateMap(hero.pos + i);
+					CellEmitter.get(hero.pos + i).burst(LeafParticle.LEVEL_SPECIFIC, 4);
 				}
 			}
 		}
+
 		if (hero.hasTalent(Talent.TOUGH_MEAL)) {
 			Buff.affect(hero, ArmorEmpower.class).set(3, 1+hero.pointsInTalent(Talent.TOUGH_MEAL));
 		}
+
 		if (hero.hasTalent(Talent.IMPREGNABLE_MEAL)) {
 			Buff.affect(hero, ArmorEnhance.class).set(hero.pointsInTalent(Talent.IMPREGNABLE_MEAL), 3);
 		}
+
 		if (hero.hasTalent(Talent.HEALING_MEAL)) {
 			if (hero.isHeroDebuffed()) {
 				boolean removed = false;
 				for (Buff b : hero.buffs()) {
-					if (b.type == Buff.buffType.NEGATIVE
-							&& !(b instanceof LostInventory)) {
+					if (b.type == Buff.buffType.NEGATIVE && !(b instanceof LostInventory)) {
 						b.detach();
 						removed = true;
 					}
 				}
-				if (removed) new Flare( 6, 32 ).color(0xFF4CD2, true).show( hero.sprite, 2f );
+				if (removed)
+					new Flare( 6, 32 ).color(0xFF4CD2, true).show( hero.sprite, 2f );
 			} else {
 				if (hero.pointsInTalent(Talent.HEALING_MEAL) > 1) {
 					hero.heal(3);

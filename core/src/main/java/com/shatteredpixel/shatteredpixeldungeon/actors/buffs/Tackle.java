@@ -156,7 +156,8 @@ public class Tackle extends FlavourBuff implements ActionIndicator.Action {
 					Sample.INSTANCE.play(Assets.Sounds.HIT_STRONG);
 				}
 
-				if (hero.buff(BrokenSeal.WarriorShield.class) != null) {
+				BrokenSeal.WarriorShield shieldBuff = hero.buff(BrokenSeal.WarriorShield.class);
+				if (hero.hasTalent(Talent.IMPROVED_TACKLE) && shieldBuff != null) {
 					Buff.affect(hero, BrokenSeal.WarriorShield.class).reduceCooldown(0.05f);
 				}
 

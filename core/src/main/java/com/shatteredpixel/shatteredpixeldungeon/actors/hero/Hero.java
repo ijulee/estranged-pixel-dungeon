@@ -1328,8 +1328,9 @@ public class Hero extends Char {
 		return canSelfTrample && !rooted && !flying &&
 				//standing in high grass
 				(Dungeon.level.map[pos] == Terrain.HIGH_GRASS ||
-				//standing in furrowed grass and not huntress
-				((heroClass != HeroClass.HUNTRESS && subClass != HeroSubClass.SPECIALIST) && Dungeon.level.map[pos] == Terrain.FURROWED_GRASS) ||
+				//standing in furrowed grass and not huntress/specialist/researcher
+				((heroClass != HeroClass.HUNTRESS && subClass != HeroSubClass.SPECIALIST && subClass != HeroSubClass.RESEARCHER) &&
+						Dungeon.level.map[pos] == Terrain.FURROWED_GRASS) ||
 				//standing on a plant
 				Dungeon.level.plants.get(pos) != null);
 	}

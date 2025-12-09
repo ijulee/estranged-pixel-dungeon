@@ -57,6 +57,7 @@ import com.watabou.utils.Bundle;
 import com.watabou.utils.Callback;
 import com.watabou.utils.GameMath;
 
+// TODO add indicators for harmonized state
 public class MonkEnergy extends Buff implements ActionIndicator.Action {
 
 	{
