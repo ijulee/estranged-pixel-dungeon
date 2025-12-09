@@ -61,19 +61,27 @@ public class ObsidianShield extends MeleeWeapon implements AlchemyWeapon {
 
     @Override
     public int defenseFactor(Char owner) {
-        return 4 + 2 * buffedLvl();    //4 extra defence, plus 2 per level;
+        return DRMax();
     }
 
-    //see Hero.damage for antimagic effects
-    public static int drRoll(int level) {
-        return Random.NormalIntRange(0, 4 + 2 * level); //4 extra defence, plus 2 per level;
+    public int DRMax(){
+        return DRMax(buffedLvl());
+    }
+
+    //4 extra defence, plus 2 per level
+    public int DRMax(int lvl){
+        return 4 + 2*lvl;
+    }
+
+    public int drRoll() {
+        return Random.NormalIntRange(0, DRMax());
     }
 
     public String statsInfo() {
         if (isIdentified()) {
-            return Messages.get(this, "stats_desc", 4 + 2 * buffedLvl());
+            return Messages.get(this, "stats_desc", DRMax());
         } else {
-            return Messages.get(this, "typical_stats_desc", 4);
+            return Messages.get(this, "typical_stats_desc", DRMax(0));
         }
     }
 

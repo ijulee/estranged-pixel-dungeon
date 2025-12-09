@@ -134,13 +134,25 @@ public class LanceNShield extends MeleeWeapon implements AlchemyWeapon {
         if (stance) {
             return 0;
         } else {
-            return 4+2*buffedLvl();     //4 extra defence, plus 2 per level;
+            return DRMax();
         }
     }
 
-    //see Hero.damage for antimagic effects
-    public static int drRoll(int level) {
-        return Random.NormalIntRange(0, 4+2*level); //4 extra defence, plus 2 per level;
+    public int DRMax(){
+        return DRMax(buffedLvl());
+    }
+
+    //4 extra defence, plus 2 per level
+    public int DRMax(int lvl){
+        return 4 + 2*lvl;
+    }
+
+    public int drRoll() {
+        if (stance) {
+            return 0;
+        } else {
+            return Random.NormalIntRange(0, DRMax());
+        }
     }
 
     public String statsInfo(){
@@ -152,9 +164,9 @@ public class LanceNShield extends MeleeWeapon implements AlchemyWeapon {
             }
         } else {
             if (isIdentified()){
-                return Messages.get(this, "stats_desc_defense", 4+2*buffedLvl());
+                return Messages.get(this, "stats_desc_defense", DRMax());
             } else {
-                return Messages.get(this, "typical_stats_desc_defense", 4);
+                return Messages.get(this, "typical_stats_desc_defense", DRMax(0));
             }
         }
     }

@@ -48,14 +48,23 @@ public class TacticalShield extends HG implements AlchemyWeapon {
 
     @Override
     public int defenseFactor( Char owner ) {
-        return 6+2*buffedLvl();             //6 extra defence, plus 2 per level
+        return DRMax();
+    }
+
+    public int DRMax(){
+        return DRMax(buffedLvl());
+    }
+
+    //6 extra defence, plus 2 per level
+    public int DRMax(int lvl){
+        return 6 + 2*lvl;
     }
 
     public String statsInfo(){
         if (isIdentified()){
-            return Messages.get(this, "stats_desc", 6+2*buffedLvl());
+            return Messages.get(this, "stats_desc", DRMax());
         } else {
-            return Messages.get(this, "typical_stats_desc", 6);
+            return Messages.get(this, "typical_stats_desc", DRMax(0));
         }
     }
 

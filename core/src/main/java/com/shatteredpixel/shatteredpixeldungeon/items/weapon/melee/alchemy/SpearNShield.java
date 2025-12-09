@@ -113,8 +113,17 @@ public class SpearNShield extends MeleeWeapon implements AlchemyWeapon {
         if (stance) {
             return 0;
         } else {
-            return 4+buffedLvl();               //4 extra defence, plus 1 per level
+            return DRMax();
         }
+    }
+
+    public int DRMax(){
+        return DRMax(buffedLvl());
+    }
+
+    //4 extra defence, plus 1 per level
+    public int DRMax(int lvl){
+        return 4 + lvl;
     }
 
     public String statsInfo(){
@@ -126,9 +135,9 @@ public class SpearNShield extends MeleeWeapon implements AlchemyWeapon {
             }
         } else {
             if (isIdentified()){
-                return Messages.get(this, "stats_desc_defense", 4+buffedLvl());
+                return Messages.get(this, "stats_desc_defense", DRMax());
             } else {
-                return Messages.get(this, "typical_stats_desc_defense", 4);
+                return Messages.get(this, "typical_stats_desc_defense", DRMax(0));
             }
         }
     }

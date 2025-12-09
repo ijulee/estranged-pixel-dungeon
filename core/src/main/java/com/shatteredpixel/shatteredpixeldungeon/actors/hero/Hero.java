@@ -2472,25 +2472,29 @@ public class Hero extends Char {
 
 		if (belongings.weapon() instanceof ObsidianShield
 				&& AntiMagic.RESISTS.contains(src.getClass())) {
-			dmg -= ObsidianShield.drRoll(belongings.weapon().buffedLvl());
+			ObsidianShield obs = (ObsidianShield) belongings.weapon();
+			dmg -= obs.drRoll();
 			dmg = Math.max(dmg, 0);
 		}
 
 		if (belongings.secondWep() instanceof ObsidianShield
 				&& AntiMagic.RESISTS.contains(src.getClass())) {
-			dmg -= ObsidianShield.drRoll(belongings.secondWep().buffedLvl());
+			ObsidianShield obs = (ObsidianShield) belongings.secondWep();
+			dmg -= obs.drRoll();
 			dmg = Math.max(dmg, 0);
 		}
 
-		if (belongings.weapon() instanceof LanceNShield && !((LanceNShield) belongings.weapon()).stance
+		if (belongings.weapon() instanceof LanceNShield
 				&& AntiMagic.RESISTS.contains(src.getClass())) {
-			dmg -= LanceNShield.drRoll(belongings.weapon().buffedLvl());
+			LanceNShield lns = (LanceNShield) belongings.weapon();
+			dmg -= lns.drRoll();
 			dmg = Math.max(dmg, 0);
 		}
 
 		if (belongings.secondWep() instanceof LanceNShield && !((LanceNShield) belongings.secondWep()).stance
 				&& AntiMagic.RESISTS.contains(src.getClass())) {
-			dmg -= LanceNShield.drRoll(belongings.secondWep().buffedLvl());
+			LanceNShield lns = (LanceNShield) belongings.secondWep();
+			dmg -= lns.drRoll();
 			dmg = Math.max(dmg, 0);
 		}
 
