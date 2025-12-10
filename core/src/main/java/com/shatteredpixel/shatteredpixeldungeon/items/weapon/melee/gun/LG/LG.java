@@ -28,6 +28,7 @@ public class LG extends Gun {
     {
         maxRounds = 2;
         rounds = maxRounds;
+        ammoPerRound = 3;
         shootingAcc = 1.5f;
     }
 
@@ -35,11 +36,6 @@ public class LG extends Gun {
     public int baseMissileMax(int lvl) {
         return 3 * (tier() + 1) +
                 lvl * (tier() + 1);
-    }
-
-    @Override
-    public int reloadAmmoUse() {
-        return Math.max(0, (maxRounds()- rounds)*3);
     }
 
     @Override

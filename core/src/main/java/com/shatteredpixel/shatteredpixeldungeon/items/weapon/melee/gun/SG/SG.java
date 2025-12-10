@@ -10,14 +10,10 @@ public class SG extends Gun {
         maxRounds = 2;
         rounds = maxRounds;
         shotsPerRound = 5;
+        ammoPerRound = 1;
         shootingAcc = 1f;
         adjShootingAcc = 3f;
         spread = true;
-    }
-
-    @Override
-    public int reloadAmmoUse() {
-        return maxRounds()- rounds;
     }
 
     @Override
@@ -34,11 +30,6 @@ public class SG extends Gun {
     public class SGBullet extends Bullet {
         {
             image = ItemSpriteSheet.TRIPLE_BULLET;
-        }
-
-        @Override
-        protected float adjacentAccFactor(Char owner, Char target) {
-            return super.adjacentAccFactor(owner, target)*3f;
         }
     }
 }

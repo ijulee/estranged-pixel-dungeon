@@ -8,6 +8,7 @@ public class RL extends Gun {
     {
         maxRounds = 2;
         rounds = maxRounds;
+        ammoPerRound = 3;
         explode = true;
     }
 
@@ -15,11 +16,6 @@ public class RL extends Gun {
     public int baseMissileMax(int lvl) {
         return 6 * (tier() + 2) +
                 lvl * (tier() + 2);
-    }
-
-    @Override
-    public int reloadAmmoUse() {
-        return Math.max(0, (maxRounds()- rounds)*3);
     }
 
     @Override

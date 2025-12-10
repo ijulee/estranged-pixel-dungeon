@@ -30,6 +30,7 @@ public class FT extends Gun {
     {
         maxRounds = 2;
         rounds = maxRounds;
+        ammoPerRound = 2;
         shootingAcc = 1.5f;
     }
 
@@ -37,11 +38,6 @@ public class FT extends Gun {
     public int baseMissileMax(int lvl) {
         return 3 * (tier() + 1) +
                 lvl * (tier() + 1);
-    }
-
-    @Override
-    public int reloadAmmoUse() {
-        return Math.max(0, (maxRounds()- rounds)*2);
     }
 
     @Override

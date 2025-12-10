@@ -680,15 +680,15 @@ public class Gun extends GunWeapon {
 		@Override
 		public float accuracyFactor(Char owner, Char target) {
 			float ACC = super.accuracyFactor(owner, target);
+
 			AttachMod attachMod = getGunMod(AttachMod.class);
 			if (attachMod == AttachMod.LASER_ATTACH) {
 				ACC *= 1.25f;
 			}
+
 			if (Dungeon.hero.hasTalent(Talent.INEVITABLE_DEATH) && Dungeon.hero.buff(RouletteOfDeath.class) != null && Dungeon.hero.buff(RouletteOfDeath.class).timeToDeath()) {
 				ACC *= 1 + Dungeon.hero.pointsInTalent(Talent.INEVITABLE_DEATH);
 			}
-
-			// ACC = Gun.this.barrelMod.bulletAccuracyFactor(ACC, Dungeon.level.adjacent(owner.pos, target.pos));
 
 			return ACC;
 		}
