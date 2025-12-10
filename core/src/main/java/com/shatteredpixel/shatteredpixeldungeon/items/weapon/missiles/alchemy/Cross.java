@@ -29,8 +29,7 @@ public class Cross extends MissileWeapon {
 
         tier = 5;
         sticky = false;
-
-        baseUses = 1000;
+        baseUses = 10;
     }
 
     @Override
@@ -44,7 +43,6 @@ public class Cross extends MissileWeapon {
     @Override
     protected float adjacentAccFactor(Char owner, Char target) {
         if (circlingBack){
-            circlingBack = false;
             return 1.5f;
         }
         return super.adjacentAccFactor(owner, target);
@@ -90,7 +88,7 @@ public class Cross extends MissileWeapon {
             this.returnPos = returnPos;
             this.returnDepth = returnDepth;
             this.returnBranch = returnBranch;
-            left = 4;
+            left = 5;
         }
 
         public int returnPos(){
@@ -108,7 +106,7 @@ public class Cross extends MissileWeapon {
 
         @Override
         public boolean act() {
-            if (returnDepth == Dungeon.depth){
+            if (returnDepth == Dungeon.depth && returnBranch == Dungeon.branch) {
                 left--;
                 if (left <= 0){
                     final Char returnTarget = Actor.findChar(returnPos);
