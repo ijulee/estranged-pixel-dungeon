@@ -3,27 +3,23 @@ package com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.gun.FT;
 import static com.shatteredpixel.shatteredpixeldungeon.Dungeon.hero;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
-import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Blob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Fire;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
 import com.shatteredpixel.shatteredpixeldungeon.effects.MagicMissile;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.gun.Gun;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.ConeAOE;
-import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
-import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.audio.Sample;
-import com.watabou.utils.Callback;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class FT extends Gun {
 
@@ -70,7 +66,7 @@ public class FT extends Gun {
                             null
                     );
                 }
-                ArrayList<Char> chars = new ArrayList<>();
+                ArrayList<Char> targets = new ArrayList<>();
                 for (int cells : cone.cells){
                     //knock doors open
                     if (Dungeon.level.map[cells] == Terrain.DOOR){
@@ -85,18 +81,17 @@ public class FT extends Gun {
 
                     Char ch = Actor.findChar(cells);
                     if (ch != null && ch.alignment != hero.alignment){
-                        chars.add(ch);
+                        targets.add(ch);
                     }
                 }
-                for (Char ch : chars) {
-                    for (int i = 0; i< shotsPerRound(); i++) {
-                        curUser.shoot(ch, this);
-                    }
-                    if (ch == hero && !ch.isAlive()) {
-                        Dungeon.fail(getClass());
-                        Badges.validateDeathFromFriendlyMagic();
-                        GLog.n(Messages.get(this, "ondeath"));
-                    }
+
+                //furthest to closest, mainly for elastic
+                Collections.sort(targets, (a, b) -> Float.compare(
+                        Dungeon.level.trueDistance(b.pos, curUser.pos),
+                        Dungeon.level.trueDistance(a.pos, curUser.pos)));
+
+                for (Char ch : targets) {
+                    super.onThrow(ch.pos);
                 }
 
                 //final zap at 2/3 distance, for timing of the actual effect
@@ -104,15 +99,13 @@ public class FT extends Gun {
                         MagicMissile.FIRE_CONE,
                         curUser.sprite,
                         cone.coreRay.path.get(dist * 2 / 3),
-                        new Callback() {
-                            @Override
-                            public void call() {
-                            }
-                        });
+                        () -> { });
             }
+        }
 
-            Invisibility.dispel();
-            onShoot();
+        @Override
+        public void showPuff(int cell) {
+            return; // does nothing
         }
 
         @Override

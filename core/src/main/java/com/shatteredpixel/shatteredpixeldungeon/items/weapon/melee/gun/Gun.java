@@ -714,10 +714,10 @@ public class Gun extends GunWeapon {
 			// shoot target cell first
 			Char enemy = Actor.findChar(cell);
 			for (int i = 0; i < shotsPerRound(); i++) {
-				if (enemy == null || enemy == curUser) {
-					showPuff(cell);
-					super.onThrow(cell);
-                } else {
+                if (enemy == null || enemy == curUser || !enemy.isAlive()) {
+                    showPuff(cell);
+                    super.onThrow(cell);
+				} else {
                     super.onThrow(enemy.pos);
                 }
             }
@@ -748,17 +748,17 @@ public class Gun extends GunWeapon {
 						Dungeon.level.trueDistance(b.pos, curUser.pos),
 						Dungeon.level.trueDistance(a.pos, curUser.pos)));
 
-				for (Char target : targets){
+				for (Char ch : targets){
 					for (int i = 0; i < shotsPerRound(); i++) {
-						if(target.isAlive()) {
-                            if (target != curUser) {
-                                super.onThrow(target.pos);
+						if(ch.isAlive()) {
+                            if (ch != curUser) {
+                                super.onThrow(ch.pos);
                             } else {
                                 // special case not processed by super method
-                                if (curUser.shoot(target, this)) {
-                                    rangedHit(target, target.pos);
+                                if (curUser.shoot(ch, this)) {
+                                    rangedHit(ch, ch.pos);
                                 } else {
-                                    rangedMiss(target.pos);
+                                    rangedMiss(ch.pos);
                                 }
                             }
                         }
@@ -768,7 +768,6 @@ public class Gun extends GunWeapon {
 				Sample.INSTANCE.play( Assets.Sounds.BLAST );
 			}
 
-			onShoot();
 		}
 
 		@Override
@@ -841,6 +840,7 @@ public class Gun extends GunWeapon {
 		@Override
 		public void cast(final Hero user, int dst) {
 			super.cast(user, dst);
+			onShoot();
 		}
 	}
 
