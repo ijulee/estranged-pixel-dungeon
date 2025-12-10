@@ -8,6 +8,7 @@ public class SMG extends Gun {
         maxRounds = 4;
         rounds = maxRounds;
         shotsPerRound = 3;
+        ammoPerRound = 3;
         shootingAcc = 1.2f;
         adjShootingAcc = 1.5f;
     }
