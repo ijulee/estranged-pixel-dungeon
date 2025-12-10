@@ -64,10 +64,10 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.samurai.Sh
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.warrior.Endure;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.warrior.HeroicLeap;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.warrior.Shockwave;
-import com.shatteredpixel.shatteredpixeldungeon.items.Ankh;
 import com.shatteredpixel.shatteredpixeldungeon.items.ArrowBag;
 import com.shatteredpixel.shatteredpixeldungeon.items.BrokenSeal;
 import com.shatteredpixel.shatteredpixeldungeon.items.BulletBelt;
+import com.shatteredpixel.shatteredpixeldungeon.items.BulletItem;
 import com.shatteredpixel.shatteredpixeldungeon.items.GammaRayGun;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.KingsCrown;
@@ -92,11 +92,8 @@ import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfLiquidFlam
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfMindVision;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfPurity;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfParalyticGas;
-import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfPurity;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfStrength;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.elixirs.ElixirOfHoneyedHealing;
-import com.shatteredpixel.shatteredpixeldungeon.items.remains.BrokenShield;
-import com.shatteredpixel.shatteredpixeldungeon.items.remains.SheathFragment;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfAccuracy;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfEnergy;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfHaste;
@@ -107,11 +104,9 @@ import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfMagicMappi
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfMirrorImage;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfRage;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfRemoveCurse;
-import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfRemoveCurse;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfRetribution;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfTeleportation;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfUpgrade;
-import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.PinkGem;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfMagicMissile;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.bow.SpiritBow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Cudgel;
@@ -126,10 +121,6 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Shovel;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.WornKatana;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.WornShortsword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.TacticalShield;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.bow.Bow;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.bow.GreatBow;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.bow.LongBow;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.bow.ShortBow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.bow.WornShortBow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.gun.AR.AR_T1;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.quick.PocketKnife;
@@ -179,6 +170,9 @@ public enum HeroClass {
 		waterskin.collect();
 
 		new ScrollOfIdentify().identify();
+
+		// let all classes start with 50 ammo
+		new BulletItem().quantity(50).collect();
 
 		if (DeviceCompat.isDebug() || SPDSettings.customSeed().contains("test")) {
 			new RingOfMight().identify().upgrade(10).collect();
@@ -391,7 +385,7 @@ public enum HeroClass {
 		hero.belongings.weapon.activate(hero);
 
 		BulletBelt bulletBelt = new BulletBelt();
-		bulletBelt.quantity(5).collect();
+		bulletBelt.quantity(4).collect();
 
 		PocketKnife pocketKnife = new PocketKnife();
 		pocketKnife.identify().collect();
@@ -482,7 +476,7 @@ public enum HeroClass {
 		pocketKnife.identify().collect();
 
 		BulletBelt bulletBelt = new BulletBelt();
-		bulletBelt.quantity(3).collect();
+		bulletBelt.quantity(2).collect();
 
 		ArrowBag arrowBag = new ArrowBag();
 		arrowBag.collect();
