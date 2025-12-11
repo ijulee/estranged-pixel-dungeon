@@ -24,3 +24,6 @@ local.properties
 
 #secret values
 android/src/main/res/values/strings.xml
+/mod-docs/
+/code.lnk
+/assets.lnk
