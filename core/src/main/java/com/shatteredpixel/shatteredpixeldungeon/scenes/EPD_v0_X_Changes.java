@@ -36,13 +36,13 @@ public class EPD_v0_X_Changes {
                 "\"add-on\" mod to Shattered, one that keeps up with SPD's content updates, and " +
                 "only seeks to add content, rather than taking the game in a different " +
                 "direction.\n\n" +
-                "It was sad to hear that Hoto-Mocha (Cocoa) will not continue with Re-Arranged, " +
-                "when there was still so much content waiting to be fleshed out. I thought that " +
-                "the game design could use more nuance as well, and that is what I will try to do " +
-                "with EstRanged. At the same time, I will keep this mod up-to-date with Shattered " +
-                "releases as well.\n\n" +
+                "I was sad to hear that Hoto-Mocha (Cocoa) will not continue developing " +
+                "Re-Arranged due to personal issues. It's clear that there was still a lot of " +
+                "content waiting to be fleshed out and refined, and that's what I will aim to " +
+                "do with EstRanged. At the same time, I will keep this mod up-to-date with " +
+                "Shattered releases as well.\n\n" +
                 "This first update will consist mostly of a Shattered rebase to v3.3.0, plus " +
-                "translation and bug fixes, but I\'ll try to implement more interesting changes " +
+                "translation and bug fixes, but I'll try to implement more interesting changes " +
                 "over time.\n\n" +
                 "_-- miaomix_") );
 
@@ -61,7 +61,7 @@ public class EPD_v0_X_Changes {
                 "**-** Brought in the new and improved background animation that came with " +
                 "Shattered v3.2.\n" +
                 "**-** Added floating text icons for ammo pickup, talent point gain, and max HP " +
-                "boost."));
+                "boost (The last 2 you can see in Elixir of Talents)."));
 
         changes = new ChangeInfo(Messages.get(ChangesScene.class, "changes"), false, null);
         changes.hardlight(CharSprite.WARNING);
@@ -148,7 +148,7 @@ public class EPD_v0_X_Changes {
                 "**-** The implementation has been changed fundamentally, along with the " +
                 "implementation of gun weapons, so there may be some unexpected bugs. Please let " +
                 "me know if anything strange happens.\n" +
-                "**-** Moved some info from bow item descriptions into Adventurer's Guuide to make " +
+                "**-** Moved some info from bow item descriptions into Adventurer's Guide to make " +
                 "them more concise.\n" +
                 "**-** Added stats description for all bows.\n" +
                 "**-** Bow weapons now gain identification progress when shooting. " +
@@ -166,7 +166,7 @@ public class EPD_v0_X_Changes {
         changes.addButton(new ChangeButton(new ItemSprite(ItemSpriteSheet.HG_T5), "Gun Weapon Changes",
                 "**-** Like bow weapons, the implementation was fundamentally changed, " +
                 "so there may be bugs.\n" +
-                "**-** Moved some info from gun item descriptions into Adventurer's Guuide to make " +
+                "**-** Moved some info from gun item descriptions into Adventurer's Guide to make " +
                 "them more concise.\n" +
                 "**-** Added stats descriptions to all gun types, including info such as shooting " +
                 "accuracy and ammo use.\n" +
@@ -196,6 +196,13 @@ public class EPD_v0_X_Changes {
                 "**-** Changed item description to be more concise.\n" +
                 "**-** Added info to the corresponding Adventurer's Guide tab."));
 
+        changes.addButton(new ChangeButton(Icons.get(Icons.PREFS), Messages.get(ChangesScene.class, "misc"),
+                "**- ALL** classes now start with 50 ammo. Gunner and Archer both start " +
+                "with 1 less Ammo belt to compensate. This is to prevent shooting weapons being " +
+                "unusable in Sewers for the other classes if no ammo belt is found.\n" +
+                "**-** Changed Elixir of Talent description to be more clear and concise " +
+                "(felt like writing a modern Yu-Gi-Oh! card)."));
+
         changes.addButton(new ChangeButton(new Image(Assets.Sprites.SPINNER, 144, 0, 16, 16),
                 Messages.get(ChangesScene.class, "bugfixes"),
                 "Fixed the following bugs:\n" +
@@ -218,8 +225,8 @@ public class EPD_v0_X_Changes {
                 "**-** Mystic Grindstone resulting in \"negative\" blocking and increased " +
                 "damage.\n" +
                 "**-** Ring of Wealth not properly accounting for Ring Necklace.\n" +
-                "**-** Equipped ring descriptions now account for bonus from Ring Necklace.\n" +
-                "**-** Potential bug where Ring Necklace provided extra benefit on game load",
+                "**-** Equipped ring descriptions now properly account for Ring Necklace.\n" +
+                "**-** Potential bug where Ring Necklace provided extra benefit on game load.",
 
                 "**Miscellaneous**\n" +
                 "**-** Researcher trampling furrowed grass in specific cases.\n" +
@@ -237,12 +244,16 @@ public class EPD_v0_X_Changes {
 
         changes.addButton(new ChangeButton(new ItemSprite(ItemSpriteSheet.LONGBOW), "Bow Weapon Nerf",
                 "Bow weapon knockback can no longer knock enemies into pits."));
+        changes.addButton(new ChangeButton(new ItemSprite(ItemSpriteSheet.CROSS),"Cross Nerf",
+                "The Cross is no longer infinite durability (10 base durability), and " +
+                "now takes 5 turns to return like the boomerang."));
         changes.addButton(new ChangeButton(HeroSprite.avatar(HeroClass.ARCHER, 2),"Archer Nerf",
                 "Similarly, Pushback talent can no longer knock enemies into pits."));
         changes.addButton(new ChangeButton(HeroSprite.avatar(HeroClass.ARCHER, 4),"Bowmaster Nerf",
                 "Bowmaster combo now breaks with partial-turn actions that do not build combo."));
         changes.addButton(new ChangeButton(HeroSprite.avatar(HeroClass.MEDIC, 2),"Medic Nerf",
                 "Medic's Healing Meal +1 no longer removes Hunger and Starving debuffs."));
+
 
     }
 }
