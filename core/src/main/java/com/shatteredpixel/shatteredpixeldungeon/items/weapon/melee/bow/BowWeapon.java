@@ -327,6 +327,17 @@ public class BowWeapon extends GunWeapon {
         }
 
         @Override
+        public int image() {
+            if (isEquipped(Dungeon.hero)) {
+                BowMasterSkill b = Dungeon.hero.buff(BowMasterSkill.class);
+                if (b != null && b.isPowerShot()) {
+                    return ItemSpriteSheet.GOLDEN_ARROW;
+                }
+            }
+            return super.image();
+        }
+
+        @Override
         public void throwSound() {
             Sample.INSTANCE.play( Assets.Sounds.ATK_SPIRITBOW, 1, Random.Float(0.87f, 1.15f) );
         }

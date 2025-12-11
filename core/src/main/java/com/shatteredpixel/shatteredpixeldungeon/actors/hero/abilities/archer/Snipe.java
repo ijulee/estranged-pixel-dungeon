@@ -86,7 +86,7 @@ public class Snipe extends ArmorAbility {
 
     public static class SnipeArrow extends MissileWeapon {
         {
-            image = ItemSpriteSheet.NORMAL_ARROW;
+            image = ItemSpriteSheet.GOLDEN_ARROW;
             spawnedForEffect = true;
         }
 

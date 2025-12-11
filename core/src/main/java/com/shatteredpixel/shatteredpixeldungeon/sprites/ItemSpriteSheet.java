@@ -1014,10 +1014,10 @@ public class ItemSpriteSheet {
 
 	private static final int NEW_WEP_TIER_5	=			xy(1, 47);  //8 slots
 	public static final int LARGE_KATANA= NEW_WEP_TIER_5+0;
-	public static final int LARGE_SHORD	= NEW_WEP_TIER_5+1;
+	public static final int LARGE_SWORD = NEW_WEP_TIER_5+1;
 	static{
 		assignItemRect(LARGE_KATANA	, 12, 16);
-		assignItemRect(LARGE_SHORD	, 14, 16);
+		assignItemRect(LARGE_SWORD, 14, 16);
 	}
 
 //	private static final int NEW_WEP_TIER_6	=			xy(9, 47);  //8 slots
@@ -1541,8 +1541,10 @@ public class ItemSpriteSheet {
 
 	private static final int ARROW_WEAPONS			=	xy(1, 74);
 	public static final int NORMAL_ARROW			= ARROW_WEAPONS+0;
+	public static final int GOLDEN_ARROW			= ARROW_WEAPONS+1;
 	static {
 		assignItemRect(NORMAL_ARROW, 14, 14);
+		assignItemRect(GOLDEN_ARROW, 14, 14);
 	}
 
 	private static final int QUICK_WEAPONS			=	xy(1, 75);
