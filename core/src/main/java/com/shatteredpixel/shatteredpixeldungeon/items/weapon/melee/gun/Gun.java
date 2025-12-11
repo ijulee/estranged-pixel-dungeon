@@ -22,6 +22,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.gunner.Riot;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
+import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.BlastParticle;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.SmokeParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfSharpshooting;
@@ -30,8 +31,10 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.GunWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.CellSelector;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.audio.Sample;
+import com.watabou.noosa.particles.Emitter;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.PathFinder;
 import com.watabou.utils.Random;
@@ -582,6 +585,26 @@ public class Gun extends GunWeapon {
 	@Override
 	public String status() {
 		return Messages.format("%d/%d", rounds, maxRounds());
+	}
+
+	@Override
+	public Emitter emitter() {
+		if (inscribeMod == InscribeMod.NORMAL) {
+			return super.emitter();
+		}
+
+		Emitter emitter = new Emitter();
+		emitter.pos(ItemSpriteSheet.film.width(image) - 2f, 2f);
+		emitter.fillTarget = false;
+		emitter.pour(Speck.factory( Speck.YELLOW_LIGHT ), 1.5f);
+		return emitter;
+	}
+
+	@Override
+	public void reset() {
+		super.reset();
+		// inscribed is not kept in bones, like broken seal
+		inscribeMod = InscribeMod.NORMAL;
 	}
 
 	//needs to be overridden
