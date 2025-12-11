@@ -50,12 +50,13 @@ public class WornKey extends Key {
 		if(!SPDSettings.supportNagged()){
 			try {
 				Dungeon.saveAll();
-//				Game.runOnRenderThread(new Callback() {
-//					@Override
-//					public void call() {
-//						ShatteredPixelDungeon.scene().add(new WndSupportPrompt());
-//					}
-//				});
+				// One-time SPD supporter prompt (currently disabled)
+				/*Game.runOnRenderThread(new Callback() {
+					@Override
+					public void call() {
+						ShatteredPixelDungeon.scene().add(new WndSupportPrompt());
+					}
+				});*/
 			} catch (IOException e) {
 				ShatteredPixelDungeon.reportException(e);
 			}
