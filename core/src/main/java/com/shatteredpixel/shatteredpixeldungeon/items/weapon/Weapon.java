@@ -581,7 +581,7 @@ abstract public class Weapon extends KindOfWeapon {
 	}
 
 	public static abstract class Enchantment implements Bundlable {
-		//TODO : 신규 인챈트 추가할 때 격투가 신비한 반지 특성 효과도 추가할 것
+		//TODO add new enchantments to Fighter?
 		public static final Class<?>[] common = new Class<?>[]{
 				Blazing.class, Chilling.class, Kinetic.class, Shocking.class, Venomous.class, Eldritch.class};
 

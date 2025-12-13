@@ -144,7 +144,7 @@ public class Pill extends Item {
     @Override
     public String desc() {
         String desc = super.desc();
-//        TODO: 간호사 기능 추가
+//        TODO add descriptions for Medic pill effects
 //        if (curUser.heroClass == HeroClass.NURSE && enemyAlternative) {
 //            desc += "\n\n" + Messages.get(this, "enemy_desc");
 //        }
