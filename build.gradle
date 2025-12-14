@@ -14,7 +14,7 @@ allprojects {
         appName = 'Estranged Pixel Dungeon'
         appPackageName = 'com.ijulee.estrangedpixeldungeon'
 
-        appVersionCode = 883
+        appVersionCode = 884
         appVersionCode += 100
         appVersionName = '0.0.1'
 
