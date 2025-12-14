@@ -92,7 +92,7 @@ public class CountCooldownBuff extends FlavourBuff{
     }
 
     public int count(){
-        return members.size() + ((cooldown() >= 0)? 1 : 0);
+        return members.size() + ((cooldown() > 0)? 1 : 0);
     }
 
     @Override

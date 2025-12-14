@@ -279,9 +279,7 @@ public class BowWeapon extends GunWeapon {
             Char enemy = Actor.findChar( cell );
 
             if (enemy == null || enemy == curUser) {
-                if (dropAmmo) {
-                    dropArrow(cell);
-                }
+                doDrop(cell);
             }
 
             if (curUser != null) {
@@ -304,12 +302,10 @@ public class BowWeapon extends GunWeapon {
         protected void rangedHit(Char enemy, int cell) {
             super.rangedHit(enemy, cell);
 
-            if (dropAmmo) {
-                if (enemy.isAlive()) {
-                    Buff.affect(enemy, ArrowAttached.class, ArrowAttached.DURATION);
-                } else {
-                    dropArrow(cell);
-                }
+            if (enemy.isAlive()) {
+                doAttach(enemy);
+            } else {
+                doDrop(cell);
             }
 
             if (curUser != null) {
@@ -321,8 +317,20 @@ public class BowWeapon extends GunWeapon {
 
         @Override
         protected void rangedMiss(int cell) {
+            doDrop(cell);
+        }
+
+        private void doDrop(int cell) {
             if (dropAmmo) {
                 dropArrow(cell);
+                dropAmmo = false;
+            }
+        }
+
+        private void doAttach(Char ch) {
+            if (dropAmmo) {
+                Buff.affect(ch, ArrowAttached.class, ArrowAttached.DURATION);
+                dropAmmo = false;
             }
         }
 
@@ -348,7 +356,7 @@ public class BowWeapon extends GunWeapon {
     }
 
     public static void dropArrow(int qty, int cell) {
-        Dungeon.level.drop((new ArrowItem()).quantity(qty), cell).sprite.drop(cell);
+        Dungeon.level.drop(new ArrowItem().quantity(qty), cell).sprite.drop(cell);
     }
 
     public static void pushEnemy(KindOfWeapon weapon, Char attacker, Char defender, int dist) {
@@ -420,6 +428,12 @@ public class BowWeapon extends GunWeapon {
             if (count() >= 10) {
                 Badges.validateHedgehog();
             }
+        }
+
+        @Override
+        public void detach() {
+            dropArrow(count(), target.pos);
+            super.detach();
         }
 
         @Override

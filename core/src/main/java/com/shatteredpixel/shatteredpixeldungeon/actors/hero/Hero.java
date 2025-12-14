@@ -1927,7 +1927,7 @@ public class Hero extends Char {
 				} else {
 					chance *= 1.2f;
 				}
-				chance += 0.05f + 0.1f * pointsInTalent(Talent.UNEXPECTED_SLASH);;
+				chance += 0.05f + 0.1f * pointsInTalent(Talent.UNEXPECTED_SLASH);
 			}
 		}
 
