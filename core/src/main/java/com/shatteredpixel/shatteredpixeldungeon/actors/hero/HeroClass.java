@@ -189,10 +189,11 @@ public enum HeroClass {
 			new RingOfFuror().identify().upgrade(100).collect();
 
 			new AlchemistsToolkit().identify().upgrade(10).collect();
-			new EnergyCrystal().quantity(1000).collect();
+			new ElixirOfHoneyedHealing().quantity(1000).collect();
 
 			new PlateArmor().identify().upgrade(100).collect();
 			new TacticalShield().identify().upgrade(100).collect();
+			new BulletBelt().quantity(100).collect();
 		} else if (DeviceCompat.isDebug()) {
 			new Teleporter().collect();
 		}
