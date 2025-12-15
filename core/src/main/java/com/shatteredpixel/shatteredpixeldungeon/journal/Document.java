@@ -22,11 +22,13 @@
 package com.shatteredpixel.shatteredpixeldungeon.journal;
 
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfIdentify;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Icons;
+import com.shatteredpixel.shatteredpixeldungeon.ui.TalentIcon;
 import com.watabou.noosa.Image;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.DeviceCompat;
@@ -219,6 +221,8 @@ public enum Document {
 					return new ItemSprite( ItemSpriteSheet.BOW );
 				case "BluePrint":
 					return new ItemSprite( ItemSpriteSheet.BLUEPRINT );
+				case "Critical":
+					return new TalentIcon( Talent.BASIC_PRACTICE );
 			}
 		}
 	}
@@ -288,6 +292,8 @@ public enum Document {
 		ADVENTURERS_GUIDE.pagesStates.put("GunSmithing",        debug ? READ : NOT_FOUND);
 		ADVENTURERS_GUIDE.pagesStates.put("Bow",                debug ? READ : NOT_FOUND);
 		ADVENTURERS_GUIDE.pagesStates.put("BluePrint",          debug ? READ : NOT_FOUND);
+		//Estranged additions
+		ADVENTURERS_GUIDE.pagesStates.put("Critical",           debug ? READ : NOT_FOUND);
 
 		//given in sewers
 		ALCHEMY_GUIDE.pagesStates.put("Potions",                debug ? READ : NOT_FOUND);
