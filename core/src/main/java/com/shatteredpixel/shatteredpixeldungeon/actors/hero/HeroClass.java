@@ -68,6 +68,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.ArrowBag;
 import com.shatteredpixel.shatteredpixeldungeon.items.BrokenSeal;
 import com.shatteredpixel.shatteredpixeldungeon.items.BulletBelt;
 import com.shatteredpixel.shatteredpixeldungeon.items.BulletItem;
+import com.shatteredpixel.shatteredpixeldungeon.items.EnergyCrystal;
 import com.shatteredpixel.shatteredpixeldungeon.items.GammaRayGun;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.KingsCrown;
@@ -96,6 +97,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfStrength;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.elixirs.ElixirOfHoneyedHealing;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfAccuracy;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfEnergy;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfFuror;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfHaste;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfMight;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfIdentify;
@@ -174,30 +176,25 @@ public enum HeroClass {
 		// let all classes start with 50 ammo
 		new BulletItem().quantity(50).collect();
 
-		if (DeviceCompat.isDebug() || SPDSettings.customSeed().contains("test")) {
-			new RingOfMight().identify().upgrade(10).collect();
-			new RingOfEnergy().identify().upgrade(20).collect();
-			new RingOfHaste().identify().upgrade(100).collect();
-			new RingOfAccuracy().identify().upgrade(100).collect();
-			new AlchemistsToolkit().identify().upgrade(10).collect();
-			new ElixirOfHoneyedHealing().identify().quantity(500).collect();
-			new PlateArmor().identify().upgrade(100).collect();
-			new TacticalShield().identify().upgrade(100).collect();
+		if (SPDSettings.customSeed().contains("test")) {
 			new Teleporter().collect();
+
 			new TengusMask().collect();
 			new KingsCrown().collect();
 			new OldAmulet().collect();
-//			new BrokenShield().collect();
-//			new PinkGem().collect();
-//			new Ankh().collect();
-//			new PotionOfLiquidFlame().identify().quantity(100).collect();
-//			new SheathFragment().quantity(20).collect();
-//			new BulletBelt().collect();
-//			new WornShortBow().identify().collect();
-//			new ShortBow().identify().collect();
-//			new Bow().identify().collect();
-//			new LongBow().identify().collect();
-//			new GreatBow().identify().collect();
+
+			new RingOfMight().identify().upgrade(10).collect();
+			new RingOfEnergy().identify().upgrade(10).collect();
+			new RingOfHaste().identify().upgrade(100).collect();
+			new RingOfFuror().identify().upgrade(100).collect();
+
+			new AlchemistsToolkit().identify().upgrade(10).collect();
+			new EnergyCrystal().quantity(1000).collect();
+
+			new PlateArmor().identify().upgrade(100).collect();
+			new TacticalShield().identify().upgrade(100).collect();
+		} else if (DeviceCompat.isDebug()) {
+			new Teleporter().collect();
 		}
 
 		switch (this) {
