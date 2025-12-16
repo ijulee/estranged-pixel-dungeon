@@ -183,6 +183,15 @@ import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfPrismaticLight
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfRegrowth;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfTransfusion;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfWarding;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.bow.CorrosiveBow;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.bow.ElectricBow;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.bow.GoldenBow;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.bow.MagicalBow;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.bow.NaturesBow;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.bow.PhaseBow;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.bow.SpiritBow;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.bow.TacticalBow;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.bow.WindBow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.AssassinsBlade;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.BattleAxe;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Bible;
@@ -341,6 +350,7 @@ public class Generator {
 		WEP_AL_T6	( 0, 0, MeleeWeapon.class),
 		WEP_AL_T7	( 0, 0, MeleeWeapon.class),
 		WEP_SP		( 0, 0, MeleeWeapon.class),
+		SPIRIT_BOW	(0,0, SpiritBow.class),
 
 		ARMOR	( 2, 1, Armor.class ),
 		
@@ -731,6 +741,20 @@ public class Generator {
 			WEP_SP.defaultProbs = new float[]{ 0, 0, 0 };
 			WEP_SP.probs = WEP_SP.defaultProbs.clone();
 
+			//see Generator.randomBow
+			SPIRIT_BOW.classes = new Class<?>[] {
+					NaturesBow.class,
+					GoldenBow.class,
+					CorrosiveBow.class,
+					WindBow.class,
+					TacticalBow.class,
+					PhaseBow.class,
+					ElectricBow.class,
+					MagicalBow.class
+			};
+			SPIRIT_BOW.defaultProbs = new float[]{ 1, 1, 1, 1, 1, 1, 1, 1 };
+			SPIRIT_BOW.probs = SPIRIT_BOW.defaultProbs.clone();
+
 			//see Generator.randomArmor
 			ARMOR.classes = new Class<?>[]{
 					ClothArmor.class,
@@ -1096,6 +1120,47 @@ public class Generator {
 			w = (MeleeWeapon) random(wepTiers[Random.chances(floorSetTierProbs[floorSet])]);
 		}
 		return w;
+	}
+
+	public static SpiritBow randomBow(Class<? extends SpiritBow> curBowClass) {
+		//generates new special SpiritBow without repeat or replacement
+		Category cat = Category.SPIRIT_BOW;
+
+		//remove current class from probs
+		float[] probs = cat.probs.clone();
+		int curIdx = Arrays.asList(cat.classes).indexOf(curBowClass);
+		if (curIdx != -1) {
+			probs[curIdx] = 0;
+		}
+
+		//reset if probs is empty
+		boolean empty = true;
+		for (float p: probs) {
+			empty &= (p == 0);
+		}
+		if (empty) {
+			reset(cat);
+			// still exclude current class
+			if (curIdx != -1) {
+				probs[curIdx] = 0;
+			}
+		}
+
+		if (cat.defaultProbs != null && cat.seed != null){
+			Random.pushGenerator(cat.seed);
+			for (int i = 0; i < cat.dropped; i++) Random.Long();
+		}
+
+		int i = Random.chances( cat.probs );
+
+		if (cat.defaultProbs != null && cat.seed != null){
+			Random.popGenerator();
+			cat.dropped++;
+		}
+
+		cat.probs[i]--;
+		return Reflection.newInstance((Class<? extends SpiritBow>) cat.classes[i]);
+
 	}
 	
 	public static final Category[] misTiers = new Category[]{
