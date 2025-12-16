@@ -3331,7 +3331,10 @@ public class Hero extends Char {
 			Buff.affect( this, Combo.class ).hit(attackTarget);
 		}
 
-		if (hit && subClass == HeroSubClass.BATTLEMAGE && belongings.attackingWeapon() instanceof MagesStaff && hasTalent(Talent.BATTLE_MAGIC) && wasEnemy) {
+		if (hit && subClass == HeroSubClass.BATTLEMAGE &&
+				belongings.attackingWeapon() instanceof MagesStaff &&
+				hasTalent(Talent.BATTLE_MAGIC) &&
+				wasEnemy) {
 			Buff.affect( this, MagicalCombo.class).hit( attackTarget );
 		}
 
@@ -3339,26 +3342,37 @@ public class Hero extends Char {
 			Buff.affect( this, Sai.ComboStrikeTracker.class).addHit();
 		}
 
-		if (!hit && belongings.weapon == null && subClass == HeroSubClass.FIGHTER && Random.Int(5) == 0 && pointsInTalent(Talent.SWIFT_MOVEMENT) > 1) {
+		if (!hit && belongings.weapon == null && subClass == HeroSubClass.FIGHTER &&
+				Random.Int(5) == 0 && pointsInTalent(Talent.SWIFT_MOVEMENT) > 1) {
 			Buff.prolong(this, EvasiveMove.class, 0.9999f);
 		}
 
-		if (buff(Sheath.Sheathing.class) != null) {
-			buff(Sheath.Sheathing.class).detach();
-			if (!attackTarget.isAlive() && Random.Float() < pointsInTalent(Talent.QUICK_SHEATHING)/3f) {
-				Buff.affect(this, Sheath.Sheathing.class);
+        if (hit && heroClass == HeroClass.SAMURAI) {
+			Buff sheathing = buff(Sheath.Sheathing.class);
+			if (sheathing != null) {
+				sheathing.detach();
+				if (!attackTarget.isAlive() && Random.Float() < pointsInTalent(Talent.QUICK_SHEATHING)/3f) {
+					Buff.affect(this, Sheath.Sheathing.class);
+				}
+			}
+
+			if (subClass == HeroSubClass.MASTER) {
+				Buff dashTracker = buff(Sheath.DashDrawTracker.class);
+				if (dashTracker != null) dashTracker.detach();
 			}
 		}
 
-		if (heroClass != HeroClass.SAMURAI && hasTalent(Talent.QUICK_SHEATHING) && !attackTarget.isAlive()) {
-			Buff.affect(this, Haste.class, 3f*pointsInTalent(Talent.QUICK_SHEATHING));
+		if (hit && heroClass != HeroClass.SAMURAI &&
+				hasTalent(Talent.QUICK_SHEATHING) && !attackTarget.isAlive()) {
+			Buff.affect(this, Haste.class, 3f * pointsInTalent(Talent.QUICK_SHEATHING));
 		}
-		curAction = null;
-		attackTarget = null;
 
 		if (buff(Sheath.CriticalAttack.class) != null) {
 			buff(Sheath.CriticalAttack.class).detach();
 		}
+
+		curAction = null;
+		attackTarget = null;
 
 		super.onAttackComplete();
 	}

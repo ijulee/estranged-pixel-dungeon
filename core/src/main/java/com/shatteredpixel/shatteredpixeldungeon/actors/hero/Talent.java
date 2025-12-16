@@ -2388,7 +2388,7 @@ public enum Talent {
 				dmg = Math.round(dmg*buff.getDmgMulti());
 				buff.hit();
 			}
-			hero.buff(Sheath.DashDrawTracker.class).detach();
+			// detach after attack delay in onAttackComplete()
 		}
 
 		if (Random.Float() < hero.pointsInTalent(Talent.MADNESS)/10f) {
