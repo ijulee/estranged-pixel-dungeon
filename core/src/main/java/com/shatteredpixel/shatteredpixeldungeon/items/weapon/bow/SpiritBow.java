@@ -527,4 +527,21 @@ public class SpiritBow extends Weapon {
 			return Messages.get(SpiritBow.class, "prompt");
 		}
 	};
+
+	public SpiritBow clone(SpiritBow bow) {
+		this.level(0);
+		this.quantity(1);
+		this.level(bow.trueLevel());
+
+		this.enchantment = bow.enchantment;
+		this.curseInfusionBonus = bow.curseInfusionBonus;
+		this.masteryPotionBonus = bow.masteryPotionBonus;
+		this.levelKnown = bow.levelKnown;
+		this.cursedKnown = bow.cursedKnown;
+		this.cursed = bow.cursed;
+		this.augment = bow.augment;
+		this.enchantHardened = bow.enchantHardened;
+
+		return this;
+	}
 }

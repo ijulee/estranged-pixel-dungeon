@@ -3,34 +3,26 @@ package com.shatteredpixel.shatteredpixeldungeon.items.changer;
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
-import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Belongings;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
-import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Flare;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Transmuting;
 import com.shatteredpixel.shatteredpixeldungeon.items.BrokenSeal;
 import com.shatteredpixel.shatteredpixeldungeon.items.EquipableItem;
+import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.KindOfWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.KnightsShield;
 import com.shatteredpixel.shatteredpixeldungeon.items.Rosary;
 import com.shatteredpixel.shatteredpixeldungeon.items.Saddle;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.Artifact;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.Ring;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.bow.CorrosiveBow;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.bow.ElectricBow;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.bow.GoldenBow;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.bow.MagicalBow;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.bow.NaturesBow;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.bow.PhaseBow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.bow.SpiritBow;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.bow.TacticalBow;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.bow.WindBow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.DeathSword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.EnhancedMachete;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.HeroSword;
@@ -46,13 +38,18 @@ import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
-import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Icons;
+import com.shatteredpixel.shatteredpixeldungeon.ui.ItemButton;
+import com.shatteredpixel.shatteredpixeldungeon.ui.RedButton;
+import com.shatteredpixel.shatteredpixeldungeon.ui.RenderedTextBlock;
+import com.shatteredpixel.shatteredpixeldungeon.ui.Window;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
+import com.shatteredpixel.shatteredpixeldungeon.windows.IconTitle;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndBag;
+import com.shatteredpixel.shatteredpixeldungeon.windows.WndInfoItem;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndOptions;
+import com.shatteredpixel.shatteredpixeldungeon.windows.WndSadGhost;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndTitledMessage;
-import com.watabou.noosa.Image;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.Random;
@@ -132,6 +129,8 @@ public class OldAmulet extends Item {
     private static final String ABILITY_LIST_0	= "abilityList_0";
     private static final String ABILITY_LIST_1	= "abilityList_1";
     private static final String ABILITY_LIST_2	= "abilityList_2";
+    private static final String BOW1 = "bow1";
+    private static final String BOW2 = "bow2";
 
     @Override
     public void storeInBundle( Bundle bundle ) {
@@ -139,6 +138,8 @@ public class OldAmulet extends Item {
         bundle.put( ABILITY_LIST_0, abilityList.get(0) );
         bundle.put( ABILITY_LIST_1, abilityList.get(1) );
         bundle.put( ABILITY_LIST_2, abilityList.get(2) );
+        bundle.put( BOW1, bow1);
+        bundle.put( BOW2, bow2);
     }
 
     @Override
@@ -148,6 +149,8 @@ public class OldAmulet extends Item {
         abilityList.add(bundle.getInt(ABILITY_LIST_0));
         abilityList.add(bundle.getInt(ABILITY_LIST_1));
         abilityList.add(bundle.getInt(ABILITY_LIST_2));
+        bow1 = (SpiritBow) bundle.get(BOW1);
+        bow2 = (SpiritBow) bundle.get(BOW2);
     }
 
     private String inventoryTitle(){
@@ -155,9 +158,9 @@ public class OldAmulet extends Item {
     }
 
     public static Item changeItem( Item item ){
-        if (item instanceof SpiritBow) {
+        /*if (item instanceof SpiritBow) {
             return changeBow((SpiritBow)item);
-        } else if (item instanceof Gun) {
+        } else*/ if (item instanceof Gun) {
             return changeGun((Gun)item);
         } else if (item instanceof Shovel) {
             return changeShovel((Shovel)item);
@@ -168,75 +171,6 @@ public class OldAmulet extends Item {
         } else {
             return null;
         }
-    }
-
-    private static float[] bowDeck = {1, 1, 1, 1, 1, 1, 1, 1};
-
-    public static SpiritBow changeBow(SpiritBow bow) {
-        SpiritBow newBow;
-        switch (Random.chances(bowDeck)) {
-            case 0: default:
-                newBow = new NaturesBow();
-                bowDeck[0] = 0;
-                break;
-            case 1:
-                newBow = new GoldenBow();
-                bowDeck[1] = 0;
-                break;
-            case 2:
-                newBow = new CorrosiveBow();
-                bowDeck[2] = 0;
-                break;
-            case 3:
-                newBow = new WindBow();
-                bowDeck[3] = 0;
-                break;
-            case 4:
-                newBow = new TacticalBow();
-                bowDeck[4] = 0;
-                break;
-            case 5:
-                newBow = new PhaseBow();
-                bowDeck[5] = 0;
-                break;
-            case 6:
-                newBow = new ElectricBow();
-                bowDeck[6] = 0;
-                break;
-            case 7:
-                newBow = new MagicalBow();
-                bowDeck[7] = 0;
-                break;
-            case -1:
-                bowDeck = new float[]{1, 1, 1, 1, 1, 1, 1, 1};
-                newBow = changeBow(bow);
-                return newBow;
-        }
-
-        if (newBow.getClass() == bow.getClass()) {
-            newBow = changeBow(bow);
-            return newBow;
-        }
-
-        newBow.level(0);
-        newBow.quantity(1);
-        int level = bow.trueLevel();
-        if (level > 0) {
-            newBow.upgrade( level );
-        } else if (level < 0) {
-            newBow.degrade( -level );
-        }
-
-        newBow.enchantment = bow.enchantment;
-        newBow.curseInfusionBonus = bow.curseInfusionBonus;
-        newBow.masteryPotionBonus = bow.masteryPotionBonus;
-        newBow.levelKnown = bow.levelKnown;
-        newBow.cursedKnown = bow.cursedKnown;
-        newBow.cursed = bow.cursed;
-        newBow.augment = bow.augment;
-        newBow.enchantHardened = bow.enchantHardened;
-
-        return newBow;
     }
 
     private static Gun changeGun(Gun gun) {
@@ -356,16 +290,24 @@ public class OldAmulet extends Item {
             if (result.isIdentified()){
                 Catalog.setSeen(result.getClass());
             }
-            Sample.INSTANCE.play(Assets.Sounds.EVOKE);
-            CellEmitter.center( curUser.pos ).burst( Speck.factory( Speck.STAR ), 7 );
-            new Flare( 6, 32 ).color(0xFFFF00, true).show( curUser.sprite, 2f );
-            Dungeon.hero.spendAndNext(Actor.TICK);
-            Dungeon.hero.sprite.operate(Dungeon.hero.pos);
-            Transmuting.show(curUser, item, result);
-            curUser.sprite.emitter().start(Speck.factory(Speck.CHANGE), 0.2f, 10);
-            GLog.p( Messages.get(this, "morph") );
+
+            onChangeComplete(item, result);
+        }
+    }
+
+    protected void onChangeComplete(Item oldItem, Item newItem) {
+        Sample.INSTANCE.play(Assets.Sounds.EVOKE);
+        Dungeon.hero.sprite.operate(Dungeon.hero.pos);
+        CellEmitter.center( Dungeon.hero.pos ).burst( Speck.factory( Speck.STAR ), 7 );
+        new Flare( 6, 32 ).color(0xFFFF00, true).show( Dungeon.hero.sprite, 2f );
+        Transmuting.show(Dungeon.hero, oldItem, newItem);
+        Dungeon.hero.sprite.emitter().start(Speck.factory(Speck.CHANGE), 0.2f, 10);
+        GLog.p( Messages.get(OldAmulet.class, "morph") );
+
+        if (Dungeon.hero.belongings.contains(this)) {
             detach(Dungeon.hero.belongings.backpack);
         }
+        Dungeon.hero.spendAndNext(Actor.TICK);
     }
 
     @Override
@@ -400,7 +342,8 @@ public class OldAmulet extends Item {
             if (!item.isIdentified()) return false;
             switch (Dungeon.hero.heroClass) {
                 case WARRIOR: default:
-                    return item instanceof BrokenSeal;
+                    return item instanceof BrokenSeal ||
+                            (item instanceof Armor && ((Armor) item).checkSeal() != null);
                 case MAGE:
                     return item instanceof MagesStaff;
                 case ROGUE:
@@ -430,18 +373,21 @@ public class OldAmulet extends Item {
 
             if (item != null && itemSelectable(item)) {
                 switch (Dungeon.hero.heroClass) {
-                    default:
-                        onItemSelected(item);
-                        break;
                     case DUELIST:
                         GameScene.show(new WndAbilitySelect((MeleeWeapon)item, abilityList.get(0), abilityList.get(1), abilityList.get(2)));
+                        break;
+                    case HUNTRESS:
+                        GameScene.show(new WndBowSelect((SpiritBow) item));
+                        break;
+                    default:
+                        onItemSelected(item);
                         break;
                 }
             }
         }
     };
 
-    public static class WndAbilitySelect extends WndOptions {
+    public class WndAbilitySelect extends WndOptions {
 
         private MeleeWeapon wep;
         private ArrayList<Integer> ability = new ArrayList<>();
@@ -508,15 +454,8 @@ public class OldAmulet extends Item {
                         && Dungeon.hero.belongings.contains(heroSword)){
                     Dungeon.quickslot.setSlot(slot, heroSword);
                 }
-                Sample.INSTANCE.play(Assets.Sounds.EVOKE);
-                CellEmitter.center( curUser.pos ).burst( Speck.factory( Speck.STAR ), 7 );
-                new Flare( 6, 32 ).color(0xFFFF00, true).show( curUser.sprite, 2f );
-                Dungeon.hero.spendAndNext(Actor.TICK);
-                Dungeon.hero.sprite.operate(Dungeon.hero.pos);
-                Transmuting.show(curUser, wep, heroSword);
-                curUser.sprite.emitter().start(Speck.factory(Speck.CHANGE), 0.2f, 10);
-                GLog.p( Messages.get(OldAmulet.class, "morph") );
-                Dungeon.hero.belongings.getItem(OldAmulet.class).detach(Dungeon.hero.belongings.backpack);
+
+                onChangeComplete(wep, heroSword);
             } else {
                 hide();
             }
@@ -540,6 +479,150 @@ public class OldAmulet extends Item {
                     heroSword.abilityInfo()));
         }
 
+    }
+
+    public static SpiritBow bow1, bow2;
+
+    public class WndBowSelect extends Window {
+        private static final int WIDTH		= 120;
+        private static final int BTN_SIZE	= 32;
+        private static final int BTN_GAP	= 5;
+        private static final int GAP		= 2;
+
+        public SpiritBow curBow;
+        public WndBowSelect(SpiritBow bow) {
+            super();
+
+            curBow = bow;
+            if (bow1 == null || bow1.getClass() == bow.getClass()) {
+                bow1 = Generator.randomBow(bow.getClass());
+            }
+            if (bow2 == null || bow2.getClass() == bow.getClass() ||
+                    bow2.getClass() == bow1.getClass()) {
+                bow2 = Generator.randomBow(bow.getClass());
+            }
+            bow1.clone(curBow);
+            bow2.clone(curBow);
+
+            IconTitle titlebar = new IconTitle();
+            titlebar.icon(new ItemSprite(OldAmulet.this.image));
+            titlebar.label(Messages.titleCase(OldAmulet.this.name()));
+            titlebar.setRect(0, 0, WIDTH, 0);
+            add( titlebar );
+
+            String msg = Messages.get(this, "desc");
+            RenderedTextBlock message = PixelScene.renderTextBlock( msg, 6 );
+            message.maxWidth(WIDTH);
+            message.setPos(0, titlebar.bottom() + GAP);
+            add( message );
+
+            ItemButton btnBow1 = new ItemButton() {
+                @Override
+                protected void onClick() {
+                    if (Dungeon.hero.belongings.contains(curBow) && item() != null) {
+                        GameScene.show(new RewardWindow(item()));
+                    } else {
+                        hide();
+                    }
+                }
+            };
+            btnBow1.item(bow1);
+            btnBow1.setRect( (WIDTH - BTN_GAP) / 2 - BTN_SIZE, message.top() + message.height() + BTN_GAP, BTN_SIZE, BTN_SIZE );
+            add( btnBow1 );
+
+            ItemButton btnBow2 = new ItemButton() {
+                @Override
+                protected void onClick() {
+                    if (Dungeon.hero.belongings.contains(curBow) && item() != null) {
+                        GameScene.show(new RewardWindow(item()));
+                    } else {
+                        hide();
+                    }
+                }
+            };
+            btnBow2.item(bow2);
+            btnBow2.setRect( btnBow1.right() + BTN_GAP, btnBow1.top(), BTN_SIZE, BTN_SIZE );
+            add( btnBow2 );
+
+            RedButton btnCancel = new RedButton(Messages.get(this, "no")) {
+                @Override
+                protected void onClick() {
+                    hide();
+
+                    GameScene.selectItem( itemSelector );
+                }
+            };
+            btnCancel.setRect(0, btnBow2.bottom() + BTN_GAP, WIDTH, BTN_SIZE / 2);
+            add( btnCancel );
+
+            resize(WIDTH, (int) btnCancel.bottom());
+        }
+
+        @Override
+        public void onBackPressed() {
+            super.onBackPressed();
+
+            GameScene.selectItem( itemSelector );
+        }
+
+        private void selectReward(Item newBow ) {
+
+            if (newBow == null){
+                return;
+            }
+
+            hide();
+
+            int slot = Dungeon.quickslot.getSlot(curBow);
+
+            curBow.detach( Dungeon.hero.belongings.backpack );
+            if (newBow.doPickUp( Dungeon.hero )) {
+                GLog.i( Messages.capitalize(Messages.get(Dungeon.hero, "you_now_have", newBow.name())) );
+
+                if (newBow.defaultAction() != null &&
+                        slot != -1 && !Dungeon.quickslot.isNonePlaceholder(slot)) {
+                    Dungeon.quickslot.setSlot(slot, newBow);
+                }
+            } else {
+                Dungeon.level.drop( newBow, Dungeon.hero.pos ).sprite.drop();
+            }
+
+            if (newBow.isIdentified()){
+                Catalog.setSeen(newBow.getClass());
+            }
+
+            onChangeComplete(curBow, newBow);
+        }
+
+        private class RewardWindow extends WndInfoItem {
+
+            public RewardWindow(Item item) {
+                super(item);
+
+
+                RedButton btnConfirm = new RedButton(Messages.get(WndSadGhost.class, "confirm")){
+                    @Override
+                    protected void onClick() {
+                        RewardWindow.this.hide();
+
+                        selectReward( item );
+                    }
+                };
+                btnConfirm.setRect(0, height+2, width/2-1, 16);
+                add(btnConfirm);
+
+                RedButton btnCancel = new RedButton(Messages.get(WndSadGhost.class, "cancel")){
+                    @Override
+                    protected void onClick() {
+                        hide();
+                    }
+                };
+                btnCancel.setRect(btnConfirm.right()+2, height+2, btnConfirm.width(), 16);
+                add(btnCancel);
+
+                resize(width, (int)btnCancel.bottom());
+            }
+        }
     }
 
     public static class TempleCurse extends Buff {
