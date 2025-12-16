@@ -8,15 +8,19 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Paralysis;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ThunderImbue;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Lightning;
+import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
+import com.shatteredpixel.shatteredpixeldungeon.effects.particles.SparkParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.brews.ShockingBrew;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfSharpshooting;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfRecharging;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.ForceCube;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.ThrowingHammer;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
+import com.watabou.noosa.particles.Emitter;
 import com.watabou.utils.PointF;
 import com.watabou.utils.Random;
 
@@ -24,7 +28,7 @@ import java.util.ArrayList;
 
 public class PotOThunder extends MissileWeapon {
     {
-        image = ItemSpriteSheet.THUNDERBOLT;
+        image = ItemSpriteSheet.THORHAMMER;
         hitSound = Assets.Sounds.LIGHTNING;
         hitSoundPitch = 1.2f;
 
@@ -53,12 +57,13 @@ public class PotOThunder extends MissileWeapon {
     }
 
     @Override
-    public String info() {
-        String info = super.info();
-
-        info += "\n\n" + Messages.get(this, "magic_damage", magicMin(buffedLvl()), magicMax(buffedLvl()));
-
-        return info;
+    public String statsInfo() {
+        // FIXME hacky but simpler than rewriting info() just to insert 1 sentence
+        if (levelKnown) {
+            return Messages.get(this, "magic_stats", magicMin(buffedLvl()), magicMax(buffedLvl()));
+        } else {
+            return Messages.get(this, "typical_magic_stats", magicMin(0), magicMax(0));
+        }
     }
 
     @Override
@@ -91,9 +96,18 @@ public class PotOThunder extends MissileWeapon {
         return Random.NormalIntRange(magicMin(lvl), magicMax(lvl));
     }
 
+    @Override
+    public Emitter emitter() {
+        Emitter emitter = new Emitter();
+        emitter.fillTarget = false;
+        emitter.pos(5, 1, 6, 6);
+        emitter.pour(SparkParticle.STATIC, 0.1f);
+        return emitter;
+    }
+
     public static class Recipe extends com.shatteredpixel.shatteredpixeldungeon.items.Recipe.SimpleRecipe {
         {
-            inputs =  new Class[]{ShockingBrew.class, ScrollOfRecharging.class, ForceCube.class};
+            inputs =  new Class[]{ShockingBrew.class, ScrollOfRecharging.class, ThrowingHammer.class};
             inQuantity = new int[]{1, 1, 1};
 
             cost = 3;

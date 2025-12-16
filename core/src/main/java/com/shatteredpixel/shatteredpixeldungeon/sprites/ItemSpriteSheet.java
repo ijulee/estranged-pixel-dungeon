@@ -1274,9 +1274,11 @@ public class ItemSpriteSheet {
 	private static final int AL_WEP_MIS		=			xy(9, 58);  //16 slots
 	public static final int CROSS			= AL_WEP_MIS+0;
 	public static final int THUNDERBOLT		= AL_WEP_MIS+1;
+	public static final int THORHAMMER 		= AL_WEP_MIS+2;
 	static{
-		assignItemRect(CROSS, 		14, 14);
-		assignItemRect(THUNDERBOLT, 13, 13);
+		assignItemRect(CROSS, 			14, 14);
+		assignItemRect(THUNDERBOLT,		13, 13);
+		assignItemRect(THORHAMMER, 	12, 12);
 	}
 
 	private static final int AL_WEP_T6	  	=			xy(1, 59);  //16 slots
