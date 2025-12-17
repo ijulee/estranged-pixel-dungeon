@@ -770,8 +770,7 @@ public abstract class Char extends Actor {
 				}
 
 				if (hero.hasTalent(Talent.HASTE_EVASION)) {
-					Awakening awakening = hero.buff(Awakening.class);
-					if (awakening != null && awakening.isAwaken()) {
+					if (Awakening.isAwakened()) {
 						Buff.prolong(hero, Haste.class, 1 + hero.pointsInTalent(Talent.HASTE_EVASION));
 					}
 				}

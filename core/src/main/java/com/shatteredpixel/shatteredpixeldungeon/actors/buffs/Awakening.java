@@ -52,7 +52,7 @@ public class Awakening extends Buff implements ActionIndicator.Action {
 
     @Override
     public boolean act() {
-        if (isAwaken()) {
+        if (state == State.ON) {
             int damage = 1;
             if (hero.HP > damage) {
                 if (hero.buff(BlobImmunity.class) == null) {
@@ -67,15 +67,11 @@ public class Awakening extends Buff implements ActionIndicator.Action {
     }
 
     public int evasionBonus( int heroLvl, int excessArmorStr ){
-        if (isAwaken()) {
+        if (state == State.ON) {
             return heroLvl/2 + excessArmorStr*Dungeon.hero.pointsInTalent(Talent.AFTERIMAGE);
         } else {
             return 0;
         }
-    }
-
-    public boolean isAwaken() {
-        return state == State.ON;
     }
 
     public static boolean isAwakened() {
@@ -94,7 +90,7 @@ public class Awakening extends Buff implements ActionIndicator.Action {
 
     @Override
     public int icon() {
-        if (isAwaken()) {
+        if (state == State.ON) {
             return BuffIndicator.DEMON_ON;
         } else {
             return BuffIndicator.DEMON_OFF;
@@ -113,7 +109,7 @@ public class Awakening extends Buff implements ActionIndicator.Action {
 
     @Override
     public String desc() {
-        if (isAwaken()) {
+        if (state == State.ON) {
             return Messages.get(this, "desc_on");
         } else {
             return Messages.get(this, "desc_off");
@@ -142,7 +138,7 @@ public class Awakening extends Buff implements ActionIndicator.Action {
 
     @Override
     public int actionIcon() {
-        if (isAwaken()) {
+        if (state == State.ON) {
             return HeroIcon.AWAKEN_OFF;
         } else {
             return HeroIcon.AWAKEN_ON;
@@ -151,7 +147,7 @@ public class Awakening extends Buff implements ActionIndicator.Action {
 
     @Override
     public int indicatorColor() {
-        if (isAwaken()) {
+        if (state == State.ON) {
             return 0x26058C;
         } else {
             return 0xC21313;
@@ -160,7 +156,7 @@ public class Awakening extends Buff implements ActionIndicator.Action {
 
     @Override
     public void doAction() {
-        if (!isAwaken()) {
+        if (state == State.OFF) {
             if (hero.buff(AwakeningCooldown.class) == null) {
                 state = State.ON;
                 hero.sprite.showStatus( CharSprite.NEUTRAL, Messages.get(this, "name") );

@@ -1088,7 +1088,7 @@ public class Hero extends Char {
 			return 0;
 		}
 
-		if (buff(Awakening.class) != null && buff(Awakening.class).isAwaken() && buff(Sheath.CriticalAttack.class) != null) {
+		if (Awakening.isAwakened() && buff(Sheath.CriticalAttack.class) != null) {
 			return 0;
 		}
 
@@ -1891,8 +1891,8 @@ public class Hero extends Char {
 			chance += 0.02f * wepSTRExcess(wep);
 
 			if (subClass == HeroSubClass.SLAYER) {
-				Awakening awakening = buff(Awakening.class);
-				if (awakening != null && awakening.isAwaken()) {
+
+				if (Awakening.isAwakened()) {
 					if (hasTalent(Talent.ACCELERATED_LETHALITY)) {
 						chance += 0.1f*pointsInTalent(Talent.ACCELERATED_LETHALITY);
 					}
@@ -1974,8 +1974,7 @@ public class Hero extends Char {
 			multi += 0.15f * pointsInTalent(Talent.POWERFUL_SLASH);
 		}
 
-		Awakening awakening = buff(Awakening.class);
-		if (awakening != null && awakening.isAwaken()) {
+		if (Awakening.isAwakened()) {
 			if (hasTalent(Talent.STABLE_BARRIER)) {
 				int shield = 1;
 				int maxShield = Math.round(HT * 0.2f * pointsInTalent(Talent.STABLE_BARRIER));
