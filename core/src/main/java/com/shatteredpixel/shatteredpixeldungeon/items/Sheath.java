@@ -147,6 +147,16 @@ public class Sheath extends Item {
         }
 
         @Override
+        public String desc() {
+            String desc = super.desc();
+            if (Dungeon.hero.subClass == HeroSubClass.MASTER &&
+                    Dungeon.hero.buff(QuickDrawCooldown.class) == null) {
+                desc += "\n\n" + Messages.get(this, "quick_draw");
+            }
+            return desc;
+        }
+
+        @Override
         public String actionName() {
             return Messages.get(this, "action");
         }
