@@ -237,9 +237,11 @@ public class Sheath extends Item {
                 if (cell == null) return;
                 final Char enemy = Actor.findChar( cell );
                 if (enemy != null) {
-                    if (Dungeon.hero.isCharmedBy(enemy) || enemy instanceof NPC || enemy == Dungeon.hero ||
-                            Dungeon.level.adjacent(target.pos, enemy.pos)) {
-                        GLog.w(Messages.get(Sheathing.class, "no_target"));
+                    if (Dungeon.level.adjacent(target.pos, enemy.pos)) {
+                        GLog.w(Messages.get(Sheathing.class, "bad_target"));
+                    } else if (enemy instanceof NPC || enemy == Dungeon.hero ||
+                            Dungeon.hero.isCharmedBy(enemy)) {
+                        GLog.w(Messages.get(Sheathing.class, "cant_attack"));
                     } else {
                         //DON'T attack targets without blinking.
                         /*if (Dungeon.hero.canAttack(enemy)){
@@ -268,8 +270,8 @@ public class Sheath extends Item {
                         }
 
                         if (dest == -1 || PathFinder.distance[dest] == Integer.MAX_VALUE || Dungeon.hero.rooted) {
-                            GLog.w(Messages.get(Sheathing.class, "cannot_dash"));
-                            if (Dungeon.hero.rooted) PixelScene.shake( 1, 1f );
+                            GLog.w(Messages.get(Sheathing.class, "cant_dash"));
+                            if (Dungeon.hero.rooted) PixelScene.shake(1, 1f);
                             return;
                         }
 
