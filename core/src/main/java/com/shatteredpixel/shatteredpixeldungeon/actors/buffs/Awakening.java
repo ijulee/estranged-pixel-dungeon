@@ -78,6 +78,14 @@ public class Awakening extends Buff implements ActionIndicator.Action {
         return state == State.ON;
     }
 
+    public static boolean isAwakened() {
+        if (Dungeon.hero == null) {
+            return false;
+        }
+        Awakening awakening = Dungeon.hero.buff(Awakening.class);
+        return awakening != null && awakening.state == State.ON;
+    }
+
     @Override
     public void detach() {
         super.detach();

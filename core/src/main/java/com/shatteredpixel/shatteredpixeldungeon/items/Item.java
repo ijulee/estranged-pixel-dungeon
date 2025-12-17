@@ -674,18 +674,23 @@ public class Item implements Bundlable {
 									Buff.affect(curUser, Talent.ImprovisedProjectileCooldown.class, 50f);
 								}
 							}
+							Sheath.CriticalAttack critTracker = user.buff(Sheath.CriticalAttack.class);
+
 							if (user.buff(Talent.LethalMomentumTracker.class) != null){
 								user.buff(Talent.LethalMomentumTracker.class).detach();
 								user.next();
 							} else if (Item.this instanceof MissileWeapon &&
-									user.buff(Awakening.class) != null &&
-									user.buff(Awakening.class).isAwaken() &&
-									user.buff(Sheath.CriticalAttack.class) != null){
-								// TODO check if RPD additions to Hero.onAttackComplete() should be repeated here
-								user.buff(Sheath.CriticalAttack.class).detach();
+									Awakening.isAwakened() && critTracker != null){
 								user.next();
 							} else {
 								user.spendAndNext(delay);
+							}
+
+							//TODO check if checks in Hero.onAttackComplete() that also apply to missile attacks
+							// should be repeated here
+
+							if (Item.this instanceof MissileWeapon && critTracker != null) {
+								critTracker.detach();
 							}
 						}
 					});
