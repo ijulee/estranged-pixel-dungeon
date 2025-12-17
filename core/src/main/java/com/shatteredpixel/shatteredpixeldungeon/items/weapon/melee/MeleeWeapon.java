@@ -522,9 +522,6 @@ public class MeleeWeapon extends Weapon {
 			float critChance = Dungeon.hero.critChance(this);
 			if (critChance > 0) {
 				info += " " + Messages.get(Weapon.class, "critchance", 100 * Dungeon.hero.critChance(this));
-				if (critChance > 1) {
-					info += " " + Messages.get(this, "critbonus");
-				}
 			}
 		}
 

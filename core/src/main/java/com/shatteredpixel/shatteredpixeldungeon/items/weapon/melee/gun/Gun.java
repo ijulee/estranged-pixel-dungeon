@@ -573,9 +573,6 @@ public class Gun extends GunWeapon {
 			float shootingCritChance = Dungeon.hero.critChance(getMissile());
 			if (shootingCritChance > 0 && shootingCritChance != Dungeon.hero.critChance(this)) {
 				info += " " + Messages.get(this, "shooting_critchance", 100 * shootingCritChance);
-				if (shootingCritChance > 1) {
-					info += " " + Messages.get(this, "critbonus");
-				}
 			}
 		}
 
