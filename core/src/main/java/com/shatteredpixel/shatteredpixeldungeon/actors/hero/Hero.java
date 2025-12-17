@@ -1092,8 +1092,7 @@ public class Hero extends Char {
 			return 0;
 		}
 
-		if (Sheath.isQuickDraw()) {
-			Buff.prolong(this, Sheath.QuickDrawCooldown.class, (30-5*pointsInTalent(Talent.STATIC_PREPARATION)));
+		if (buff(Sheath.QuickDrawTracker.class) != null) {
 			return 0;
 		}
 
@@ -1919,10 +1918,7 @@ public class Hero extends Char {
 			}
 
 			if (buff(Sheath.Sheathing.class) != null) {
-				if (subClass == HeroSubClass.MASTER &&
-						buff(Sheath.QuickDrawCooldown.class) == null &&
-						buff(Sheath.DashDrawTracker.class) == null &&
-						wep instanceof MeleeWeapon) {
+				if (buff(Sheath.QuickDrawTracker.class) != null) {
 					chance *= 1.4f + 0.2f * pointsInTalent(Talent.ENHANCED_CRIT);
 				} else {
 					chance *= 1.2f;
@@ -1974,7 +1970,7 @@ public class Hero extends Char {
 			multi += 0.1f * pointsInTalent(Talent.POWERFUL_CRIT);
 		}
 
-		if (Sheath.isQuickDraw()) {
+		if (buff(Sheath.QuickDrawTracker.class) != null) {
 			multi += 0.15f * pointsInTalent(Talent.POWERFUL_SLASH);
 		}
 
@@ -3321,11 +3317,17 @@ public class Hero extends Char {
 		boolean wasEnemy = attackTarget.alignment == Alignment.ENEMY
 				|| (attackTarget instanceof Mimic && attackTarget.alignment == Alignment.NEUTRAL);
 
+		if (Sheath.isQuickDraw()) {
+			Buff.affect(this, Sheath.QuickDrawTracker.class);
+		}
+
 		boolean hit = attack(attackTarget);
 		
 		Invisibility.dispel();
 
 		spend( attackDelay() );
+
+		boolean isCritical = buff(Sheath.CriticalAttack.class) != null;
 
 		if (hit && subClass == HeroSubClass.GLADIATOR && wasEnemy){
 			Buff.affect( this, Combo.class ).hit(attackTarget);
@@ -3351,12 +3353,20 @@ public class Hero extends Char {
 			Buff sheathing = buff(Sheath.Sheathing.class);
 			if (sheathing != null) {
 				sheathing.detach();
-				if (!attackTarget.isAlive() && Random.Float() < pointsInTalent(Talent.QUICK_SHEATHING)/3f) {
+				if (!attackTarget.isAlive() && Random.Int(3) < pointsInTalent(Talent.QUICK_SHEATHING)) {
 					Buff.affect(this, Sheath.Sheathing.class);
 				}
 			}
 
 			if (subClass == HeroSubClass.MASTER) {
+				Buff quickTracker = buff(Sheath.QuickDrawTracker.class);
+				if (quickTracker != null) {
+					quickTracker.detach();
+					if (!isCritical) {
+						Buff.prolong(this, Sheath.QuickDrawCooldown.class, (30 - 5 * pointsInTalent(Talent.STATIC_PREPARATION)));
+					}
+				}
+
 				Buff dashTracker = buff(Sheath.DashDrawTracker.class);
 				if (dashTracker != null) dashTracker.detach();
 			}
@@ -3367,7 +3377,7 @@ public class Hero extends Char {
 			Buff.affect(this, Haste.class, 3f * pointsInTalent(Talent.QUICK_SHEATHING));
 		}
 
-		if (buff(Sheath.CriticalAttack.class) != null) {
+		if (isCritical) {
 			buff(Sheath.CriticalAttack.class).detach();
 		}
 

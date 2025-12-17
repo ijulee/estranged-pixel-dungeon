@@ -744,7 +744,8 @@ public abstract class Mob extends Char {
 				Sample.INSTANCE.play(Assets.Sounds.HIT_STRONG);
 			}
 
-			if (enemy.buff(Preparation.class) != null || Sheath.isQuickDraw()) {
+			if (enemy.buff(Preparation.class) != null ||
+					enemy.buff(Sheath.QuickDrawTracker.class) != null) {
 				Wound.hit(this);
 			} else {
 				Surprise.hit(this);

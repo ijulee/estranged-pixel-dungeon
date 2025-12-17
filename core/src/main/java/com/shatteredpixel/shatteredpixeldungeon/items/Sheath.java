@@ -1,7 +1,5 @@
 package com.shatteredpixel.shatteredpixeldungeon.items;
 
-import static com.shatteredpixel.shatteredpixeldungeon.Dungeon.hero;
-
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
@@ -87,11 +85,11 @@ public class Sheath extends Item {
     }
 
     public static boolean isQuickDraw() {
-        return hero.subClass == HeroSubClass.MASTER &&
-                    hero.belongings.attackingWeapon() instanceof MeleeWeapon &&
-                    hero.buff(Sheathing.class) != null &&
-                    hero.buff(QuickDrawCooldown.class) == null &&
-                    hero.buff(DashDrawTracker.class) == null;
+        return Dungeon.hero.subClass == HeroSubClass.MASTER &&
+                    Dungeon.hero.belongings.attackingWeapon() instanceof MeleeWeapon &&
+                    Dungeon.hero.buff(Sheathing.class) != null &&
+                    Dungeon.hero.buff(QuickDrawCooldown.class) == null &&
+                    Dungeon.hero.buff(DashDrawTracker.class) == null;
     }
 
     public static class Sheathing extends Buff implements ActionIndicator.Action {
@@ -105,9 +103,11 @@ public class Sheath extends Item {
         @Override
         public boolean attachTo(Char target) {
             if (super.attachTo(target)){
-                if (hero != null) {
+                if (Dungeon.hero != null) {
                     Dungeon.observe();
-                    if (hero.subClass == HeroSubClass.MASTER && hero.buff(DashDrawCooldown.class) == null) {
+
+                    if (Dungeon.hero.subClass == HeroSubClass.MASTER &&
+                            Dungeon.hero.buff(DashDrawCooldown.class) == null) {
                         ActionIndicator.setAction(this);
                     }
                 }
@@ -120,7 +120,8 @@ public class Sheath extends Item {
         @Override
         public void detach() {
             super.detach();
-            if (hero != null) {
+
+            if (Dungeon.hero != null) {
                 Dungeon.observe();
                 GameScene.updateFog();
                 ActionIndicator.clearAction(this);
@@ -129,19 +130,22 @@ public class Sheath extends Item {
 
         @Override
         public boolean act() {
-            if (hero.subClass == HeroSubClass.MASTER) {
-                if (hero.buff(DashDrawCooldown.class) == null) {
+            // detach if hero has moved, has no weapon, or has no sheath
+            if (pos == -1) pos = target.pos;
+            if (pos != target.pos || Dungeon.hero.belongings.weapon() == null ||
+                    Dungeon.hero.belongings.getItem(Sheath.class) == null) {
+                detach();
+                return true;
+            }
+
+            spend(TICK);
+
+            if (Dungeon.hero.subClass == HeroSubClass.MASTER) {
+                if (Dungeon.hero.buff(DashDrawCooldown.class) == null) {
                     ActionIndicator.setAction(this);
                 } else {
                     ActionIndicator.clearAction(this);
                 }
-            }
-
-            if (pos == -1) pos = target.pos;
-            if (pos != target.pos || !(hero.belongings.weapon instanceof MeleeWeapon)) {
-                detach();
-            } else {
-                spend(TICK);
             }
             return true;
         }
@@ -173,8 +177,7 @@ public class Sheath extends Item {
 
         @Override
         public void doAction() {
-            /*GameScene.selectCell(attack);*/
-            Sheath s = hero.belongings.getItem(Sheath.class);
+            Sheath s = Dungeon.hero.belongings.getItem(Sheath.class);
             if (s == null) {
                 detach();
             }
@@ -183,7 +186,7 @@ public class Sheath extends Item {
                     Dungeon.quickslot.getItem(QuickSlotButton.targetingSlot) == s) {
                 int cell = QuickSlotButton.autoAim(QuickSlotButton.lastTarget, s);
 
-                if (cell != -1){
+                if (cell != -1) {
                     GameScene.handleCell(cell);
                 } else {
                     //couldn't auto-aim, just target the position and hope for the best.
@@ -204,7 +207,8 @@ public class Sheath extends Item {
         public void storeInBundle(Bundle bundle) {
             super.storeInBundle(bundle);
             bundle.put( POS, pos );
-            bundle.put( CAN_DASH, (hero.subClass == HeroSubClass.MASTER && hero.buff(DashDrawCooldown.class) == null) );
+
+            bundle.put( CAN_DASH, ActionIndicator.action == this );
         }
 
         @Override
@@ -231,6 +235,17 @@ public class Sheath extends Item {
             return 500;
         }
 
+        private static void showPuff(int cell) {
+            Dungeon.observe();
+            GameScene.updateFog();
+            Dungeon.hero.checkVisibleMobs();
+
+            Dungeon.hero.sprite.place( Dungeon.hero.pos );
+            Dungeon.hero.sprite.turnTo( Dungeon.hero.pos, cell);
+            CellEmitter.get( Dungeon.hero.pos ).burst( Speck.factory( Speck.WOOL ), 6 );
+            Sample.INSTANCE.play( Assets.Sounds.PUFF );
+        }
+
         private final CellSelector.Listener attack = new CellSelector.Listener() {
             @Override
             public void onSelect(Integer cell) {
@@ -243,16 +258,11 @@ public class Sheath extends Item {
                             Dungeon.hero.isCharmedBy(enemy)) {
                         GLog.w(Messages.get(Sheathing.class, "cant_attack"));
                     } else {
-                        //DON'T attack targets without blinking.
-                        /*if (Dungeon.hero.canAttack(enemy)){
-                            Dungeon.hero.curAction = new HeroAction.Attack( enemy );
-                            Dungeon.hero.next();
-                            return;
-                        }*/
+                        //don't attack targets without blinking.
 
                         PathFinder.buildDistanceMap(Dungeon.hero.pos,BArray.or(Dungeon.level.passable, Dungeon.level.avoid, null), blinkDistance());
                         int dest = -1;
-                        for (int i : PathFinder.NEIGHBOURS8){
+                        for (int i : PathFinder.NEIGHBOURS8) {
                             //cannot blink into a cell that's occupied or impassable, only over them
                             if (Actor.findChar(cell+i) != null)     continue;
                             if (!Dungeon.level.passable[cell+i] && !(target.flying && Dungeon.level.avoid[cell+i])) {
@@ -275,22 +285,15 @@ public class Sheath extends Item {
                             return;
                         }
 
-                        Buff.affect(hero, DashDrawTracker.class);
-                        if (hero.hasTalent(Talent.INNER_EYE)) {
-                            Buff.affect(hero, DashDrawVision.class, 2f);
+                        Buff.affect(Dungeon.hero, DashDrawTracker.class);
+                        if (Dungeon.hero.hasTalent(Talent.INNER_EYE)) {
+                            Buff.affect(Dungeon.hero, DashDrawVision.class, 2f);
                         }
 
                         Dungeon.hero.pos = dest;
                         Dungeon.level.occupyCell(Dungeon.hero);
                         //prevents the hero from being interrupted by seeing new enemies
-                        Dungeon.observe();
-                        GameScene.updateFog();
-                        Dungeon.hero.checkVisibleMobs();
-
-                        Dungeon.hero.sprite.place( Dungeon.hero.pos );
-                        Dungeon.hero.sprite.turnTo( Dungeon.hero.pos, cell);
-                        CellEmitter.get( Dungeon.hero.pos ).burst( Speck.factory( Speck.WOOL ), 6 );
-                        Sample.INSTANCE.play( Assets.Sounds.PUFF );
+                        showPuff(cell);
 
                         Dungeon.hero.curAction = new HeroAction.Attack( enemy );
                         Dungeon.hero.next();
@@ -313,21 +316,15 @@ public class Sheath extends Item {
                     Dungeon.hero.pos = dest;
                     Dungeon.level.occupyCell(Dungeon.hero);
                     //prevents the hero from being interrupted by seeing new enemies
-                    Dungeon.observe();
-                    GameScene.updateFog();
-                    Dungeon.hero.checkVisibleMobs();
-
-                    Dungeon.hero.sprite.place( Dungeon.hero.pos );
-                    Dungeon.hero.sprite.turnTo( Dungeon.hero.pos, cell);
-                    CellEmitter.get( Dungeon.hero.pos ).burst( Speck.factory( Speck.WOOL ), 6 );
-                    Sample.INSTANCE.play( Assets.Sounds.PUFF );
+                    showPuff(cell);
 
                     Dungeon.hero.spendAndNext(Actor.TICK);
 
                     GLog.w(Messages.get(Sheathing.class, "no_target"));
-                    Buff.prolong(hero, DashDrawCooldown.class, (100-10*hero.pointsInTalent(Talent.DYNAMIC_PREPARATION)));
-                    if (hero.buff(DashDrawAccel.class) != null) {
-                        hero.buff(DashDrawAccel.class).detach();
+                    Buff.prolong(Dungeon.hero, DashDrawCooldown.class,
+                            (100-10*Dungeon.hero.pointsInTalent(Talent.DYNAMIC_PREPARATION)));
+                    if (Dungeon.hero.buff(DashDrawAccel.class) != null) {
+                        Dungeon.hero.buff(DashDrawAccel.class).detach();
                     }
                     ActionIndicator.clearAction(Sheathing.this);
                 }
@@ -395,6 +392,8 @@ public class Sheath extends Item {
         }
     }
 
+    public static class QuickDrawTracker extends Buff {}
+
     public static class QuickDrawCooldown extends FlavourBuff{
         public int icon() { return BuffIndicator.TIME; }
         public void tintIcon(Image icon) { icon.hardlight(0x586EDB); }
@@ -423,7 +422,7 @@ public class Sheath extends Item {
 
         public void hit() {
             dmgMulti += 0.05f;
-            dmgMulti = Math.min(dmgMulti, 1+0.25f*hero.pointsInTalent(Talent.ACCELERATION));
+            dmgMulti = Math.min(dmgMulti, 1+0.25f*Dungeon.hero.pointsInTalent(Talent.ACCELERATION));
         }
 
         public float getDmgMulti() {
