@@ -70,9 +70,9 @@ public class RingOfEvasion extends Ring {
 
     @Override
     public int onHit(Hero hero, Char enemy, int damage) {
-        float enemyAcc = enemy.attackSkill(hero)*4;	//적의 명중률에 4배의 보정이 붙음
+        float enemyAcc = enemy.attackSkill(hero);
         int heroEva = hero.defenseSkill(enemy);
-        if (Random.Float() < heroEva/enemyAcc) {
+        if (Random.Float() < heroEva / (4*enemyAcc)) {
             Buff.prolong(hero, EvasiveMove.class, 1.0001f);
         }
         return damage;
