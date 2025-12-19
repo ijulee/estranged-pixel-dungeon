@@ -27,6 +27,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Cripple;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Daze;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FlavourBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MonkEnergy;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Paralysis;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Vertigo;
@@ -388,30 +389,25 @@ public class RingOfForce extends Ring {
 
     @Override
     public int onHit(Hero hero, Char enemy, int damage) {
-        switch (Random.Int(20)) {
-            case 0:
-                Buff.affect(enemy, Paralysis.class, 1f);
-                Sample.INSTANCE.play(Assets.Sounds.HIT_STRONG);
-                return damage;
-            case 1:
-                Buff.affect(enemy, Daze.class, 3f);
-                Sample.INSTANCE.play(Assets.Sounds.HIT_STRONG);
-                return damage;
-            case 2:
-                Buff.affect(enemy, Cripple.class, 3f);
-                Sample.INSTANCE.play(Assets.Sounds.HIT_STRONG);
-                return damage;
-            case 3:
-                Buff.affect(enemy, Vertigo.class, 3f);
-                Sample.INSTANCE.play(Assets.Sounds.HIT_STRONG);
-                return damage;
-            case 4:
-                Buff.affect(enemy, Weakness.class, 3f);
-                Sample.INSTANCE.play(Assets.Sounds.HIT_STRONG);
-                return damage;
-            default:
-                return damage;
-        }
-    }
+		final Class<? extends FlavourBuff>[] debuffs = new Class[] {
+				Paralysis.class,
+				Daze.class,
+				Cripple.class,
+				Vertigo.class,
+				Weakness.class
+				/*null*/ //no proc
+		};
+		float[] durations = {1,3,3,3,3};
+
+		float[] probs = {1,1,1,1,1,15}; //25% to proc
+		int idx = Random.chances(probs);
+
+		if (idx != debuffs.length) {
+			Buff.affect(enemy, debuffs[idx], durations[idx]);
+			Sample.INSTANCE.play(Assets.Sounds.HIT_STRONG);
+		}
+
+		return damage;
+	}
 }
 
