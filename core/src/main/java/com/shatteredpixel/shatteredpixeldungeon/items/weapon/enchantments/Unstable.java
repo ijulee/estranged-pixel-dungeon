@@ -43,7 +43,12 @@ public class Unstable extends Weapon.Enchantment {
 			Lucky.class,
 			//projecting not included, no on-hit effect
 			Shocking.class,
-			Vampiric.class
+			Vampiric.class,
+			//RPD additional enchants
+			Stunning.class,
+			Eldritch.class,
+			Venomous.class,
+			Vorpal.class
 	};
 
 	@Override
