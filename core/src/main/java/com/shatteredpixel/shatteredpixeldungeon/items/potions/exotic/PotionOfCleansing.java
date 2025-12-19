@@ -100,6 +100,17 @@ public class PotionOfCleansing extends ExoticPotion {
 		Buff.prolong(ch, Cleanse.class, duration);
 	}
 
+	public static void cleanseButHunger(Char ch){
+		for (Buff b : ch.buffs()){
+			if (b.type == Buff.buffType.NEGATIVE
+					&& !(b instanceof AllyBuff)
+					&& !(b instanceof LostInventory)
+					&& !(b instanceof Hunger)){
+				b.detach();
+			}
+		}
+	}
+
 	public static class Cleanse extends FlavourBuff {
 
 		{
