@@ -76,14 +76,17 @@ public class RingOfAccuracy extends Ring {
     public int onHit(Hero hero, Char enemy, int damage) {
         float damageMulti = 1f;
         float heroAcc = hero.attackSkill(enemy);
-        float enemyEva = enemy.defenseSkill(hero)*2; //적의 회피에 2배의 보정이 붙음
-        if (Random.Float() < heroAcc/enemyEva) {
+		float enemyEva = enemy.defenseSkill(hero)*2;
+
+		float procChance = heroAcc / (2.0f * enemyEva);
+		if (Random.Float() < procChance) {
             damageMulti = GameMath.gate(1, heroAcc/enemyEva, 2);
             Sample.INSTANCE.play(Assets.Sounds.HIT_STRONG);
-            if (Random.Float() < 0.1f) {
+
+			float debuffRoll = Random.Float();
+            if (debuffRoll < 0.1f) {
                 Buff.affect(enemy, Paralysis.class, 1f);
-            }
-            if (Random.Float() < 0.1f) {
+            } else if (debuffRoll < 0.2f) {
                 Buff.affect(enemy, Daze.class, 2f);
             }
         }
