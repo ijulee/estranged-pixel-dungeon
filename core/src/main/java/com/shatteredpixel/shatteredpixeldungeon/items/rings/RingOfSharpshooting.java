@@ -28,6 +28,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.spells.TelekineticGrab;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfBlastWave;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -86,17 +87,42 @@ public class RingOfSharpshooting extends Ring {
     @Override
     public int onHit(Hero hero, Char enemy, int damage) {
         if (enemy.buff(PinCushion.class) != null) {
-            Item item = enemy.buff(PinCushion.class).grabOne();
-            if (item.doPickUp(hero, enemy.pos)) {
-                hero.spend(-Item.TIME_TO_PICK_UP); //casting the spell already takes a turn
-                GLog.i( Messages.capitalize(Messages.get(hero, "you_now_have", item.name())) );
+            MissileWeapon wep = (MissileWeapon) enemy.buff(PinCushion.class).grabOne();
+
+			if (wep.doPickUp(hero, enemy.pos)) {
+				// repair the stack after picking up
+				MissileWeapon stack = (MissileWeapon) hero.belongings.getSimilar(wep);
+				stack.repair(stack.durabilityPerUse());
+
+                hero.spend(-wep.pickupDelay()); //casting the spell already takes a turn
+                GLog.i( Messages.capitalize(Messages.get(hero, "you_now_have", wep.name())) );
             } else {
+				// repair the obtained wep and drop
+				wep.repair(wep.durabilityPerUse());
+
                 GLog.w(Messages.get(TelekineticGrab.class, "cant_grab"));
-                Dungeon.level.drop(item, enemy.pos).sprite.drop();
+                Dungeon.level.drop(wep, enemy.pos).sprite.drop();
             }
-            WandOfBlastWave.throwChar(enemy, new Ballistica(hero.pos, enemy.pos, Ballistica.MAGIC_BOLT), 2, true, false, hero);
+
+			pushEnemy(hero, enemy, 2, true, false, false);
         }
 
         return damage;
     }
+
+	//most comprehensive; gives choice of distance, door closing, collision dmg, and chasming
+	public static void pushEnemy(Char attacker, Char defender, int dist, boolean closeDoors, boolean collideDmg, boolean chasm) {
+		//trace a ballistica to our target (which will also extend past them
+		Ballistica trajectory = new Ballistica(attacker.pos, defender.pos, Ballistica.STOP_TARGET);
+		//trim it to just be the part that goes past them
+		trajectory = new Ballistica(trajectory.collisionPos, trajectory.path.get(trajectory.path.size()-1), Ballistica.PROJECTILE);
+		//knock them back along that ballistica, ensuring they don't fall into a pit
+		if (chasm && !defender.flying) {
+			while (dist > trajectory.dist ||
+					(dist > 0 && Dungeon.level.pit[trajectory.path.get(dist)])) {
+				dist--;
+			}
+		}
+		WandOfBlastWave.throwChar(defender, trajectory, dist, closeDoors, collideDmg, attacker);
+	}
 }
