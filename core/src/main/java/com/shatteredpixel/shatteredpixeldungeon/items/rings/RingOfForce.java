@@ -114,8 +114,11 @@ public class RingOfForce extends Ring {
 			return dmg;
 		} else {
 			//attack without any ring of force influence
-			if (Dungeon.hero.subClass == HeroSubClass.FIGHTER) {
-				int damage = Hero.heroDamageIntRange((hero.STR() - 8), (hero.STR() - 8 + hero.lvl));
+			if (hero.subClass == HeroSubClass.FIGHTER) {
+				int damage = Hero.heroDamageIntRange(
+						(hero.STR()-8),
+						(hero.STR()-8 + hero.lvl) );
+
 				if (hero.pointsInTalent(Talent.RING_KNUCKLE) == 3) {
 					if (hero.belongings.ring != null) {
 						damage += hero.belongings.ring.buffedLvl();
@@ -124,12 +127,8 @@ public class RingOfForce extends Ring {
 						damage += hero.belongings.misc.buffedLvl();
 					}
 				}
-				int conservedDamage = 0;
-				if (Dungeon.hero.buff(Kinetic.ConservedDamage.class) != null) {
-					conservedDamage = Dungeon.hero.buff(Kinetic.ConservedDamage.class).damageBonus();
-					Dungeon.hero.buff(Kinetic.ConservedDamage.class).detach();
-				}
-				return damage + conservedDamage;
+
+				return damage;
 			} else {
 				return Hero.heroDamageIntRange(1, Math.max(hero.STR()-8, 1));
 			}
