@@ -612,11 +612,13 @@ abstract public class Weapon extends KindOfWeapon {
 
 		public static float genericProcChanceMultiplier( Char attacker ){
 			float multi = RingOfArcana.enchantPowerMultiplier(attacker);
+
 			Berserk rage = attacker.buff(Berserk.class);
 			if (rage != null) {
 				multi = rage.enchantFactor(multi);
 			}
 
+			//FIXME Looks like Ghost shooting enchant mod gun won't apply here
 			if (attacker instanceof Hero && ((Hero) attacker).belongings.attackingWeapon() instanceof Gun.Bullet) {
 				multi *= ((Gun.Bullet) ((Hero) attacker).belongings.attackingWeapon()).enchantMod().enchantFactor();
 			}
@@ -630,9 +632,9 @@ abstract public class Weapon extends KindOfWeapon {
 				multi += 3f;
 			}
 
-			if (attacker.buff(TrueRunicBlade.TrueRunicSlashTracker.class) != null){
+			if (attacker.buff(TrueRunicBlade.TrueRunicBladeTracker.class) != null){
 				multi += 3f;
-				attacker.buff(TrueRunicBlade.TrueRunicSlashTracker.class).detach();
+				attacker.buff(TrueRunicBlade.TrueRunicBladeTracker.class).detach();
 			}
 
 			if (attacker.buff(MagicalBow.MagicalArrowTracker.class) != null){

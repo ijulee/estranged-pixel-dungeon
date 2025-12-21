@@ -8,7 +8,6 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FlavourBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
-import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Piranha;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.spells.Evolution;
 import com.shatteredpixel.shatteredpixeldungeon.items.spells.UpgradeDust;
@@ -20,7 +19,6 @@ import com.shatteredpixel.shatteredpixeldungeon.ui.AttackIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Callback;
-import com.watabou.utils.Reflection;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,18 +30,18 @@ public class TrueRunicBlade extends MeleeWeapon implements AlchemyWeapon {
         hitSound = Assets.Sounds.HIT_SLASH;
         hitSoundPitch = 1f;
 
-        tier = 5;
+        tier = 6;
     }
 
     @Override
     public int max(int lvl) {
-        return  5*(tier) +
-                Math.round(lvl*(tier+4)); //same as Runic Blade
+        return  5*(tier-1) +    //25 base dmg
+                lvl*(tier+3);   //+9 per level
     }
 
     @Override
     public int proc(Char attacker, Char defender, int damage) {
-        Buff.affect(attacker, TrueRunicSlashTracker.class);
+        Buff.affect(attacker, TrueRunicBladeTracker.class);
         return super.proc(attacker, defender, damage);
     }
 
@@ -104,7 +102,8 @@ public class TrueRunicBlade extends MeleeWeapon implements AlchemyWeapon {
         }
     }
 
-    public static class TrueRunicSlashTracker extends FlavourBuff{};
+    //tracks the base melee attack enchant boost
+    public static class TrueRunicBladeTracker extends FlavourBuff{}
 
     @Override
     public ArrayList<Class<?extends Item>> weaponRecipe() {
