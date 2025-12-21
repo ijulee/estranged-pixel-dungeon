@@ -74,6 +74,12 @@ public class Ballistica {
 	}
 
 	private void build( int from, int to, boolean stopTarget, boolean stopChars, boolean stopTerrain, boolean ignoreSoftSolid ) {
+		if (from == to) {
+			collide(from);
+			path.add(from);
+			return;
+		}
+
 		int w = Dungeon.level.width();
 
 		int x0 = from % w;
