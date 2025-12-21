@@ -89,20 +89,26 @@ public class LG extends Gun {
                 }
                 curUser.sprite.parent.add(new Beam.SuperNovaRay(curUser.sprite.center(), DungeonTilemap.raisedTileCenterToWorld( cells ), multi));
 
+                if (targets.isEmpty()) {
+                    //mainly to proc seer shot when no chars in range
+                    super.onThrow(cell);
+                    return;
+                }
+
                 //furthest to closest, mainly for elastic
                 Collections.sort(targets, (a, b) -> Float.compare(
                         Dungeon.level.trueDistance(b.pos, curUser.pos),
                         Dungeon.level.trueDistance(a.pos, curUser.pos)));
 
-                for (Char ch : targets) {
-                    super.onThrow(ch.pos);
+                for (Char target : targets) {
+                    shootTarget(target);
                 }
             }
         }
 
         @Override
         public void showPuff(int cell) {
-            return; // does nothing
+            // does nothing
         }
 
         @Override

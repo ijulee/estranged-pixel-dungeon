@@ -85,13 +85,17 @@ public class FT extends Gun {
                     }
                 }
 
-                //furthest to closest, mainly for elastic
-                Collections.sort(targets, (a, b) -> Float.compare(
-                        Dungeon.level.trueDistance(b.pos, curUser.pos),
-                        Dungeon.level.trueDistance(a.pos, curUser.pos)));
+                if (targets.isEmpty()) {
+                    //mainly to proc seer shot when no chars in range
+                    super.onThrow(cell);
+                } else {//furthest to closest, mainly for elastic
+                    Collections.sort(targets, (a, b) -> Float.compare(
+                            Dungeon.level.trueDistance(b.pos, curUser.pos),
+                            Dungeon.level.trueDistance(a.pos, curUser.pos)));
 
-                for (Char ch : targets) {
-                    super.onThrow(ch.pos);
+                    for (Char target : targets) {
+                        shootTarget(target);
+                    }
                 }
 
                 //final zap at 2/3 distance, for timing of the actual effect
@@ -99,13 +103,13 @@ public class FT extends Gun {
                         MagicMissile.FIRE_CONE,
                         curUser.sprite,
                         cone.coreRay.path.get(dist * 2 / 3),
-                        () -> { });
+                        null);
             }
         }
 
         @Override
         public void showPuff(int cell) {
-            return; // does nothing
+            // does nothing
         }
 
         @Override

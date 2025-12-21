@@ -731,22 +731,12 @@ public class Gun extends GunWeapon {
 
 		@Override
 		protected void onThrow( int cell ) {
-			// shoot target cell first
-			Char enemy = Actor.findChar(cell);
-			for (int i = 0; i < shotsPerRound(); i++) {
-                if (enemy == null || enemy == curUser || !enemy.isAlive()) {
-                    showPuff(cell);
-                    super.onThrow(cell);
-				} else {
-                    super.onThrow(enemy.pos);
-                }
-            }
 
-			// process explosion if needed
-			if (explode) {
-				ArrayList<Char> targets = new ArrayList<>();
-				int[] aoe = PathFinder.NEIGHBOURS8;
-				for (int i : aoe){
+			ArrayList<Char> targets = new ArrayList<>();
+			if (!explode) {
+				if (Actor.findChar(cell) != null) targets.add(Actor.findChar(cell));
+			} else {
+				for (int i : PathFinder.NEIGHBOURS9){
 					int c = cell + i;
 					if (Dungeon.level.insideMap(c)) {
 						if (Dungeon.level.heroFOV[c]) {
@@ -756,38 +746,48 @@ public class Gun extends GunWeapon {
 							Dungeon.level.destroy(c);
 							GameScene.updateMap(c);
 						}
-						Char ch = Actor.findChar(c);
-						if (ch != null) {
-							targets.add(ch);
-						}
+						if (Actor.findChar(c) != null) targets.add(Actor.findChar(c));
 					}
-				}
-
-				//furthest to closest, mainly for elastic
-				Collections.sort(targets, (a, b) -> Float.compare(
-						Dungeon.level.trueDistance(b.pos, curUser.pos),
-						Dungeon.level.trueDistance(a.pos, curUser.pos)));
-
-				for (Char ch : targets){
-					for (int i = 0; i < shotsPerRound(); i++) {
-						if(ch.isAlive()) {
-                            if (ch != curUser) {
-                                super.onThrow(ch.pos);
-                            } else {
-                                // special case not processed by super method
-                                if (curUser.shoot(ch, this)) {
-                                    rangedHit(ch, ch.pos);
-                                } else {
-                                    rangedMiss(ch.pos);
-                                }
-                            }
-                        }
-                    }
 				}
 
 				Sample.INSTANCE.play( Assets.Sounds.BLAST );
 			}
 
+			if (targets.isEmpty()) {
+				//mainly to proc seer shot when no chars in range
+				super.onThrow(cell);
+				return;
+			}
+
+			//furthest to closest, mainly for elastic
+			Collections.sort(targets, (a, b) -> Float.compare(
+					Dungeon.level.trueDistance(b.pos, curUser.pos),
+					Dungeon.level.trueDistance(a.pos, curUser.pos)));
+
+			for (Char target : targets){
+				shootTarget(target);
+			}
+		}
+
+		public void shootTarget(Char target) {
+			for (int i = 0; i < shotsPerRound(); i++) {
+				int pos = target.pos;
+				if(target.isAlive()) {
+					if (!curUser.shoot(target, this)) {
+						rangedMiss(target.pos);
+					} else {
+						rangedHit(target, target.pos);
+					}
+				} else {
+					showPuff(pos);
+				}
+			}
+		}
+
+		@Override
+		protected void rangedMiss(int cell) {
+			super.rangedMiss(cell);
+			showPuff(cell);
 		}
 
 		@Override
