@@ -1,17 +1,13 @@
 package com.shatteredpixel.shatteredpixeldungeon.items;
 
-import static com.shatteredpixel.shatteredpixeldungeon.Dungeon.hero;
-
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Adrenaline;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AllyBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FlavourBuff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.CountCooldownBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Healing;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Hunger;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.LostInventory;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Poison;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.RadioactiveMutation;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.SaviorAllyBuff;
@@ -25,7 +21,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Beam;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.PoisonParticle;
-import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ScrollOfSirensSong;
+import com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic.PotionOfCleansing;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.bow.SpiritBow;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -37,14 +33,15 @@ import com.shatteredpixel.shatteredpixeldungeon.tiles.DungeonTilemap;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.utils.Bundle;
+import com.watabou.utils.DeviceCompat;
 import com.watabou.utils.Random;
 
 import java.util.ArrayList;
 
 public class GammaRayGun extends Item {
 
-    private static ItemSprite.Glowing WHITE_FAST = new ItemSprite.Glowing( 0xFFFFFF, 0.33f );
-    private static ItemSprite.Glowing WHITE_SLOW = new ItemSprite.Glowing( 0xFFFFFF, 1f );
+    private static final ItemSprite.Glowing WHITE_FAST = new ItemSprite.Glowing( 0xFFFFFF, 0.33f );
+    private static final ItemSprite.Glowing WHITE_SLOW = new ItemSprite.Glowing( 0xFFFFFF, 1f );
 
     {
         image = ItemSpriteSheet.GAMMA_RAY_GUN;
@@ -58,13 +55,15 @@ public class GammaRayGun extends Item {
 
     private static final String AC_USE = "USE";
 
+    private static final int BASE_COOLDOWN = 4;
+
     private float powerMulti() {
         float multi = 1f;
-        if (hero.hasTalent(Talent.HIGH_POWER)) {
-            multi += 0.25f * hero.pointsInTalent(Talent.HIGH_POWER);
+        if (Dungeon.hero.hasTalent(Talent.HIGH_POWER)) {
+            multi += 0.25f * Dungeon.hero.pointsInTalent(Talent.HIGH_POWER);
         }
-        if (hero.hasTalent(Talent.HEALING_WING) && hero.buff(AngelWing.AngelWingBuff.class) != null) {
-            multi += hero.pointsInTalent(Talent.HEALING_WING);
+        if (Dungeon.hero.hasTalent(Talent.HEALING_WING) && Dungeon.hero.buff(AngelWing.AngelWingBuff.class) != null) {
+            multi += Dungeon.hero.pointsInTalent(Talent.HEALING_WING);
         }
         return multi;
     }
@@ -91,13 +90,13 @@ public class GammaRayGun extends Item {
 
     @Override
     public ItemSprite.Glowing glowing() {
-        if (hero != null) {
-            GammaRayWarning buff = hero.buff(GammaRayWarning.class);
-            if (buff != null) {
-                if (buff.getDuration() > 7+hero.pointsInTalent(Talent.HIGH_POWER)) {
-                    return WHITE_FAST;
-                } else {
+        if (Dungeon.hero != null) {
+            GammaRayCooldown cooldown = Dungeon.hero.buff(GammaRayCooldown.class);
+            if (cooldown != null) {
+                if (cooldown.count() <= 1) {
                     return WHITE_SLOW;
+                } else {
+                    return WHITE_FAST;
                 }
             } else {
                 return null;
@@ -111,14 +110,13 @@ public class GammaRayGun extends Item {
     public String info() {
         String info = super.info();
 
-        if (hero != null) {
-            GammaRayWarning buff = hero.buff(GammaRayWarning.class);
-
-            if (buff != null) {
-                if (buff.getDuration() > 7 + hero.pointsInTalent(Talent.HIGH_POWER)) {
-                    info += "\n\n" + Messages.get(this, "warning_high");
-                } else {
+        if (Dungeon.hero != null) {
+            GammaRayCooldown cooldown = Dungeon.hero.buff(GammaRayCooldown.class);
+            if (cooldown != null) {
+                if (cooldown.count() <= 1) {
                     info += "\n\n" + Messages.get(this, "warning_low");
+                } else {
+                    info += "\n\n" + Messages.get(this, "warning_high");
                 }
             } else {
                 info += "\n\n" + Messages.get(this, "warning_none");
@@ -126,6 +124,10 @@ public class GammaRayGun extends Item {
         }
 
         return info;
+    }
+
+    private static int getCooldown() {
+        return BASE_COOLDOWN + Dungeon.hero.pointsInTalent(Talent.HIGH_POWER);
     }
 
     private CellSelector.Listener shooter = new CellSelector.Listener() {
@@ -141,158 +143,109 @@ public class GammaRayGun extends Item {
                     if (ch != null) {
                         if (ch.alignment == Char.Alignment.ENEMY ||
                                 (ch instanceof Mimic && ch.alignment == Char.Alignment.NEUTRAL)) {
-                            Buff.affect(ch, Poison.class).set( Math.round((3f + 2f*Dungeon.depth / 3f) * powerMulti()) );
                             if (Dungeon.level.heroFOV[ch.pos]) {
                                 CellEmitter.center( ch.pos ).burst( PoisonParticle.SPLASH, 3 );
                             }
+
+                            Buff.affect(ch, Poison.class).set( Math.round((3f + Dungeon.depth * 0.67f) * powerMulti()) );
+
                             if (curUser.hasTalent(Talent.RADIATION)) {
                                 Buff.affect(ch, RadioactiveMutation.class).set(6-curUser.pointsInTalent(Talent.RADIATION));
                             }
+
                             if (curUser.subClass == HeroSubClass.SAVIOR) {
+                                //FIXME cache ally count? Or at least have a function
                                 int allyNumber = 0;
                                 for (Char mob : Actor.chars()) {
                                     if (mob.buff(SaviorAllyBuff.class) != null) {
                                         allyNumber++;
                                     }
                                 }
-                                if (ch instanceof Mob
-                                        && allyNumber < 2 + hero.pointsInTalent(Talent.RECRUIT)
-                                        && !ch.isImmune(SaviorAllyBuff.class)
-                                        && Random.Float() < (ch.HT - ch.HP + 5*(1+hero.pointsInTalent(Talent.APPEASE))) / (float)ch.HT) {
+
+                                if (ch instanceof Mob &&
+                                        allyNumber < 2 + curUser.pointsInTalent(Talent.RECRUIT) &&
+                                        !ch.isImmune(SaviorAllyBuff.class) &&
+                                        Random.Float() < (ch.HT - ch.HP + 5*(1+curUser.pointsInTalent(Talent.APPEASE))) / (float)ch.HT) {
                                     
-                                    // 아군으로 만드는 버프
                                     AllyBuff.affectAndLoot((Mob)ch, curUser, SaviorAllyBuff.class);
+
+                                    PotionOfCleansing.cleanse(ch);
                                     
-                                    // 디버프 제거
-                                    for (Buff b : ch.buffs()){
-                                        if (b.type == Buff.buffType.NEGATIVE
-                                                && !(b instanceof AllyBuff)
-                                                && !(b instanceof LostInventory)){
-                                            b.detach();
-                                        }
-                                        if (b instanceof Hunger){
-                                            ((Hunger) b).satisfy(Hunger.STARVING);
-                                        }
-                                    }
-                                    
-                                    // 구원자 3-8 특성
-                                    if (hero.hasTalent(Talent.DELAYED_HEALING)) {
-                                        Buff.affect(ch, Healing.class).setHeal((int)(0.2f*hero.pointsInTalent(Talent.DELAYED_HEALING))*ch.HT, 0, 1);
+                                    if (curUser.hasTalent(Talent.DELAYED_HEALING)) {
+                                        Buff.affect(ch, Healing.class).setHeal(
+                                                (int)(0.2f*curUser.pointsInTalent(Talent.DELAYED_HEALING))*ch.HT,
+                                                0,
+                                                1);
                                     }
                                 }
                             }
                         }
+
                         if (ch.alignment == Char.Alignment.ALLY && (ch != curUser)) {
-                            int healAmt = Math.round((5f+curUser.lvl/2f)*powerMulti());
-                            if (hero.hasTalent(Talent.MEDICAL_RAY)) {
-                                healAmt = Math.round(healAmt * (1f + 0.2f * hero.pointsInTalent(Talent.MEDICAL_RAY)));
+                            int healAmt = Math.round((5f+curUser.lvl/2f) * powerMulti());
+                            if (curUser.hasTalent(Talent.MEDICAL_RAY)) {
+                                healAmt = Math.round(healAmt * (1f + 0.2f*curUser.pointsInTalent(Talent.MEDICAL_RAY)));
                             }
-                            // 아군 회복
                             ch.heal(healAmt);
 
-                            if (hero.hasTalent(Talent.ADRENALINE)) {
-                                Buff.prolong(ch, Adrenaline.class, 3*hero.pointsInTalent(Talent.ADRENALINE));
-                                Buff.affect(ch, Poison.class).set(3*hero.pointsInTalent(Talent.ADRENALINE));
+                            if (curUser.hasTalent(Talent.ADRENALINE)) {
+                                Buff.prolong(ch, Adrenaline.class, 3*curUser.pointsInTalent(Talent.ADRENALINE));
+                                Buff.affect(ch, Poison.class).set(3*curUser.pointsInTalent(Talent.ADRENALINE));
                             }
 
-                            if (hero.hasTalent(Talent.STIMPACK)) {
-                                Buff.prolong(ch, StimPack.class, hero.pointsInTalent(Talent.STIMPACK));
+                            if (curUser.hasTalent(Talent.STIMPACK)) {
+                                Buff.prolong(ch, StimPack.class, curUser.pointsInTalent(Talent.STIMPACK));
                             }
                         }
                     }
                     curUser.sprite.zap(target);
                     curUser.sprite.parent.add( new Beam.GreenRay(curUser.sprite.center(), DungeonTilemap.raisedTileCenterToWorld(beam.collisionPos)) );
                 }
-                if (curUser.buff(GammaRayCooldown.class) != null) {
-                    if (curUser.buff(Poison.class) != null) {
-                        Buff.affect(curUser, Poison.class).extend(5+Math.round(curUser.lvl/2f));
-                    } else {
-                        Buff.affect(curUser, Poison.class).set(5+Math.round(curUser.lvl/2f));
+
+                GammaRayCooldown cooldown = curUser.buff(GammaRayCooldown.class);
+                if (cooldown != null) {
+                    //1/2-chance per shot to poison user
+                    float poisonChance = (float) Math.pow(0.5f, cooldown.count());
+                    if (Random.Float() > poisonChance) {
+                        float poison = 5+Math.round(curUser.lvl/2f);
+                        if (curUser.buff(Poison.class) != null) {
+                            Buff.affect(curUser, Poison.class).extend(poison);
+                        } else {
+                            Buff.affect(curUser, Poison.class).set(poison);
+                        }
+                        BuffIndicator.refreshHero();
+                        CellEmitter.center( curUser.pos ).burst( PoisonParticle.SPLASH, 3 );
                     }
-                    BuffIndicator.refreshHero();
-                    CellEmitter.center( curUser.pos ).burst( PoisonParticle.SPLASH, 3 );
                 }
-                int duration = Random.NormalIntRange(3, 5) + hero.pointsInTalent(Talent.HIGH_POWER);
-                if (Random.Float() < 0.5f) {
-                    Buff.affect(hero, GammaRayCooldown.class).set(duration);
-                }
-                Buff.affect(hero, GammaRayWarning.class).set(10+hero.pointsInTalent(Talent.HIGH_POWER));
-                hero.spendAndNext(Actor.TICK);
+                //add to cooldown count
+                Buff.affect(curUser, GammaRayCooldown.class, getCooldown());
+
+                curUser.spendAndNext(Actor.TICK);
             }
         }
+
         @Override
         public String prompt() {
             return Messages.get(SpiritBow.class, "prompt");
         }
     };
 
-    public static class GammaRayWarning extends Buff {
-        private int duration;
-
-        public void set(int time) {
-            duration = time;
-        }
-
-        public int getDuration() {
-            return duration;
-        }
-
+    public static class GammaRayCooldown extends CountCooldownBuff {
         @Override
         public boolean act() {
-            duration -= TICK;
-            spend(TICK);
-            Item.updateQuickslot();
-            if (duration <= 0) {
-                detach();
-            }
-            return true;
-        }
-
-        private static final String DURATION  = "duration";
-
-        @Override
-        public void storeInBundle(Bundle bundle) {
-            super.storeInBundle(bundle);
-            bundle.put(DURATION, duration);
+            updateQuickslot();
+            return super.act();
         }
 
         @Override
-        public void restoreFromBundle(Bundle bundle) {
-            super.restoreFromBundle(bundle);
-            duration = bundle.getInt( DURATION );
-        }
-    }
-
-    public static class GammaRayCooldown extends Buff {
-
-        private int duration;
-
-        public void set(int time) {
-            duration = time;
+        public int icon() {
+            // normally not visible; show only in debug builds.
+            return (DeviceCompat.isDebug())? BuffIndicator.RADIOACTIVE : BuffIndicator.NONE;
         }
 
         @Override
-        public boolean act() {
-            duration-=TICK;
-            spend(TICK);
-            if (duration <= 0) {
-                detach();
-            }
-            return true;
-        }
-
-        private static final String DURATION  = "duration";
-
-        @Override
-        public void storeInBundle(Bundle bundle) {
-            super.storeInBundle(bundle);
-            bundle.put(DURATION, duration);
-        }
-
-        @Override
-        public void restoreFromBundle(Bundle bundle) {
-            super.restoreFromBundle(bundle);
-            duration = bundle.getInt( DURATION );
+        public float iconFadePercent() {
+            return 1 - cooldown() / getCooldown();
         }
     }
 

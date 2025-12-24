@@ -21,6 +21,7 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 
+import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.watabou.utils.Bundle;
 
 import java.util.PriorityQueue;
@@ -93,6 +94,11 @@ public class CountCooldownBuff extends FlavourBuff{
 
     public int count(){
         return members.size() + ((cooldown() > 0)? 1 : 0);
+    }
+
+    @Override
+    public String desc() {
+        return Messages.get(this, "desc", count(), dispTurns());
     }
 
     @Override
