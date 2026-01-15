@@ -49,7 +49,6 @@ import com.shatteredpixel.shatteredpixeldungeon.items.BrokenSeal;
 import com.shatteredpixel.shatteredpixeldungeon.items.EnergyCrystal;
 import com.shatteredpixel.shatteredpixeldungeon.items.EquipableItem;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
-import com.shatteredpixel.shatteredpixeldungeon.items.KindOfWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.KnightsShield;
 import com.shatteredpixel.shatteredpixeldungeon.items.LiquidMetal;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.curses.AntiEntropy;
@@ -79,7 +78,6 @@ import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Viscosity;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfArcana;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.gun.Gun;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.ParchmentScrap;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.ShardOfOblivion;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Catalog;
@@ -89,7 +87,6 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.HeroSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
-import com.shatteredpixel.shatteredpixeldungeon.windows.WndOptions;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndOptions;
 import com.watabou.noosa.Game;
 import com.watabou.noosa.audio.Sample;
@@ -940,15 +937,15 @@ public class Armor extends EquipableItem {
 
 		public static final Class<?>[] uncommon = new Class<?>[]{
 				Brimstone.class, Stone.class, Entanglement.class,
-				Repulsion.class, Camouflage.class, Flow.class, Afterimage.class };
+				Repulsion.class, Camouflage.class, Flow.class, Satisfying.class };
 
 		public static final Class<?>[] rare = new Class<?>[]{
-				Affection.class, AntiMagic.class, Thorns.class, Satisfying.class };
+				Affection.class, AntiMagic.class, Thorns.class, Afterimage.class };
 
 		public static final float[] typeChances = new float[]{
-				50, //12.5% each
-				40, //6.67% each
-				10  //3.33% each
+				50, //10.0% each
+				40, //5.71% each
+				10  //2.50% each
 		};
 
 		public static final Class<?>[] curses = new Class<?>[]{
