@@ -30,6 +30,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.EquipableItem;
 import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.KindOfWeapon;
+import com.shatteredpixel.shatteredpixeldungeon.items.KnightsShield;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MagesStaff;
@@ -116,6 +117,12 @@ public class CursingTrap extends Trap {
 			Armor a = (Armor) item;
 			if (a.glyph == null){
 				a.inscribe(Armor.Glyph.randomCurse());
+			}
+		}
+		if (item instanceof KnightsShield){
+			KnightsShield s = (KnightsShield) item;
+			if (s.glyph == null){
+				s.inscribe(Armor.Glyph.randomCurse());
 			}
 		}
 	}

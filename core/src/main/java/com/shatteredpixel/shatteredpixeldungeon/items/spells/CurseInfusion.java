@@ -93,8 +93,16 @@ public class CurseInfusion extends InventorySpell {
 		} else if (item instanceof RingOfMight){
 			curUser.updateHT(false);
 		} else if (item instanceof KnightsShield) {
-			((KnightsShield) item).inscribe(true);
-			((KnightsShield) item).curseInfusionBonus = true;
+			KnightsShield shield = (KnightsShield) item;
+			if (shield.glyph != null){
+				//if we are freshly applying curse infusion, don't replace an existing curse
+				if (shield.hasGoodGlyph() || shield.curseInfusionBonus) {
+					shield.glyph = Armor.Glyph.randomCurse(shield.glyph.getClass());
+				}
+			} else {
+				shield.glyph = Armor.Glyph.randomCurse();
+			}
+			shield.curseInfusionBonus = true;
 		}
 		Badges.validateItemLevelAquired(item);
 		updateQuickslot();

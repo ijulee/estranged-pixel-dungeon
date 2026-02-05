@@ -111,12 +111,12 @@ public class Stylus extends Item {
 	}
 
 	private void inscribe( KnightsShield shield ) {
-		shield.inscribe(false);
-		updateQuickslot();
-
 		detach(curUser.belongings.backpack);
+		Catalog.countUse(getClass());
 
 		GLog.w( Messages.get(this, "inscribed"));
+
+		shield.inscribe();
 
 		curUser.sprite.operate(curUser.pos);
 		curUser.sprite.centerEmitter().start(PurpleParticle.BURST, 0.05f, 10);

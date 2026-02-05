@@ -1,6 +1,7 @@
 package com.shatteredpixel.shatteredpixeldungeon.items;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicImmune;
@@ -10,6 +11,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.armor.curses.Bulk;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Flow;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Swiftness;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfArcana;
+import com.shatteredpixel.shatteredpixeldungeon.journal.Catalog;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
@@ -153,23 +155,25 @@ public class KnightsShield extends Item {
         return glyph != null && !glyph.curse();
     }
 
-    public void inscribe( boolean isCurse ) {
-        if (isCurse) {
-            if (this.glyph != null){
-                //if we are freshly applying curse infusion, don't replace an existing curse
-                if (this.hasGoodGlyph() || this.curseInfusionBonus) {
-                    this.glyph = Armor.Glyph.randomCurse(this.glyph.getClass());
-                }
-            } else {
-                this.glyph = Armor.Glyph.randomCurse();
-            }
-            this.curseInfusionBonus = true;
-        } else {
-            Class<? extends Armor.Glyph> oldGlyphClass = this.glyph != null ? this.glyph.getClass() : null;
-            Armor.Glyph gl = Armor.Glyph.random( oldGlyphClass );
-            this.glyph = gl;
-            this.curseInfusionBonus = false;
-        }
+    public KnightsShield inscribe() {
+        Class<? extends Armor.Glyph> oldGlyphClass = this.glyph != null ? this.glyph.getClass() : null;
+        Armor.Glyph gl = Armor.Glyph.random( oldGlyphClass );
+        return inscribe(gl);
+    }
+
+    public KnightsShield inscribe(Armor.Glyph glyph) {
+        if (glyph == null || !glyph.curse()) curseInfusionBonus = false;
+
+        this.glyph = glyph;
+
         updateQuickslot();
+
+		if (glyph != null && isIdentified() && Dungeon.hero != null
+            && Dungeon.hero.isAlive() && Dungeon.hero.belongings.contains(this)) {
+            Catalog.setSeen(glyph.getClass());
+            Statistics.itemTypesDiscovered.add(glyph.getClass());
+        }
+
+        return this;
     }
 }
