@@ -403,7 +403,7 @@ public class Armor extends EquipableItem {
 		this.seal = seal;
 		if (seal.level() > 0){
 			//doesn't trigger upgrading logic such as affecting curses/glyphs
-			int newLevel = trueLevel()+1;
+			int newLevel = trueLevel() + seal.level();
 			level(newLevel);
 			Badges.validateItemLevelAquired(this);
 		}
@@ -427,7 +427,7 @@ public class Armor extends EquipableItem {
 			seal = null;
 
 			if (detaching.level() > 0){
-				degrade();
+				degrade(detaching.level());
 			}
 			if (detaching.canTransferGlyph()){
 				inscribe(null);
@@ -630,7 +630,7 @@ public class Armor extends EquipableItem {
 		
 		cursed = false;
 
-		if (seal != null && seal.level() == 0)
+		if (seal != null && seal.isUpgradable())
 			seal.upgrade();
 
 		return super.upgrade();

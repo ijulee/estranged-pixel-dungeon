@@ -268,7 +268,7 @@ abstract public class ClassArmor extends Armor {
 									//automates the process of detaching the seal manually
 									// and re-affixing it to the new armor
 									if (seal.level() > 0){
-										int newLevel = trueLevel() + 1;
+										int newLevel = trueLevel() + seal.level();
 										level(newLevel);
 										Badges.validateItemLevelAquired(ClassArmor.this);
 									}
