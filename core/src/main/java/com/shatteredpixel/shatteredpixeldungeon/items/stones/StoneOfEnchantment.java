@@ -25,13 +25,16 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Belongings;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Enchanting;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
+import com.shatteredpixel.shatteredpixeldungeon.items.BrokenSeal;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.KnightsShield;
+import com.shatteredpixel.shatteredpixeldungeon.items.Stylus;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ScrollOfEnchantment;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Catalog;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 
@@ -62,9 +65,14 @@ public class StoneOfEnchantment extends InventoryStone {
 			((Weapon)item).enchant();
 			
 		} else if (item instanceof Armor) {
-			
-			((Armor)item).inscribe();
-			
+
+			BrokenSeal seal = ((Armor) item).checkSeal();
+			if (seal != null && seal.canTransferGlyph() && seal.amuletApplied) {
+				chooseInscribe((Armor) item);
+				return;
+			} else {
+				((Armor)item).inscribe();
+			}
 		} else { // item instanceof KnightsShield
 
 			((KnightsShield) item).inscribe();
@@ -85,7 +93,33 @@ public class StoneOfEnchantment extends InventoryStone {
 		useAnimation();
 		
 	}
-	
+
+	private void chooseInscribe(Armor armor) {
+		GameScene.show(new Armor.WndChooseInscribe(armor) {
+			@Override
+			public void chooseArmor() {
+				armor.inscribe();
+				curUser.sprite.emitter().start( Speck.factory( Speck.LIGHT ), 0.1f, 5 );
+				Enchanting.show( curUser, armor );
+
+				GLog.p(Messages.get(StoneOfEnchantment.class, "armor"));
+
+				useAnimation();
+			}
+
+			@Override
+			public void chooseSeal() {
+				armor.inscribeSeal();
+				curUser.sprite.emitter().start( Speck.factory( Speck.LIGHT ), 0.1f, 5 );
+				Enchanting.show( curUser, armor.checkSeal() );
+
+				GLog.p(Messages.get(StoneOfEnchantment.class, "seal"));
+
+				useAnimation();
+			}
+		});
+	}
+
 	@Override
 	public int value() {
 		return 30 * quantity;

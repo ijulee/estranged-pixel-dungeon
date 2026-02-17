@@ -31,9 +31,11 @@ import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Catalog;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndBag;
+import com.shatteredpixel.shatteredpixeldungeon.windows.WndOptions;
 import com.watabou.noosa.audio.Sample;
 
 import java.util.ArrayList;
@@ -83,7 +85,86 @@ public class Stylus extends Item {
 	public boolean isIdentified() {
 		return true;
 	}
-	
+
+	public Item chooseSeal(Armor armor) {
+		final String noglyph = Messages.get(Armor.class, "inscribe_noglyph");
+
+		BrokenSeal seal = armor.checkSeal();
+
+		String glyph1 = (armor.glyph != null) ? armor.glyph.name() : noglyph;
+		String glyph2 = (armor.sealGlyph != null) ? armor.sealGlyph.name() : noglyph;
+
+		final Item[] choice = new Item[1];
+
+		GameScene.show(new WndOptions(new ItemSprite(seal.image()),
+				Messages.get(Armor.class, "inscribe_title"),
+				Messages.get(Armor.class, "inscribe_desc", glyph1, glyph2),
+				Messages.get(armor, "name"),
+				Messages.get(seal, "name_restored")) {
+			@Override
+			protected void onSelect(int index) {
+				switch (index) {
+					case 0: // inscribe armor
+						choice[0] = armor;
+						break;
+					case 1: // inscribe seal
+						choice[0] = seal;
+						break;
+					default:
+						break;
+				}
+			}
+
+			@Override
+			public void onBackPressed() {
+				// do nothing
+			}
+		});
+
+		return choice[0];
+	}
+	/*
+	public static void chooseInscribe(Armor armor, Glyph glyph, Callback callback) {
+        String glyph1 = (armor.glyph != null) ? armor.glyph.name() : Messages.get(Armor.class, "inscribe_noglyph"),
+                glyph2 = (armor.sealGlyph != null) ? armor.sealGlyph.name() : Messages.get(Armor.class, "inscribe_noglyph");
+
+        GameScene.show(new WndOptions(new ItemSprite(armor.seal.image()),
+                Messages.get(Armor.class, "inscribe_title"),
+                Messages.get(Armor.class, "inscribe_desc", glyph1, glyph2),
+                Messages.get(armor, "name"),
+				Messages.get(armor.seal, "name_restored")) {
+            @Override
+            protected void onSelect(int index) {
+                switch (index) {
+                    case 0: // inscribe armor
+                        armor.inscribe(glyph);
+						Enchanting.show(curUser, armor);
+						callback.call();
+                        break;
+                    case 1: // inscribe seal
+                        armor.sealGlyph = glyph;
+                        armor.seal.setGlyph(glyph);
+						Enchanting.show(curUser, armor.seal);
+						callback.call();
+						break;
+                    default:
+                        break;
+                }
+            }
+
+            @Override
+            public void hide() {
+                super.hide();
+                Dungeon.hero.next();
+            }
+
+            @Override
+            public void onBackPressed() {
+                // do nothing
+            }
+        });
+    }
+*/
 	private void inscribe( Armor armor ) {
 
 		if (!armor.cursedKnown){
@@ -110,6 +191,28 @@ public class Stylus extends Item {
 		curUser.busy();
 	}
 
+	private void inscribeSeal(Armor armor) {
+
+		if (armor.sealGlyph.curse()) {
+			GLog.w( Messages.get(this, "cursed"));
+			return;
+		}
+
+		detach(curUser.belongings.backpack);
+		Catalog.countUse(getClass());
+
+		armor.inscribeSeal();
+
+		GLog.w( Messages.get(this, "inscribed_seal"));
+
+		curUser.sprite.operate(curUser.pos);
+		curUser.sprite.centerEmitter().start(PurpleParticle.BURST, 0.05f, 10);
+		Enchanting.show(curUser, armor.checkSeal());
+		Sample.INSTANCE.play(Assets.Sounds.BURNING);
+
+		curUser.spend(TIME_TO_INSCRIBE);
+		curUser.busy();
+    }
 	private void inscribe( KnightsShield shield ) {
 		detach(curUser.belongings.backpack);
 		Catalog.countUse(getClass());
@@ -153,7 +256,22 @@ public class Stylus extends Item {
 		public void onSelect( Item item ) {
 			if (item != null) {
 				if (item instanceof Armor) {
-					Stylus.this.inscribe( (Armor)item );
+					BrokenSeal seal = ((Armor) item).checkSeal();
+					if (seal != null && seal.canTransferGlyph() && seal.amuletApplied) {
+						GameScene.show(new Armor.WndChooseInscribe((Armor) item) {
+							@Override
+							public void chooseArmor() {
+								Stylus.this.inscribe( (Armor) item );
+							}
+
+							@Override
+							public void chooseSeal() {
+								Stylus.this.inscribeSeal( (Armor) item );
+							}
+						});
+					} else {
+						Stylus.this.inscribe( (Armor) item );
+					}
 				} else {
 					Stylus.this.inscribe( (KnightsShield) item );
 				}

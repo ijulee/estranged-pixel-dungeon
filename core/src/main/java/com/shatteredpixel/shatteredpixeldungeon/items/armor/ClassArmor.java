@@ -264,6 +264,9 @@ abstract public class ClassArmor extends Armor {
 								if (armor.checkSeal() != null) {
 									inscribe(armor.glyph);
 									seal = armor.checkSeal();
+									if (seal.amuletApplied && seal.getGlyph() != null) {
+										sealGlyph = seal.getGlyph();
+									}
 								} else if (checkSeal() != null){
 									//automates the process of detaching the seal manually
 									// and re-affixing it to the new armor

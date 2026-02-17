@@ -142,9 +142,10 @@ public class BrokenSeal extends Item {
 			} else if (armor.cursed && (getGlyph() == null || !getGlyph().curse())){
 				GLog.w(Messages.get(BrokenSeal.class, "cursed_armor"));
 
-			}else if (armor.glyph != null && getGlyph() != null
+			} else if (armor.glyph != null && getGlyph() != null
 					&& canTransferGlyph()
-					&& armor.glyph.getClass() != getGlyph().getClass()) {
+					&& armor.glyph.getClass() != getGlyph().getClass()
+					&& !amuletApplied) {
 
 				GameScene.show(new WndOptions(new ItemSprite(ItemSpriteSheet.SEAL),
 						Messages.get(BrokenSeal.class, "choose_title"),
