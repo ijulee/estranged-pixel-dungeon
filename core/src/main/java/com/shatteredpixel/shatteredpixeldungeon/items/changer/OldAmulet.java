@@ -168,9 +168,18 @@ public class OldAmulet extends Item {
             return changeMachete((Machete)item);
         } else if (item instanceof KnightsShield) {
             return changeShield();
+        } else if (item instanceof Armor) {
+            return changeSeal(((Armor) item).checkSeal());
+        } else if (item instanceof BrokenSeal) {
+            return changeSeal((BrokenSeal) item);
         } else {
             return null;
         }
+    }
+
+    private static BrokenSeal changeSeal(BrokenSeal seal) {
+        seal.amuletApplied = true;
+        return seal;
     }
 
     private static Gun changeGun(Gun gun) {

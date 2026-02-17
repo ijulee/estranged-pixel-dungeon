@@ -69,6 +69,7 @@ public class BrokenSeal extends Item {
 	}
 
 	private Armor.Glyph glyph;
+	public boolean amuletApplied = false;
 
 	public boolean canTransferGlyph(){
 		if (glyph == null){
@@ -96,6 +97,15 @@ public class BrokenSeal extends Item {
 	public int maxShield( int armTier, int armLvl ){
 		// 5-15, based on equip tier and iron will
 		return 3 + 2*armTier + Dungeon.hero.pointsInTalent(Talent.IRON_WILL);
+	}
+
+	@Override
+	public int image() {
+		if (amuletApplied) {
+			return ItemSpriteSheet.SEAL2;
+		} else {
+			return image;
+		}
 	}
 
 	@Override
@@ -185,12 +195,14 @@ public class BrokenSeal extends Item {
 
 	@Override
 	public String name() {
-		return glyph != null ? glyph.name( super.name() ) : super.name();
+		String name = (amuletApplied) ? Messages.get(this, "name_restored") : super.name();
+
+		return glyph != null ? glyph.name( name ) : name;
 	}
 
 	@Override
 	public String info() {
-		String info = super.info();
+		String info = (amuletApplied) ? Messages.get(this, "desc_restored") : super.info();
 		if (glyph != null){
 			info += "\n\n" + Messages.get(this, "inscribed", glyph.name());
 			info += " " + glyph.desc();
@@ -231,17 +243,20 @@ public class BrokenSeal extends Item {
 	};
 
 	private static final String GLYPH = "glyph";
+	private static final String AMULET = "amulet";
 
 	@Override
 	public void storeInBundle(Bundle bundle) {
 		super.storeInBundle(bundle);
 		bundle.put(GLYPH, glyph);
+		bundle.put(AMULET, amuletApplied);
 	}
 
 	@Override
 	public void restoreFromBundle(Bundle bundle) {
 		super.restoreFromBundle(bundle);
 		glyph = (Armor.Glyph)bundle.get(GLYPH);
+		amuletApplied = bundle.getBoolean(AMULET);
 	}
 
 	public static class WarriorShield extends ShieldBuff {

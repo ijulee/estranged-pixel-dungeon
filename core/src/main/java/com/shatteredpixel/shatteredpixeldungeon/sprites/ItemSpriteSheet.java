@@ -1392,11 +1392,13 @@ public class ItemSpriteSheet {
 	public static final int DEATHS_SWORD	= SPECIAL_ITEM+1;
 	public static final int SADDLE			= SPECIAL_ITEM+2;
 	public static final int ROSARY			= SPECIAL_ITEM+3;
+	public static final int SEAL2			= SPECIAL_ITEM+4;
 	static{
 		assignItemRect(HERO_SWORD	, 14, 14);
 		assignItemRect(DEATHS_SWORD	, 14, 16);
 		assignItemRect(SADDLE		, 14, 13);
 		assignItemRect(ROSARY		, 14, 15);
+		assignItemRect(SEAL2		, 13, 13);
 	}
 
 	private static final int NEW_POTIONS		=			xy(1, 64);  //16 slots
