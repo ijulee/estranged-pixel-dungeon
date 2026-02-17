@@ -372,7 +372,8 @@ public class ItemSprite extends MovieClip {
 				
 				glowUp = true;
 				phase = 0;
-				
+				if (glowing instanceof DualGlowing) ((DualGlowing) glowing).swapColor();
+
 			}
 			
 			float value = phase / glowing.period * 0.6f;
@@ -413,6 +414,69 @@ public class ItemSprite extends MovieClip {
 			blue = (color & 0xFF) / 255f;
 			
 			this.period = period;
+		}
+	}
+
+	public static class DualGlowing extends Glowing {
+
+		public int color1;
+		public float red1;
+		public float green1;
+		public float blue1;
+		public float period1;
+
+		public int color2;
+		public float red2;
+		public float green2;
+		public float blue2;
+		public float period2;
+		public boolean useColor2 = false;
+
+		public DualGlowing(int color1, int color2) {
+			this(color1, color2, 1f);
+		}
+
+		public DualGlowing(int color1, int color2, float period) {
+			this(color1, color2, period, period);
+		}
+
+		public DualGlowing(Glowing glowing1, Glowing glowing2) {
+			this(glowing1.color, glowing2.color, glowing1.period, glowing2.period);
+		}
+
+		public DualGlowing(int color1, int color2, float period1, float period2) {
+			super(color1, period1);
+
+			this.color1 = color1;
+			red1 = (color1 >> 16) / 255f;
+			green1 = ((color1 >> 8) & 0xFF) / 255f;
+			blue1 = (color1 & 0xFF) / 255f;
+			this.period1 = period1;
+
+			this.color2 = color2;
+			red2 = (color2 >> 16) / 255f;
+			green2 = ((color2 >> 8) & 0xFF) / 255f;
+			blue2 = (color2 & 0xFF) / 255f;
+			this.period2 = period2;
+		}
+
+		public void swapColor() {
+			if (useColor2) {
+				useColor2 = false;
+				color = color1;
+				red = red1;
+				green = green1;
+				blue = blue1;
+				period = period1;
+
+			} else {
+				useColor2 = true;
+				color = color2;
+				red = red2;
+				green = green2;
+				blue = blue2;
+				period = period2;
+			}
 		}
 	}
 }
