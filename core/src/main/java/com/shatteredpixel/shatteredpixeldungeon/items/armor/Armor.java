@@ -967,8 +967,9 @@ public class Armor extends EquipableItem {
 
 	public Armor inscribe() {
 
-		Class<? extends Glyph> oldGlyphClass = glyph != null ? glyph.getClass() : null;
-		Glyph gl = Glyph.random( oldGlyphClass );
+		Class<? extends Glyph> armorGlyphClass = glyph != null ? glyph.getClass() : null,
+				sealGlyphClass = sealGlyph != null ? sealGlyph.getClass() : null;
+		Glyph gl = Glyph.random( armorGlyphClass, sealGlyphClass );
 
 		return inscribe( gl );
 	}
