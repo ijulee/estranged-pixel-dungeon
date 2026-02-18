@@ -161,15 +161,16 @@ public class OldAmulet extends Item {
         /*if (item instanceof SpiritBow) {
             return changeBow((SpiritBow)item);
         } else*/ if (item instanceof Gun) {
-            return changeGun((Gun)item);
+            return changeGun((Gun) item);
         } else if (item instanceof Shovel) {
-            return changeShovel((Shovel)item);
+            return changeShovel((Shovel) item);
         } else if (item instanceof Machete) {
-            return changeMachete((Machete)item);
+            return changeMachete((Machete) item);
         } else if (item instanceof KnightsShield) {
             return changeShield();
         } else if (item instanceof Armor) {
-            return changeSeal(((Armor) item).checkSeal());
+            changeSeal(((Armor) item).checkSeal());
+            return item;
         } else if (item instanceof BrokenSeal) {
             return changeSeal((BrokenSeal) item);
         } else {
