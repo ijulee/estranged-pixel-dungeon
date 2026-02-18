@@ -100,6 +100,7 @@ import com.watabou.utils.Reflection;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class Armor extends EquipableItem {
 
@@ -937,13 +938,21 @@ public class Armor extends EquipableItem {
 
 	public Armor inscribeSeal() {
 
-		Class<? extends Glyph>[] oldGlyphClass = new Class[] {
-				glyph != null ? glyph.getClass() : null,
-                sealGlyph != null ? sealGlyph.getClass() : null
-		};
-		Glyph gl = Glyph.random(oldGlyphClass);
+		Class<? extends Glyph> armorGlyphClass = glyph != null ? glyph.getClass() : null,
+				sealGlyphClass = sealGlyph != null ? sealGlyph.getClass() : null;
 
-		return inscribeSeal( gl );
+		Glyph gl;
+        if (Dungeon.hero.pointsInTalent(Talent.RUNIC_TRANSFERENCE) != 1) {
+            gl = Glyph.random(armorGlyphClass, sealGlyphClass);
+        } else {
+			ArrayList<Class<?>> toIgnore = new ArrayList<>();
+			toIgnore.add(armorGlyphClass);
+			toIgnore.add(sealGlyphClass);
+			toIgnore.addAll(List.of(Glyph.rare));
+			gl = Glyph.random(toIgnore.toArray(new Class[]{}));
+        }
+
+        return inscribeSeal( gl );
 	}
 
 	public Armor inscribe( Glyph glyph ) {
