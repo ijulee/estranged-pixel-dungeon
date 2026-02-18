@@ -113,6 +113,7 @@ public enum Icons {
 	SLEEP,
 	ALERT,
 	LOST,
+	INVESTIGATE,
 	MINI_INFO,
 	MINI_UNCHECKED,
 	MINI_CHECKED,
@@ -367,13 +368,16 @@ public enum Icons {
 				icon.frame( icon.texture.uvRectBySize( 0, 88, 7, 5 ) );
 				break;
 			case SLEEP:
-				icon.frame( icon.texture.uvRectBySize( 16, 80, 9, 8 ) );
+				icon.frame( icon.texture.uvRectBySize( 7, 88, 9, 8 ) );
 				break;
 			case ALERT:
-				icon.frame( icon.texture.uvRectBySize( 16, 88, 8, 8 ) );
+				icon.frame( icon.texture.uvRectBySize( 16, 80, 8, 8 ) );
 				break;
 			case LOST:
-				icon.frame( icon.texture.uvRectBySize( 24, 88, 8, 8 ) );
+				icon.frame( icon.texture.uvRectBySize( 24, 80, 8, 8 ) );
+				break;
+			case INVESTIGATE:
+				icon.frame( icon.texture.uvRectBySize( 16, 88, 8, 8 ) );
 				break;
 			case MINI_INFO:
 				icon.frame( icon.texture.uvRectBySize( 32, 144, 9, 9 ) );
