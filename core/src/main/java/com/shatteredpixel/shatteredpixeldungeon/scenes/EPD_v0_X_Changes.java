@@ -34,7 +34,7 @@ public class EPD_v0_X_Changes {
         changeInfos.add(changes);
 
         changes.addButton( new ChangeButton(Icons.ESTRANGED.get(), "Dev Commentary",
-                "**-** Released [DATE]\n" +
+                "**-** Released February 18, 2026\n" +
                 "**-** Based on Re-Arranged v3.40.0-FINAL and Shattered v3.3.1\n\n" +
                 "Sorry to have taken this long to release a new update. Life happened. Also I wanted " +
                 "to implement a major change, rather than just fixes and QoL changes, which took a " +
