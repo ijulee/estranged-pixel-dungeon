@@ -2,6 +2,10 @@ package com.shatteredpixel.shatteredpixeldungeon.scenes;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
+import com.shatteredpixel.shatteredpixeldungeon.items.GammaRayGun;
+import com.shatteredpixel.shatteredpixeldungeon.items.KnightsShield;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.bow.SpiritBow;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.alchemy.PotOThunder;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.HeroSprite;
@@ -21,7 +25,7 @@ public class EPD_v0_X_Changes {
     }
 
     private static void add_v0_1_Changes(ArrayList<ChangeInfo> changeInfos) {
-        ChangeInfo changes = new ChangeInfo("v0.0.1", true, "");
+        ChangeInfo changes = new ChangeInfo("v0.0.2", true, "");
         changes.hardlight(Window.TITLE_COLOR);
         changeInfos.add(changes);
 
@@ -31,6 +35,104 @@ public class EPD_v0_X_Changes {
 
         changes.addButton( new ChangeButton(Icons.ESTRANGED.get(), "Dev Commentary",
                 "**-** Released [DATE]\n" +
+                "**-** Based on Re-Arranged v3.40.0-FINAL and Shattered v3.3.1\n\n" +
+                "Sorry to have taken this long to release a new update. Life happened. Also I wanted " +
+                "to implement a major change, rather than just fixes and QoL changes, which took a " +
+                "while to sort out properly.\n\n" +
+                "One thing I must mention. I haven't been on Discord, but the news about " +
+                "requiring ID or face verification is concerning. I may decide to leave " +
+                "Discord entirely, which is unfortunate as it has the biggest PD community " +
+                "that I know, but it can't be helped.\n\n" +
+                "_-- miaomix_") );
+
+        changes.addButton( new ChangeButton(new ItemSprite(ItemSpriteSheet.SEAL2), "Old Amulet effect for Warrior",
+                "Added a new Old Amulet transformation for Warrior: the restored " +
+                "Warrior's Seal. The bonus effects are very simple, but Warrior is meant to be a " +
+                "simple class in the first place.\n\n" +
+                "The Broken Seal becomes the Warrior's seal, restored by the power of the Old Amulet. " +
+                "It can carry an additional upgrade and, if you have the Runic Transference talent, " +
+                "hold and apply its own glyph, in addition to the Armor's glyph."));
+
+        changes.addButton( new ChangeButton(new ItemSprite(ItemSpriteSheet.MASTERY), "New Guidebook Page",
+                "Added a new guidebook page explaining critical hits, and removed " +
+                "some of that info from item, hero, and talent descriptions. Doing my best to " +
+                "avoid walls of text in descriptions."));
+
+        changes.addButton( new ChangeButton(new SpiritBow(),
+                "Added a confirmation window for Spirit Bow's Old Amulet transformation. " +
+                "Now you have a choice of 2 special bows. You can view the description of each bow " +
+                "before choosing it. The choices remain the same even if you decide to use the " +
+                "Amulet later."));
+
+        changes.addButton( new ChangeButton(new PotOThunder(),
+                "Renamed Pot'o'Thunder to Thorhammer (sprite is WIP), and changed the " +
+                "recipe requirement to Throwing Hammer. It just makes more sense to me (sorry in " +
+                "advance if there's a reference I'm not aware of), and gives Throwing Hammer " +
+                "a use in alchemy instead of Force Cube, which is already used for Force Glove."));
+
+        changes = new ChangeInfo(Messages.get(ChangesScene.class, "changes"), false, null);
+        changes.hardlight(CharSprite.WARNING);
+        changeInfos.add(changes);
+
+        changes.addButton(new ChangeButton(HeroSprite.avatar(HeroClass.SAMURAI, 4),"Swordmaster Changes",
+                "**-** Change talent descriptions for accuracy and clarity.\n" +
+                "**-** As Swordmaster sheathing buff now indicates if next attack will be Quick Draw.\n" +
+                "**-** Separate, clearer warning messages for Dash Draw."));
+
+        changes.addButton(new ChangeButton(HeroSprite.avatar(HeroClass.HUNTRESS, 4),"Fighter Changes",
+                "**-** Changed talent descriptions for accuracy and clarity.\n\n" +
+                "Changed Mystic Punch ring bonus effect descriptions and effects:\n" +
+                "**-** Ring of Arcana: now simply applies an Unstable enchantment, fixed Kinetic " +
+                "conserved damage timing\n" +
+                "**-** Ring of Accuracy: no longer inflicts both debuffs at the same time\n" +
+                "**-** Ring of Elements: no longer cleanses hunger\n" +
+                "**-** Ring of Sharpshooting: fixed knockback and throwie repair"));
+
+        changes.addButton(new ChangeButton(new GammaRayGun(),
+                "**-** Now has less opaque RNG for cooldown (visible in debug builds).\n" +
+                "**-** Changed Radioactive debuff icon, name, and descriptions."));
+
+        changes.addButton(new ChangeButton(new KnightsShield(),
+                "**-** Knight's shield can now be inscribed by Stone/Scroll of Enchantment."));
+
+        changes.addButton(new ChangeButton(Icons.get(Icons.PREFS), Messages.get(ChangesScene.class, "misc"),
+                "**-** Various text changes.\n" +
+                "**-** Changed how guns process multiple targets again.\n" +
+                "**-** Multi-target Elastic projectile weapons no longer knocks back on " +
+                "self-damage.\n" +
+                "**-** Renamed \"Satisfying Glyph\" to \"Glyph of Satiation\".\n" +
+                "**-** Swapped rarities of Satiation and Afterimage (now uncommon and rare, " +
+                "respectively).\n" +
+                "**-** Added ReARranged additional enchantments (Stunning, Eldritch, " +
+                "Venomous, and Vorpal) to potential Unstable effects."));
+
+        changes.addButton(new ChangeButton(new Image(Assets.Sprites.SPINNER, 144, 0, 16, 16),
+                Messages.get(ChangesScene.class, "bugfixes"),
+                "**-** Fixed Swordmaster Quick Draw proccing incorrectly, sometimes " +
+                "alongside Dash Draw.\n" +
+                "**-** Fixed incorrect critical indicator for a non-critical physical attack " +
+                "occurring after a critical missile attack.\n" +
+                "**-** Fixed missing \"Randomize\" icon."));
+
+        changes = new ChangeInfo(Messages.get(ChangesScene.class, "nerfs"), false, null);
+        changes.hardlight(CharSprite.NEGATIVE);
+        changeInfos.add(changes);
+
+        changes.addButton(new ChangeButton(new ItemSprite(ItemSpriteSheet.TRUE_RUNIC_BLADE), "True Runic Blade Nerf",
+                "True Runic Blade is now a Tier 6 weapon, while stats remain the same. " +
+                "Its power is just too high for a Tier 5 blueprint melee weapon. I plan to make " +
+                "lower tier weapon blueprints more accessible in the future."));
+
+        changes = new ChangeInfo("v0.0.1", true, "");
+        changes.hardlight(Window.TITLE_COLOR);
+        changeInfos.add(changes);
+
+        changes = new ChangeInfo(Messages.get(ChangesScene.class, "new"), false, null);
+        changes.hardlight(Window.TITLE_COLOR);
+        changeInfos.add(changes);
+
+        changes.addButton( new ChangeButton(Icons.ESTRANGED.get(), "Dev Commentary",
+                "**-** Released December 15, 2025\n" +
                 "**-** Based on Re-Arranged v3.40.0-FINAL and Shattered v3.3.0\n\n" +
                 "Hi there. Long time player, first time modder. Re-Arranged is what I'd call an " +
                 "\"add-on\" mod to Shattered, one that keeps up with SPD's content updates, and " +

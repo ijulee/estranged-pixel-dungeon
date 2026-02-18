@@ -58,7 +58,7 @@ public class v3_X_Changes {
 		spdTitle.hardlight(Window.TITLE_COLOR);
 		changeInfos.add(spdTitle);
 
-		String baseStr = Messages.get(ChangesScene.class, "spd_prefix");
+		String baseStr = Messages.get(ChangesScene.class, "spd_prefix", "v0.0.2", "v3.3.1");
 		ChangeInfo spdVersion = new ChangeInfo("", true, baseStr);
 		spdVersion.hardlight(0xCCCCCC);
 		changeInfos.add(spdVersion);
