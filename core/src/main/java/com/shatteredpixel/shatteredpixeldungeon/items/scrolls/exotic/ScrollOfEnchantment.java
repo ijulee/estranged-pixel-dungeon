@@ -22,7 +22,9 @@
 package com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
+import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Belongings;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Enchanting;
 import com.shatteredpixel.shatteredpixeldungeon.items.BrokenSeal;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
@@ -43,6 +45,8 @@ import com.shatteredpixel.shatteredpixeldungeon.windows.WndBag;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndOptions;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndTitledMessage;
 import com.watabou.noosa.audio.Sample;
+
+import java.util.Arrays;
 
 public class ScrollOfEnchantment extends ExoticScroll {
 	
@@ -288,20 +292,31 @@ public class ScrollOfEnchantment extends ExoticScroll {
 			if (index < 3) {
 				if (arm != null) {
 					BrokenSeal seal = arm.checkSeal();
-					if (seal != null && seal.canTransferGlyph() && seal.amuletApplied) {
+					Armor.Glyph glyph = glyphs[index];
+					if (seal != null && seal.amuletApplied && Dungeon.hero.hasTalent(Talent.RUNIC_TRANSFERENCE)) {
 						GameScene.show(new Armor.WndChooseInscribe(arm) {
 							@Override
 							public void chooseArmor() {
-								arm.inscribe(glyphs[index]);
+								arm.inscribe(glyph);
 								GLog.p(Messages.get(StoneOfEnchantment.class, "armor"));
 								onUse(arm);
 							}
 
 							@Override
 							public void chooseSeal() {
-								arm.inscribeSeal(glyphs[index]);
+								arm.inscribeSeal(glyph);
 								GLog.p(Messages.get(StoneOfEnchantment.class, "seal"));
 								onUse(arm.checkSeal());
+							}
+
+							@Override
+							protected boolean enabled(int index) {
+								if (index == 1) {
+									return !Arrays.asList(Armor.Glyph.rare).contains(glyph.getClass()) ||
+											Dungeon.hero.pointsInTalent(Talent.RUNIC_TRANSFERENCE) > 1;
+								} else {
+									return true;
+								}
 							}
 						});
 					} else {
