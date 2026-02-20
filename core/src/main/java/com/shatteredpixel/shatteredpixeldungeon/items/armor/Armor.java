@@ -1022,21 +1022,16 @@ public class Armor extends EquipableItem {
 				&& (Dungeon.hero.subClass != HeroSubClass.PALADIN || glyph == null)){
 			return HOLY;
 		} else {
-            if (glyph != null) {
-				if (!cursedKnown) {
-					return null;
-				} else if (sealGlyph != null &&
-						seal != null && seal.canTransferGlyph() && seal.amuletApplied) {
-                    return new ItemSprite.DualGlowing(glyph.glowing(), sealGlyph.glowing());
-                } else {
-					return glyph.glowing();
-				}
-            } else if (sealGlyph != null && seal != null) {
-				return sealGlyph.glowing();
+			if (sealGlyph == null) {
+				return glyph != null && (cursedKnown || !glyph.curse()) ? glyph.glowing() : null;
 			} else {
-				return null;
-			}
-		}
+                if (glyph == null || glyph.getClass() == sealGlyph.getClass()) {
+                    return sealGlyph.glowing();
+                } else {
+                    return new ItemSprite.DualGlowing(glyph.glowing(), sealGlyph.glowing());
+                }
+            }
+        }
 	}
 	
 	public static abstract class Glyph implements Bundlable {
