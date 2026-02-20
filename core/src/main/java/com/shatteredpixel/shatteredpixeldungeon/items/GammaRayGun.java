@@ -153,6 +153,10 @@ public class GammaRayGun extends Item {
                                 Buff.affect(ch, RadioactiveMutation.class).set(6-curUser.pointsInTalent(Talent.RADIATION));
                             }
 
+                            if (ch instanceof Mob) {
+                                ((Mob) ch).aggro(curUser);
+                            }
+
                             if (curUser.subClass == HeroSubClass.SAVIOR) {
                                 //FIXME cache ally count? Or at least have a function
                                 int allyNumber = 0;
