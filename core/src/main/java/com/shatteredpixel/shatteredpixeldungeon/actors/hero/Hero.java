@@ -2124,7 +2124,7 @@ public class Hero extends Char {
 				}
 				break;
 			case VETERAN:
-				if (level.adjacent(enemy.pos, pos) && buff(Tackle.TackleTracker.class) == null) {
+				if (buff(Tackle.TackleTracker.class) == null) {
 					Actor.add(new Actor() {
 
 						{
