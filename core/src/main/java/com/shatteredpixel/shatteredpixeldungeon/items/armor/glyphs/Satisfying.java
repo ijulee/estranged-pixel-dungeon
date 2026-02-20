@@ -39,15 +39,14 @@ public class Satisfying extends Glyph {
 	@Override
 	public int proc( Armor armor, Char attacker, Char defender, int damage) {
 
-		int level = Math.max(0, armor.buffedLvl());
+		int level = Math.max(0, armor.buffedLvl()+1);
 		
 		// 25% fixed
-		float procChance = 0.25f;
-		procChance *= procChanceMultiplier(defender);
+		float procChance = 0.25f * procChanceMultiplier(defender);
 		float powerMulti = Math.max(1f, procChance);
 		if (Random.Float() < procChance && defender == Dungeon.hero) {
 
-			Buff.affect(Dungeon.hero, Hunger.class).affectHunger(Math.max(1, Math.round(damage*0.1*level)*powerMulti));
+			Buff.affect(Dungeon.hero, Hunger.class).satisfy( Math.max(1, Math.round(damage*0.4f*level*powerMulti)) );
 			Dungeon.hero.sprite.emitter().burst(Speck.factory(Speck.HUNGER), 1);
 
 		}
