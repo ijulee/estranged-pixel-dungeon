@@ -24,6 +24,7 @@ package com.shatteredpixel.shatteredpixeldungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AscensionChallenge;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.Artifact;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.MagicalHolster;
@@ -241,7 +242,7 @@ public class Badges {
 		CHAMPION_2                  ( 126 ),
 		CHAMPION_3                  ( 127 ),
 
-		//rearranged badegs
+		//rearranged badges
 		BOSS_SLAIN_3_ENCHANTER,
 
 		BOSS_SLAIN_3_OUTLAW,
@@ -1032,12 +1033,37 @@ public class Badges {
 			case 25:
 				badge = Badge.BOSS_CHALLENGE_5;
 				break;
+			/*case 30:
+				badge = Badge.BOSS_CHALLENGE_6;
+				break;*/
 		}
 
 		if (badge != null) {
 			local.add(badge);
 			displayBadge(badge);
+			Talent.redeemBetterChoice(Dungeon.hero);
 		}
+	}
+
+	public static int countBossChallengeBadges() {
+		List<Badges.Badge> bossBadges = List.of(
+				Badges.Badge.BOSS_CHALLENGE_1,
+				Badges.Badge.BOSS_CHALLENGE_2,
+				Badges.Badge.BOSS_CHALLENGE_3,
+				Badges.Badge.BOSS_CHALLENGE_4,
+				Badges.Badge.BOSS_CHALLENGE_5
+				/*Badges.Badge.BOSS_CHALLENGE_6*/
+		);
+
+		int badgeCount = 0;
+		for (Badge b : bossBadges) {
+			if (local.contains(b)) {
+				badgeCount++;
+			}
+		}
+
+		GLog.i("Challenge Badges: %d", badgeCount);
+		return badgeCount;
 	}
 	
 	public static void validateMastery() {

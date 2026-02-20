@@ -25,6 +25,7 @@ import static com.shatteredpixel.shatteredpixeldungeon.Dungeon.hero;
 import static com.shatteredpixel.shatteredpixeldungeon.Dungeon.level;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
+import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.GamesInProgress;
 import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
@@ -87,6 +88,7 @@ import com.shatteredpixel.shatteredpixeldungeon.effects.particles.LeafParticle;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ShadowParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.BrokenSeal;
 import com.shatteredpixel.shatteredpixeldungeon.items.BulletItem;
+import com.shatteredpixel.shatteredpixeldungeon.items.Heap;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.KindOfWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.Sheath;
@@ -99,17 +101,20 @@ import com.shatteredpixel.shatteredpixeldungeon.items.pills.Pill;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.Potion;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfStrength;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.elixirs.Elixir;
+import com.shatteredpixel.shatteredpixeldungeon.items.potions.elixirs.ElixirOfTalent;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic.ExoticPotion;
-import com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic.PotionOfCleansing;
+import com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic.PotionOfDivineInspiration;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.Ring;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfForce;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.Scroll;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfRecharging;
+import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfTransmutation;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfUpgrade;
+import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ScrollOfMetamorphosis;
 import com.shatteredpixel.shatteredpixeldungeon.items.spellbook.SpellBook;
 import com.shatteredpixel.shatteredpixeldungeon.items.stones.Runestone;
+import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfAugmentation;
 import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfIntuition;
-import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ScrollOfEnchantment;
 import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfAggression;
 import com.shatteredpixel.shatteredpixeldungeon.items.stones.StoneOfEnchantment;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.ShardOfOblivion;
@@ -160,6 +165,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 public enum Talent {
 
@@ -1498,37 +1504,7 @@ public enum Talent {
 	public static void onTalentUpgraded( Hero hero, Talent talent ){
 		//universal
 		if (talent == BETTER_CHOICE){
-			switch (hero.pointsInTalent(Talent.BETTER_CHOICE)) {
-				case 0: default:
-					break;
-				case 1:
-					StoneOfEnchantment stone = new StoneOfEnchantment();
-					if (stone.doPickUp( Dungeon.hero )) {
-						GLog.i( Messages.get(Dungeon.hero, "you_now_have", stone.name() ));
-						hero.spend(-1);
-					} else {
-						level.drop( stone, Dungeon.hero.pos ).sprite.drop();
-					}
-					break;
-				case 2:
-					ScrollOfEnchantment enchantment = new ScrollOfEnchantment();
-					if (enchantment.doPickUp( Dungeon.hero )) {
-						GLog.i( Messages.get(Dungeon.hero, "you_now_have", enchantment.name() ));
-						hero.spend(-1);
-					} else {
-						level.drop( enchantment, Dungeon.hero.pos ).sprite.drop();
-					}
-					break;
-				case 3:
-					ScrollOfUpgrade scl = new ScrollOfUpgrade();
-					if (scl.doPickUp( Dungeon.hero )) {
-						GLog.i( Messages.get(Dungeon.hero, "you_now_have", scl.name() ));
-						hero.spend(-1);
-					} else {
-						level.drop( scl, Dungeon.hero.pos ).sprite.drop();
-					}
-					break;
-			}
+			redeemBetterChoice(hero);
 		}
 
 		//warrior
@@ -1704,6 +1680,46 @@ public enum Talent {
 				level.drop(bow, Dungeon.hero.pos).sprite.drop();
 			}
 		}
+	}
+
+	public static void redeemBetterChoice( Hero hero ) {
+		if (Badges.countBossChallengeBadges() < 2) {
+			return;
+		}
+
+		Heap h = new Heap();
+
+		switch (hero.pointsInTalent(BETTER_CHOICE)) {
+			case 0: default:
+				break;
+			case 1:
+				h.drop(new StoneOfEnchantment());
+				h.drop(new StoneOfAugmentation());
+				break;
+			case 2:
+				h.drop(new ScrollOfTransmutation());
+				h.drop(new ScrollOfMetamorphosis());
+				break;
+			case 3:
+				h.drop(new PotionOfDivineInspiration());
+				h.drop(new ElixirOfTalent());
+				break;
+		}
+
+		float totalpickupTime = 0;
+		while (!h.isEmpty()) {
+			Item item = h.pickUp();
+			if (item.doPickUp(hero, hero.pos)) {
+				totalpickupTime += item.pickupDelay();
+				GLog.i( Messages.capitalize(Messages.get(hero, "you_now_have", item.name())) );
+			} else {
+				GLog.i( Messages.capitalize(Messages.get(hero, "you_cant_have", item.name())) );
+				level.drop(item, hero.pos).sprite.drop(hero.pos);
+			}
+		}
+
+		hero.spend( -totalpickupTime );
+		new Flare(6, 28).color(0xAA00FF, true).show(hero.sprite, 3.67f);
 	}
 
 	public static class CachedRationsDropped extends CounterBuff{{revivePersists = true;}};
