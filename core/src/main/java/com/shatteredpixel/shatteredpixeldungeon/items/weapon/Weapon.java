@@ -581,7 +581,6 @@ abstract public class Weapon extends KindOfWeapon {
 	}
 
 	public static abstract class Enchantment implements Bundlable {
-		//TODO add new enchantments to Fighter?
 		public static final Class<?>[] common = new Class<?>[]{
 				Blazing.class, Chilling.class, Kinetic.class, Shocking.class, Venomous.class, Eldritch.class};
 
