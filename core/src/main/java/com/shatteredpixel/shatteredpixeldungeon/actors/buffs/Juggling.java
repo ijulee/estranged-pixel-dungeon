@@ -1,5 +1,7 @@
 package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 
+import static com.shatteredpixel.shatteredpixeldungeon.ui.QuickSlotButton.lastTarget;
+
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
@@ -21,35 +23,25 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.ui.ActionIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.ui.HeroIcon;
-import com.shatteredpixel.shatteredpixeldungeon.ui.Icons;
 import com.shatteredpixel.shatteredpixeldungeon.ui.QuickSlotButton;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.BitmapText;
-import com.watabou.noosa.Image;
 import com.watabou.noosa.Visual;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Bundlable;
 import com.watabou.utils.Bundle;
-import com.watabou.utils.Callback;
 import com.watabou.utils.Random;
 
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Queue;
 
-public class Juggling extends Buff implements ActionIndicator.Action {
+public class Juggling extends TargetingAction {
     {
         type = buffType.NEUTRAL;
     }
 
-    private final static Image cross = Icons.TARGET.get();
-    private static Char lastTarget = null;
     Queue<MissileWeapon> weapons = new LinkedList<>();
-
-    @Override
-    public int icon() {
-        return BuffIndicator.JUGGLING;
-    }
 
     private int maxWeapons() {
         return 3 + ((Hero) target).pointsInTalent(Talent.SKILLFUL_JUGGLING);
@@ -124,6 +116,11 @@ public class Juggling extends Buff implements ActionIndicator.Action {
     }
 
     @Override
+    public int icon() {
+        return BuffIndicator.JUGGLING;
+    }
+
+    @Override
     public String actionName() {
         return Messages.get(this, "action_name");
     }
@@ -153,20 +150,18 @@ public class Juggling extends Buff implements ActionIndicator.Action {
     @Override
     public void doAction() {
         if (!GameScene.isCellSelecterActive(shooter)) {
-            if (canAutoAim(lastTarget)) {
-                CharSprite sprite = lastTarget.sprite;
-                if (sprite != null && sprite.parent != null) {
-                    sprite.parent.addToFront(cross);
-                    cross.point(sprite.center(cross));
-                }
-            }
+            showCross();
 
             GameScene.selectCell(shooter);
         } else {
             if (canAutoAim(lastTarget)) {
                 int cell = QuickSlotButton.autoAim(lastTarget);
-                if (cell == -1) return;
-                shooter.onSelect(cell);
+                if (cell != -1) {
+                    GameScene.handleCell(cell);
+                } else {
+                    //couldn't auto-aim, just target the position and hope for the best.
+                    GameScene.handleCell(lastTarget.pos);
+                }
             }
         }
     }
@@ -176,21 +171,6 @@ public class Juggling extends Buff implements ActionIndicator.Action {
                 ch.isAlive() && ch.isActive() &&
                 ch.alignment != Char.Alignment.ALLY &&
                 Dungeon.hero.fieldOfView[ch.pos];
-    }
-
-    public static void target( Char target ) {
-        if (target != null && target.alignment != Char.Alignment.ALLY) {
-            lastTarget = target;
-
-            Juggling j = Dungeon.hero.buff(Juggling.class);
-            if (j != null && GameScene.isCellSelecterActive(j.shooter)) {
-                CharSprite sprite = lastTarget.sprite;
-                if (sprite.parent != null) {
-                    sprite.parent.addToFront(cross);
-                    cross.point(sprite.center(cross));
-                }
-            }
-        }
     }
 
     private static final String WEAPONS = "weapons";
@@ -226,18 +206,15 @@ public class Juggling extends Buff implements ActionIndicator.Action {
                         MissileWeapon wep = weapons.poll();
                         if (wep.STRReq() <= hero.STR()) {
                             int dst = wep.throwPos(hero, cell);
-                            wep.cast(hero, dst, false, 0, new Callback() {
-                                @Override
-                                public void call() {
-                                    if (hero.hasTalent(Talent.FANCY_PERFORMANCE)) {
-                                        Char ch = Actor.findChar(dst);
-                                        if (ch != null && ch.alignment == Char.Alignment.ENEMY ||
-                                                (ch instanceof Mimic && ch.alignment == Char.Alignment.NEUTRAL)) {
-                                            lastTarget = ch;
-                                            Dungeon.level.drop(
-                                                    new Gold(5 * hero.pointsInTalent(Talent.FANCY_PERFORMANCE)), dst)
-                                                    .sprite.drop();
-                                        }
+                            wep.cast(hero, dst, false, 0, () -> {
+                                if (hero.hasTalent(Talent.FANCY_PERFORMANCE)) {
+                                    Char ch = Actor.findChar(dst);
+                                    if (ch != null && ch.alignment == Char.Alignment.ENEMY ||
+                                            (ch instanceof Mimic && ch.alignment == Char.Alignment.NEUTRAL)) {
+                                        lastTarget = ch;
+                                        Dungeon.level.drop(
+                                                new Gold(5 * hero.pointsInTalent(Talent.FANCY_PERFORMANCE)), dst)
+                                                .sprite.drop();
                                     }
                                 }
                             });
@@ -250,12 +227,11 @@ public class Juggling extends Buff implements ActionIndicator.Action {
                         }
                     }
 
+                    removeCross();
                     hero.spend(TICK);
                     detach();
                 }
             }
-
-            cross.remove();
         }
 
         @Override
@@ -263,6 +239,14 @@ public class Juggling extends Buff implements ActionIndicator.Action {
             return Messages.get(SpiritBow.class, "prompt");
         }
     };
+
+    public static float accuracyFactor(Hero hero) {
+        if (hero.buff(Juggling.class) != null) {
+            return 0.5f + 0.2f*Dungeon.hero.pointsInTalent(Talent.FOCUS_MAINTAIN);
+        } else {
+            return 1;
+        }
+    }
 
     public static BowWeapon getBow() {
         BowWeapon bow;
@@ -284,14 +268,6 @@ public class Juggling extends Buff implements ActionIndicator.Action {
                 Buff.affect(Dungeon.hero, Juggling.class).juggle(arrow, false);
             }
             Item.updateQuickslot();
-        }
-    }
-
-    public static float accuracyFactor(Hero hero) {
-        if (hero.buff(Juggling.class) != null) {
-            return 0.5f + 0.2f*Dungeon.hero.pointsInTalent(Talent.FOCUS_MAINTAIN);
-        } else {
-            return 1;
         }
     }
 

@@ -5,7 +5,6 @@ import static com.shatteredpixel.shatteredpixeldungeon.ui.QuickSlotButton.lastTa
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
-import com.shatteredpixel.shatteredpixeldungeon.scenes.CellSelector;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.ui.ActionIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Icons;
@@ -80,6 +79,4 @@ public abstract class TargetingAction extends Buff implements ActionIndicator.Ac
             }
         }
     }
-
-    protected abstract CellSelector.Listener getListener();
 }
