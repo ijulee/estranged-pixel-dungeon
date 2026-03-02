@@ -117,7 +117,6 @@ public class DangerIndicator extends Tag {
 			Mob target = Dungeon.hero.visibleEnemy(++enemyIndex);
 
 			QuickSlotButton.target(target);
-			SwordAura.target(target);
 			if (Dungeon.hero.canAttack(target)) AttackIndicator.target(target);
 
 			if (Dungeon.hero.curAction == null && target.sprite != null) {

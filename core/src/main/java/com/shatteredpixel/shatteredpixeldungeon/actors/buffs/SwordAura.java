@@ -1,6 +1,7 @@
 package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 
 import static com.shatteredpixel.shatteredpixeldungeon.Dungeon.hero;
+import static com.shatteredpixel.shatteredpixeldungeon.ui.QuickSlotButton.lastTarget;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
@@ -24,11 +25,9 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.ui.ActionIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.ui.HeroIcon;
-import com.shatteredpixel.shatteredpixeldungeon.ui.Icons;
 import com.shatteredpixel.shatteredpixeldungeon.ui.QuickSlotButton;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.BitmapText;
-import com.watabou.noosa.Image;
 import com.watabou.noosa.Visual;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Bundle;
@@ -36,14 +35,11 @@ import com.watabou.utils.Random;
 
 import java.util.ArrayList;
 
-public class SwordAura extends Buff implements ActionIndicator.Action {
+public class SwordAura extends TargetingAction {
     {
         type = buffType.NEUTRAL;
         announced = false;
     }
-
-    private final static Image cross = Icons.TARGET.get();
-    private static Char lastTarget = null;
 
     private int energy = 0;
     private int recovered = 0;
@@ -149,20 +145,18 @@ public class SwordAura extends Buff implements ActionIndicator.Action {
     @Override
     public void doAction() {
         if (!GameScene.isCellSelecterActive(shooter)) {
-            if (canAutoAim(lastTarget)){
-                CharSprite sprite = lastTarget.sprite;
-                if (sprite != null && sprite.parent != null) {
-                    sprite.parent.addToFront(cross);
-                    cross.point(sprite.center(cross));
-                }
-            }
+            showCross();
 
             GameScene.selectCell(shooter);
         } else {
             if (canAutoAim(lastTarget)){
                 int cell = QuickSlotButton.autoAim(lastTarget, knockAura());
-                if (cell == -1) return;
-                shooter.onSelect(cell);
+                if (cell != -1) {
+                    GameScene.handleCell(cell);
+                } else {
+                    //couldn't auto-aim, just target the position and hope for the best.
+                    GameScene.handleCell(lastTarget.pos);
+                }
             }
         }
     }
@@ -172,21 +166,6 @@ public class SwordAura extends Buff implements ActionIndicator.Action {
                 lastTarget.isAlive() && lastTarget.isActive() &&
                 lastTarget.alignment != Char.Alignment.ALLY &&
                 Dungeon.hero.fieldOfView[lastTarget.pos];
-    }
-
-    public static void target( Char target ) {
-        if (target != null && target.alignment != Char.Alignment.ALLY) {
-            lastTarget = target;
-
-            SwordAura aura = Dungeon.hero.buff(SwordAura.class);
-            if (aura != null && GameScene.isCellSelecterActive(aura.shooter)) {
-                CharSprite sprite = lastTarget.sprite;
-                if (sprite.parent != null) {
-                    sprite.parent.addToFront(cross);
-                    cross.point(sprite.center(cross));
-                }
-            }
-        }
     }
 
     public Aura knockAura(){
@@ -288,14 +267,6 @@ public class SwordAura extends Buff implements ActionIndicator.Action {
         public void throwSound() {
             Sample.INSTANCE.play( Assets.Sounds.MISS );
         }
-
-        @Override
-        public void cast(final Hero user, final int dst) {
-            Char enemy = Actor.findChar( dst );
-            SwordAura.target(enemy);
-
-            super.cast(user, dst);
-        }
     }
 
     private final CellSelector.Listener shooter = new CellSelector.Listener() {
@@ -307,10 +278,8 @@ public class SwordAura extends Buff implements ActionIndicator.Action {
                 } else {
                     GLog.w(Messages.get(this, "cannot_hero"));
                 }
-            }
 
-            if (cross != null) {
-                cross.remove();
+                removeCross();
             }
         }
         @Override
