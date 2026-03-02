@@ -202,6 +202,11 @@ public class SwordAura extends Buff implements ActionIndicator.Action {
         }
 
         @Override
+        public int defaultQuantity() {
+            return 1;
+        }
+
+        @Override
         public float accuracyFactor(Char owner, Char target) {
             return Char.INFINITE_ACCURACY;
         }
