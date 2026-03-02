@@ -637,8 +637,8 @@ public abstract class Level implements Bundlable {
 			GLog.w(Messages.get(Stasis.StasisBuff.class, "left_behind"));
 		}
 
-		Tackle.SuperArmorTracker superArmorTracker = Dungeon.hero.buff(Tackle.SuperArmorTracker.class);
-		if (superArmorTracker != null) superArmorTracker.detach();
+		Tackle.PostTackleTracker postTackle = Dungeon.hero.buff(Tackle.PostTackleTracker.class);
+		if (postTackle != null) postTackle.detach();
 
 		//spend the hero's partial turns,  so the hero cannot take partial turns between floors
 		Dungeon.hero.spendToWhole();

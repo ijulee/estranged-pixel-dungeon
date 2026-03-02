@@ -34,6 +34,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Awakening;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicImmune;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Momentum;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Tackle;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
@@ -77,9 +78,11 @@ import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Thorns;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Viscosity;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfArcana;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.ParchmentScrap;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.ShardOfOblivion;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Shortsword;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Catalog;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
@@ -720,7 +723,24 @@ public class Armor extends EquipableItem {
 		
 		return damage;
 	}
-	
+
+	public void progressID() {
+        float uses = Math.min( availableUsesToID, Talent.itemIDSpeedFactor(Dungeon.hero, this) );
+        availableUsesToID -= uses;
+        usesLeftToID -= uses;
+        if (usesLeftToID <= 0) {
+            if (ShardOfOblivion.passiveIDDisabled()){
+                if (usesLeftToID > -1){
+                    GLog.p(Messages.get(ShardOfOblivion.class, "identify_ready"), name());
+                }
+                setIDReady();
+            } else {
+                identify();
+                GLog.p(Messages.get(Armor.class, "identify"));
+                Badges.validateItemLevelAquired(this);
+            }
+        }
+    }
 	@Override
 	public void onHeroGainExp(float levelPercent, Hero hero) {
 		levelPercent *= Talent.itemIDSpeedFactor(hero, this);
@@ -1066,6 +1086,12 @@ public class Armor extends EquipableItem {
 		public static float genericProcChanceMultiplier( Char defender ){
 			float multi = RingOfArcana.enchantPowerMultiplier(defender);
 
+			if ( defender.buff(Tackle.TackleTracker.class) != null &&
+				 Dungeon.hero.hasTalent(Talent.MYSTICAL_TACKLE) ) {
+				// 67%/100%/150% power
+				multi *= 4/9f * Math.pow(1.5f, Dungeon.hero.pointsInTalent(Talent.MYSTICAL_TACKLE));
+			}
+
 			if (Dungeon.hero.alignment == defender.alignment
 					&& Dungeon.hero.buff(AuraOfProtection.AuraBuff.class) != null
 					&& (Dungeon.level.distance(defender.pos, Dungeon.hero.pos) <= 2 || defender.buff(LifeLinkSpell.LifeLinkSpellBuff.class) != null)){
@@ -1159,6 +1185,18 @@ public class Armor extends EquipableItem {
 				return (Glyph) Reflection.newInstance(Random.element(glyphs));
 			}
 		}
-		
+
+		public int procTackle(Armor armor, Char attacker, Char defender, int damage) {
+			//proc glyph effect like an enchantment
+			proc(armor, defender, attacker, damage);
+			return damage;
+		}
+
+		public int procEnchant(Armor armor, Weapon.Enchantment ench, Char attacker, Char defender, int damage) {
+			//proc given enchantment at same level as armor
+			Weapon wep = new Shortsword();
+			wep.level(armor.buffedLvl());
+			return ench.proc(wep, attacker, defender, damage);
+		}
 	}
 }

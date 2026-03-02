@@ -21,47 +21,56 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 
+import static com.shatteredpixel.shatteredpixeldungeon.Dungeon.hero;
+import static com.shatteredpixel.shatteredpixeldungeon.ui.QuickSlotButton.lastTarget;
+
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
-import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
-import com.shatteredpixel.shatteredpixeldungeon.effects.particles.BlastParticle;
-import com.shatteredpixel.shatteredpixeldungeon.effects.particles.SmokeParticle;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.DwarfKing;
 import com.shatteredpixel.shatteredpixeldungeon.items.BrokenSeal;
-import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfBlastWave;
-import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Swiftness;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfSharpshooting;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.scenes.CellSelector;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.ui.ActionIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.ui.AttackIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.ui.HeroIcon;
+import com.shatteredpixel.shatteredpixeldungeon.ui.QuickSlotButton;
+import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Bundle;
-import com.watabou.utils.Callback;
 import com.watabou.utils.PathFinder;
-import com.watabou.utils.Random;
 
 import java.util.ArrayList;
 
-public class Tackle extends FlavourBuff implements ActionIndicator.Action {
-
-	{ actPriority = HERO_PRIO+1; }
-
-	public int object = 0;
-
-	private static final String OBJECT    = "object";
-
-	public static final float DURATION = 1f;
-
+public class Tackle extends TargetingAction {
 	{
+		actPriority = HERO_PRIO+1;
 		type = buffType.POSITIVE;
 	}
 
-	public void set(int object){
+	public int object = 0;
+
+	public static final float DURATION = 3f;
+
+	private static final String OBJECT    = "object";
+
+
+	public void set(int object, float time) {
 		this.object = object;
+		spend(time - cooldown() - 1);
+	}
+
+	@Override
+	public boolean act() {
+		detach();
+		return true;
 	}
 
 	@Override
@@ -74,28 +83,6 @@ public class Tackle extends FlavourBuff implements ActionIndicator.Action {
 	public void detach() {
 		super.detach();
 		ActionIndicator.clearAction(this);
-	}
-
-	@Override
-	public boolean act() {
-		Char ch = (Char) Actor.findById(object);
-		if (ch == null) {
-			detach();
-			spend(TICK);
-			return true;
-		}
-		if (ch.alignment != Char.Alignment.ENEMY) {
-			detach();
-			spend(TICK);
-			return true;
-		}
-		if (!Dungeon.level.adjacent(ch.pos, Dungeon.hero.pos)) {
-			detach();
-			spend(TICK);
-			return true;
-		}
-		spend(TICK);
-		return true;
 	}
 
 	@Override
@@ -127,125 +114,167 @@ public class Tackle extends FlavourBuff implements ActionIndicator.Action {
 
 	@Override
 	public void doAction() {
-		Dungeon.hero.busy();
 		Char ch = (Char) Actor.findById(object);
-		Hero hero = Dungeon.hero;
-		if (ch == null || hero == null || !Dungeon.level.adjacent(ch.pos, hero.pos)) {
-			hero.next();
-			detach();
-			return;
-		}
+		if (hero.pointsInTalent(Talent.IMPROVED_TACKLE) < 3) {
 
-		if (hero.hasTalent(Talent.SUPER_ARMOR)) {
-			Buff.affect(hero, SuperArmorTracker.class, Actor.TICK);
-		}
-		if (hero.hasTalent(Talent.MYSTICAL_TACKLE)) {
-			Buff.affect(hero, MysticalTackleTracker.class, Actor.TICK);
-		}
-
-		target.sprite.attack(ch.pos, new Callback() {
-			@Override
-			public void call() {
-				AttackIndicator.target(ch);
-				float damageMulti = 0.4f + 0.2f*hero.pointsInTalent(Talent.POWERFUL_TACKLE);
-				int heroDr = Math.max(0, hero.drRoll()); // In case Grindstone results in negative dr roll
-				int damage = Math.round(heroDr * damageMulti); //deals 40%+(20*Talent.POWERFUL_TACKLE level)% of hero's dr
-				Buff.affect(hero, TackleTracker.class);
-
-				if (hero.attack(ch, 0f, damage, Char.INFINITE_ACCURACY)){
-					Sample.INSTANCE.play(Assets.Sounds.HIT_STRONG);
-				}
-
-				BrokenSeal.WarriorShield shieldBuff = hero.buff(BrokenSeal.WarriorShield.class);
-				if (hero.hasTalent(Talent.IMPROVED_TACKLE) && shieldBuff != null) {
-					Buff.affect(hero, BrokenSeal.WarriorShield.class).reduceCooldown(0.05f);
-				}
-
-				//pushes the enemy back
-				int pushedPos = -1;
-				Ballistica trajectory = new Ballistica(target.pos, ch.pos, Ballistica.STOP_TARGET);
-				trajectory = new Ballistica(trajectory.collisionPos, trajectory.path.get(trajectory.path.size() - 1), Ballistica.PROJECTILE);
-				int dist = 1;
-				if (hero.pointsInTalent(Talent.IMPROVED_TACKLE) > 1) dist++;
-
-				if (!ch.isAlive() || (!ch.flying && hero.pointsInTalent(Talent.IMPROVED_TACKLE) < 3)) {
-					while (dist > trajectory.dist ||
-							(dist > 0 && Dungeon.level.pit[trajectory.path.get(dist)])) {
-						dist--;
-					}
-				}
-				WandOfBlastWave.throwChar(ch, trajectory, dist, true, true, hero.getClass());
-
-				try {
-					pushedPos = trajectory.path.get(dist); //checks the position of enemy after pushing
-				} catch (ArrayIndexOutOfBoundsException e) {
-					//Idk why ArrayIndexOutOfBoundsException happens here, so I just added try-catch here
-					//if the exception occurs, pushedPos will become path's last position
-					pushedPos = trajectory.path.get(trajectory.path.size()-1);
-				}
-				if (Actor.findChar(pushedPos) != null) {
-					int findPos = Math.max(0, dist-1);
-					pushedPos = trajectory.path.get(findPos);
-				}
-
-				if (ch.isAlive() && hero.hasTalent(Talent.INCAPACITATION)) {
-					switch (hero.pointsInTalent(Talent.INCAPACITATION)) {
-						case 3:
-							Buff.affect(ch, Vulnerable.class, 2f);
-						case 2:
-							Buff.affect(ch, Weakness.class, 2f);
-						case 1:
-							Buff.affect(ch, Daze.class, 2f);
-						case 0: default:
-							break;
-					}
-				};
-				hero.spendAndNext(Actor.TICK);
-				hero.buff(TackleTracker.class).detach();
-
-				if (!ch.isAlive() && hero.hasTalent(Talent.DELAYED_GRENADE)) {
-					if (pushedPos != -1) {
-						int minDamage = Math.round(2.5f+2.5f*hero.pointsInTalent(Talent.DELAYED_GRENADE));
-						int maxDamage = 10*(1+hero.pointsInTalent(Talent.DELAYED_GRENADE));
-
-						ArrayList<Char> affected = new ArrayList<>();
-
-						for (int n : PathFinder.NEIGHBOURS9) {
-							int c = pushedPos + n;
-							if (c >= 0 && c < Dungeon.level.length()) {
-								if (Dungeon.level.heroFOV[c]) {
-									CellEmitter.get(c).burst(SmokeParticle.FACTORY, 4);
-									CellEmitter.center(pushedPos).burst(BlastParticle.FACTORY, 4);
-								}
-								if (Dungeon.level.flamable[c]) {
-									Dungeon.level.destroy(c);
-									GameScene.updateMap(c);
-								}
-								Char enemy = Actor.findChar(c);
-								if (enemy != null) {
-									if (enemy != hero && enemy.alignment != Char.Alignment.ALLY) {
-										affected.add(enemy);
-									}
-								}
-							}
-						}
-
-						for (Char enemy : affected) {
-							enemy.damage(Random.NormalIntRange(minDamage, maxDamage), hero);
-						}
-					}
-				}
+            if ( ch == null || !ch.isAlive() ) {
+                detach();
+            } else if ( target.isCharmedBy(ch) ||
+						!Dungeon.level.adjacent(ch.pos, target.pos) ) {
+                GLog.w(Messages.get(Combo.class, "bad_target"));
+            } else {
+				doTackle(ch);
 			}
-		});
+        } else if (!GameScene.isCellSelecterActive(listener)) {
+			if (ch != null) {
+				QuickSlotButton.target(ch);
+			}
 
-		detach();
+			showCross();
+			GameScene.selectCell(listener);
+        } else {
+			if (canAutoAim(lastTarget)) {
+				//target must be adjacent
+				listener.onSelect(lastTarget.pos);
+			} else if (ch != null) {
+				listener.onSelect(ch.pos);
+			}
+		}
+    }
+
+	public void doTackle(final Char ch) {
+		hero.busy();
+
+		target.sprite.attack(ch.pos, () -> {
+
+			float damageMulti = 0.6f + 0.2f* hero.pointsInTalent(Talent.POWERFUL_TACKLE);
+			int damage = Math.round(hero.drRoll() * damageMulti);
+
+			AttackIndicator.target(ch);
+			lastTarget = ch;
+			TackleTracker tracker = Buff.affect(hero, TackleTracker.class);
+
+            if (hero.attack(ch, 0f, damage, Char.INFINITE_ACCURACY)) {
+                Sample.INSTANCE.play(Assets.Sounds.HIT_STRONG);
+
+                if (hero.hasTalent(Talent.POWERFUL_TACKLE)) {
+					int recoil = Math.round( (damage - hero.drRoll()) *
+							(0.2f*hero.pointsInTalent(Talent.POWERFUL_TACKLE)) );
+
+                    hero.damage(
+							Math.min(recoil, hero.HP + hero.shielding() - 1),
+							Tackle.this);
+                }
+
+                BrokenSeal.WarriorShield shieldBuff = hero.buff(BrokenSeal.WarriorShield.class);
+                if (shieldBuff != null && hero.hasTalent(Talent.IMPROVED_TACKLE)) {
+                    Buff.affect(hero, BrokenSeal.WarriorShield.class).reduceCooldown(0.1f); // 15-turns
+                }
+
+                int dist = (hero.pointsInTalent(Talent.IMPROVED_TACKLE) >= 2) ? 2 : 1;
+                RingOfSharpshooting.pushEnemy(hero, ch, dist, true, false, false);
+
+                if (ch.isAlive()) {
+                    switch (hero.pointsInTalent(Talent.INCAPACITATION)) {
+                        case 3:
+                            Buff.affect(ch, Paralysis.class, 2f);
+                        case 2:
+                            Buff.affect(ch, Cripple.class, 2f);
+                        case 1:
+                            Buff.affect(ch, Vulnerable.class, 2f);
+                        case 0:
+                        default:
+                            break;
+                    }
+                } else { //!ch.isAlive()
+                    if (hero.hasTalent(Talent.DELAYED_GRENADE)) {
+                        int minDamage = 4 + 3 * hero.pointsInTalent(Talent.DELAYED_GRENADE);
+                        int maxDamage = 10 + 10 * hero.pointsInTalent(Talent.DELAYED_GRENADE);
+
+                        ArrayList<Char> affected = new ArrayList<>();
+
+                        for (int i : PathFinder.NEIGHBOURS8) {
+                            int c = ch.pos + i;
+                            if (c >= 0 && c < Dungeon.level.length()) {
+                                Char enemy = Actor.findChar(c);
+                                if (enemy != null && enemy != hero &&
+                                        enemy.alignment != Char.Alignment.ALLY) {
+                                    affected.add(enemy);
+                                }
+                            }
+                        }
+
+                        for (Char enemy : affected) {
+                            int dmg = Hero.heroDamageIntRange(minDamage, maxDamage);
+                            if (enemy instanceof DwarfKing) {
+								//change damage type for DK so that tackle AOE doesn't count for DK's challenge badge
+                                enemy.damage(dmg, Tackle.this);
+                            } else {
+                                enemy.damage(dmg, hero);
+                            }
+                            enemy.sprite.bloodBurstA(ch.sprite.center(), dmg);
+                            enemy.sprite.flash();
+                        }
+
+                        Sample.INSTANCE.play(Assets.Sounds.BLAST);
+                    }
+                }
+
+                Buff.affect(hero, PostTackleTracker.class, TICK);
+            }
+
+			Invisibility.dispel();
+
+            tracker.detach();
+			hero.spendAndNext(tackleDelay());
+			Tackle.this.detach();
+        });
 	}
 
-	public static class TackleTracker extends Buff{};
-	public static class SuperArmorTracker extends FlavourBuff{
+	private static boolean canAutoAim(Char lastTarget) {
+		return lastTarget != null &&
+				lastTarget.isAlive() && lastTarget.isActive() &&
+				lastTarget.alignment != Char.Alignment.ALLY &&
+				hero.fieldOfView[lastTarget.pos] &&
+				Dungeon.level.adjacent(lastTarget.pos, hero.pos);
+	}
+
+	public float tackleDelay() {
+		Armor armor = hero.belongings.armor();
+		if (armor.hasGlyph(Swiftness.class, hero)) {
+			int level = Math.max(0, armor.buffedLvl());
+			float speed = (1.25f + 0.06f * level) * Armor.Glyph.genericProcChanceMultiplier(hero);
+			return 1f / speed;
+		} else {
+			return 1f;
+		}
+	}
+
+	public static class TackleTracker extends Buff{}
+	public static class PostTackleTracker extends FlavourBuff{
 		{ actPriority = HERO_PRIO+1; }
-	};
-	public static class MysticalTackleTracker extends FlavourBuff{
-		{ actPriority = HERO_PRIO+1; }
+	}
+
+	protected CellSelector.Listener listener = new CellSelector.Listener() {
+		@Override
+		public void onSelect(Integer cell) {
+			if (cell == null) return;
+			final Char enemy = Actor.findChar( cell );
+			if ( enemy == null || enemy == target ||
+				 !Dungeon.level.adjacent(enemy.pos, target.pos) ||
+				 target.isCharmedBy( enemy ) ) {
+				GLog.w(Messages.get(Combo.class, "bad_target"));
+
+			} else {
+				removeCross();
+				doTackle( enemy );
+			}
+		}
+
+		@Override
+		public String prompt() {
+			return Messages.get(Combo.class, "prompt");
+		}
+
 	};
 }

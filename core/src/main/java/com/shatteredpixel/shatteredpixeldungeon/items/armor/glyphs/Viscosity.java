@@ -66,8 +66,10 @@ public class Viscosity extends Glyph {
 		private int level = 0;
 
 		public int deferDamage(int dmg){
-			//account for icon stomach (just skip the glyph)
-			if (target.buff(Talent.WarriorFoodImmunity.class) != null || target.buff(Tackle.SuperArmorTracker.class) != null){
+			//account for iron stomach and brace for impact (just skip the glyph)
+			if ( target.buff(Talent.WarriorFoodImmunity.class) != null ||
+				 ( target.buff(Tackle.PostTackleTracker.class) != null &&
+				   Dungeon.hero.hasTalent(Talent.SUPER_ARMOR) ) ) {
 				return dmg;
 			}
 

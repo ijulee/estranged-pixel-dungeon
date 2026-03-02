@@ -2133,8 +2133,8 @@ public class Hero extends Char {
 
 						@Override
 						protected boolean act() {
-							if (enemy.isAlive()) {
-								Buff.prolong(Hero.this, Tackle.class, 1).set(enemy.id());
+							if (enemy.isAlive() || Hero.this.pointsInTalent(Talent.MYSTICAL_TACKLE) >= 3) {
+								Buff.append(Hero.this, Tackle.class).set(enemy.id(), Tackle.DURATION);
 							}
 							Actor.remove(this);
 							return true;
@@ -2494,16 +2494,16 @@ public class Hero extends Char {
 			dmg = Math.max(dmg, 0);
 		}
 
-		if (buff(Tackle.SuperArmorTracker.class) != null) {
+		if (buff(Tackle.PostTackleTracker.class) != null) {
 			switch (pointsInTalent(Talent.SUPER_ARMOR)) {
 				case 1:
-					dmg = Math.round(dmg*0.67f);
+					dmg = Math.round(dmg*0.60f);
 					break;
 				case 2:
-					dmg = Math.round(dmg*0.33f);
+					dmg = Math.round(dmg*0.40f);
 					break;
 				case 3:
-					dmg = Math.round(dmg*0.00f);
+					dmg = Math.round(dmg*0.20f);
 					break;
 				case 0: default:
 					break;

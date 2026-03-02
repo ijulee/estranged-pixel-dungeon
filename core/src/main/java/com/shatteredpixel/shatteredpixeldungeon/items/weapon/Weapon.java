@@ -46,6 +46,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.samurai.Sh
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.MirrorImage;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.KindOfWeapon;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfArcana;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfForce;
@@ -147,6 +148,29 @@ abstract public class Weapon extends KindOfWeapon {
 
 		boolean becameAlly = false;
 		boolean wasAlly = defender.alignment == Char.Alignment.ALLY;
+
+		if (attacker.buff(Tackle.TackleTracker.class) != null) {
+			Armor armor = hero.belongings.armor();
+
+			if (attacker.buff(MagicImmune.class) == null && hero.hasTalent(Talent.MYSTICAL_TACKLE)) {
+				if (armor.glyph != null) {
+					damage = armor.glyph.procTackle(armor, attacker, defender, damage);
+				}
+
+				if ( armor.sealGlyph != null &&
+					 (armor.glyph == null || armor.glyph.getClass() != armor.sealGlyph.getClass()) ) {
+					damage = armor.sealGlyph.procTackle(armor, attacker, defender, damage);
+				}
+			}
+
+			// armor ID progress on Tackle instead of weapon
+			if (armor != null && !armor.levelKnown) {
+				armor.progressID();
+			}
+
+			return damage;
+		}
+
 		if (attacker.buff(MagicImmune.class) == null) {
 			Enchantment trinityEnchant = null;
 			//only when it's the hero or a char that uses the hero's weapon
@@ -653,10 +677,6 @@ abstract public class Weapon extends KindOfWeapon {
 			if (attacker.buff(Talent.StrikingWaveTracker.class) != null
 					&& ((Hero)attacker).pointsInTalent(Talent.STRIKING_WAVE) == 4){
 				multi += 0.2f;
-			}
-
-			if (attacker instanceof Hero && attacker.buff(Tackle.MysticalTackleTracker.class) != null) {
-				multi += 0.5f * Dungeon.hero.pointsInTalent(Talent.MYSTICAL_TACKLE);
 			}
 
 			if (hero.hasTalent(Talent.HIGH_POWER) && hero.heroClass != HeroClass.MEDIC) {
