@@ -67,7 +67,7 @@ public class Suppression extends Mob {
 
 	@Override
 	public int drRoll() {
-		return Random.NormalIntRange(5, 30);
+		return super.drRoll() + Random.NormalIntRange(5, 30);
 	}
 
 	@Override

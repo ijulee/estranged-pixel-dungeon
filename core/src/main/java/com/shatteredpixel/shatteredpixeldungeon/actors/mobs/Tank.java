@@ -98,7 +98,7 @@ public class Tank extends Mob {
 
 	@Override
 	public int drRoll() {
-		return Random.NormalIntRange(10, 50);
+		return super.drRoll() + Random.NormalIntRange(10, 50);
 	}
 
 	private void zap() {

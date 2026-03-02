@@ -144,11 +144,11 @@ public class Rebel extends Mob {
 	
 	@Override
 	public int drRoll() {
-		int dr;
+		int dr = super.drRoll();
 		if (Dungeon.isChallenged(Challenges.STRONGER_BOSSES)) {
-			dr = Random.NormalIntRange(10, 30);
+			dr += Random.NormalIntRange(10, 30);
 		} else {
-			dr = Random.NormalIntRange(5, 30);
+			dr += Random.NormalIntRange(5, 30);
 		}
 		return dr;
 	}

@@ -96,7 +96,7 @@ public class Medic extends Mob {
 
 	@Override
 	public int drRoll() {
-		return Random.NormalIntRange(0, 15);
+		return super.drRoll() + Random.NormalIntRange(0, 15);
 	}
 
 }

@@ -106,7 +106,7 @@ public class SWAT extends Mob {
 	
 	@Override
 	public int drRoll() {
-		return Random.NormalIntRange(5, 20);
+		return super.drRoll() + Random.NormalIntRange(5, 20);
 	}
 
 	@Override

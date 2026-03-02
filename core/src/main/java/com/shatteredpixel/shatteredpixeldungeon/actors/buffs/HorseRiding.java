@@ -413,7 +413,7 @@ public class HorseRiding extends Buff implements ActionIndicator.Action, Hero.Do
 
         @Override
         public int drRoll() {
-            return HorseRiding.drRoll();
+            return super.drRoll() + HorseRiding.drRoll();
         }
     }
 
