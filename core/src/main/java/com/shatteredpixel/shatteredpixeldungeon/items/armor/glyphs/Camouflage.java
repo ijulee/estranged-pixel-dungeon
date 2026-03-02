@@ -27,6 +27,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Blooming;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.watabou.noosa.audio.Sample;
 
@@ -38,6 +39,11 @@ public class Camouflage extends Armor.Glyph {
 	public int proc(Armor armor, Char attacker, Char defender, int damage) {
 		//no proc effect, triggers in HighGrass.trample
 		return damage;
+	}
+
+	@Override
+	public int procTackle(Armor armor, Char attacker, Char defender, int damage) {
+		return procEnchant(armor, new Blooming(), attacker, defender, damage);
 	}
 
 	public static void activate(Char ch, int level){

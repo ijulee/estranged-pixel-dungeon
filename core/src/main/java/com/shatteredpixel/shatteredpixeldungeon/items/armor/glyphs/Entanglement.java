@@ -24,6 +24,9 @@ package com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Roots;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.duelist.Feint;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.EarthParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
@@ -54,6 +57,20 @@ public class Entanglement extends Glyph {
 			
 		}
 
+		return damage;
+	}
+
+	@Override
+	public int procTackle(Armor armor, Char attacker, Char defender, int damage) {
+		int level = Math.max( 0, armor.buffedLvl() );
+
+		float procChance = (level+1f)/(level+5f) * procChanceMultiplier(attacker);
+
+		if (procChance > Random.Float() && defender.alignment == Char.Alignment.ENEMY) {
+			float powerMulti = Math.max(1f, procChance);
+
+			Buff.affect(defender, Roots.class, 3f*powerMulti);
+		}
 		return damage;
 	}
 

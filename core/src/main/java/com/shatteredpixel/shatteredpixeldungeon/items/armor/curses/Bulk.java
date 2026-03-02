@@ -25,6 +25,8 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ShadowParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Chilling;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Stunning;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 
@@ -36,6 +38,11 @@ public class Bulk extends Armor.Glyph {
 	public int proc(Armor armor, Char attacker, Char defender, int damage) {
 		//no proc effect, triggers in Char.speed()
 		return damage;
+	}
+
+	@Override
+	public int procTackle(Armor armor, Char attacker, Char defender, int damage) {
+		return procEnchant(armor, new Stunning(), attacker, defender, damage);
 	}
 
 	//more of a reduction really

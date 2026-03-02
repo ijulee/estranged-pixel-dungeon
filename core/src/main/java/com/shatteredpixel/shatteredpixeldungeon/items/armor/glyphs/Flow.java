@@ -25,6 +25,8 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Blooming;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Chilling;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.watabou.utils.Random;
 
@@ -38,7 +40,12 @@ public class Flow extends Armor.Glyph {
 		return damage;
 	}
 
-	public static float speedBoost( Char owner, int level ){
+	@Override
+	public int procTackle(Armor armor, Char attacker, Char defender, int damage) {
+		return procEnchant(armor, new Chilling(), attacker, defender, damage);
+	}
+
+	public static float speedBoost(Char owner, int level ){
 		if (level == -1 || !Dungeon.level.water[owner.pos]){
 			return 1;
 		} else {

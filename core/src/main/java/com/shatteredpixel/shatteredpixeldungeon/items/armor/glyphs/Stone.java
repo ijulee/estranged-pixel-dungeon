@@ -24,16 +24,21 @@ package com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AscensionChallenge;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Barkskin;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Bless;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ChampionEnemy;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Daze;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Hex;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.duelist.Feint;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.FerretTuft;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.watabou.utils.GameMath;
+import com.watabou.utils.Random;
 
 public class Stone extends Armor.Glyph {
 
@@ -97,7 +102,21 @@ public class Stone extends Armor.Glyph {
 		
 		return damage;
 	}
-	
+
+	@Override
+	public int procTackle(Armor armor, Char attacker, Char defender, int damage) {
+		int level = Math.max( 0, armor.buffedLvl() );
+
+		float procChance = (level+1f)/(level+5f) * procChanceMultiplier(attacker);
+
+		if (procChance > Random.Float() && defender.alignment == Char.Alignment.ENEMY) {
+			float powerMulti = Math.max(1f, procChance);
+
+			Barkskin.conditionallyAppend(attacker, Math.round((level+1)*powerMulti), 1);
+		}
+		return damage;
+	}
+
 	private static boolean testing = false;
 	
 	public static boolean testingEvasion(){

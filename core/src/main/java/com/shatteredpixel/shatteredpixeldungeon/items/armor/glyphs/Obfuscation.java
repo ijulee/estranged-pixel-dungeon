@@ -23,6 +23,8 @@ package com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs;
 
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Chilling;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Eldritch;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 
 public class Obfuscation extends Armor.Glyph {
@@ -33,6 +35,11 @@ public class Obfuscation extends Armor.Glyph {
 	public int proc(Armor armor, Char attacker, Char defender, int damage) {
 		//no proc effect, triggered in Char.stealth()
 		return damage;
+	}
+
+	@Override
+	public int procTackle(Armor armor, Char attacker, Char defender, int damage) {
+		return procEnchant(armor, new Eldritch(), attacker, defender, damage);
 	}
 
 	public static float stealthBoost( Char owner, int level ){

@@ -60,7 +60,14 @@ public class Overgrowth extends Armor.Glyph {
 		
 		return damage;
 	}
-	
+
+	@Override
+	public int procTackle(Armor armor, Char attacker, Char defender, int damage) {
+		//reversed to apply plant effect to attack target
+		proc(armor, attacker, defender, damage);
+		return damage;
+	}
+
 	@Override
 	public ItemSprite.Glowing glowing() {
 		return BLACK;

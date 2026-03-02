@@ -22,8 +22,12 @@
 package com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs;
 
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.duelist.Feint;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
+import com.watabou.utils.Random;
 
 public class Afterimage extends Armor.Glyph {
 
@@ -32,6 +36,24 @@ public class Afterimage extends Armor.Glyph {
 	@Override
 	public int proc(Armor armor, Char attacker, Char defender, int damage) {
 		//no proc effect, see armor.evasionFactor for effect and armor.defenseFactor
+		return damage;
+	}
+
+	@Override
+	public int procTackle(Armor armor, Char attacker, Char defender, int damage) {
+		int level = Math.max( 0, armor.buffedLvl() );
+
+		float procChance = (level+1f)/(level+5f) * procChanceMultiplier(attacker);
+
+		if (procChance > Random.Float() && defender.alignment == Char.Alignment.ENEMY) {
+			float powerMulti = Math.max(1f, procChance);
+
+			if (defender instanceof Mob) {
+				((Mob) defender).clearEnemy();
+			}
+			Buff.affect(defender, Feint.AfterImage.FeintConfusion.class, powerMulti);
+			if (defender.sprite != null) defender.sprite.showLost();
+		}
 		return damage;
 	}
 

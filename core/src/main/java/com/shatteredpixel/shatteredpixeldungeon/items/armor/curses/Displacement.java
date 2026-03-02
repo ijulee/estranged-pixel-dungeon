@@ -24,6 +24,8 @@ package com.shatteredpixel.shatteredpixeldungeon.items.armor.curses;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfTeleportation;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Displacing;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Chilling;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.watabou.utils.Random;
 
@@ -41,6 +43,16 @@ public class Displacement extends Armor.Glyph {
 		}
 
 		return damage;
+	}
+
+	@Override
+	public int procTackle(Armor armor, Char attacker, Char defender, int damage) {
+		if (Random.Int(2) == 0) {
+            return procEnchant(armor, new Displacing(), attacker, defender, damage);
+        } else {
+            proc(armor, defender, attacker, damage);
+			return damage;
+		}
 	}
 
 	@Override
