@@ -62,8 +62,8 @@ public class Rat extends Mob {
 	}
 	
 	@Override
-	public int drRoll() {
-		return super.drRoll() + Random.NormalIntRange(0, 1);
+	public int posDRRoll() {
+		return super.posDRRoll() + Random.NormalIntRange(0, 1);
 	}
 
 	private static final String RAT_ALLY = "rat_ally";

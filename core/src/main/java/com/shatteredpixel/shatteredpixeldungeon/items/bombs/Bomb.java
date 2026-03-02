@@ -199,7 +199,7 @@ public class Bomb extends Item {
 				}
 
 				int dmg = Random.NormalIntRange(minDamage, maxDamage);
-				dmg -= Math.max(0, ch.drRoll()); // In case Grindstone results in negative dr roll
+				dmg -= ch.drRoll();
 
 				if (dmg > 0) {
 					ch.damage(dmg, this);

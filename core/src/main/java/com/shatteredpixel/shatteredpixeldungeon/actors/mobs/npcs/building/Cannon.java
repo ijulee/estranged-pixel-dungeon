@@ -44,8 +44,8 @@ public class Cannon extends Building {
     }
 
     @Override
-    public int drRoll() {
-        return super.drRoll() + Random.NormalIntRange(10, 30);
+    public int posDRRoll() {
+        return super.posDRRoll() + Random.NormalIntRange(10, 30);
     }
 
     @Override
@@ -129,7 +129,7 @@ public class Cannon extends Building {
                 dmg = Math.round(dmg*0.67f);
             }
 
-            dmg -= Math.max(0, ch.drRoll()); // In case Grindstone results in negative dr roll
+            dmg -= ch.drRoll();
 
             if (dmg > 0) {
                 ch.damage(dmg, this);

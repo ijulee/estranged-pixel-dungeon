@@ -710,7 +710,7 @@ public class MagicalCombo extends Buff implements ActionIndicator.Action {
 						Char ch = Actor.findChar(cells);
 						if (ch != null && ch.alignment != hero.alignment){
 							int damage = Random.NormalIntRange(10, 20);
-							damage -= Math.max(0, ch.drRoll()); // In case Grindstone results in negative dr roll
+							damage -= ch.drRoll();
 							ch.damage(damage, hero);
 							affectedChar++;
 						}

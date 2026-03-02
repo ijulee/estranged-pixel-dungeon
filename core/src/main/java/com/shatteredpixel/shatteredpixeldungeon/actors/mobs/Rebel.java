@@ -22,10 +22,8 @@
 package com.shatteredpixel.shatteredpixeldungeon.actors.mobs;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
-import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Challenges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
-import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Barrier;
@@ -143,8 +141,8 @@ public class Rebel extends Mob {
 	}
 	
 	@Override
-	public int drRoll() {
-		int dr = super.drRoll();
+	public int posDRRoll() {
+		int dr = super.posDRRoll();
 		if (Dungeon.isChallenged(Challenges.STRONGER_BOSSES)) {
 			dr += Random.NormalIntRange(10, 30);
 		} else {

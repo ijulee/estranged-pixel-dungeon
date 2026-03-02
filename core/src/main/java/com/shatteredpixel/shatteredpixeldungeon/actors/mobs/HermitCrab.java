@@ -47,8 +47,8 @@ public class HermitCrab extends Crab {
 	}
 
 	@Override
-	public int drRoll() {
-		return super.drRoll() + 2; //2-6 DR total, up from 0-4
+	public int posDRRoll() {
+		return super.posDRRoll() + 2; //2-6 DR total, up from 0-4
 	}
 
 }

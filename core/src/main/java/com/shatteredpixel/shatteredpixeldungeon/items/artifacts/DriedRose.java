@@ -850,8 +850,8 @@ public class DriedRose extends Artifact {
 		}
 		
 		@Override
-		public int drRoll() {
-			int dr = super.drRoll();
+		public int posDRRoll() {
+			int dr = super.posDRRoll();
 			if (armor() != null){
 				dr += Random.NormalIntRange( armor().DRMin(), armor().DRMax());
 			}

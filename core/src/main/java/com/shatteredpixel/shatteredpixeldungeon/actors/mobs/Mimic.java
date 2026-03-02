@@ -236,8 +236,8 @@ public class Mimic extends Mob {
 	}
 
 	@Override
-	public int drRoll() {
-		return super.drRoll() + Random.NormalIntRange(0, 1 + level/2);
+	public int posDRRoll() {
+		return super.posDRRoll() + Random.NormalIntRange(0, 1 + level/2);
 	}
 
 	@Override

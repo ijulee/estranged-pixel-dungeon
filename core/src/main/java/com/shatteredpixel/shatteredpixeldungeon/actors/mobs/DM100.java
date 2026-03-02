@@ -68,8 +68,8 @@ public class DM100 extends Mob implements Callback {
 	}
 	
 	@Override
-	public int drRoll() {
-		return super.drRoll() + Random.NormalIntRange(0, 4);
+	public int posDRRoll() {
+		return super.posDRRoll() + Random.NormalIntRange(0, 4);
 	}
 
 	@Override

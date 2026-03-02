@@ -107,8 +107,8 @@ public abstract class Elemental extends Mob {
 	}
 	
 	@Override
-	public int drRoll() {
-		return super.drRoll() + Random.NormalIntRange(0, 5);
+	public int posDRRoll() {
+		return super.posDRRoll() + Random.NormalIntRange(0, 5);
 	}
 	
 	protected int rangedCooldown = Random.NormalIntRange( 3, 5 );

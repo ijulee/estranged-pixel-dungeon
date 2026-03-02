@@ -890,17 +890,19 @@ public abstract class Char extends Actor {
 		return Messages.get(this, "def_verb");
 	}
 	
-	public int drRoll() {
+	public int posDRRoll() {
 		int dr = 0;
 
 		dr += Random.NormalIntRange( 0 , Barkskin.currentLevel(this) );
 
-		/*FIXME: Grindstone applying to ALL characters makes it hard to check for negative defense.
-		*   This function is overridden many times, and used in many places. The current solution
-		*  	is to do a check for negative def whenever this function is used.  */
-		dr -= GrindStone.drRoll();
-
 		return dr;
+	}
+
+	//TODO: any new subclasses from SPD should rename drRoll() to posDRRoll()
+	public int drRoll() {
+		//so that Grindstone is accounted for properly without negative blocking
+		int dr = posDRRoll() - GrindStone.drRoll();
+		return Math.max(0, dr);
 	}
 	
 	public int damageRoll() {

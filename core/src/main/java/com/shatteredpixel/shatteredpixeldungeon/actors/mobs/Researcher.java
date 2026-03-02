@@ -29,12 +29,8 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Light;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Ooze;
 import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
-import com.shatteredpixel.shatteredpixeldungeon.items.potions.Potion;
-import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfHealing;
-import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfStrength;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ResearcherSprite;
 import com.watabou.utils.Random;
-import com.watabou.utils.Reflection;
 
 public class Researcher extends Mob {
 
@@ -82,8 +78,8 @@ public class Researcher extends Mob {
 	}
 
 	@Override
-	public int drRoll() {
-		return super.drRoll() + Random.NormalIntRange(0, 20);
+	public int posDRRoll() {
+		return super.posDRRoll() + Random.NormalIntRange(0, 20);
 	}
 
 }

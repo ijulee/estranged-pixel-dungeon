@@ -114,8 +114,8 @@ public class RotLasher extends Mob {
 	}
 
 	@Override
-	public int drRoll() {
-		return super.drRoll() + Random.NormalIntRange(0, 8);
+	public int posDRRoll() {
+		return super.posDRRoll() + Random.NormalIntRange(0, 8);
 	}
 	
 	{

@@ -41,8 +41,8 @@ public class WatchTower extends Building {
     }
 
     @Override
-    public int drRoll() {
-        return super.drRoll() + Random.NormalIntRange(0, 5);
+    public int posDRRoll() {
+        return super.posDRRoll() + Random.NormalIntRange(0, 5);
     }
 
     @Override

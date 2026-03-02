@@ -165,8 +165,8 @@ public class Succubus extends Mob {
 	}
 	
 	@Override
-	public int drRoll() {
-		return super.drRoll() + Random.NormalIntRange(0, 10);
+	public int posDRRoll() {
+		return super.posDRRoll() + Random.NormalIntRange(0, 10);
 	}
 
 	@Override

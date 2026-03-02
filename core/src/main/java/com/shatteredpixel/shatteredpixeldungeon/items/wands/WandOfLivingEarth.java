@@ -414,8 +414,8 @@ public class WandOfLivingEarth extends DamageWand {
 		}
 
 		@Override
-		public int drRoll() {
-			int dr = super.drRoll();
+		public int posDRRoll() {
+			int dr = super.posDRRoll();
 			if (Dungeon.isChallenged(Challenges.NO_ARMOR)){
 				return dr + Random.NormalIntRange(wandLevel, 2 + wandLevel);
 			} else {

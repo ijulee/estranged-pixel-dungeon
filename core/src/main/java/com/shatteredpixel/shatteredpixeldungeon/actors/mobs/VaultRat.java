@@ -27,8 +27,8 @@ public class VaultRat extends VaultMob {
 	}
 
 	@Override
-	public int drRoll() {
-		return super.drRoll() + Random.NormalIntRange(0, 1);
+	public int posDRRoll() {
+		return super.posDRRoll() + Random.NormalIntRange(0, 1);
 	}
 
 	@Override

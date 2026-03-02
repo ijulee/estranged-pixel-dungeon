@@ -363,7 +363,7 @@ public class Combo extends Buff implements ActionIndicator.Action {
 				dmgMulti = 0;
 				break;
 			case SLAM:
-				dmgBonus = Math.round(Math.max(0, target.drRoll()) * count / 5f); // In case Grindstone results in negative dr roll
+				dmgBonus = Math.round(target.drRoll() * count / 5f);
 				break;
 			case CRUSH:
 				dmgMulti = 0.25f * count;
@@ -409,7 +409,7 @@ public class Combo extends Buff implements ActionIndicator.Action {
 								&& PathFinder.distance[ch.pos] < Integer.MAX_VALUE) {
 							int aoeHit = Math.round(target.damageRoll() * 0.25f * count);
 							aoeHit /= 2;
-							aoeHit -= Math.max(0, ch.drRoll()); // In case Grindstone results in negative dr roll
+							aoeHit -= ch.drRoll();
 							if (ch.buff(Vulnerable.class) != null) aoeHit *= 1.33f;
 							if (ch instanceof DwarfKing){
 								//change damage type for DK so that crush AOE doesn't count for DK's challenge badge

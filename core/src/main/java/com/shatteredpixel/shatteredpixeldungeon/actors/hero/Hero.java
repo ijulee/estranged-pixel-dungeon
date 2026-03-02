@@ -875,8 +875,8 @@ public class Hero extends Char {
 	}
 
 	@Override
-	public int drRoll() {
-		int dr = super.drRoll();
+	public int posDRRoll() {
+		int dr = super.posDRRoll();
 
 		if (belongings.armor() != null) {
 			int armDr = Random.NormalIntRange( belongings.armor().DRMin(), belongings.armor().DRMax());

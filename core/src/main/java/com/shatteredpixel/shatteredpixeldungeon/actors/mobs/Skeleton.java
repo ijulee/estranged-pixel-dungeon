@@ -122,7 +122,7 @@ public class Skeleton extends Mob {
 				}
 
 				//apply DR twice (with 2 rolls for more consistency)
-				damage = Math.max( 0,  damage - (Math.max(0, ch.drRoll()) + Math.max(0, ch.drRoll())) ); // In case Grindstone results in negative dr roll
+				damage = Math.max( 0,  damage - (ch.drRoll() + ch.drRoll()) );
 				ch.damage( damage, this );
 				if (ch == Dungeon.hero && !ch.isAlive()) {
 					heroKilled = true;
@@ -159,8 +159,8 @@ public class Skeleton extends Mob {
 	}
 	
 	@Override
-	public int drRoll() {
-		return super.drRoll() + Random.NormalIntRange(0, 5);
+	public int posDRRoll() {
+		return super.posDRRoll() + Random.NormalIntRange(0, 5);
 	}
 
 }

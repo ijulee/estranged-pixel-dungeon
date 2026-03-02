@@ -267,8 +267,8 @@ public class Ratmogrify extends ArmorAbility {
 			return original.attackSkill(target);
 		}
 
-		public int drRoll() {
-			return original.drRoll();
+		public int posDRRoll() {
+			return original.posDRRoll();
 		}
 
 		@Override

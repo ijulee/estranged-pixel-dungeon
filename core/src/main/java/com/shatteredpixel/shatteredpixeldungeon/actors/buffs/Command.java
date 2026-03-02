@@ -610,9 +610,9 @@ public class Command extends Buff implements ActionIndicator.Action {
         }
 
         @Override
-        public int drRoll() {
+        public int posDRRoll() {
             int region = (int)Math.ceil(Dungeon.scalingDepth()/5f);
-            return super.drRoll() + Random.NormalIntRange(region, 5*region);
+            return super.posDRRoll() + Random.NormalIntRange(region, 5*region);
         }
 
         @Override
@@ -739,9 +739,9 @@ public class Command extends Buff implements ActionIndicator.Action {
         }
 
         @Override
-        public int drRoll() {
+        public int posDRRoll() {
             int region = (int)Math.ceil(Dungeon.scalingDepth()/5f);
-            return super.drRoll() + Random.NormalIntRange(region, 2*region); //weaker dr
+            return super.posDRRoll() + Random.NormalIntRange(region, 2*region); //weaker dr
         }
 
         @Override
@@ -801,9 +801,9 @@ public class Command extends Buff implements ActionIndicator.Action {
         }
 
         @Override
-        public int drRoll() {
+        public int posDRRoll() {
             int region = (int)Math.ceil(Dungeon.scalingDepth()/5f);
-            return super.drRoll() + Random.NormalIntRange(2*region, 6*region); //higher dr
+            return super.posDRRoll() + Random.NormalIntRange(2*region, 6*region); //higher dr
         }
 
         @Override

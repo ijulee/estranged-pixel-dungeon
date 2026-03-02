@@ -5,7 +5,6 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
-import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfWarding;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.BarricadeSprite;
@@ -38,8 +37,8 @@ public class Barricade extends Building {
     }
 
     @Override
-    public int drRoll() {
-        return super.drRoll() + Random.NormalIntRange(0, maxDr);
+    public int posDRRoll() {
+        return super.posDRRoll() + Random.NormalIntRange(0, maxDr);
     }
 
     @Override
