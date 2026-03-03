@@ -23,6 +23,9 @@ package com.shatteredpixel.shatteredpixeldungeon.items.armor.curses;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FlavourBuff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Paralysis;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.ShadowParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Chilling;
@@ -42,7 +45,12 @@ public class Bulk extends Armor.Glyph {
 
 	@Override
 	public int procTackle(Armor armor, Char attacker, Char defender, int damage) {
-		return procEnchant(armor, new Stunning(), attacker, defender, damage);
+		procEnchant(armor, new Stunning(), attacker, defender, damage);
+		FlavourBuff p = defender.buff(Paralysis.class);
+		if (p != null) {
+			Buff.prolong(attacker, Paralysis.class, p.cooldown());
+		}
+		return damage;
 	}
 
 	//more of a reduction really
