@@ -1696,11 +1696,11 @@ public enum Talent {
 				h.drop(new StoneOfEnchantment());
 				break;
 			case 2:
-				h.drop(new ScrollOfTransmutation());
+				h.drop(new ScrollOfTransmutation().identify(false));
 				h.drop(new Evolution());
 				break;
 			case 3:
-				h.drop(new PotionOfExperience());
+				h.drop(new PotionOfExperience().identify(false));
 				h.drop(new ElixirOfTalent());
 				break;
 		}
