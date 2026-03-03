@@ -67,6 +67,18 @@ public class Tackle extends TargetingAction {
 		spend(time - cooldown() - 1);
 	}
 
+	public static float damageMulti() {
+		return 0.6f + 0.2f* hero.pointsInTalent(Talent.POWERFUL_TACKLE);
+	}
+
+	public static float recoilMulti() {
+		return 0.2f*hero.pointsInTalent(Talent.POWERFUL_TACKLE);
+	}
+
+	public static int knockbackDist() {
+		return (hero.pointsInTalent(Talent.IMPROVED_TACKLE) >= 2) ? 2 : 1;
+	}
+
 	@Override
 	public boolean act() {
 		detach();
@@ -86,6 +98,67 @@ public class Tackle extends TargetingAction {
 	}
 
 	@Override
+	public int icon() {
+		return BuffIndicator.SEAL_SHIELD;
+	}
+
+	@Override
+	public void tintIcon(Image icon) {
+		icon.hardlight(0xFFDB65);
+	}
+
+	@Override
+	public float iconFadePercent() {
+		return 1-visualcooldown()/(DURATION-1);
+	}
+
+	@Override
+	public String iconTextDisplay() {
+		return Integer.toString((int)visualcooldown());
+	}
+
+	@Override
+	public String desc() {
+		if (hero == null) {
+			return super.desc();
+		}
+
+		String desc;
+		if (hero.pointsInTalent(Talent.IMPROVED_TACKLE) >= 3) {
+            desc = Messages.get(this, "desc_improved");
+        } else {
+            desc = Messages.get(this, "desc");
+        }
+
+		desc += "\n\n" + Messages.get(this, "stats_desc", 100*damageMulti(), knockbackDist());
+		if (hero.hasTalent(Talent.POWERFUL_TACKLE)) {
+			desc += " " + Messages.get(this, "recoil", 100*recoilMulti());
+		}
+
+		Armor amr = hero.belongings.armor();
+		if (amr != null) {
+            if (amr.glyph != null) {
+				desc += "\n\n" + Messages.get(this, "has_glyph");
+				desc += " " + Messages.get(this, "glyph_desc", amr.glyph.name(),
+						Messages.get(amr.glyph, "tackle_desc"));
+				if (amr.sealGlyph != null && amr.glyph.getClass() != amr.sealGlyph.getClass()) {
+					desc += " " + Messages.get(this, "glyph_desc", amr.sealGlyph.name(),
+							Messages.get(amr.sealGlyph, "tackle_desc"));
+
+				}
+            } else if (amr.sealGlyph != null) {
+				desc += "\n\n" + Messages.get(this, "has_glyph");
+				desc += " " + Messages.get(this, "glyph_desc", amr.sealGlyph.name(),
+						Messages.get(amr.sealGlyph, "tackle_desc"));
+
+			}
+        }
+
+		desc += "\n\n" + Messages.get(this, "cooldown", dispTurns(visualcooldown()));
+        return desc;
+	}
+
+	@Override
 	public void storeInBundle( Bundle bundle ) {
 		super.storeInBundle( bundle );
 		bundle.put( OBJECT, object );
@@ -99,7 +172,7 @@ public class Tackle extends TargetingAction {
 
 	@Override
 	public String actionName() {
-		return Messages.get(this, "tackle");
+		return Messages.get(this, "name");
 	}
 
 	@Override
