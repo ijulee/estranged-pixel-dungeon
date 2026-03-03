@@ -2,6 +2,7 @@ package com.shatteredpixel.shatteredpixeldungeon.scenes;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.items.GammaRayGun;
 import com.shatteredpixel.shatteredpixeldungeon.items.KnightsShield;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.bow.SpiritBow;
@@ -11,7 +12,10 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.HeroSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
+import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIcon;
+import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Icons;
+import com.shatteredpixel.shatteredpixeldungeon.ui.TalentIcon;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Window;
 import com.shatteredpixel.shatteredpixeldungeon.ui.changelist.ChangeButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.changelist.ChangeInfo;
@@ -21,11 +25,81 @@ import java.util.ArrayList;
 
 public class EPD_v0_X_Changes {
     public static void addAllChanges( ArrayList<ChangeInfo> changeInfos ) {
-        add_v0_1_Changes(changeInfos);
+        add_v0_0_Changes(changeInfos);
     }
 
-    private static void add_v0_1_Changes(ArrayList<ChangeInfo> changeInfos) {
-        ChangeInfo changes = new ChangeInfo("v0.0.2", true, "");
+    private static void add_v0_0_Changes(ArrayList<ChangeInfo> changeInfos) {
+        ChangeInfo changes = new ChangeInfo("v0.0.3", true, "");
+        changes.hardlight(Window.TITLE_COLOR);
+        changeInfos.add(changes);
+
+        changes = new ChangeInfo(Messages.get(ChangesScene.class, "new"), false, null);
+        changes.hardlight(Window.TITLE_COLOR);
+        changeInfos.add(changes);
+
+        changes.addButton( new ChangeButton(Icons.ESTRANGED.get(), "Dev Commentary",
+                "**-** Released March 3, 2026\n\n" +
+                "Getting back into the flow of things. As a follow-up to the Old Amulet " +
+                "transformation for Warrior, I have now reworked talents and added QoL changes to " +
+                "Veteran. Up next is probably pruning the bloated weapon pool.\n\n" +
+                "As an aside, I am back on Discord for now, for as long as Discord delays the " +
+                "unnecessary and intrusive enforcement of age verification.\n\n" +
+                "_-- miaomix_") );
+
+        changes.addButton( new ChangeButton(new BuffIcon(BuffIndicator.TACKLING, true),
+                "Veteran Rework",
+                "Tackle mechanics and subclass talents have been reworked:\n\n" +
+                "**-** Veteran subclass talents have been renamed and icons changed.\n" +
+                "**-** Tackle can be triggered when attacking a mob with a ranged melee weapon, and " +
+                "lasts up to 3 turns after the attack.\n" +
+                "**-** There is now a buff icon and description for Tackle when it is active.\n" +
+                "**-** Tackle now identifies the armor you're wearing.\n" +
+                "**-** Tackle can no longer stun enemies by knocking them into walls. In exchange," +
+                "the Vital Point Strike talent (3-10) now applies paralysis at +3.\n" +
+                "**-** Increased Tackle damage to 60% of damage blocking power.",
+                "Veteran rework (cont.):\n\n" +
+                "**-** Bull Rush talent (3-7) increases Tackle damage to 80%/100%/120% of damage blocking " +
+                "power. In exchange, you now also take 20%/40%/60% recoil damage (reduced by armor).\n" +
+                "**-** Instead of using weapon enchantment, Tackle will now apply a bonus effect " +
+                "based on armor glyph, if you have the Enchanted Armor talent (3-8).\n" +
+                "**-** Brace for Impact talent (3-11) has been reduced to 40%/60%/80%.\n" +
+                "**-** Strength Training talent (3-12) effect to knock enemies into pits at +3 was " +
+                "removed. Instead, you are able to Tackle any adjacent enemy at +3."));
+
+        changes.addButton(new ChangeButton(new TalentIcon(Talent.BETTER_CHOICE),
+                "Better Choice Rework",
+                "The Better Choice generic Tier 3 talent seems a bit plain and uninspiring. " +
+                "Trading 3 points for essentially 2 upgrades doesn't feel like a strategic decision " +
+                "at all. As an alternative, I took a page from Deranged PD and reworked it into " +
+                "_Trial by Fire_, rewarding you for completing boss challenge badges. You no longer " +
+                "receive any upgrades, but you do get items that can help you complete your loadout."));
+
+        changes = new ChangeInfo(Messages.get(ChangesScene.class, "changes"), false, null);
+        changes.hardlight(CharSprite.WARNING);
+        changeInfos.add(changes);
+
+        changes.addButton(new ChangeButton(Icons.TARGET.get(), "Hero Action Targeting",
+                "Improved targeting functionality for hero actions:\n" +
+                "**-** Crosshair appears on the Action Indicator tag to signal cell selection.\n" +
+                "**-** Targets can be switched using the Danger Indicator tag.\n" +
+                "**-** Should work seamlessly without leaving \"phantom\" crosshairs.\n" +
+                "**-** Changes apply to: the Auraslasher's Sword Aura, the Juggler's Juggling, and " +
+                "the Veteran's Tackle."));
+
+        changes.addButton(new ChangeButton(new GammaRayGun(),
+                "The Medic's Gamma Ray Gun will now aggro enemies, like damage-dealing " +
+                "wands."));
+
+        changes.addButton(new ChangeButton(new Image(Assets.Sprites.SPINNER, 144, 0, 16, 16),
+                Messages.get(ChangesScene.class, "bugfixes"),
+                "**-** Some mobs and allies were not affected by Mystic Grindstone.\n" +
+                "**-** Fixed bug where Sword Aura can't be used.\n" +
+                "**-** Fixed Satiation glyph giving 0 satiation at +0 (and triggering starvation " +
+                "damage). Effectively a 1 level buff for the glyph.\n" +
+                "**-** Removed erroneous satiation gain visual effect during time stasis effects.\n" +
+                "**-** Fixed single armor glyphs not having a glow."));
+
+        changes = new ChangeInfo("v0.0.2", true, "");
         changes.hardlight(Window.TITLE_COLOR);
         changeInfos.add(changes);
 

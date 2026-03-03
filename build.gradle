@@ -16,7 +16,7 @@ allprojects {
 
         appVersionCode = 891 // SPD v3.3.6
         appVersionCode += 100
-        appVersionName = '0.0.2'
+        appVersionName = 'v0.0.3'
 
         appJavaCompatibility = JavaVersion.VERSION_11
 
