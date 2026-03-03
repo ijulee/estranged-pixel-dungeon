@@ -2133,9 +2133,9 @@ public class Hero extends Char {
 
 						@Override
 						protected boolean act() {
-							if (enemy.isAlive() || Hero.this.pointsInTalent(Talent.MYSTICAL_TACKLE) >= 3) {
-								Buff.append(Hero.this, Tackle.class).set(enemy.id(), Tackle.DURATION);
-							}
+							if (enemy.isAlive() || Hero.this.pointsInTalent(Talent.IMPROVED_TACKLE) >= 3) {
+                                Buff.append(Hero.this, Tackle.class).set(enemy.id(), Tackle.DURATION + 1);
+                            }
 							Actor.remove(this);
 							return true;
 						}
