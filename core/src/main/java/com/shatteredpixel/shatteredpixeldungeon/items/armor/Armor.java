@@ -710,6 +710,29 @@ public class Armor extends EquipableItem {
 		return damage;
 	}
 
+	public int procTackle(Char attacker, Char defender, int damage) {
+
+		if (attacker.buff(MagicImmune.class) == null && hero.hasTalent(Talent.MYSTICAL_TACKLE)) {
+			if (glyph != null) {
+				damage = glyph.procTackle(this, attacker, defender, damage);
+
+				if (sealGlyph != null && glyph.getClass() != sealGlyph.getClass()) {
+					damage = sealGlyph.procTackle(this, attacker, defender, damage);
+				}
+			} else if (sealGlyph != null) {
+				damage = sealGlyph.procTackle(this, attacker, defender, damage);
+			}
+		}
+
+		if (!levelKnown && attacker == Dungeon.hero) {
+			progressID();
+		}
+
+		Sample.INSTANCE.play(Assets.Sounds.HIT_STRONG);
+
+		return damage;
+	}
+
 	public void progressID() {
         float uses = Math.min( availableUsesToID, Talent.itemIDSpeedFactor(Dungeon.hero, this) );
         availableUsesToID -= uses;

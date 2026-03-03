@@ -1998,11 +1998,21 @@ public class Hero extends Char {
 		KindOfWeapon wep;
 		if (RingOfForce.fightingUnarmed(this) && !RingOfForce.unarmedGetsWeaponEnchantment(this)){
 			wep = null;
+		} else if (buff(Tackle.TackleTracker.class) != null) {
+			wep = null;
 		} else {
 			wep = belongings.attackingWeapon();
 		}
 
 		damage = Talent.onAttackProc( this, enemy, damage );
+
+		if (buff(Tackle.TackleTracker.class) != null) {
+			damage = Tackle.procTackle(this, enemy, damage);
+
+			if (belongings.armor() != null) {
+				damage = belongings.armor().procTackle(this, enemy, damage);
+			}
+		}
 
 		if (wep != null) {
 			damage = wep.proc( this, enemy, damage );

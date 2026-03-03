@@ -40,9 +40,11 @@ import com.shatteredpixel.shatteredpixeldungeon.scenes.CellSelector;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.ui.ActionIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.ui.AttackIndicator;
+import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.ui.HeroIcon;
 import com.shatteredpixel.shatteredpixeldungeon.ui.QuickSlotButton;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
+import com.watabou.noosa.Image;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.PathFinder;
@@ -57,7 +59,7 @@ public class Tackle extends TargetingAction {
 
 	public int object = 0;
 
-	public static final float DURATION = 3f;
+	public static final float DURATION = 4f;
 
 	private static final String OBJECT    = "object";
 
@@ -219,90 +221,94 @@ public class Tackle extends TargetingAction {
 		hero.busy();
 
 		target.sprite.attack(ch.pos, () -> {
-
-			float damageMulti = 0.6f + 0.2f* hero.pointsInTalent(Talent.POWERFUL_TACKLE);
-			int damage = Math.round(hero.drRoll() * damageMulti);
+			int damage = Math.round(hero.drRoll() * damageMulti());
 
 			AttackIndicator.target(ch);
-			lastTarget = ch;
 			TackleTracker tracker = Buff.affect(hero, TackleTracker.class);
 
-            if (hero.attack(ch, 0f, damage, Char.INFINITE_ACCURACY)) {
-                Sample.INSTANCE.play(Assets.Sounds.HIT_STRONG);
-
-                if (hero.hasTalent(Talent.POWERFUL_TACKLE)) {
-					int recoil = Math.round( (damage - hero.drRoll()) *
-							(0.2f*hero.pointsInTalent(Talent.POWERFUL_TACKLE)) );
-
-                    hero.damage(
-							Math.min(recoil, hero.HP + hero.shielding() - 1),
-							Tackle.this);
-                }
-
-                BrokenSeal.WarriorShield shieldBuff = hero.buff(BrokenSeal.WarriorShield.class);
-                if (shieldBuff != null && hero.hasTalent(Talent.IMPROVED_TACKLE)) {
-                    Buff.affect(hero, BrokenSeal.WarriorShield.class).reduceCooldown(0.1f); // 15-turns
-                }
-
-                int dist = (hero.pointsInTalent(Talent.IMPROVED_TACKLE) >= 2) ? 2 : 1;
-                RingOfSharpshooting.pushEnemy(hero, ch, dist, true, false, false);
-
-                if (ch.isAlive()) {
-                    switch (hero.pointsInTalent(Talent.INCAPACITATION)) {
-                        case 3:
-                            Buff.affect(ch, Paralysis.class, 2f);
-                        case 2:
-                            Buff.affect(ch, Cripple.class, 2f);
-                        case 1:
-                            Buff.affect(ch, Vulnerable.class, 2f);
-                        case 0:
-                        default:
-                            break;
-                    }
-                } else { //!ch.isAlive()
-                    if (hero.hasTalent(Talent.DELAYED_GRENADE)) {
-                        int minDamage = 4 + 3 * hero.pointsInTalent(Talent.DELAYED_GRENADE);
-                        int maxDamage = 10 + 10 * hero.pointsInTalent(Talent.DELAYED_GRENADE);
-
-                        ArrayList<Char> affected = new ArrayList<>();
-
-                        for (int i : PathFinder.NEIGHBOURS8) {
-                            int c = ch.pos + i;
-                            if (c >= 0 && c < Dungeon.level.length()) {
-                                Char enemy = Actor.findChar(c);
-                                if (enemy != null && enemy != hero &&
-                                        enemy.alignment != Char.Alignment.ALLY) {
-                                    affected.add(enemy);
-                                }
-                            }
-                        }
-
-                        for (Char enemy : affected) {
-                            int dmg = Hero.heroDamageIntRange(minDamage, maxDamage);
-                            if (enemy instanceof DwarfKing) {
-								//change damage type for DK so that tackle AOE doesn't count for DK's challenge badge
-                                enemy.damage(dmg, Tackle.this);
-                            } else {
-                                enemy.damage(dmg, hero);
-                            }
-                            enemy.sprite.bloodBurstA(ch.sprite.center(), dmg);
-                            enemy.sprite.flash();
-                        }
-
-                        Sample.INSTANCE.play(Assets.Sounds.BLAST);
-                    }
-                }
-
-                Buff.affect(hero, PostTackleTracker.class, TICK);
-            }
+			boolean hit = hero.attack(ch, 0f, damage, Char.INFINITE_ACCURACY);
 
 			Invisibility.dispel();
 
-            tracker.detach();
 			hero.spendAndNext(tackleDelay());
+
+			if (hit) {
+				onTackle(ch);
+			}
+
+			tracker.detach();
+
 			Tackle.this.detach();
         });
 	}
+
+	public static int procTackle(Char attacker, Char defender, int damage) {
+		if (hero.hasTalent(Talent.POWERFUL_TACKLE)) {
+			int recoil = Math.round( (damage - attacker.drRoll()) * Tackle.recoilMulti() );
+
+			attacker.damage(Math.min(recoil, attacker.HP + attacker.shielding() - 1), Tackle.class);
+		}
+
+		return damage;
+	}
+
+	private void onTackle(Char ch) {
+		RingOfSharpshooting.pushEnemy(hero, ch, knockbackDist(), true, false, false);
+
+		BrokenSeal.WarriorShield shieldBuff = hero.buff(BrokenSeal.WarriorShield.class);
+		if (shieldBuff != null && hero.hasTalent(Talent.IMPROVED_TACKLE)) {
+			Buff.affect(hero, BrokenSeal.WarriorShield.class).reduceCooldown(0.1f); // 15-turns
+		}
+
+		if (ch.isAlive()) {
+			switch (hero.pointsInTalent(Talent.INCAPACITATION)) {
+				case 3:
+					Buff.affect(ch, Paralysis.class, 2f);
+				case 2:
+					Buff.affect(ch, Cripple.class, 2f);
+				case 1:
+					Buff.affect(ch, Vulnerable.class, 2f);
+				case 0:
+				default:
+					break;
+			}
+		} else { //!ch.isAlive()
+			if (hero.hasTalent(Talent.DELAYED_GRENADE)) {
+				int minDamage = 4 + 3 * hero.pointsInTalent(Talent.DELAYED_GRENADE);
+				int maxDamage = 10 + 10 * hero.pointsInTalent(Talent.DELAYED_GRENADE);
+
+				ArrayList<Char> affected = new ArrayList<>();
+
+				for (int i : PathFinder.NEIGHBOURS8) {
+					int c = ch.pos + i;
+					if (c >= 0 && c < Dungeon.level.length()) {
+						Char enemy = Actor.findChar(c);
+						if (enemy != null && enemy != hero &&
+								enemy.alignment != Char.Alignment.ALLY) {
+							affected.add(enemy);
+						}
+					}
+				}
+
+				for (Char enemy : affected) {
+					int dmg = Hero.heroDamageIntRange(minDamage, maxDamage);
+					if (enemy instanceof DwarfKing) {
+						//change damage type for DK so that tackle AOE doesn't count for DK's challenge badge
+						enemy.damage(dmg, Tackle.this);
+					} else {
+						enemy.damage(dmg, hero);
+					}
+					enemy.sprite.bloodBurstA(ch.sprite.center(), dmg);
+					enemy.sprite.flash();
+				}
+
+				Sample.INSTANCE.play(Assets.Sounds.BLAST);
+			}
+		}
+
+		Buff.affect(hero, PostTackleTracker.class, TICK);
+	}
+
 
 	private static boolean canAutoAim(Char lastTarget) {
 		return lastTarget != null &&
