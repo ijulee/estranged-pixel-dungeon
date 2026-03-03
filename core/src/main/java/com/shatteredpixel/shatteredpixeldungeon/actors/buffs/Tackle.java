@@ -101,12 +101,7 @@ public class Tackle extends TargetingAction {
 
 	@Override
 	public int icon() {
-		return BuffIndicator.SEAL_SHIELD;
-	}
-
-	@Override
-	public void tintIcon(Image icon) {
-		icon.hardlight(0xFFDB65);
+		return BuffIndicator.TACKLING;
 	}
 
 	@Override
