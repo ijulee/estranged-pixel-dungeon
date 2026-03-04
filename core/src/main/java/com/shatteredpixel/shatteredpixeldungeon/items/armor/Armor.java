@@ -198,6 +198,7 @@ public class Armor extends EquipableItem {
 		availableUsesToID = USES_TO_ID/2f;
 		//armor can be kept in bones between runs, the seal cannot.
 		seal = null;
+		sealGlyph = null;
 	}
 
 	@Override
@@ -421,6 +422,9 @@ public class Armor extends EquipableItem {
 			// assign to sealGlyph
 			sealGlyph = seal.getGlyph();
 
+			if (!seal.amuletApplied) {
+				inscribe(null);
+			}
 			updateQuickslot();
 		}
 
@@ -444,14 +448,14 @@ public class Armor extends EquipableItem {
 				degrade(detaching.level());
 			}
 
-			// remove seal glyph
 			if (glyph != null && sealGlyph != null && glyph.getClass() == sealGlyph.getClass()) {
-				glyph = null;
+				if (!detaching.canTransferGlyph()) {
+					detaching.setGlyph(null);
+				} else {
+					inscribe(null);
+				}
 			}
 			sealGlyph = null;
-            if (!detaching.canTransferGlyph()) {
-                detaching.setGlyph(null);
-            }
 
             return detaching;
 		} else {
@@ -829,11 +833,14 @@ public class Armor extends EquipableItem {
 		}
 
 		if (seal != null) {
-			info += "\n\n" + Messages.get(Armor.class, "seal_attached", seal.maxShield(tier, level()));
-
-			if (seal.amuletApplied && sealGlyph != null && (glyph == null || glyph.getClass() != sealGlyph.getClass())) {
-				info += " " + Messages.get(Armor.class, "inscribed", sealGlyph.name());
-				info += " " + sealGlyph.desc();
+            if (!seal.amuletApplied) {
+                info += "\n\n" + Messages.get(Armor.class, "seal_attached", seal.maxShield(tier, level()));
+            } else {
+                info += "\n\n" + Messages.get(Armor.class, "seal2_attached", seal.maxShield(tier, level()));
+				if (sealGlyph != null && (glyph == null || glyph.getClass() != sealGlyph.getClass())) {
+					info += " " + Messages.get(BrokenSeal.class, "inscribed", sealGlyph.name());
+					info += " " + sealGlyph.desc();
+				}
 			}
 		}
 		
@@ -992,9 +999,11 @@ public class Armor extends EquipableItem {
 		//the hero needs runic transference to actually transfer, but we still attach the glyph here
 		// in case they take that talent in the future
 		if (seal != null && !(seal.canTransferGlyph() && seal.amuletApplied)) {
-			this.sealGlyph = glyph;
-			seal.setGlyph(glyph);
-		}
+			if (glyph != null) {
+				this.sealGlyph = glyph;
+				seal.setGlyph(glyph);
+			}
+        }
 
 		if (glyph != null && isIdentified() && Dungeon.hero != null
 				&& Dungeon.hero.isAlive() && Dungeon.hero.belongings.contains(this)){

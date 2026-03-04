@@ -147,7 +147,7 @@ public class BrokenSeal extends Item {
 					&& armor.glyph.getClass() != getGlyph().getClass()
 					&& !amuletApplied) {
 
-				GameScene.show(new WndOptions(new ItemSprite(ItemSpriteSheet.SEAL),
+				GameScene.show(new WndOptions(new ItemSprite(this),
 						Messages.get(BrokenSeal.class, "choose_title"),
 						Messages.get(BrokenSeal.class, "choose_desc", armor.glyph.name(), getGlyph().name()),
 						armor.glyph.name(),
@@ -196,14 +196,14 @@ public class BrokenSeal extends Item {
 
 	@Override
 	public String name() {
-		String name = (amuletApplied) ? Messages.get(this, "name_restored") : super.name();
+		String name = (amuletApplied) ? Messages.get(this, "name2") : super.name();
 
 		return glyph != null ? glyph.name( name ) : name;
 	}
 
 	@Override
 	public String info() {
-		String info = (amuletApplied) ? Messages.get(this, "desc_restored") : super.info();
+		String info = (amuletApplied) ? Messages.get(this, "desc2") : super.info();
 		if (glyph != null){
 			info += "\n\n" + Messages.get(this, "inscribed", glyph.name());
 			info += " " + glyph.desc();
