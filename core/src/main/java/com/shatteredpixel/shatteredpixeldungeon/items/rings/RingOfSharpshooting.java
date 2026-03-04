@@ -117,7 +117,7 @@ public class RingOfSharpshooting extends Ring {
 		//trim it to just be the part that goes past them
 		trajectory = new Ballistica(trajectory.collisionPos, trajectory.path.get(trajectory.path.size()-1), Ballistica.PROJECTILE);
 		//knock them back along that ballistica, ensuring they don't fall into a pit
-		if (chasm && !defender.flying) {
+		if (!chasm && defender.isAlive() && !defender.flying) {
 			while (dist > trajectory.dist ||
 					(dist > 0 && Dungeon.level.pit[trajectory.path.get(dist)])) {
 				dist--;
