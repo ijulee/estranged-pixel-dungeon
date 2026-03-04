@@ -135,7 +135,7 @@ public class Shockwave extends ArmorAbility {
 									if ( hero.subClass == HeroSubClass.VETERAN &&
 										 hero.buff(Tackle.class) == null &&
 										 (ch.isAlive() || hero.pointsInTalent(Talent.IMPROVED_TACKLE) >= 3) ) {
-                                        Buff.append(hero, Tackle.class).set(ch.id(), Tackle.DURATION+1);
+                                        Buff.affect(hero, Tackle.class).set(ch.id(), Tackle.DURATION+1);
                                     }
 								} else {
 									ch.damage(damage, hero);

@@ -2144,7 +2144,7 @@ public class Hero extends Char {
 						@Override
 						protected boolean act() {
 							if (enemy.isAlive() || Hero.this.pointsInTalent(Talent.IMPROVED_TACKLE) >= 3) {
-                                Buff.append(Hero.this, Tackle.class).set(enemy.id(), Tackle.DURATION + 1);
+                                Buff.affect(Hero.this, Tackle.class).set(enemy.id(), Tackle.DURATION + 1);
                             }
 							Actor.remove(this);
 							return true;
