@@ -1041,31 +1041,11 @@ public class Badges {
 		if (badge != null) {
 			local.add(badge);
 			displayBadge(badge);
+			Statistics.bossChals+=1;
 			Talent.redeemBetterChoice(Dungeon.hero);
 		}
 	}
 
-	public static int countBossChallengeBadges() {
-		List<Badges.Badge> bossBadges = List.of(
-				Badges.Badge.BOSS_CHALLENGE_1,
-				Badges.Badge.BOSS_CHALLENGE_2,
-				Badges.Badge.BOSS_CHALLENGE_3,
-				Badges.Badge.BOSS_CHALLENGE_4,
-				Badges.Badge.BOSS_CHALLENGE_5
-				/*Badges.Badge.BOSS_CHALLENGE_6*/
-		);
-
-		int badgeCount = 0;
-		for (Badge b : bossBadges) {
-			if (local.contains(b)) {
-				badgeCount++;
-			}
-		}
-
-		GLog.i("Challenge Badges: %d", badgeCount);
-		return badgeCount;
-	}
-	
 	public static void validateMastery() {
 		
 		Badge badge = null;

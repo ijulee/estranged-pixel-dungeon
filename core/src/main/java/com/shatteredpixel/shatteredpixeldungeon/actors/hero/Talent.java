@@ -29,6 +29,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.GamesInProgress;
 import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
+import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Adrenaline;
@@ -1682,28 +1683,34 @@ public enum Talent {
 	}
 
 	public static void redeemBetterChoice( Hero hero ) {
-		if (Badges.countBossChallengeBadges() < 2) {
+		if ( Statistics.bossChals < 2 ||
+			 Statistics.betterChoice >= hero.pointsInTalent(BETTER_CHOICE) ) {
 			return;
 		}
 
 		Heap h = new Heap();
 
 		switch (hero.pointsInTalent(BETTER_CHOICE)) {
-			case 0: default:
-				break;
-			case 1:
-				h.drop(new StoneOfAugmentation());
-				h.drop(new StoneOfEnchantment());
-				break;
-			case 2:
-				h.drop(new ScrollOfTransmutation().identify(false));
-				h.drop(new Evolution());
-				break;
 			case 3:
-				h.drop(new PotionOfExperience().identify(false));
-				h.drop(new ElixirOfTalent());
+				if (Statistics.betterChoice < 3) {
+					h.drop(new PotionOfExperience().identify(false));
+					h.drop(new ElixirOfTalent());
+				}
+			case 2:
+                if (Statistics.betterChoice < 2) {
+                    h.drop(new ScrollOfTransmutation().identify(false));
+                    h.drop(new Evolution());
+                }
+			case 1:
+				if (Statistics.betterChoice < 1) {
+					h.drop(new StoneOfAugmentation());
+					h.drop(new StoneOfEnchantment());
+				}
+			case 0:
+			default:
 				break;
 		}
+		Statistics.betterChoice = hero.pointsInTalent(BETTER_CHOICE);
 
 		float totalpickupTime = 0;
 		while (!h.isEmpty()) {
