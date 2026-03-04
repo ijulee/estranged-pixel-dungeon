@@ -2134,7 +2134,7 @@ public class Hero extends Char {
 				}
 				break;
 			case VETERAN:
-				if (buff(Tackle.TackleTracker.class) == null) {
+				if (buff(Tackle.TackleTracker.class) == null && !(wep instanceof MissileWeapon)) {
 					Actor.add(new Actor() {
 
 						{
