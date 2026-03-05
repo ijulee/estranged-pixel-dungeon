@@ -768,14 +768,17 @@ public class Armor extends EquipableItem {
 	public String name() {
 		if (isEquipped(Dungeon.hero) && !hasCurseGlyph() && Dungeon.hero.buff(HolyWard.HolyArmBuff.class) != null
 			&& (Dungeon.hero.subClass != HeroSubClass.PALADIN || glyph == null)){
-				return Messages.get(HolyWard.class, "glyph_name", super.name());
-			} else {
-				String name = glyph != null && (cursedKnown || !glyph.curse()) ? glyph.name( super.name() ) : super.name();
-				if (glyph != null && sealGlyph != null && glyph.getClass() != sealGlyph.getClass()) {
-					name = sealGlyph.name(name).replaceAll(" of ", " and ").replaceFirst(" and ", " of ");
-				}
-				return name;
-
+			return Messages.get(HolyWard.class, "glyph_name", super.name());
+		} else if (glyph != null && (cursedKnown || !glyph.curse())) {
+			String name = glyph.name( super.name() );
+			if (sealGlyph != null && glyph.getClass() != sealGlyph.getClass()) {
+				name = sealGlyph.name(name).replaceAll(" of ", " and ").replaceFirst(" and ", " of ");
+			}
+			return name;
+		} else if (sealGlyph != null) {
+			return sealGlyph.name( super.name() );
+		} else {
+			return super.name();
 		}
 	}
 	
@@ -833,14 +836,13 @@ public class Armor extends EquipableItem {
 		}
 
 		if (seal != null) {
-            if (!seal.amuletApplied) {
-                info += "\n\n" + Messages.get(Armor.class, "seal_attached", seal.maxShield(tier, level()));
-            } else {
-                info += "\n\n" + Messages.get(Armor.class, "seal2_attached", seal.maxShield(tier, level()));
-				if (sealGlyph != null && (glyph == null || glyph.getClass() != sealGlyph.getClass())) {
-					info += " " + Messages.get(BrokenSeal.class, "inscribed", sealGlyph.name());
-					info += " " + sealGlyph.desc();
-				}
+			info += "\n\n" + Messages.get(Armor.class,
+					(!seal.amuletApplied) ? "seal_attached" : "seal2_attached",
+					seal.maxShield(tier, level()));
+
+			if (sealGlyph != null && (glyph == null || glyph.getClass() != sealGlyph.getClass())) {
+				info += " " + Messages.get(BrokenSeal.class, "inscribed", sealGlyph.name());
+				info += " " + sealGlyph.desc();
 			}
 		}
 		
