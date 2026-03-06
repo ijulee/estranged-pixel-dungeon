@@ -93,10 +93,12 @@ public class GammaRayGun extends Item {
         if (Dungeon.hero != null) {
             GammaRayCooldown cooldown = Dungeon.hero.buff(GammaRayCooldown.class);
             if (cooldown != null) {
-                if (cooldown.count() <= 1) {
+                if (cooldown.count() > 1) {
+                    return WHITE_FAST;
+                } else if (cooldown.count() == 1) {
                     return WHITE_SLOW;
                 } else {
-                    return WHITE_FAST;
+                    return null;
                 }
             } else {
                 return null;
@@ -113,10 +115,12 @@ public class GammaRayGun extends Item {
         if (Dungeon.hero != null) {
             GammaRayCooldown cooldown = Dungeon.hero.buff(GammaRayCooldown.class);
             if (cooldown != null) {
-                if (cooldown.count() <= 1) {
+                if (cooldown.count() > 1) {
+                    info += "\n\n" + Messages.get(this, "warning_high");
+                } else if (cooldown.count() == 1) {
                     info += "\n\n" + Messages.get(this, "warning_low");
                 } else {
-                    info += "\n\n" + Messages.get(this, "warning_high");
+                    info += "\n\n" + Messages.get(this, "warning_none");
                 }
             } else {
                 info += "\n\n" + Messages.get(this, "warning_none");

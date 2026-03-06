@@ -402,7 +402,7 @@ public class BowWeapon extends GunWeapon {
             type = buffType.NEUTRAL;
         }
 
-        public static final float DURATION = 50f;
+        public static final float DURATION = 5f;
 
         @Override
         public int icon() {
@@ -411,7 +411,7 @@ public class BowWeapon extends GunWeapon {
 
         @Override
         public float iconFadePercent() {
-            return Math.max(0, (DURATION - visualcooldown()) / DURATION);
+            return Math.max(0, 1f - visualcooldown() / DURATION);
         }
 
         @Override
@@ -434,11 +434,6 @@ public class BowWeapon extends GunWeapon {
         public void detach() {
             dropArrow(count(), target.pos);
             super.detach();
-        }
-
-        @Override
-        public String desc() {
-            return Messages.get(this, "desc", count(), cooldown());
         }
     }
 
@@ -480,12 +475,12 @@ public class BowWeapon extends GunWeapon {
         @Override
         public String desc() {
             int xs = (count() > MAX_SHOTS) ? count() - MAX_SHOTS : 0;
-            return Messages.get(this, "desc", MAX_SHOTS, (int) MAX_DURATION, count(), (float)100*Math.pow(0.9f, xs));
+            return Messages.get(this, "desc", MAX_SHOTS, (int) MAX_DURATION, count(), 100f*Math.pow(0.9f, xs));
         }
 
         @Override
         public float iconFadePercent() {
-            return Math.max(0, (MAX_SHOTS - (float) count()) / MAX_SHOTS);
+            return Math.max(0, 1f - (float) count() / MAX_SHOTS);
         }
 
         public int damage(int damage) {

@@ -32,22 +32,17 @@ public class CountCooldownBuff extends FlavourBuff{
 
     @Override
     public boolean act(){
+        while (!members.isEmpty() && members.peek() != null && members.peek() <= 0) {
+            members.poll();
+        }
+
         if (members.isEmpty()) {
-            // detach if no member left
             detach();
         } else {
-            Float next = members.poll();
-
-            // remove other members expiring at the same time
-            while (next != null && next == 0) {
-                next = members.poll();
-            }
-
+            Float next = members.peek();
             if (next != null) {
-                // assign next cooldown
                 super.spend(next);
 
-                // update remaining cooldowns
                 PriorityQueue<Float> newMembers = new PriorityQueue<>();
                 while (!members.isEmpty()) {
                     newMembers.add(members.poll() - next);
@@ -63,9 +58,8 @@ public class CountCooldownBuff extends FlavourBuff{
         // store new cooldown in relation to current cooldown
         if (members.isEmpty() && cooldown() == 0) {
             super.spend(time);
-        } else {
-            members.add(time-cooldown());
         }
+        members.add(time-cooldown());
     }
 
     private static final String MEMBERS = "members";
@@ -75,8 +69,8 @@ public class CountCooldownBuff extends FlavourBuff{
         super.storeInBundle(bundle);
         float[] membersArray = new float[members.size()];
         int i = 0;
-        for (Object f : members.toArray()){
-            membersArray[i] = (Float) f;
+        for (Float f : members.toArray(new Float[]{})) {
+            membersArray[i] = f;
             i++;
         }
         bundle.put(MEMBERS, membersArray);
@@ -93,7 +87,7 @@ public class CountCooldownBuff extends FlavourBuff{
     }
 
     public int count(){
-        return members.size() + ((cooldown() > 0)? 1 : 0);
+        return members.size();
     }
 
     @Override
