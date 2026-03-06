@@ -24,6 +24,8 @@ import com.watabou.noosa.Image;
 import java.util.ArrayList;
 
 public class EPD_v0_X_Changes {
+    public static Image bugfix = new Image(Assets.Sprites.SPINNER, 144, 0, 16, 16);
+
     public static void addAllChanges( ArrayList<ChangeInfo> changeInfos ) {
         add_v0_0_Changes(changeInfos);
     }
@@ -38,7 +40,7 @@ public class EPD_v0_X_Changes {
         changeInfos.add(changes);
 
         changes.addButton( new ChangeButton(Icons.ESTRANGED.get(), "Dev Commentary",
-                "**-** Released March 3, 2026\n\n" +
+                "**-** Released March 6, 2026\n\n" +
                 "Getting back into the flow of things. As a follow-up to the Old Amulet " +
                 "transformation for Warrior, I have now reworked talents and added QoL changes to " +
                 "Veteran. Up next is probably pruning the bloated weapon pool.\n\n" +
@@ -50,8 +52,8 @@ public class EPD_v0_X_Changes {
                 "Veteran Rework",
                 "Tackle mechanics and subclass talents have been reworked:\n\n" +
                 "**-** Veteran subclass talents have been renamed and icons changed.\n" +
-                "**-** Tackle can be triggered when attacking a mob with a ranged melee weapon, and " +
-                "lasts up to 3 turns after the attack.\n" +
+                "**-** Tackle is now triggered when attacking a mob with a melee weapon at any range, " +
+                "and lasts up to 3 turns after the attack.\n" +
                 "**-** There is now a buff icon and description for Tackle when it is active.\n" +
                 "**-** Tackle now identifies the armor you're wearing.\n" +
                 "**-** Tackle can no longer stun enemies by knocking them into walls. In exchange," +
@@ -66,38 +68,40 @@ public class EPD_v0_X_Changes {
                 "**-** Strength Training talent (3-12) effect to knock enemies into pits at +3 was " +
                 "removed. Instead, you are able to Tackle any adjacent enemy at +3."));
 
-        changes.addButton(new ChangeButton(new TalentIcon(Talent.BETTER_CHOICE),
-                "Better Choice Rework",
+        changes.addButton( new ChangeButton(new TalentIcon(Talent.BETTER_CHOICE), "Better Choice Rework",
                 "The Better Choice generic Tier 3 talent seems a bit plain and uninspiring. " +
                 "Trading 3 points for essentially 2 upgrades doesn't feel like a strategic decision " +
-                "at all. As an alternative, I took a page from Deranged PD and reworked it into " +
-                "_Trial by Fire_, rewarding you for completing boss challenge badges. You no longer " +
-                "receive any upgrades, but you do get items that can help you complete your loadout."));
+                "at all. As an alternative, I have reworked it into _Trial by Fire_, which rewards " +
+                "you for completing boss challenge badges. You no longer receive any upgrades, but " +
+                "you do get items that could help you complete your loadout."));
 
         changes = new ChangeInfo(Messages.get(ChangesScene.class, "changes"), false, null);
         changes.hardlight(CharSprite.WARNING);
         changeInfos.add(changes);
 
-        changes.addButton(new ChangeButton(Icons.TARGET.get(), "Hero Action Targeting",
+        changes.addButton( new ChangeButton(Icons.TARGET.get(), "Hero Action Targeting",
                 "Improved targeting functionality for hero actions:\n" +
                 "**-** Crosshair appears on the Action Indicator tag to signal cell selection.\n" +
                 "**-** Targets can be switched using the Danger Indicator tag.\n" +
-                "**-** Should work seamlessly without leaving \"phantom\" crosshairs.\n" +
-                "**-** Changes apply to: the Auraslasher's Sword Aura, the Juggler's Juggling, and " +
+                "**-** Should work seamlessly without leaving \"phantom\" crosshairs.\n\n" +
+                "These changes apply to the Auraslasher's Sword Aura, the Juggler's Juggling, and " +
                 "the Veteran's Tackle."));
 
-        changes.addButton(new ChangeButton(new GammaRayGun(),
-                "The Medic's Gamma Ray Gun will now aggro enemies, like damage-dealing " +
-                "wands."));
+        changes.addButton( new ChangeButton(Icons.PREFS.get(), Messages.get(ChangesScene.class, "misc"),
+                "**-** The Medic's Gamma Ray Gun will now aggro enemies, like damage-dealing wands.\n" +
+                "**-** Spellbooks can now be transmuted into other flavors."));
 
-        changes.addButton(new ChangeButton(new Image(Assets.Sprites.SPINNER, 144, 0, 16, 16),
+        changes.addButton(new ChangeButton(bugfix,
                 Messages.get(ChangesScene.class, "bugfixes"),
                 "**-** Some mobs and allies were not affected by Mystic Grindstone.\n" +
                 "**-** Fixed bug where Sword Aura can't be used.\n" +
                 "**-** Fixed Satiation glyph giving 0 satiation at +0 (and triggering starvation " +
                 "damage). Effectively a 1 level buff for the glyph.\n" +
                 "**-** Removed erroneous satiation gain visual effect during time stasis effects.\n" +
-                "**-** Fixed single armor glyphs not having a glow."));
+                "**-** Fixed armor and broken seal with glyphs not having the correct name, desc, and glow.\n" +
+                "**-** Fixed Fighter's Mystic Punch talent bonus effect for Ring of Sharpshooting " +
+                "incorrectly chasming enemies.\n" +
+                "**-** Fixed Arrow Pincushion dropping \"0 arrows\"."));
 
         changes = new ChangeInfo("v0.0.2", true, "");
         changes.hardlight(Window.TITLE_COLOR);
@@ -180,7 +184,7 @@ public class EPD_v0_X_Changes {
                 "**-** Added ReARranged additional enchantments (Stunning, Eldritch, " +
                 "Venomous, and Vorpal) to potential Unstable effects."));
 
-        changes.addButton(new ChangeButton(new Image(Assets.Sprites.SPINNER, 144, 0, 16, 16),
+        changes.addButton(new ChangeButton(bugfix,
                 Messages.get(ChangesScene.class, "bugfixes"),
                 "**-** Fixed Swordmaster Quick Draw proccing incorrectly, sometimes " +
                 "alongside Dash Draw.\n" +
@@ -379,7 +383,7 @@ public class EPD_v0_X_Changes {
                 "**-** Changed Elixir of Talent description to be more clear and concise " +
                 "(felt like writing a modern Yu-Gi-Oh! card)."));
 
-        changes.addButton(new ChangeButton(new Image(Assets.Sprites.SPINNER, 144, 0, 16, 16),
+        changes.addButton(new ChangeButton(bugfix,
                 Messages.get(ChangesScene.class, "bugfixes"),
                 "Fixed the following bugs:\n" +
                 "**Weapons**\n" +
