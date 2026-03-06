@@ -107,14 +107,7 @@ public class ScrollOfTransmutation extends InventoryScroll {
 			return item instanceof Ring || item instanceof Wand || item instanceof Artifact
 					|| item instanceof Trinket || item instanceof Plant.Seed || item instanceof Pill
 					|| item instanceof Runestone
-					|| item instanceof NaturesBow
-					|| item instanceof GoldenBow
-					|| item instanceof CorrosiveBow
-					|| item instanceof WindBow
-					|| item instanceof TacticalBow
-					|| item instanceof PhaseBow
-					|| item instanceof ElectricBow
-					|| item instanceof MagicalBow;
+					|| (item instanceof SpiritBow && item.getClass() != SpiritBow.class);
 		}
 	}
 	
@@ -220,8 +213,7 @@ public class ScrollOfTransmutation extends InventoryScroll {
 		} else if (item instanceof Trinket) {
 			return changeTrinket( (Trinket)item );
 		} else if (item instanceof SpiritBow && item.getClass() != SpiritBow.class) {
-			SpiritBow bow = (SpiritBow) item;
-			return Generator.randomBow(bow.getClass()).clone(bow);
+			return changeBow((SpiritBow) item);
 		} else {
 			return null;
 		}
@@ -253,6 +245,10 @@ public class ScrollOfTransmutation extends InventoryScroll {
 		} while (n.getClass() == dart.getClass());
 
 		return n;
+	}
+
+	private static SpiritBow changeBow( SpiritBow bow ) {
+		return Generator.randomBow(bow.getClass()).clone(bow);
 	}
 	
 	private static Weapon changeWeapon( Weapon w ) {
