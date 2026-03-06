@@ -219,15 +219,7 @@ public class ScrollOfTransmutation extends InventoryScroll {
 			}
 		} else if (item instanceof Trinket) {
 			return changeTrinket( (Trinket)item );
-		} else if (item instanceof SpiritBow && item.getClass() != SpiritBow.class
-				/*item instanceof NaturesBow
-				|| item instanceof GoldenBow
-				|| item instanceof CorrosiveBow
-				|| item instanceof WindBow
-				|| item instanceof TacticalBow
-				|| item instanceof PhaseBow
-				|| item instanceof ElectricBow
-				|| item instanceof MagicalBow*/) {
+		} else if (item instanceof SpiritBow && item.getClass() != SpiritBow.class) {
 			SpiritBow bow = (SpiritBow) item;
 			return Generator.randomBow(bow.getClass()).clone(bow);
 		} else {
