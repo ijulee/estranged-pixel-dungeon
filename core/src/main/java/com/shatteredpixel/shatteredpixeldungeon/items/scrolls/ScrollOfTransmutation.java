@@ -43,6 +43,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic.ExoticPotio
 import com.shatteredpixel.shatteredpixeldungeon.items.quest.Pickaxe;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.Ring;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ExoticScroll;
+import com.shatteredpixel.shatteredpixeldungeon.items.spellbook.SpellBook;
 import com.shatteredpixel.shatteredpixeldungeon.items.stones.Runestone;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.Trinket;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.Wand;
@@ -107,7 +108,8 @@ public class ScrollOfTransmutation extends InventoryScroll {
 			return item instanceof Ring || item instanceof Wand || item instanceof Artifact
 					|| item instanceof Trinket || item instanceof Plant.Seed || item instanceof Pill
 					|| item instanceof Runestone
-					|| (item instanceof SpiritBow && item.getClass() != SpiritBow.class);
+					|| (item instanceof SpiritBow && item.getClass() != SpiritBow.class)
+					|| item instanceof SpellBook;
 		}
 	}
 	
@@ -214,6 +216,8 @@ public class ScrollOfTransmutation extends InventoryScroll {
 			return changeTrinket( (Trinket)item );
 		} else if (item instanceof SpiritBow && item.getClass() != SpiritBow.class) {
 			return changeBow((SpiritBow) item);
+		} else if (item instanceof SpellBook) {
+			return changeSpellbook((SpellBook) item);
 		} else {
 			return null;
 		}
@@ -378,6 +382,16 @@ public class ScrollOfTransmutation extends InventoryScroll {
 		n.updateLevel();
 		
 		return n;
+	}
+
+	private static SpellBook changeSpellbook( SpellBook sb ) {
+		SpellBook nb;
+
+		do {
+			nb = (SpellBook) Generator.randomUsingDefaults( Generator.Category.SPELLBOOK );
+		} while ( nb.getClass() == sb.getClass() );
+
+		return nb;
 	}
 	
 	private static Plant.Seed changeSeed( Plant.Seed s ) {
