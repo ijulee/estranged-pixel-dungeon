@@ -415,22 +415,20 @@ public class ItemSprite extends MovieClip {
 			
 			this.period = period;
 		}
+
+		public boolean isEqual(Glowing other) {
+			if (other == null || other.getClass() != Glowing.class) {
+				return false;
+			} else {
+				return this.color == other.color && this.period == other.period;
+			}
+		}
 	}
 
 	public static class DualGlowing extends Glowing {
+		public Glowing glow1, glow2;
 
-		public int color1;
-		public float red1;
-		public float green1;
-		public float blue1;
-		public float period1;
-
-		public int color2;
-		public float red2;
-		public float green2;
-		public float blue2;
-		public float period2;
-		public boolean useColor2 = false;
+		public boolean useGlow2 = false;
 
 		public DualGlowing(int color1, int color2) {
 			this(color1, color2, 1f);
@@ -440,43 +438,57 @@ public class ItemSprite extends MovieClip {
 			this(color1, color2, period, period);
 		}
 
-		public DualGlowing(Glowing glowing1, Glowing glowing2) {
-			this(glowing1.color, glowing2.color, glowing1.period, glowing2.period);
+		public DualGlowing(int color1, int color2, float period1, float period2) {
+			this(new Glowing(color1, period1), new Glowing(color2, period2));
 		}
 
-		public DualGlowing(int color1, int color2, float period1, float period2) {
-			super(color1, period1);
+		public DualGlowing(Glowing glow1, Glowing glow2) {
+			super(glow1.color, glow1.period);
 
-			this.color1 = color1;
-			red1 = (color1 >> 16) / 255f;
-			green1 = ((color1 >> 8) & 0xFF) / 255f;
-			blue1 = (color1 & 0xFF) / 255f;
-			this.period1 = period1;
-
-			this.color2 = color2;
-			red2 = (color2 >> 16) / 255f;
-			green2 = ((color2 >> 8) & 0xFF) / 255f;
-			blue2 = (color2 & 0xFF) / 255f;
-			this.period2 = period2;
+			this.glow1 = glow1;
+			this.glow2 = glow2;
 		}
 
 		public void swapColor() {
-			if (useColor2) {
-				useColor2 = false;
-				color = color1;
-				red = red1;
-				green = green1;
-				blue = blue1;
-				period = period1;
+			if (useGlow2) {
+				useGlow2 = false;
+				color = glow1.color;
+				red = glow1.red;
+				green = glow1.green;
+				blue = glow1.blue;
+				period = glow1.period;
 
 			} else {
-				useColor2 = true;
-				color = color2;
-				red = red2;
-				green = green2;
-				blue = blue2;
-				period = period2;
+				useGlow2 = true;
+				color = glow2.color;
+				red = glow2.red;
+				green = glow2.green;
+				blue = glow2.blue;
+				period = glow2.period;
 			}
 		}
+
+		@Override
+		public boolean isEqual(Glowing other) {
+			if (other == null || other.getClass() != DualGlowing.class) {
+				return false;
+			} else {
+				DualGlowing otherDual = (DualGlowing) other;
+				return (this.glow1.isEqual(otherDual.glow1) && this.glow2.isEqual(otherDual.glow2)) ||
+						(this.glow1.isEqual(otherDual.glow2) && this.glow2.isEqual(otherDual.glow1));
+			}
+		}
+
+		public static Glowing combineGlowing(Glowing glow1, Glowing glow2) {
+			if (glow1 != null) {
+				if (glow2 != null && !glow1.isEqual(glow2)) {
+					return new DualGlowing(glow1, glow2);
+				} else {
+					return glow1;
+				}
+			} else {
+                return glow2;
+            }
+        }
 	}
 }

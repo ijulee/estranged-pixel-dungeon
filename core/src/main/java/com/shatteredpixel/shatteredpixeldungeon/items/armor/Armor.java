@@ -1069,7 +1069,7 @@ public class Armor extends EquipableItem {
                 if (glyph == null || glyph.getClass() == sealGlyph.getClass()) {
                     return sealGlyph.glowing();
                 } else {
-                    return new ItemSprite.DualGlowing(glyph.glowing(), sealGlyph.glowing());
+                    return ItemSprite.DualGlowing.combineGlowing(glyph.glowing(), sealGlyph.glowing());
                 }
             }
         }
