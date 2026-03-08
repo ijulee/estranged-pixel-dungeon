@@ -42,6 +42,8 @@ public class FireMaker extends TargetedSpell {
 		int cell = bolt.collisionPos;
 
 		GameScene.add( Blob.seed(cell, 3, Fire.class));
+
+		onSpellused();
 	}
 	
 	@Override

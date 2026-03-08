@@ -57,6 +57,8 @@ public class HandyBarricade extends TargetedSpell {
 				GameScene.updateMap(cell+i);
 			}
 		}
+
+		onSpellused();
 	}
 	
 	@Override

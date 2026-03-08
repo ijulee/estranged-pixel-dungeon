@@ -42,6 +42,8 @@ public class RapidGrowth extends TargetedSpell {
 		int cell = bolt.collisionPos;
 
 		GameScene.add( Blob.seed(cell, 40, Regrowth.class));
+
+		onSpellused();
 	}
 	
 	@Override

@@ -42,6 +42,8 @@ public class IceMaker extends TargetedSpell {
 		int cell = bolt.collisionPos;
 
 		GameScene.add(Blob.seed(cell, 5, Freezing.class));
+
+		onSpellused();
 	}
 	
 	@Override
