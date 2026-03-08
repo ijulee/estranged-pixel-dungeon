@@ -9,6 +9,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.ui.AttackIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
@@ -568,4 +569,12 @@ public class HeroSword extends MeleeWeapon {
         return prefix + " " + wep.abilityInfo();
     }
 
+    @Override
+    public ItemSprite.Glowing glowing() {
+        if (usedWep != null) {
+            return ItemSprite.DualGlowing.combineGlowing(super.glowing(), usedWep.glowing());
+        } else {
+            return super.glowing();
+        }
+    }
 }
