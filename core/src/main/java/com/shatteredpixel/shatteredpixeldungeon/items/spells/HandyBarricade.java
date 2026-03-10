@@ -21,10 +21,12 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.items.spells;
 
+import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.effects.MagicMissile;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Splash;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic.PotionOfStormClouds;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
@@ -32,6 +34,8 @@ import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
+import com.watabou.noosa.audio.Sample;
+import com.watabou.utils.Callback;
 import com.watabou.utils.PathFinder;
 
 public class HandyBarricade extends TargetedSpell {
@@ -60,7 +64,17 @@ public class HandyBarricade extends TargetedSpell {
 
 		onSpellused();
 	}
-	
+
+	@Override
+	protected void fx(Ballistica bolt, Callback callback) {
+		MagicMissile.boltFromChar( curUser.sprite.parent,
+				MagicMissile.EARTH,
+				curUser.sprite,
+				bolt.collisionPos,
+				callback);
+		Sample.INSTANCE.play( Assets.Sounds.MINE );
+	}
+
 	@Override
 	public int value() {
 		//prices of ingredients, divided by output quantity
