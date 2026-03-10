@@ -77,7 +77,7 @@ public class CrystalBall extends Trinket {
                 Dungeon.hero.buff(Awareness.class).detach();
             }
         }
-        if (Dungeon.branch == 0 && !CrystalBall.visited[Dungeon.depth]) { //브랜치 층에서는 작동하지 않음
+        if (Dungeon.branch == 0 && Dungeon.depth < CrystalBall.visited.length && !CrystalBall.visited[Dungeon.depth]) { //브랜치 층에서는 작동하지 않음
             if (Random.Float() < CrystalBall.itemVisionChance()) {
                 Buff.affect(hero, Awareness.class, Awareness.DURATION);
             }

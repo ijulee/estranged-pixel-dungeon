@@ -48,7 +48,7 @@ public class MagicalCompass extends Trinket {
     }
 
     public static void onSwitchLevel() {
-        if (Dungeon.branch == 0 && !MagicalCompass.compassed[Dungeon.depth]) { //브랜치 층에서는 작동하지 않음
+        if (Dungeon.branch == 0 && Dungeon.depth < MagicalCompass.compassed.length && !MagicalCompass.compassed[Dungeon.depth]) { //브랜치 층에서는 작동하지 않음
             if (Random.Float() < MagicalCompass.compassChance()) {
                 int len = Dungeon.level.length();
                 boolean[] p = Dungeon.level.passable;
