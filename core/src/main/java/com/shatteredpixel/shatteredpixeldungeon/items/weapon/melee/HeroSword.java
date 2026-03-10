@@ -7,6 +7,9 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.HolyWard;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.HolyWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
@@ -115,6 +118,24 @@ public class HeroSword extends MeleeWeapon {
     @Override
     public int value() {
         return -1;
+    }
+
+    @Override
+    public String name() {
+        if (isEquipped(Dungeon.hero) && !hasCurseEnchant() && Dungeon.hero.buff(HolyWeapon.HolyWepBuff.class) != null
+                && (Dungeon.hero.subClass != HeroSubClass.PALADIN || enchantment == null)){
+            return Messages.get(HolyWeapon.class, "ench_name", trueName());
+        } else if (enchantment != null && (cursedKnown || !enchantment.curse())) {
+            String name = trueName();
+            if (usedWep != null && usedWep.enchantment != null && enchantment.getClass() != usedWep.enchantment.getClass()) {
+                name = usedWep.enchantment.name( name );
+            }
+            return enchantment.name( name );
+        } else if (usedWep != null && usedWep.enchantment != null) {
+            return usedWep.enchantment.name( super.name() );
+        } else {
+            return super.name();
+        }
     }
 
     @Override
