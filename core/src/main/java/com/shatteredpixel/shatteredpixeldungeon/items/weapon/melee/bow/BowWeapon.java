@@ -402,7 +402,7 @@ public class BowWeapon extends GunWeapon {
             type = buffType.NEUTRAL;
         }
 
-        public static final float DURATION = 5f;
+        public static final float DURATION = 30f;
 
         @Override
         public int icon() {
