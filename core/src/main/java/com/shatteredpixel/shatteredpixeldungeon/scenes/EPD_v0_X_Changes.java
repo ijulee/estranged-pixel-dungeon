@@ -31,7 +31,39 @@ public class EPD_v0_X_Changes {
     }
 
     private static void add_v0_0_Changes(ArrayList<ChangeInfo> changeInfos) {
-        ChangeInfo changes = new ChangeInfo("v0.0.3", true, "");
+        ChangeInfo changes = new ChangeInfo("v0.0.4", true, "");
+        changes.hardlight(Window.TITLE_COLOR);
+        changeInfos.add(changes);
+
+        changes = new ChangeInfo(Messages.get(ChangesScene.class, "new"), false, null);
+        changes.hardlight(Window.TITLE_COLOR);
+        changeInfos.add(changes);
+
+        changes.addButton( new ChangeButton(Icons.ESTRANGED.get(), "Dev Commentary",
+                "**-** Released March 10, 2026\n\n" +
+                "I was working on something bigger, but decided to do this hotfix to fix a few " +
+                "glaring bugs.\n\n" +
+                "_-- miaomix_") );
+
+        changes = new ChangeInfo(Messages.get(ChangesScene.class, "changes"), false, null);
+        changes.hardlight(CharSprite.WARNING);
+        changeInfos.add(changes);
+
+        changes.addButton( new ChangeButton(new ItemSprite(ItemSpriteSheet.HERO_SWORD), "Duelist's Hero Sword",
+                "The Duelist's Hero Sword can now have an enchantment glow if the source weapon " +
+                "has an enchantment, and dual glow if the sword itself has a different one. The " +
+                "item name will also contain the source weapon's enchantment name."));
+
+        changes.addButton(new ChangeButton(bugfix,
+                Messages.get(ChangesScene.class, "bugfixes"),
+                "**-** Fixed Skeleton Key causing crash when picking up keys in Lab region. " +
+                "I tried to salvage EPD v0.0.3 save files as best I could.\n" +
+                "**-** Fixed Skeleton Key incorrectly discarding Crystal Keys in Old Temple.\n" +
+                "**-** Fixed City quest Escape Crystal missing sprite.\n" +
+                "**-** Fixed certain targeted spells freezing the game when casted, unless " +
+                "the game is reloaded."));
+
+        changes = new ChangeInfo("v0.0.3", true, "");
         changes.hardlight(Window.TITLE_COLOR);
         changeInfos.add(changes);
 
