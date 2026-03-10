@@ -565,73 +565,76 @@ public class SkeletonKey extends Artifact {
 
 	public static class KeyReplacementTracker extends Buff {
 
-		public int[] ironKeysNeeded, goldenKeysNeeded, crystalKeysNeeded;
+		//TODO add branch support (only Crystal Keys have full support right now)
+		public int[][] ironKeysNeeded, goldenKeysNeeded, crystalKeysNeeded;
 
 		{
 			revivePersists = true;
-			ironKeysNeeded = new int[26];
-			Arrays.fill(ironKeysNeeded, -1);
-			goldenKeysNeeded = new int[26];
-			Arrays.fill(goldenKeysNeeded, -1);
-			crystalKeysNeeded = new int[26];
-			Arrays.fill(crystalKeysNeeded, -1);
-		}
+			ironKeysNeeded = new int[1][Dungeon.MAX_DEPTH];
+			Arrays.fill(ironKeysNeeded[0], -1);
+			goldenKeysNeeded = new int[1][Dungeon.MAX_DEPTH];
+			Arrays.fill(goldenKeysNeeded[0], -1);
+			crystalKeysNeeded = new int[Dungeon.MAX_BRANCH][Dungeon.MAX_DEPTH];
+            for (int i=0; i<Dungeon.MAX_BRANCH; i++) {
+                Arrays.fill(crystalKeysNeeded[i], -1);
+            }
+        }
 
 		public void setupKeysForDepth(){
-			ironKeysNeeded[Dungeon.depth] = 0;
-			goldenKeysNeeded[Dungeon.depth] = 0;
-			crystalKeysNeeded[Dungeon.depth] = 0;
+			ironKeysNeeded[0][Dungeon.depth] = 0;
+			goldenKeysNeeded[0][Dungeon.depth] = 0;
+			crystalKeysNeeded[Dungeon.branch][Dungeon.depth] = 0;
 
 			for (Heap h : Dungeon.level.heaps.valueList()){
 				if (h.type == Heap.Type.LOCKED_CHEST){
-					goldenKeysNeeded[Dungeon.depth]++;
+					goldenKeysNeeded[0][Dungeon.depth]++;
 				} else if (h.type == Heap.Type.CRYSTAL_CHEST){
-					crystalKeysNeeded[Dungeon.depth]++;
+					crystalKeysNeeded[Dungeon.branch][Dungeon.depth]++;
 				}
 			}
 
 			for (int i = 0; i < Dungeon.level.length(); i++){
 				if (Dungeon.level.map[i] == Terrain.LOCKED_DOOR){
-					ironKeysNeeded[Dungeon.depth]++;
+					ironKeysNeeded[0][Dungeon.depth]++;
 				} else if (Dungeon.level.map[i] == Terrain.CRYSTAL_DOOR){
-					crystalKeysNeeded[Dungeon.depth]++;
+					crystalKeysNeeded[Dungeon.branch][Dungeon.depth]++;
 				}
 			}
 		}
 
 		//used if a level was reset, e.g. via unblessed ankh vs. boss
 		public void clearDepth(){
-			ironKeysNeeded[Dungeon.depth] = -1;
-			goldenKeysNeeded[Dungeon.depth] = -1;
-			crystalKeysNeeded[Dungeon.depth] = -1;
+			ironKeysNeeded[0][Dungeon.depth] = -1;
+			goldenKeysNeeded[0][Dungeon.depth] = -1;
+			crystalKeysNeeded[Dungeon.branch][Dungeon.depth] = -1;
 		}
 
 		public void processIronLockOpened(){
-			if (ironKeysNeeded[Dungeon.depth] == -1){
+			if (ironKeysNeeded[0][Dungeon.depth] == -1){
 				setupKeysForDepth();
 			}
-			ironKeysNeeded[Dungeon.depth] -= 1;
+			ironKeysNeeded[0][Dungeon.depth] -= 1;
 			processExcessKeys();
 		}
 
 		public void processGoldLockOpened(){
-			if (goldenKeysNeeded[Dungeon.depth] == -1){
+			if (goldenKeysNeeded[0][Dungeon.depth] == -1){
 				setupKeysForDepth();
 			}
-			goldenKeysNeeded[Dungeon.depth] -= 1;
+			goldenKeysNeeded[0][Dungeon.depth] -= 1;
 			processExcessKeys();
 		}
 
 		public void processCrystalLockOpened(){
-			if (crystalKeysNeeded[Dungeon.depth] == -1){
+			if (crystalKeysNeeded[Dungeon.branch][Dungeon.depth] == -1){
 				setupKeysForDepth();
 			}
-			crystalKeysNeeded[Dungeon.depth] -= 1;
+			crystalKeysNeeded[Dungeon.branch][Dungeon.depth] -= 1;
 			processExcessKeys();
 		}
 
 		public void processExcessKeys(){
-			int keysNeeded = ironKeysNeeded[Dungeon.depth];
+			int keysNeeded = ironKeysNeeded[0][Dungeon.depth];
 			boolean removed = false;
 			if (keysNeeded >= 0) {
 				while (Notes.keyCount(new IronKey(Dungeon.depth)) > keysNeeded) {
@@ -639,14 +642,14 @@ public class SkeletonKey extends Artifact {
 					removed = true;
 				}
 			}
-			keysNeeded = goldenKeysNeeded[Dungeon.depth];
+			keysNeeded = goldenKeysNeeded[0][Dungeon.depth];
 			if (keysNeeded >= 0) {
 				while (Notes.keyCount(new GoldenKey(Dungeon.depth)) > keysNeeded) {
 					Notes.remove(new GoldenKey(Dungeon.depth));
 					removed = true;
 				}
 			}
-			keysNeeded = crystalKeysNeeded[Dungeon.depth];
+			keysNeeded = crystalKeysNeeded[Dungeon.branch][Dungeon.depth];
 			if (keysNeeded >= 0) {
 				while (Notes.keyCount(new CrystalKey(Dungeon.depth)) > keysNeeded) {
 					Notes.remove(new CrystalKey(Dungeon.depth));
@@ -661,22 +664,44 @@ public class SkeletonKey extends Artifact {
 
 		public static String IRON_NEEDED = "iron_needed";
 		public static String GOLDEN_NEEDED = "golden_needed";
-		public static String CRYSTAL_NEEDED = "crystal_needed";
+		public static String CRYSTAL_NEEDED = "crystal_needed_%d";
+		public static String CRYSTAL_NEEDED_OLD = "crystal_needed";
 
 		@Override
 		public void storeInBundle(Bundle bundle) {
 			super.storeInBundle(bundle);
-			bundle.put(IRON_NEEDED, ironKeysNeeded);
-			bundle.put(GOLDEN_NEEDED, goldenKeysNeeded);
-			bundle.put(CRYSTAL_NEEDED, crystalKeysNeeded);
+			bundle.put(IRON_NEEDED, ironKeysNeeded[0]);
+			bundle.put(GOLDEN_NEEDED, goldenKeysNeeded[0]);
+			for (int i=0; i<Dungeon.MAX_BRANCH; i++) {
+				bundle.put(String.format(CRYSTAL_NEEDED, i), crystalKeysNeeded[i]);
+			}
 		}
 
 		@Override
 		public void restoreFromBundle(Bundle bundle) {
 			super.restoreFromBundle(bundle);
-			ironKeysNeeded = bundle.getIntArray(IRON_NEEDED);
-			goldenKeysNeeded = bundle.getIntArray(GOLDEN_NEEDED);
-			crystalKeysNeeded = bundle.getIntArray(CRYSTAL_NEEDED);
+
+			if (bundle.contains(CRYSTAL_NEEDED_OLD)) {
+				//attempt to preserve v0.0.3 save file
+				int[] ironKeys = bundle.getIntArray(IRON_NEEDED);
+				int[] goldenKeys = bundle.getIntArray(GOLDEN_NEEDED);
+				int[] crystalKeys = bundle.getIntArray(CRYSTAL_NEEDED_OLD);
+
+				System.arraycopy(ironKeys, 0, ironKeysNeeded[0], 0, ironKeys.length);
+				System.arraycopy(goldenKeys, 0, goldenKeysNeeded[0], 0, goldenKeys.length);
+                System.arraycopy(crystalKeys, 0, crystalKeysNeeded[0], 0, crystalKeys.length);
+			} else {
+				ironKeysNeeded[0] = bundle.getIntArray(IRON_NEEDED);
+				goldenKeysNeeded[0] = bundle.getIntArray(GOLDEN_NEEDED);
+
+				for (int b=0; b<Dungeon.MAX_BRANCH; b++) {
+					if (bundle.contains(String.format(CRYSTAL_NEEDED, b))) {
+						crystalKeysNeeded[b] = bundle.getIntArray(String.format(CRYSTAL_NEEDED, b));
+					} else {
+						Arrays.fill(crystalKeysNeeded[b], -1);
+					}
+				}
+			}
 		}
 
 	}

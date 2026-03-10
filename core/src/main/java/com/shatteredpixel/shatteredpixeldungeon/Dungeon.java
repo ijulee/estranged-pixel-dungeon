@@ -206,6 +206,8 @@ public class Dungeon {
 	// 0 is the default path
 	// 1 is for quest sub-floors
 	public static int branch;
+	public static final int MAX_DEPTH = 31;
+	public static final int MAX_BRANCH = 4;
 
 	//keeps track of what levels the game should try to load instead of creating fresh
 	public static ArrayList<Integer> generatedLevels = new ArrayList<>();
