@@ -450,7 +450,7 @@ public class Gun extends GunWeapon {
 
 		if (isEquipped(Dungeon.hero)) {
 			time -= Dungeon.hero.pointsInTalent(Talent.FAST_RELOAD);
-			if (((Hero)user).heroClass == HeroClass.GUNNER) {
+			if (Dungeon.hero.heroClass == HeroClass.GUNNER) {
 				time -= 1;
 			}
 		}
