@@ -657,8 +657,10 @@ abstract public class Weapon extends KindOfWeapon {
 				multi += 0.2f;
 			}
 
-			if (hero.hasTalent(Talent.HIGH_POWER) && hero.heroClass != HeroClass.MEDIC) {
-				multi += 0.1f * hero.pointsInTalent(Talent.HIGH_POWER);
+			if (attacker instanceof Hero &&
+				((Hero)attacker).hasTalent(Talent.HIGH_POWER) &&
+				((Hero)attacker).heroClass != HeroClass.MEDIC) {
+				multi += 0.1f * ((Hero)attacker).pointsInTalent(Talent.HIGH_POWER);
 			}
 
 			return multi;
