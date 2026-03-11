@@ -47,12 +47,15 @@ public class FT extends Gun {
             image = ItemSpriteSheet.NO_BULLET;
         }
 
+        public int maxDist() {
+            return tier() + 1;
+        }
+
         @Override
         protected void onThrow(int cell) {
             if (cell != curUser.pos) {
                 Ballistica aim = new Ballistica(curUser.pos, cell, Ballistica.WONT_STOP);
-                int maxDist = FT.this.tier + 1;
-                int dist = Math.min(aim.dist, maxDist);
+                int dist = Math.min(aim.dist, maxDist());
                 ConeAOE cone = new ConeAOE(aim,
                         dist,
                         30,

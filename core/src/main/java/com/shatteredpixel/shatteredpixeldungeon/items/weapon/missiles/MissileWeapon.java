@@ -51,6 +51,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.bow.SpiritBow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Explosive;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Projecting;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.gun.FT.FT;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.gun.Gun;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.gun.LG.LG;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.darts.Dart;
@@ -202,8 +203,15 @@ abstract public class MissileWeapon extends Weapon {
 	
 	@Override
 	public int throwPos(Hero user, int dst) {
+		//FIXME move into respective subclass methods
 		if (this instanceof LG.LGBullet) {
-			return dst;
+			Ballistica beam = new Ballistica(user.pos, dst, Ballistica.WONT_STOP);
+			return beam.path.get(Math.min(beam.dist, ((LG.LGBullet) this).maxDist()));
+        }
+
+		if (this instanceof FT.FTBullet) {
+			Ballistica beam = new Ballistica(user.pos, dst, Ballistica.DASH | Ballistica.IGNORE_SOFT_SOLID);
+			return beam.path.get(Math.min(beam.dist, ((FT.FTBullet) this).maxDist()));
 		}
 
 		int projecting = 0;

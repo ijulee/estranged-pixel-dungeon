@@ -44,12 +44,16 @@ public class LG extends Gun {
             image = ItemSpriteSheet.NO_BULLET;
         }
 
+        public int maxDist() {
+            return 2 * (tier() + 1);
+        }
+
         @Override
         protected void onThrow(int cell) {
             if (cell != curUser.pos) {
                 Ballistica aim = new Ballistica(curUser.pos, cell, Ballistica.WONT_STOP);
                 ArrayList<Char> targets = new ArrayList<>();
-                int maxDist = 2*(LG.this.tier+1);
+                int maxDist = maxDist();
                 int dist = Math.min(aim.dist, maxDist);
                 int cells = aim.path.get(Math.min(aim.dist, dist));
                 boolean terrainAffected = false;
