@@ -245,11 +245,6 @@ public abstract class GunWeapon extends MeleeWeapon {
             return ACC;
         }
 
-        /*@Override
-        protected void onThrow(int cell) {
-            super.onThrow(cell);
-        }*/
-
         @Override
         protected void rangedHit(Char enemy, int cell) {
             if (curUser != null) {
