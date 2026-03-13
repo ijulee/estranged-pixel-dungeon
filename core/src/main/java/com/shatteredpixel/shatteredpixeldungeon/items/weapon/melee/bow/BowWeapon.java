@@ -209,10 +209,12 @@ public class BowWeapon extends GunWeapon {
                     Sample.INSTANCE.play(Assets.Sounds.HIT_STRONG);
                 }
 
-                if (curUser.buff(BowFatigue.class) != null) {
-                    damage = curUser.buff(BowFatigue.class).damage(damage);
-                }
             }
+
+            if (owner.buff(BowFatigue.class) != null) {
+                damage = owner.buff(BowFatigue.class).damage(damage);
+            }
+
             return damage;
         }
 
@@ -285,11 +287,6 @@ public class BowWeapon extends GunWeapon {
             if (curUser != null) {
                 Dungeon.bullet--;
 
-                if (curUser.buff(PenetrationShotBuff.class) != null &&
-                        enemy != null && enemy != curUser) {
-                    curUser.buff(PenetrationShotBuff.class).detach();
-                }
-
                 if (curUser.subClass != HeroSubClass.BOWMASTER) {
                     Buff.affect(curUser, BowFatigue.class, BowFatigue.MAX_DURATION);
                 }
@@ -308,7 +305,11 @@ public class BowWeapon extends GunWeapon {
                 doDrop(cell);
             }
 
-            if (curUser != null) {
+            if (BowWeapon.this.isEquipped(curUser)) {
+                if (curUser.buff(PenetrationShotBuff.class) != null && enemy != curUser) {
+                    curUser.buff(PenetrationShotBuff.class).detach();
+                }
+
                 if (curUser.subClass == HeroSubClass.BOWMASTER) {
                     Buff.affect(curUser, BowMasterSkill.class).onShoot();
                 }
