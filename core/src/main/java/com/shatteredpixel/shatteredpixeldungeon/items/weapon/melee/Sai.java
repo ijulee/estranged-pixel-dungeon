@@ -144,11 +144,11 @@ public class Sai extends MeleeWeapon {
 			if (Dungeon.hero.belongings.weapon() instanceof Gloves
 					|| Dungeon.hero.belongings.weapon() instanceof Sai
 					|| Dungeon.hero.belongings.weapon() instanceof Gauntlet
-					|| (Dungeon.hero.belongings.weapon() instanceof HeroSword && ((HeroSword) Dungeon.hero.belongings.weapon()).ability == 7)
+					|| (Dungeon.hero.belongings.weapon() instanceof HeroSword && ((HeroSword) Dungeon.hero.belongings.weapon()).ability == HeroSword.Ability.COMBO_STRIKE)
 					|| Dungeon.hero.belongings.secondWep() instanceof Gloves
 					|| Dungeon.hero.belongings.secondWep() instanceof Sai
 					|| Dungeon.hero.belongings.secondWep() instanceof Gauntlet
-					|| (Dungeon.hero.belongings.secondWep() instanceof HeroSword && ((HeroSword) Dungeon.hero.belongings.secondWep()).ability == 7)) {
+					|| (Dungeon.hero.belongings.secondWep() instanceof HeroSword && ((HeroSword) Dungeon.hero.belongings.secondWep()).ability == HeroSword.Ability.COMBO_STRIKE)) {
 				return BuffIndicator.DUEL_COMBO;
 			} else {
 				return BuffIndicator.NONE;

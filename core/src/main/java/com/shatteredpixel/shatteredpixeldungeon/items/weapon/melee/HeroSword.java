@@ -8,7 +8,6 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.HolyWard;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.HolyWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -33,86 +32,115 @@ public class HeroSword extends MeleeWeapon {
         bones = false;
     }
 
-    public MeleeWeapon usedWep;
+    public enum Ability {
+        SNEAK               (Dagger.class),
+        HEAVY_BLOW          (HandAxe.class),
+        COMBO_STRIKE        (Gloves.class),
+        RETRIBUTION         (Greataxe.class),
+        CLEAVE              (WornShortsword.class),
+        DEFENSIVE_STANCE    (Quarterstaff.class),
+        RUNIC_SLASH         (RunicBlade.class),
+        SWORD_DANCE         (Scimitar.class),
+        HARVEST             (Sickle.class),
+        LUNGE               (Rapier.class),
+        ANGELIZE            (Bible.class),
+        REVERSE_GRIP        (DualDagger.class),
+        PARRY               (Nunchaku.class),
+        FLASH_SLASH         (WornKatana.class),
+        LASH                (Whip.class),
+        GUARD               (RoundShield.class);
 
-    int ability = -1;
+        public final Class<? extends MeleeWeapon> wepClass;
 
-    public static final int NO_ABILITY          = -1;
-    public static final int SNEAK               = 0;
-    public static final int HEAVY_BLOW          = 1;
-    public static final int COMBO_STRIKE        = 2;
-    public static final int RETRIBUTION         = 3;
-    public static final int CLEAVE              = 4;
-    public static final int DEFENSIVE_STANCE    = 5;
-    public static final int RUNIC_SLASH         = 6;
-    public static final int SWORD_DANCE         = 7;
-    public static final int HARVEST             = 8;
-    public static final int LUNGE               = 9;
-    public static final int ANGELIZE            = 10;
-    public static final int REVERSE_GRIP        = 11;
-    public static final int PARRY               = 12;
-    public static final int FLASH_SLASH         = 13;
-    public static final int LASH                = 14;
-    public static final int GUARD               = 15;
+        Ability(Class<? extends MeleeWeapon> wepClass) {
+            this.wepClass = wepClass;
+        }
 
-    public HeroSword() {}
-
-    public HeroSword(int ability, MeleeWeapon wep) {
-        this.tier = wep.tier;
-        this.DLY = wep.DLY;
-        this.RCH = wep.RCH;
-        this.ability = ability;
-        this.usedWep = wep;
+        public String abilityName() {
+            return Messages.get(wepClass, "ability_name");
+        }
     }
 
-    private static final String USED_WEAPON	= "usedWep";
-    private static final String ABILITY	= "ability";
+    private MeleeWeapon baseWep;
+
+    public Ability ability;
+
+    public HeroSword() {
+        this(null);
+    }
+
+    public HeroSword(MeleeWeapon wep) {
+        baseWep = wep == null ? new WornShortsword() : wep;
+
+        copyBaseWeapon();
+    }
+
+    private void copyBaseWeapon() {
+        tier = baseWep.tier;
+        DLY = baseWep.DLY;
+        RCH = baseWep.RCH;
+
+        int level = baseWep.trueLevel();
+        if (level > 0) {
+            upgrade( level );
+        } else if (level < 0) {
+            degrade( -level );
+        }
+
+        //don't copy ench or CI bonus
+
+        masteryPotionBonus = baseWep.masteryPotionBonus;
+        levelKnown = baseWep.levelKnown;
+        cursedKnown = baseWep.cursedKnown;
+        cursed = baseWep.cursed;
+        augment = baseWep.augment;
+        enchantHardened = baseWep.enchantHardened;
+    }
+
+    private static final String BASE_WEAPON = "usedWep";
+    private static final String ABILITY = "ability";
 
     @Override
     public void storeInBundle( Bundle bundle ) {
         super.storeInBundle( bundle );
-        bundle.put( USED_WEAPON, usedWep );
+        bundle.put( BASE_WEAPON, baseWep );
         bundle.put( ABILITY, ability );
     }
 
     @Override
     public void restoreFromBundle( Bundle bundle ) {
         super.restoreFromBundle( bundle );
-        usedWep = (MeleeWeapon) bundle.get( USED_WEAPON );
-        ability = bundle.getInt( ABILITY );
+        baseWep = (MeleeWeapon) bundle.get( BASE_WEAPON );
+        copyBaseWeapon();
+        ability = bundle.getEnum( ABILITY, Ability.class );
     }
 
     @Override
     public int min(int lvl) {
-        return usedWep.min(lvl);
+        return baseWep.min(lvl);
     }
 
     @Override
     public int max(int lvl) {
-        return usedWep.max(lvl);
+        return baseWep.max(lvl);
     }
 
     @Override
     public int STRReq(int lvl) {
-        return usedWep.STRReq(lvl);
+        return baseWep.STRReq(lvl);
     }
 
     @Override
     public int defenseFactor( Char owner ) {
-        return usedWep.defenseFactor(owner);
+        return baseWep.defenseFactor(owner);
     }
 
     @Override
     public int reachFactor(Char owner) {
         int reach = super.reachFactor(owner);
-        reach += usedWep.reachFactor(owner);
+        reach += baseWep.reachFactor(owner);
 
         return reach - 1;
-    }
-
-    @Override
-    public boolean isIdentified() {
-        return true;
     }
 
     @Override
@@ -127,12 +155,12 @@ public class HeroSword extends MeleeWeapon {
             return Messages.get(HolyWeapon.class, "ench_name", trueName());
         } else if (enchantment != null && (cursedKnown || !enchantment.curse())) {
             String name = trueName();
-            if (usedWep != null && usedWep.enchantment != null && enchantment.getClass() != usedWep.enchantment.getClass()) {
-                name = usedWep.enchantment.name( name );
+            if (baseWep.enchantment != null && enchantment.getClass() != baseWep.enchantment.getClass()) {
+                name = baseWep.enchantment.name( name );
             }
             return enchantment.name( name );
-        } else if (usedWep != null && usedWep.enchantment != null) {
-            return usedWep.enchantment.name( super.name() );
+        } else if (baseWep.enchantment != null) {
+            return baseWep.enchantment.name( super.name() );
         } else {
             return super.name();
         }
@@ -142,36 +170,42 @@ public class HeroSword extends MeleeWeapon {
     public String info() {
         String info = super.info();
 
-        info += "\n\n" + Messages.get(this, "properties", usedWep.name());
+        String baseWepName = baseWep.name() + ((baseWep.level() > 0) ? String.format(" +%d", baseWep.level()) : "");
+        info += "\n\n" + Messages.get(this, "properties", baseWep.name());
+        if (baseWep.enchantment != null) {
+            info += " " + baseWep.enchantment.desc();
+        }
 
         return info;
     }
 
     @Override
+    public String statsInfo() {
+        return baseWep.statsInfo();
+    }
+
+    @Override
     public int proc(Char attacker, Char defender, int damage) {
-        usedWep.proc(attacker, defender, damage);
+        damage = baseWep.proc( attacker, defender, damage );
         return super.proc( attacker, defender, damage );
     }
 
     @Override
     protected int baseChargeUse(Hero hero, Char target){
-        if (ability == CLEAVE) {
-            if (hero.buff(Sword.CleaveTracker.class) != null) {
-                return 0;
-            } else {
-                return 1;
-            }
+        if (ability == Ability.CLEAVE && hero.buff(Sword.CleaveTracker.class) != null) {
+            return 0;
+        } else {
+            return 1;
         }
-        return 1;
     }
 
     @Override
     public String targetingPrompt() {
         switch (ability) {
-            case NO_ABILITY: case DEFENSIVE_STANCE: case SWORD_DANCE: case ANGELIZE: case REVERSE_GRIP: case PARRY: case LASH: case GUARD: default:
-                return null;
             case SNEAK: case HEAVY_BLOW: case COMBO_STRIKE: case RETRIBUTION: case CLEAVE: case RUNIC_SLASH: case HARVEST: case LUNGE: case FLASH_SLASH:
                 return Messages.get(this, "prompt");
+            default:
+                return null;
         }
     }
 
@@ -179,423 +213,365 @@ public class HeroSword extends MeleeWeapon {
     protected void duelistAbility(Hero hero, Integer target) {
         int dmgBoost;
         switch (ability) {
-            case NO_ABILITY: default:
-                break;
-            case SNEAK: //단검 능력
+            case SNEAK:
                 Dagger.sneakAbility(hero, target, 6, 2+buffedLvl(), this);
                 break;
-            case HEAVY_BLOW: //손도끼 능력
+            case HEAVY_BLOW:
+                //roughly +45% damage
                 dmgBoost = augment.damageFactor(Math.round(0.45f*max(buffedLvl())));
                 Mace.heavyBlowAbility(hero, target, 1, dmgBoost, this);
                 break;
-            case COMBO_STRIKE: //징 박힌 장갑 능력
+            case COMBO_STRIKE:
+                //roughly +45% damage
                 dmgBoost = augment.damageFactor(Math.round(0.45f*max(buffedLvl())));
                 Sai.comboStrikeAbility(hero, target, 0, dmgBoost, this);
                 break;
-            case RETRIBUTION: //특대 도끼 능력
-                if (hero.HP / (float)hero.HT >= 0.5f){
-                    GLog.w(Messages.get(this, "ability_cant_use"));
-                    return;
-                }
-
-                if (target == null) {
-                    return;
-                }
-
-                Char enemy = Actor.findChar(target);
-                if (enemy == null || enemy == hero || hero.isCharmedBy(enemy) || !Dungeon.level.heroFOV[target]) {
-                    GLog.w(Messages.get(this, "ability_no_target"));
-                    return;
-                }
-
-                hero.belongings.abilityWeapon = this;
-                if (!hero.canAttack(enemy)){
-                    GLog.w(Messages.get(this, "ability_target_range"));
-                    hero.belongings.abilityWeapon = null;
-                    return;
-                }
-                hero.belongings.abilityWeapon = null;
-
-                hero.sprite.attack(enemy.pos, new Callback() {
-                    @Override
-                    public void call() {
-                        beforeAbilityUsed(hero, enemy);
-                        AttackIndicator.target(enemy);
-
-                        //roughly +50% base damage, +50% scaling
-                        int dmgBoost = augment.damageFactor(Math.round(0.5f*max(buffedLvl())));
-
-                        if (hero.attack(enemy, 1, dmgBoost, Char.INFINITE_ACCURACY)){
-                            Sample.INSTANCE.play(Assets.Sounds.HIT_STRONG);
-                        }
-
-                        Invisibility.dispel();
-                        if (!enemy.isAlive()){
-                            hero.next();
-                            onAbilityKill(hero, enemy);
-                        } else {
-                            hero.spendAndNext(hero.attackDelay());
-                        }
-                        afterAbilityUsed(hero);
-                    }
-                });
+            case RETRIBUTION:
+                //roughly +50% damage
+                dmgBoost = augment.damageFactor( Math.round(0.5f * max(buffedLvl())) );
+                retributionAbility(hero, target, dmgBoost, this);
                 break;
-            case CLEAVE: //검 능력
+            case CLEAVE:
                 dmgBoost = augment.damageFactor(Math.round(0.67f*max(buffedLvl())));
                 Sword.cleaveAbility(hero, target, 1, dmgBoost, this);
                 break;
-            case DEFENSIVE_STANCE: //육척봉 능력
-                beforeAbilityUsed(hero, null);
-                //1 turn less as using the ability is instant
-                Buff.prolong(hero, Quarterstaff.DefensiveStance.class, 3 + buffedLvl());
-                hero.sprite.operate(hero.pos);
-                hero.next();
-                afterAbilityUsed(hero);
+            case DEFENSIVE_STANCE:
+                defensiveStanceAbility(hero, this);
                 break;
-            case RUNIC_SLASH: //룬 검 능력
-                if (target == null) {
-                    return;
-                }
-
-                Char enemy2 = Actor.findChar(target);
-                if (enemy2 == null || enemy2 == hero || hero.isCharmedBy(enemy2) || !Dungeon.level.heroFOV[target]) {
-                    GLog.w(Messages.get(this, "ability_no_target"));
-                    return;
-                }
-
-                //we apply here because of projecting
-                RunicBlade.RunicSlashTracker tracker = Buff.affect(hero, RunicBlade.RunicSlashTracker.class);
-                tracker.boost = 2f + 0.50f*buffedLvl();
-                hero.belongings.abilityWeapon = this;
-                if (!hero.canAttack(enemy2)){
-                    GLog.w(Messages.get(this, "ability_target_range"));
-                    tracker.detach();
-                    hero.belongings.abilityWeapon = null;
-                    return;
-                }
-                hero.belongings.abilityWeapon = null;
-
-                hero.sprite.attack(enemy2.pos, new Callback() {
-                    @Override
-                    public void call() {
-                        beforeAbilityUsed(hero, enemy2);
-                        AttackIndicator.target(enemy2);
-                        if (hero.attack(enemy2, 1f, 0, Char.INFINITE_ACCURACY)){
-                            Sample.INSTANCE.play(Assets.Sounds.HIT_STRONG);
-                            if (!enemy2.isAlive()){
-                                onAbilityKill(hero, enemy2);
-                            }
-                        }
-                        tracker.detach();
-                        Invisibility.dispel();
-                        hero.spendAndNext(hero.attackDelay());
-                        afterAbilityUsed(hero);
-                    }
-                });
+            case RUNIC_SLASH:
+                runicSlashAbility(hero, target,this);
                 break;
-            case SWORD_DANCE: //시미타 능력
-                beforeAbilityUsed(hero, null);
-                //1 turn less as using the ability is instant
-                Buff.prolong(hero, Scimitar.SwordDance.class, 3+buffedLvl());
-                hero.sprite.operate(hero.pos);
-                hero.next();
-                afterAbilityUsed(hero);
+            case SWORD_DANCE:
+                swordDanceAbility(hero, this);
                 break;
-            case HARVEST: //손낫 능력
+            case HARVEST:
                 //replaces damage with 50% avg dmg of bleed
                 int bleedAmt = augment.damageFactor(Math.round(0.5f*max(buffedLvl())));
                 Sickle.harvestAbility(hero, target, 0f, bleedAmt, this);
                 break;
-            case LUNGE: //레이피어 능력
+            case LUNGE:
                 //roughly +67% damage
                 dmgBoost = augment.damageFactor(Math.round(0.67f*max(buffedLvl())));
                 Rapier.lungeAbility(hero, target, 1, dmgBoost, this);
                 break;
-            case ANGELIZE: //성서 능력
+            case ANGELIZE:
                 Bible.angelAbility(hero, 5+buffedLvl(), this);
                 break;
-            case REVERSE_GRIP: //쌍단검 능력
-                beforeAbilityUsed(hero, null);
-                //1 turn less as using the ability is instant
-                Buff.prolong(hero, DualDagger.ReverseBlade.class, 5+buffedLvl());
-                Sample.INSTANCE.play(Assets.Sounds.MISS);
-                hero.sprite.emitter().burst( Speck.factory( Speck.JET ), 20);
-                hero.next();
-                afterAbilityUsed(hero);
+            case REVERSE_GRIP:
+                reverseGripAbility(hero, this);
                 break;
-            case PARRY: //쌍절곤 능력
-                beforeAbilityUsed(hero, null);
-                Invisibility.dispel();
-                Buff.affect(hero, Nunchaku.ParryTracker.class, Actor.TICK);
-                hero.spendAndNext(Actor.TICK);
-                hero.busy();
-                afterAbilityUsed(hero);
+            case PARRY:
+                parryAbility(hero, this);
                 break;
-            case FLASH_SLASH: //낡은 도 능력
+            case FLASH_SLASH:
                 NormalKatana.flashSlashAbility(hero, target, 0.6f, this);
                 break;
-            case LASH: //채찍 능력
-                ArrayList<Char> targets = new ArrayList<>();
-                Char closest = null;
-
-                hero.belongings.abilityWeapon = this;
-                for (Char ch : Actor.chars()){
-                    if (ch.alignment == Char.Alignment.ENEMY
-                            && !hero.isCharmedBy(ch)
-                            && Dungeon.level.heroFOV[ch.pos]
-                            && hero.canAttack(ch)){
-                        targets.add(ch);
-                        if (closest == null || Dungeon.level.trueDistance(hero.pos, closest.pos) > Dungeon.level.trueDistance(hero.pos, ch.pos)){
-                            closest = ch;
-                        }
-                    }
-                }
-                hero.belongings.abilityWeapon = null;
-
-                if (targets.isEmpty()) {
-                    GLog.w(Messages.get(this, "ability_no_target"));
-                    return;
-                }
-
-                throwSound();
-                Char finalClosest = closest;
-                hero.sprite.attack(hero.pos, new Callback() {
-                    @Override
-                    public void call() {
-                        beforeAbilityUsed(hero, finalClosest);
-                        //roughly +20% base damage
-                        int dmgBoost = augment.damageFactor(Math.round(0.2f*max(buffedLvl())));
-                        for (Char ch : targets) {
-                            hero.attack(ch, 1, dmgBoost, Char.INFINITE_ACCURACY);
-                            if (!ch.isAlive()){
-                                onAbilityKill(hero, ch);
-                            }
-                        }
-                        Invisibility.dispel();
-                        hero.spendAndNext(hero.attackDelay());
-                        afterAbilityUsed(hero);
-                    }
-                });
+            case LASH:
+                //roughly +20% damage
+                dmgBoost = augment.damageFactor(Math.round(0.2f*max(buffedLvl())));
+                lashAbility(hero, dmgBoost, this);
                 break;
-            case GUARD: //원형 방패 능력
+            case GUARD:
                 RoundShield.guardAbility(hero, 5+buffedLvl(), this);
+                break;
+            default:
                 break;
         }
     }
 
     @Override
     public String abilityName() {
-        MeleeWeapon wep;
-        switch (ability) {
-            case NO_ABILITY: default:
-                wep = new MeleeWeapon();
-                break;
-            case SNEAK:
-                wep = new Dagger();
-                break;
-            case HEAVY_BLOW:
-                wep = new HandAxe();
-                break;
-            case COMBO_STRIKE:
-                wep = new Gloves();
-                break;
-            case RETRIBUTION:
-                wep = new Greataxe();
-                break;
-            case CLEAVE:
-                wep = new WornShortsword();
-                break;
-            case DEFENSIVE_STANCE:
-                wep = new Quarterstaff();
-                break;
-            case RUNIC_SLASH:
-                wep = new RunicBlade();
-                break;
-            case SWORD_DANCE:
-                wep = new Scimitar();
-                break;
-            case HARVEST:
-                wep = new Sickle();
-                break;
-            case LUNGE:
-                wep = new Rapier();
-                break;
-            case ANGELIZE:
-                wep = new Bible();
-                break;
-            case REVERSE_GRIP:
-                wep = new DualDagger();
-                break;
-            case PARRY:
-                wep = new Nunchaku();
-                break;
-            case FLASH_SLASH:
-                wep = new WornKatana();
-                break;
-            case LASH:
-                wep = new Whip();
-                break;
-            case GUARD:
-                wep = new RoundShield();
-                break;
-        }
-        return wep.abilityName();
+        return ability.abilityName();
     }
 
     @Override
     public String abilityInfo() {
-        String prefix = Messages.get(this, "prefix");
-        MeleeWeapon wep;
+        String info = Messages.get(this, "prefix");
+        int dmgBoost;
         switch (ability) {
-            case NO_ABILITY: default:
-                wep = new MeleeWeapon() {
-                    @Override
-                    public int max(int lvl) {
-                        return HeroSword.this.max(lvl);
-                    }
-                };
-                break;
             case SNEAK:
-                wep = new Dagger() {
-                    @Override
-                    public int max(int lvl) {
-                        return HeroSword.this.max(lvl);
-                    }
-                };
+                if (levelKnown) {
+                    info += " " + Messages.get(ability.wepClass, "ability_desc", 2+buffedLvl());
+                } else {
+                    info += " " + Messages.get(ability.wepClass, "typical_ability_desc", 2);
+                }
                 break;
             case HEAVY_BLOW:
-                wep = new HandAxe() {
-                    @Override
-                    public int max(int lvl) {
-                        return HeroSword.this.max(lvl);
-                    }
-                };
+                dmgBoost = levelKnown ? 4 + Math.round(1.5f*buffedLvl()) : 4;
+                if (levelKnown) {
+                    info += " " + Messages.get(ability.wepClass, "ability_desc", augment.damageFactor(min()+dmgBoost), augment.damageFactor(max()+dmgBoost));
+                } else {
+                    info += " " + Messages.get(ability.wepClass, "typical_ability_desc", min(0)+dmgBoost, max(0)+dmgBoost);
+                }
                 break;
             case COMBO_STRIKE:
-                wep = new Gloves() {
-                    @Override
-                    public int max(int lvl) {
-                        return HeroSword.this.max(lvl);
-                    }
-                };
+                dmgBoost = levelKnown ? 3 + buffedLvl() : 3;
+                if (levelKnown) {
+                    info += " " + Messages.get(ability.wepClass, "ability_desc", augment.damageFactor(dmgBoost));
+                } else {
+                    info += " " + Messages.get(ability.wepClass, "typical_ability_desc", augment.damageFactor(dmgBoost));
+                }
                 break;
             case RETRIBUTION:
-                wep = new Greataxe() {
-                    @Override
-                    public int max(int lvl) {
-                        return HeroSword.this.max(lvl);
-                    }
-                };
+                dmgBoost = levelKnown ? 15 + 2*buffedLvl() : 15;
+                if (levelKnown) {
+                    info += " " + Messages.get(ability.wepClass, "ability_desc", augment.damageFactor(min()+dmgBoost), augment.damageFactor(max()+dmgBoost));
+                } else {
+                    info += " " + Messages.get(ability.wepClass, "typical_ability_desc", min(0)+dmgBoost, max(0)+dmgBoost);
+                }
                 break;
             case CLEAVE:
-                wep = new WornShortsword() {
-                    @Override
-                    public int max(int lvl) {
-                        return HeroSword.this.max(lvl);
-                    }
-                };
+                dmgBoost = levelKnown ? 3 + buffedLvl() : 3;
+                if (levelKnown) {
+                    info += " " + Messages.get(ability.wepClass, "ability_desc", augment.damageFactor(min()+dmgBoost), augment.damageFactor(max()+dmgBoost));
+                } else {
+                    info += " " + Messages.get(ability.wepClass, "typical_ability_desc", min(0)+dmgBoost, max(0)+dmgBoost);
+                }
                 break;
             case DEFENSIVE_STANCE:
-                wep = new Quarterstaff() {
-                    @Override
-                    public int max(int lvl) {
-                        return HeroSword.this.max(lvl);
-                    }
-                };
+            case SWORD_DANCE:
+                if (levelKnown) {
+                    info += " " + Messages.get(ability.wepClass, "ability_desc", 4+buffedLvl());
+                } else {
+                    info += " " + Messages.get(ability.wepClass, "typical_ability_desc", 4);
+                }
                 break;
             case RUNIC_SLASH:
-                wep = new RunicBlade() {
-                    @Override
-                    public int max(int lvl) {
-                        return HeroSword.this.max(lvl);
-                    }
-                };
-                break;
-            case SWORD_DANCE:
-                wep = new Scimitar() {
-                    @Override
-                    public int max(int lvl) {
-                        return HeroSword.this.max(lvl);
-                    }
-                };
+                if (levelKnown) {
+                    info += " " + Messages.get(ability.wepClass, "ability_desc", 300+50*buffedLvl());
+                } else {
+                    info += " " + Messages.get(ability.wepClass, "typical_ability_desc", 300);
+                }
                 break;
             case HARVEST:
-                wep = new Sickle() {
-                    @Override
-                    public int max(int lvl) {
-                        return HeroSword.this.max(lvl);
-                    }
-                };
+                int bleedAmt = levelKnown ? Math.round(15f + 2.5f*buffedLvl()) : 15;
+                if (levelKnown) {
+                    info += " " + Messages.get(ability.wepClass, "ability_desc", augment.damageFactor(bleedAmt));
+                } else {
+                    info += " " + Messages.get(ability.wepClass, "typical_ability_desc", bleedAmt);
+                }
                 break;
             case LUNGE:
-                wep = new Rapier() {
-                    @Override
-                    public int max(int lvl) {
-                        return HeroSword.this.max(lvl);
-                    }
-                };
+                dmgBoost = levelKnown ? 5 + Math.round(1.5f*buffedLvl()) : 5;
+                if (levelKnown) {
+                    info += " " + Messages.get(ability.wepClass, "ability_desc", augment.damageFactor(min()+dmgBoost), augment.damageFactor(max()+dmgBoost));
+                } else {
+                    info += " " + Messages.get(ability.wepClass, "typical_ability_desc", min(0)+dmgBoost, max(0)+dmgBoost);
+                }
                 break;
             case ANGELIZE:
-                wep = new Bible() {
-                    @Override
-                    public int max(int lvl) {
-                        return HeroSword.this.max(lvl);
-                    }
-                };
-                break;
             case REVERSE_GRIP:
-                wep = new DualDagger() {
-                    @Override
-                    public int max(int lvl) {
-                        return HeroSword.this.max(lvl);
-                    }
-                };
+                if (levelKnown) {
+                    info += " " + Messages.get(ability.wepClass, "ability_desc", 6+buffedLvl());
+                } else {
+                    info += " " + Messages.get(ability.wepClass, "typical_ability_desc", 6);
+                }
                 break;
             case PARRY:
-                wep = new Nunchaku() {
-                    @Override
-                    public int max(int lvl) {
-                        return HeroSword.this.max(lvl);
-                    }
-                };
+                if (levelKnown) {
+                    info += " " + Messages.get(ability.wepClass, "ability_desc");
+                } else {
+                    info += " " + Messages.get(ability.wepClass, "typical_ability_desc");
+                }
                 break;
             case FLASH_SLASH:
-                wep = new WornKatana() {
-                    @Override
-                    public int max(int lvl) {
-                        return HeroSword.this.max(lvl);
-                    }
-                };
+                if (levelKnown) {
+                    info += " " + Messages.get(ability.wepClass, "ability_desc", Messages.decimalFormat("#.##", 0.6f));
+                } else {
+                    info += " " + Messages.get(ability.wepClass, "typical_ability_desc", Messages.decimalFormat("#.##", 0.6f));
+                }
                 break;
             case LASH:
-                wep = new Whip() {
-                    @Override
-                    public int max(int lvl) {
-                        return HeroSword.this.max(lvl);
-                    }
-                };
+                if (levelKnown) {
+                    info += " " + Messages.get(ability.wepClass, "ability_desc", augment.damageFactor(min()), augment.damageFactor(max()));
+                } else {
+                    info += " " + Messages.get(ability.wepClass, "typical_ability_desc", min(0), max(0));
+                }
                 break;
             case GUARD:
-                wep = new RoundShield() {
-                    @Override
-                    public int max(int lvl) {
-                        return HeroSword.this.max(lvl);
-                    }
-                };
+                if (levelKnown) {
+                    info += " " + Messages.get(ability.wepClass, "ability_desc", 5+buffedLvl());
+                } else {
+                    info += " " + Messages.get(ability.wepClass, "typical_ability_desc", 5);
+                }
+                break;
+            default:
                 break;
         }
-        if (levelKnown) {
-            wep.identify().level(buffedLvl());
-        }
-        return prefix + " " + wep.abilityInfo();
+        return info;
     }
 
     @Override
     public ItemSprite.Glowing glowing() {
-        if (usedWep != null) {
-            return ItemSprite.DualGlowing.combineGlowing(super.glowing(), usedWep.glowing());
-        } else {
-            return super.glowing();
+        return ItemSprite.DualGlowing.combineGlowing(super.glowing(), baseWep.glowing());
+    }
+
+    private static void retributionAbility(Hero hero, Integer target, int dmgBoost, MeleeWeapon wep) {
+        if (hero.HP / (float)hero.HT >= 0.5f){
+            GLog.w(Messages.get(wep, "ability_cant_use"));
+            return;
         }
+
+        if (target == null) {
+            return;
+        }
+
+        Char enemy = Actor.findChar(target);
+
+        if (enemy == null || enemy == hero || hero.isCharmedBy(enemy) || !Dungeon.level.heroFOV[target]) {
+            GLog.w(Messages.get(wep, "ability_no_target"));
+            return;
+        }
+
+        hero.belongings.abilityWeapon = wep;
+        if (!hero.canAttack(enemy)){
+            GLog.w(Messages.get(wep, "ability_target_range"));
+            hero.belongings.abilityWeapon = null;
+            return;
+        }
+        hero.belongings.abilityWeapon = null;
+
+        hero.sprite.attack(enemy.pos, new Callback() {
+            @Override
+            public void call() {
+                wep.beforeAbilityUsed(hero, enemy);
+                AttackIndicator.target(enemy);
+
+
+                if (hero.attack(enemy, 1, dmgBoost, Char.INFINITE_ACCURACY)){
+                    Sample.INSTANCE.play(Assets.Sounds.HIT_STRONG);
+                }
+
+                Invisibility.dispel();
+                if (!enemy.isAlive()){
+                    hero.next();
+                    onAbilityKill(hero, enemy);
+                } else {
+                    hero.spendAndNext(hero.attackDelay());
+                }
+                wep.afterAbilityUsed(hero);
+            }
+        });
+    }
+
+    private static void defensiveStanceAbility(Hero hero, MeleeWeapon wep) {
+        wep.beforeAbilityUsed(hero, null);
+        //1 turn less as using the ability is instant
+        Buff.prolong(hero, Quarterstaff.DefensiveStance.class, 3 + wep.buffedLvl());
+        hero.sprite.operate(hero.pos);
+        hero.next();
+        wep.afterAbilityUsed(hero);
+    }
+
+    private static void runicSlashAbility(Hero hero, Integer target, MeleeWeapon wep) {
+        if (target == null) {
+            return;
+        }
+
+        Char enemy = Actor.findChar(target);
+        if (enemy == null || enemy == hero || hero.isCharmedBy(enemy) || !Dungeon.level.heroFOV[target]) {
+            GLog.w(Messages.get(wep, "ability_no_target"));
+            return;
+        }
+
+        //we apply here because of projecting
+        RunicBlade.RunicSlashTracker tracker = Buff.affect(hero, RunicBlade.RunicSlashTracker.class);
+        tracker.boost = 2f + 0.50f*wep.buffedLvl();
+        hero.belongings.abilityWeapon = wep;
+        if (!hero.canAttack(enemy)){
+            GLog.w(Messages.get(wep, "ability_target_range"));
+            tracker.detach();
+            hero.belongings.abilityWeapon = null;
+            return;
+        }
+        hero.belongings.abilityWeapon = null;
+
+        hero.sprite.attack(enemy.pos, new Callback() {
+            @Override
+            public void call() {
+                wep.beforeAbilityUsed(hero, enemy);
+                AttackIndicator.target(enemy);
+                if (hero.attack(enemy, 1f, 0, Char.INFINITE_ACCURACY)){
+                    Sample.INSTANCE.play(Assets.Sounds.HIT_STRONG);
+                    if (!enemy.isAlive()){
+                        onAbilityKill(hero, enemy);
+                    }
+                }
+                tracker.detach();
+                Invisibility.dispel();
+                hero.spendAndNext(hero.attackDelay());
+                wep.afterAbilityUsed(hero);
+            }
+        });
+    }
+
+    private static void swordDanceAbility(Hero hero, MeleeWeapon wep) {
+        wep.beforeAbilityUsed(hero, null);
+        //1 turn less as using the ability is instant
+        Buff.prolong(hero, Scimitar.SwordDance.class, 3+wep.buffedLvl());
+        hero.sprite.operate(hero.pos);
+        hero.next();
+        wep.afterAbilityUsed(hero);
+    }
+
+    private static void reverseGripAbility(Hero hero, MeleeWeapon wep) {
+        wep.beforeAbilityUsed(hero, null);
+        //1 turn less as using the ability is instant
+        Buff.prolong(hero, DualDagger.ReverseBlade.class, 5+wep.buffedLvl());
+        Sample.INSTANCE.play(Assets.Sounds.MISS);
+        hero.sprite.emitter().burst( Speck.factory( Speck.JET ), 20);
+        hero.next();
+        wep.afterAbilityUsed(hero);
+    }
+
+    private static void parryAbility(Hero hero, MeleeWeapon wep) {
+        wep.beforeAbilityUsed(hero, null);
+        Invisibility.dispel();
+        Buff.affect(hero, Nunchaku.ParryTracker.class, Actor.TICK);
+        hero.spendAndNext(Actor.TICK);
+        hero.busy();
+        wep.afterAbilityUsed(hero);
+    }
+
+    private static void lashAbility(Hero hero, int dmgBoost, MeleeWeapon wep) {
+        ArrayList<Char> targets = new ArrayList<>();
+        Char closest = null;
+
+        hero.belongings.abilityWeapon = wep;
+        for (Char ch : Actor.chars()){
+            if (ch.alignment == Char.Alignment.ENEMY
+                    && !hero.isCharmedBy(ch)
+                    && Dungeon.level.heroFOV[ch.pos]
+                    && hero.canAttack(ch)){
+                targets.add(ch);
+                if (closest == null || Dungeon.level.trueDistance(hero.pos, closest.pos) > Dungeon.level.trueDistance(hero.pos, ch.pos)){
+                    closest = ch;
+                }
+            }
+        }
+        hero.belongings.abilityWeapon = null;
+
+        if (targets.isEmpty()) {
+            GLog.w(Messages.get(wep, "ability_no_target"));
+            return;
+        }
+
+        wep.throwSound();
+        Char finalClosest = closest;
+        hero.sprite.attack(hero.pos, new Callback() {
+            @Override
+            public void call() {
+                wep.beforeAbilityUsed(hero, finalClosest);
+                for (Char ch : targets) {
+                    hero.attack(ch, 1, dmgBoost, Char.INFINITE_ACCURACY);
+                    if (!ch.isAlive()){
+                        onAbilityKill(hero, ch);
+                    }
+                }
+                Invisibility.dispel();
+                hero.spendAndNext(hero.attackDelay());
+                wep.afterAbilityUsed(hero);
+            }
+        });
     }
 }

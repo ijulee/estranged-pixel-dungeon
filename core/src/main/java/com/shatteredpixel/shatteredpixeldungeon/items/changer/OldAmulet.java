@@ -25,6 +25,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.rings.Ring;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.bow.SpiritBow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.DeathSword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.EnhancedMachete;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.GunWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.HeroSword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Machete;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MagesStaff;
@@ -50,17 +51,17 @@ import com.shatteredpixel.shatteredpixeldungeon.windows.WndInfoItem;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndOptions;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndSadGhost;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndTitledMessage;
+import com.watabou.noosa.Image;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.Random;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class OldAmulet extends Item {
 
     public static final String AC_USE		= "USE";
-
-    ArrayList<Integer> abilityList = new ArrayList<>();
 
     {
         image = ItemSpriteSheet.OLD_AMULET;
@@ -70,13 +71,12 @@ public class OldAmulet extends Item {
         unique = true;
         bones = false;
 
-        while (abilityList.size() < 3) {
-            int index = Random.Int(16);
-            if (!abilityList.contains(index)) {
-                abilityList.add(index);
-            }
-        }
+        HeroSword.Ability[] a = HeroSword.Ability.values();
+        Random.shuffle(a);
+        abilities = Arrays.copyOfRange(a, 0, 3);
     }
+
+    private HeroSword.Ability[] abilities;
 
     @Override
     public ArrayList<String> actions(Hero hero) {
@@ -126,31 +126,32 @@ public class OldAmulet extends Item {
         }
     }
 
-    private static final String ABILITY_LIST_0	= "abilityList_0";
-    private static final String ABILITY_LIST_1	= "abilityList_1";
-    private static final String ABILITY_LIST_2	= "abilityList_2";
+    private static final String ABILITY0	= "ability0";
+    private static final String ABILITY1	= "ability1";
+    private static final String ABILITY2	= "ability2";
     private static final String BOW1 = "bow1";
     private static final String BOW2 = "bow2";
 
     @Override
     public void storeInBundle( Bundle bundle ) {
         super.storeInBundle( bundle );
-        bundle.put( ABILITY_LIST_0, abilityList.get(0) );
-        bundle.put( ABILITY_LIST_1, abilityList.get(1) );
-        bundle.put( ABILITY_LIST_2, abilityList.get(2) );
-        bundle.put( BOW1, bow1);
-        bundle.put( BOW2, bow2);
+        bundle.put( ABILITY0, abilities[0] );
+        bundle.put( ABILITY1, abilities[1] );
+        bundle.put( ABILITY2, abilities[2] );
+        bundle.put( BOW1, bow1 );
+        bundle.put( BOW2, bow2 );
     }
 
     @Override
     public void restoreFromBundle( Bundle bundle ) {
         super.restoreFromBundle( bundle );
-        abilityList.clear();
-        abilityList.add(bundle.getInt(ABILITY_LIST_0));
-        abilityList.add(bundle.getInt(ABILITY_LIST_1));
-        abilityList.add(bundle.getInt(ABILITY_LIST_2));
-        bow1 = (SpiritBow) bundle.get(BOW1);
-        bow2 = (SpiritBow) bundle.get(BOW2);
+        abilities = new HeroSword.Ability[] {
+                bundle.getEnum( ABILITY0, HeroSword.Ability.class ),
+                bundle.getEnum( ABILITY1, HeroSword.Ability.class ),
+                bundle.getEnum( ABILITY2, HeroSword.Ability.class )
+        };
+        bow1 = (SpiritBow) bundle.get( BOW1 );
+        bow2 = (SpiritBow) bundle.get( BOW2 );
     }
 
     private String inventoryTitle(){
@@ -158,9 +159,7 @@ public class OldAmulet extends Item {
     }
 
     public static Item changeItem( Item item ){
-        /*if (item instanceof SpiritBow) {
-            return changeBow((SpiritBow)item);
-        } else*/ if (item instanceof Gun) {
+        if (item instanceof Gun) {
             return changeGun((Gun) item);
         } else if (item instanceof Shovel) {
             return changeShovel((Shovel) item);
@@ -362,7 +361,7 @@ public class OldAmulet extends Item {
                     return item instanceof SpiritBow;
                 case DUELIST:
                 case SAMURAI:
-                    return item instanceof MeleeWeapon && !(item instanceof MagesStaff) && !(item instanceof Gun);
+                    return item instanceof MeleeWeapon && !(item instanceof MagesStaff) && !(item instanceof GunWeapon);
                 case GUNNER:
                     return item instanceof Gun;
                 case ADVENTURER:
@@ -384,7 +383,7 @@ public class OldAmulet extends Item {
             if (item != null && itemSelectable(item)) {
                 switch (Dungeon.hero.heroClass) {
                     case DUELIST:
-                        GameScene.show(new WndAbilitySelect((MeleeWeapon)item, abilityList.get(0), abilityList.get(1), abilityList.get(2)));
+                        GameScene.show( new WndAbilitySelect( (MeleeWeapon)item ) );
                         break;
                     case HUNTRESS:
                         GameScene.show(new WndBowSelect((SpiritBow) item));
@@ -400,44 +399,25 @@ public class OldAmulet extends Item {
     public class WndAbilitySelect extends WndOptions {
 
         private MeleeWeapon wep;
-        private ArrayList<Integer> ability = new ArrayList<>();
+        private HeroSword heroSword;
 
-        public WndAbilitySelect(MeleeWeapon wep, int ability_1, int ability_2, int ability_3) {
-            super(new ItemSprite(new HeroSword()),
-                    Messages.titleCase(new HeroSword().name()),
+        public WndAbilitySelect(MeleeWeapon wep) {
+            super(new ItemSprite(ItemSpriteSheet.HERO_SWORD, wep.glowing()),
+                    Messages.titleCase(Messages.get(HeroSword.class, "name")),
                     Messages.get(HeroSword.class, "ability_select"),
-                    new HeroSword(ability_1, wep).abilityName(),
-                    new HeroSword(ability_2, wep).abilityName(),
-                    new HeroSword(ability_3, wep).abilityName(),
+                    abilities[0].abilityName(),
+                    abilities[1].abilityName(),
+                    abilities[2].abilityName(),
                     Messages.get(HeroSword.class, "cancel"));
-            ability.add(ability_1);
-            ability.add(ability_2);
-            ability.add(ability_3);
             this.wep = wep;
+            this.heroSword = new HeroSword(wep);
         }
 
         @Override
         protected void onSelect(int index) {
             if (index < 3) {
-                HeroSword heroSword = new HeroSword(ability.get(index), wep);
-
-                heroSword.level(0);
-                heroSword.quantity(1);
-                int level = wep.trueLevel();
-                if (level > 0) {
-                    heroSword.upgrade( level );
-                } else if (level < 0) {
-                    heroSword.degrade( -level );
-                }
-
-                heroSword.enchantment = wep.enchantment;
-                heroSword.curseInfusionBonus = wep.curseInfusionBonus;
-                heroSword.masteryPotionBonus = wep.masteryPotionBonus;
-                heroSword.levelKnown = wep.levelKnown;
-                heroSword.cursedKnown = wep.cursedKnown;
-                heroSword.cursed = wep.cursed;
-                heroSword.augment = wep.augment;
-                heroSword.enchantHardened = wep.enchantHardened;
+                heroSword.ability = abilities[index];
+                heroSword.identify(false);
 
                 int slot = Dungeon.quickslot.getSlot(wep);
                 if (wep.isEquipped(Dungeon.hero)) {
@@ -478,17 +458,13 @@ public class OldAmulet extends Item {
 
         @Override
         protected void onInfo( int index ) {
-            HeroSword heroSword = new HeroSword(ability.get(index), wep);
-            if (wep.isIdentified()) {
-                heroSword.level(wep.buffedLvl());
-                heroSword.identify();
-            }
+            heroSword.ability = abilities[index];
+
             GameScene.show(new WndTitledMessage(
-                    Icons.get(Icons.INFO),
+                    new ItemSprite(heroSword),
                     Messages.titleCase(heroSword.abilityName()),
                     heroSword.abilityInfo()));
         }
-
     }
 
     public static SpiritBow bow1, bow2;
