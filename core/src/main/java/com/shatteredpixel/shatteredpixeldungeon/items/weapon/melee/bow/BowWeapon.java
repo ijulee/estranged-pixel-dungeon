@@ -36,8 +36,6 @@ import com.watabou.utils.Random;
 // TODO allow ghost to shoot bows when equipped (this will be a nightmare)
 public class BowWeapon extends GunWeapon {
 
-    private static final int MAX_SHOTS = 3;
-
     @Override
     public boolean canShoot() {
         if (isEquipped(Dungeon.hero))
@@ -457,6 +455,7 @@ public class BowWeapon extends GunWeapon {
             type = buffType.NEGATIVE;
         }
 
+        public static final int MAX_SHOTS = 3;
         public static final float MAX_DURATION = 5f;
 
         @Override
