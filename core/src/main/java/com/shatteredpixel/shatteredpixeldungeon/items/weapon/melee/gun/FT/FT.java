@@ -9,6 +9,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Blob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Fire;
 import com.shatteredpixel.shatteredpixeldungeon.effects.MagicMissile;
+import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.DriedRose;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.gun.Gun;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
@@ -107,6 +108,75 @@ public class FT extends Gun {
                         curUser.sprite,
                         cone.coreRay.path.get(dist * 2 / 3),
                         null);
+            }
+        }
+
+        @Override
+        public void ghostThrow(DriedRose.GhostHero ghost, int cell) {
+            if (cell != ghost.pos) {
+                Ballistica aim = new Ballistica(ghost.pos, cell, Ballistica.WONT_STOP);
+                int dist = Math.min(aim.dist, maxDist());
+                boolean flameVisible = false;
+                ConeAOE cone = new ConeAOE(aim,
+                        dist,
+                        30,
+                        Ballistica.STOP_TARGET | Ballistica.STOP_SOLID | Ballistica.IGNORE_SOFT_SOLID);
+
+                //cast to cells at the tip, rather than all cells, better performance.
+                for (Ballistica ray : cone.outerRays) {
+                    //only if visible
+                    if (Dungeon.level.heroFOV[ghost.pos] || Dungeon.level.heroFOV[ray.path.get(ray.dist)]) {
+                        flameVisible = true;
+                        ((MagicMissile)ghost.sprite.parent.recycle( MagicMissile.class )).reset(
+                                MagicMissile.FIRE_CONE,
+                                ghost.sprite,
+                                ray.path.get(ray.dist),
+                                null
+                        );
+                    }
+                }
+
+                ArrayList<Char> targets = new ArrayList<>();
+                for (int cells : cone.cells){
+                    //knock doors open
+                    if (Dungeon.level.map[cells] == Terrain.DOOR){
+                        Level.set(cells, Terrain.OPEN_DOOR);
+                        GameScene.updateMap(cells);
+                    }
+
+                    //only ignite cells directly near caster if they are flammable
+                    if (!(Dungeon.level.adjacent(ghost.pos, cells) && !Dungeon.level.flamable[cells])) {
+                        GameScene.add(Blob.seed(cells, 2, Fire.class));
+                    }
+
+                    Char ch = Actor.findChar(cells);
+                    if (ch != null && ch.alignment != hero.alignment){
+                        targets.add(ch);
+                    }
+                }
+
+                if (targets.isEmpty()) {
+                    //do nothing
+                } else { //furthest to closest, mainly for elastic
+                    Collections.sort(targets, (a, b) -> Float.compare(
+                            Dungeon.level.trueDistance(b.pos, ghost.pos),
+                            Dungeon.level.trueDistance(a.pos, ghost.pos)));
+
+                    for (Char target : targets) {
+                        ghostShoot(ghost, target);
+                    }
+                }
+
+                if (flameVisible) {
+                    //final zap at 2/3 distance, for timing of the actual effect
+                    MagicMissile.boltFromChar(ghost.sprite.parent,
+                            MagicMissile.FIRE_CONE,
+                            ghost.sprite,
+                            cone.coreRay.path.get(dist * 2 / 3),
+                            null);
+                }
+
+                useRound();
             }
         }
 

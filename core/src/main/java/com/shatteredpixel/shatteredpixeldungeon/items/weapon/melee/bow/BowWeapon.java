@@ -17,6 +17,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.items.ArrowBag;
 import com.shatteredpixel.shatteredpixeldungeon.items.ArrowItem;
 import com.shatteredpixel.shatteredpixeldungeon.items.KindOfWeapon;
+import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.DriedRose;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfSharpshooting;
 import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfBlastWave;
@@ -293,6 +294,12 @@ public class BowWeapon extends GunWeapon {
 
                 updateQuickslot();
             }
+        }
+
+        @Override
+        public void ghostThrow(DriedRose.GhostHero ghost, int cell) {
+            super.ghostThrow(ghost, cell);
+            Buff.affect(ghost, BowFatigue.class, BowFatigue.MAX_DURATION);
         }
 
         @Override

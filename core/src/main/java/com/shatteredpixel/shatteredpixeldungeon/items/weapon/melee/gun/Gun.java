@@ -25,6 +25,7 @@ import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.BlastParticle;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.SmokeParticle;
+import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.DriedRose;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfSharpshooting;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.bow.SpiritBow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.GunWeapon;
@@ -56,8 +57,8 @@ public class Gun extends GunWeapon {
 	protected float shootingSpeed = 1f;
 	protected float shootingAcc = 1f;
 	protected float adjShootingAcc = 1f;
-	protected boolean explode = false;
-	protected boolean spread = false; //산탄 여부 = 거리에 따른 탄환 위력 감소 여부.
+	public boolean explode = false;
+	protected boolean spread = false;
 
 	public interface GunMod<M extends Enum<M> & GunMod<M>> {
 		String name();
@@ -739,9 +740,8 @@ public class Gun extends GunWeapon {
 				for (int i : PathFinder.NEIGHBOURS9){
 					int c = cell + i;
 					if (Dungeon.level.insideMap(c)) {
-						if (Dungeon.level.heroFOV[c]) {
-							showPuff(c);
-						}
+						showPuff(c);
+
 						if (Dungeon.level.flamable[c]) {
 							Dungeon.level.destroy(c);
 							GameScene.updateMap(c);
@@ -766,6 +766,63 @@ public class Gun extends GunWeapon {
 
 			for (Char target : targets){
 				shootTarget(target);
+			}
+		}
+
+		@Override
+		public void ghostThrow(DriedRose.GhostHero ghost, int cell) {
+			ArrayList<Char> targets = new ArrayList<>();
+			if (!explode) {
+				if (Actor.findChar(cell) != null) targets.add(Actor.findChar(cell));
+			} else {
+				for (int i : PathFinder.NEIGHBOURS9){
+					int c = cell + i;
+					if (Dungeon.level.insideMap(c)) {
+						showPuff(c);
+
+						if (Dungeon.level.flamable[c]) {
+							Dungeon.level.destroy(c);
+							GameScene.updateMap(c);
+						}
+						if (Actor.findChar(c) != null) targets.add(Actor.findChar(c));
+					}
+				}
+
+				Sample.INSTANCE.play( Assets.Sounds.BLAST );
+			}
+
+			if (targets.isEmpty()) {
+				return;
+			}
+
+			//furthest to closest, mainly for elastic
+			Collections.sort(targets, (a, b) -> Float.compare(
+					Dungeon.level.trueDistance(b.pos, ghost.pos),
+					Dungeon.level.trueDistance(a.pos, ghost.pos)));
+
+			for (Char target : targets) {
+				ghostShoot(ghost, target);
+			}
+
+			useRound();
+		}
+
+		protected void ghostShoot(DriedRose.GhostHero ghost, Char target) {
+			for (int i = 0; i < shotsPerRound(); i++) {
+				int pos = target.pos;
+				if(target.isAlive()) {
+					if (!ghost.attack(target)) {
+						showPuff(pos);
+					} else {
+						if (explode && target == Dungeon.hero && !target.isAlive()) {
+							Dungeon.fail(Gun.this.getClass());
+							Badges.validateDeathFromFriendlyMagic();
+							GLog.n(Messages.get(Gun.class, "ondeath"));
+						}
+					}
+				} else {
+					showPuff(pos);
+				}
 			}
 		}
 
@@ -802,8 +859,10 @@ public class Gun extends GunWeapon {
 		}
 
 		public void showPuff(int cell) {
-			CellEmitter.get(cell).burst(SmokeParticle.FACTORY, (explode)?4:2);
-			CellEmitter.center(cell).burst(BlastParticle.FACTORY, (explode)?4:2);
+			if (Dungeon.level.heroFOV[cell]) {
+				CellEmitter.get(cell).burst(SmokeParticle.FACTORY, (explode)?4:2);
+				CellEmitter.center(cell).burst(BlastParticle.FACTORY, (explode)?4:2);
+			}
 		}
 
 		public void onShoot() {

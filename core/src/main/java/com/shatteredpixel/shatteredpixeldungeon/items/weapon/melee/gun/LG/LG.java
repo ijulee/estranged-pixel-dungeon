@@ -7,6 +7,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Beam;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.LaserParticle;
+import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.DriedRose;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.gun.Gun;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
@@ -55,7 +56,7 @@ public class LG extends Gun {
                 ArrayList<Char> targets = new ArrayList<>();
                 int maxDist = maxDist();
                 int dist = Math.min(aim.dist, maxDist);
-                int cells = aim.path.get(Math.min(aim.dist, dist));
+                int endCell = aim.path.get(Math.min(aim.dist, dist));
                 boolean terrainAffected = false;
                 for (int c : aim.subPath(1, maxDist)) {
 
@@ -91,7 +92,7 @@ public class LG extends Gun {
                         multi = 3f;
                         break;
                 }
-                curUser.sprite.parent.add(new Beam.SuperNovaRay(curUser.sprite.center(), DungeonTilemap.raisedTileCenterToWorld( cells ), multi));
+                curUser.sprite.parent.add(new Beam.SuperNovaRay(curUser.sprite.center(), DungeonTilemap.raisedTileCenterToWorld( endCell ), multi));
 
                 if (targets.isEmpty()) {
                     //mainly to proc seer shot when no chars in range
@@ -107,6 +108,79 @@ public class LG extends Gun {
                 for (Char target : targets) {
                     shootTarget(target);
                 }
+            }
+        }
+
+        @Override
+        public void ghostThrow(DriedRose.GhostHero ghost, int cell) {
+            if (cell != ghost.pos) {
+                Ballistica aim = new Ballistica(ghost.pos, cell, Ballistica.WONT_STOP);
+                ArrayList<Char> targets = new ArrayList<>();
+                int maxDist = maxDist();
+                int dist = Math.min(aim.dist, maxDist);
+                int endCell = aim.path.get(Math.min(aim.dist, dist));
+                boolean terrainAffected = false;
+                boolean visibleBeam = false;
+                for (int c : aim.subPath(1, maxDist)) {
+
+                    Char ch;
+                    if ((ch = Actor.findChar( c )) != null) {
+                        targets.add( ch );
+                    }
+
+                    if (Dungeon.level.flamable[c]) {
+                        Dungeon.level.destroy( c );
+                        GameScene.updateMap( c );
+                        terrainAffected = true;
+
+                    }
+
+                    if (Dungeon.level.heroFOV[c]) {
+                        CellEmitter.center( c ).burst( LaserParticle.BURST, 3 );
+                        visibleBeam = true;
+                    }
+                }
+
+                if (terrainAffected) {
+                    Dungeon.observe();
+                }
+
+                float multi;
+                WeightMod weightMod = getGunMod(WeightMod.class);
+                switch (weightMod) {
+                    case NORMAL_WEIGHT: default:
+                        multi = 2f;
+                        break;
+                    case LIGHT_WEIGHT:
+                        multi = 1f;
+                        break;
+                    case HEAVY_WEIGHT:
+                        multi = 3f;
+                        break;
+                }
+
+                if (visibleBeam) {
+                    ghost.sprite.parent.add(
+                            new Beam.SuperNovaRay(
+                                    ghost.sprite.center(),
+                                    DungeonTilemap.raisedTileCenterToWorld( endCell ),
+                                    multi) );
+                }
+
+                if (targets.isEmpty()) {
+                    return;
+                }
+
+                //furthest to closest, mainly for elastic
+                Collections.sort(targets, (a, b) -> Float.compare(
+                        Dungeon.level.trueDistance(b.pos, ghost.pos),
+                        Dungeon.level.trueDistance(a.pos, ghost.pos)));
+
+                for (Char target : targets) {
+                    ghostShoot(ghost, target);
+                }
+
+                useRound();
             }
         }
 
