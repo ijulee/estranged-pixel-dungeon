@@ -204,9 +204,11 @@ public class BowWeapon extends GunWeapon {
                             bow.missileMax()));
                 }
 
-                if (curUser.buff(PenetrationShotBuff.class) != null) {
-                    damage = curUser.buff(PenetrationShotBuff.class).proc(damage, this.buffedLvl(), bow.tier);
+                PenetrationShotBuff penShot = curUser.buff(PenetrationShotBuff.class);
+                if (penShot != null) {
+                    damage = penShot.proc(damage, this.buffedLvl(), bow.tier);
                     Sample.INSTANCE.play(Assets.Sounds.HIT_STRONG);
+                    penShot.detach();
                 }
 
             }
@@ -306,10 +308,6 @@ public class BowWeapon extends GunWeapon {
             }
 
             if (BowWeapon.this.isEquipped(curUser)) {
-                if (curUser.buff(PenetrationShotBuff.class) != null && enemy != curUser) {
-                    curUser.buff(PenetrationShotBuff.class).detach();
-                }
-
                 if (curUser.subClass == HeroSubClass.BOWMASTER) {
                     Buff.affect(curUser, BowMasterSkill.class).onShoot();
                 }
