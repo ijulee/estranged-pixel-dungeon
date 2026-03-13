@@ -114,7 +114,7 @@ public class DirectableAlly extends NPC {
 		movingToDefendPos = bundle.getBoolean(MOVING_TO_DEFEND);
 	}
 
-	private class Wandering extends Mob.Wandering {
+	protected class Wandering extends Mob.Wandering {
 
 		@Override
 		public boolean act( boolean enemyInFOV, boolean justAlerted ) {
@@ -156,7 +156,7 @@ public class DirectableAlly extends NPC {
 
 	}
 
-	private class Hunting extends Mob.Hunting {
+	protected class Hunting extends Mob.Hunting {
 
 		@Override
 		public boolean act(boolean enemyInFOV, boolean justAlerted) {

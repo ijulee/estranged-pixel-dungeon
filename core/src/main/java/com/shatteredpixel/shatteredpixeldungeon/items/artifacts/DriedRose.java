@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2025 Evan Debenham
+ * Copyright (C) 2014-2026 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,6 +34,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Burning;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicImmune;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Regeneration;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.StimPack;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Belongings;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
@@ -52,13 +53,17 @@ import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfEnergy;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfRetribution;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ScrollOfPsionicBlast;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Projecting;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.GunWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.bow.BowWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.gun.FT.FT;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.gun.Gun;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.gun.LG.LG;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.gun.SG.SG;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Catalog;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
+import com.shatteredpixel.shatteredpixeldungeon.mechanics.ConeAOE;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.AlchemyScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.CellSelector;
@@ -68,6 +73,7 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.GhostSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.MissileSprite;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BossHealthBar;
 import com.shatteredpixel.shatteredpixeldungeon.ui.ItemButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RenderedTextBlock;
@@ -86,6 +92,7 @@ import com.watabou.utils.PathFinder;
 import com.watabou.utils.Random;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class DriedRose extends Artifact {
 
@@ -228,12 +235,11 @@ public class DriedRose extends Artifact {
 			autoReload = !autoReload;
 			if (ghost != null) {
 				if (autoReload) {
-					ghost.yell(Messages.get(this, "auto_reload_on"));
-					Sample.INSTANCE.play( Assets.Sounds.GHOST );
+					ghost.yell(Messages.get(GhostHero.class, "dialogue_reload_on"));
 				} else {
-					ghost.yell(Messages.get(this, "auto_reload_off"));
-					Sample.INSTANCE.play( Assets.Sounds.GHOST );
+					ghost.yell(Messages.get(GhostHero.class, "dialogue_reload_off"));
 				}
+				Sample.INSTANCE.play( Assets.Sounds.GHOST );
 			}
 		}
 	}
@@ -249,7 +255,6 @@ public class DriedRose extends Artifact {
 			} else {
 				ghostID = 0;
 			}
-			if (ghost != null) GameScene.selectCell(ghostDirector);
 		}
 	}
 	
@@ -288,7 +293,7 @@ public class DriedRose extends Artifact {
 				desc += "\n" + Messages.get(this, "desc_armor", Messages.titleCase(armor.title()));
 			}
 
-			if (weapon != null && weapon instanceof Gun) {
+			if (weapon instanceof Gun) {
 				if (autoReload) {
 					desc += "\n\n" + Messages.get(this, "auto_reload_desc_on");
 				} else {
@@ -296,7 +301,7 @@ public class DriedRose extends Artifact {
 				}
 			}
 
-			desc += "\n" + Messages.get(this, "desc_strength", ghostStrength());
+			desc += "\n\n" + Messages.get(this, "desc_strength", ghostStrength());
 
 		}
 		
@@ -577,7 +582,9 @@ public class DriedRose extends Artifact {
 			spriteClass = GhostSprite.class;
 
 			flying = true;
-			
+
+			WANDERING = new Wandering();
+			HUNTING = new Hunting();
 			state = HUNTING;
 			
 			properties.add(Property.UNDEAD);
@@ -586,7 +593,10 @@ public class DriedRose extends Artifact {
 		
 		private DriedRose rose = null;
 
-		private Gun.Bullet nextBullet = null;
+        private GunWeapon.GunMissile missileWep;
+		//FIXME save reloading state and prevent removing weapon from rose while reloading?
+		private int throwPos = -1;
+		private boolean reloading = false;
 
 		public GhostHero(){
 			super();
@@ -599,55 +609,14 @@ public class DriedRose extends Artifact {
 			HP = HT;
 		}
 
-		public boolean willingToShoot() {
-			return rose != null
-					&& rose.weapon != null
-					&& enemy != null
-					&& rose.weapon instanceof Gun
-					&& (!Dungeon.level.adjacent( this.pos, enemy.pos ) || rose.weapon instanceof SG)
-					&& ((Gun)rose.weapon).rounds() > 0;
-		}
-
 		@Override
 		public void defendPos(int cell) {
-			if (cell == this.pos) {
-				if (tryReload(false)) {
-					return;
-				}
+			if (cell == this.pos && weapon() instanceof Gun && !((Gun) weapon()).fullyLoaded()) {
+				yell(Messages.get(this, "dialogue_reloading"));
+			} else {
+				yell(Messages.get(this, "directed_position_" + Random.IntRange(1, 5)));
 			}
-			yell(Messages.get(this, "directed_position_" + Random.IntRange(1, 5)));
 			super.defendPos(cell);
-		}
-
-		public boolean tryReload(boolean shouldEmpty) {
-			if (rose != null) {
-				if (rose.weapon instanceof Gun) {
-					if (shouldEmpty) {
-						if (((Gun)rose.weapon).rounds() <= 0) {
-							reload();
-							return true;
-						}
-					} else {
-						if (((Gun)rose.weapon).rounds() < ((Gun)rose.weapon).maxRounds()) {
-							reload();
-							return true;
-						}
-					}
-				}
-			}
-			return false;
-		}
-
-		public void reload() {
-			Callback callback = new Callback() {
-				@Override
-				public void call() {
-					((Gun)rose.weapon).quickReload();
-				}
-			};
-			spend(((Gun)rose.weapon).reloadTime(this));
-			this.sprite.showStatus( CharSprite.POSITIVE, Messages.get(DriedRose.class, "reloading") );
-			callback.call();
 		}
 
 		@Override
@@ -660,6 +629,43 @@ public class DriedRose extends Artifact {
 		public void targetChar(Char ch) {
 			yell(Messages.get(this, "directed_attack_" + Random.IntRange(1, 5)));
 			super.targetChar(ch);
+		}
+
+		public boolean willShoot() {
+			if (enemy == null) {
+				return false;
+			}
+
+			Weapon wep = weapon();
+
+			boolean willShootBow =  wep instanceof BowWeapon &&
+									(buff(BowWeapon.BowFatigue.class) == null ||
+									buff(BowWeapon.BowFatigue.class).damage(100) >= 80);
+
+			boolean willShootGun =	wep instanceof Gun && ((Gun) wep).canShoot();
+
+			return 	(willShootGun || willShootBow) &&
+					(!Dungeon.level.adjacent( this.pos, enemy.pos ) || wep instanceof SG);
+		}
+
+		public boolean doReload(boolean whenEmpty) {
+			if (weapon() instanceof Gun) {
+				Gun gun = (Gun) weapon();
+
+				if ((whenEmpty && !gun.canShoot()) || !gun.fullyLoaded()) {
+					reloading = true;
+					gun.quickReload();
+					spend( gun.reloadTime(this) );
+
+					sprite.showStatus( CharSprite.POSITIVE, Messages.get(this, "reloading") );
+					((GhostSprite) sprite).reload();
+
+					Sample.INSTANCE.play(Assets.Sounds.UNLOCK);
+
+					return true;
+				}
+			}
+			return false;
 		}
 
 		private void updateRose(){
@@ -696,13 +702,15 @@ public class DriedRose extends Artifact {
 				damage(1, new NoRoseDamage());
 			}
 
-			if (this.state == WANDERING && !movingToDefendPos && enemy == null) {
-				tryReload(false);
-			}
-
 			if (!isAlive()) {
 				return true;
 			}
+
+			if (reloading) {
+				reloading = false;
+				sprite.idle();
+			}
+
 			return super.act();
 		}
 
@@ -710,102 +718,165 @@ public class DriedRose extends Artifact {
 
 		@Override
 		public int attackSkill(Char target) {
-			
+
 			//same accuracy as the hero.
 			int acc = Dungeon.hero.lvl + 9;
 
-			if (weapon() != null){
-				acc *= weapon().accuracyFactor( this, target );
+			if (missileWep != null) {
+				acc *= missileWep.accuracyFactor(this, target);
+			} else if (weapon() != null) {
+				acc *= weapon().accuracyFactor(this, target);
 			}
-			
+
 			return acc;
 		}
-		
+
 		@Override
 		public float attackDelay() {
 			float delay = super.attackDelay();
-			if (weapon() != null) {
-				if (nextBullet != null) {
-					delay *= nextBullet.delayFactor(this); //탄환 공격 속도 적용
-				} else {
-					delay *= weapon().delayFactor(this);
-				}
+
+			if (missileWep != null) {
+				delay *= missileWep.delayFactor(this);
+			} else if (weapon() != null) {
+				delay *= weapon().delayFactor(this);
 			}
 			return delay;
 		}
 
 		@Override
 		protected boolean canAttack(Char enemy) {
-			if (willingToShoot()) {
-				nextBullet = ((Gun)rose.weapon).getMissile();
-				if (nextBullet instanceof LG.LGBullet) {
-					return new Ballistica( this.pos, enemy.pos, Ballistica.STOP_TARGET).collisionPos == enemy.pos;
-				} else if (nextBullet instanceof FT.FTBullet) {
-					return new Ballistica( this.pos, enemy.pos, Ballistica.DASH).collisionPos == enemy.pos;
+			if ( missileWep != null ) {
+				return true;
+			}
+
+			if (willShoot()) {
+				GunWeapon gun = (GunWeapon) weapon();
+				GunWeapon.GunMissile missile = gun.getMissile();
+
+				boolean canShoot;
+
+				//check that we can hit the enemy, but avoid hitting hero
+				if (missile instanceof LG.LGBullet) {
+					Ballistica aim = new Ballistica( this.pos, enemy.pos, Ballistica.WONT_STOP );
+					int dist = Math.min( aim.dist, ((LG.LGBullet) missile).maxDist() );
+					List<Integer> beam = aim.subPath(0, dist);
+
+					canShoot = 	beam.contains( enemy.pos ) &&
+								!beam.contains( Dungeon.hero.pos );
+					throwPos = enemy.pos;
+
+				} else if (missile instanceof FT.FTBullet) {
+					Ballistica aim = new Ballistica( this.pos, enemy.pos, Ballistica.WONT_STOP );
+					int dist = Math.min( aim.dist, ((FT.FTBullet) missile).maxDist() );
+					ConeAOE blast = new ConeAOE(aim,
+							dist,
+							30,
+							Ballistica.DASH | Ballistica.IGNORE_SOFT_SOLID);
+
+					canShoot =	blast.cells.contains( enemy.pos ) &&
+								!blast.cells.contains( Dungeon.hero.pos );
+					throwPos = enemy.pos;
+
 				} else {
-					return new Ballistica( this.pos, enemy.pos, Ballistica.PROJECTILE).collisionPos == enemy.pos;
+					//account for projecting
+					int projecting = gun.hasEnchant(Projecting.class, this) ? 4 : 0;
+
+					projecting = Math.round(projecting * Weapon.Enchantment.genericProcChanceMultiplier(this));
+
+					if (Dungeon.level.distance(this.pos, enemy.pos) > projecting) {
+                        throwPos = new Ballistica(this.pos, enemy.pos, Ballistica.PROJECTILE).collisionPos;
+                    } else {
+                        throwPos = enemy.pos;
+                    }
+
+					//can shoot explosive guns as long as the explosion will hit enemy
+					if (gun instanceof Gun && ((Gun) gun).explode) {
+						canShoot = 	(Dungeon.level.distance(throwPos, enemy.pos) <= 1) &&
+									(Dungeon.level.distance(throwPos, this.pos) > 1) &&
+									(Dungeon.level.distance(throwPos, Dungeon.hero.pos) > 1);
+					} else {
+						canShoot = (throwPos == enemy.pos);
+					}
 				}
+
+				if (canShoot) {
+					missileWep = missile;
+				}
+
+				return canShoot;
 			} else {
                 return super.canAttack(enemy) || (weapon() != null && weapon().canReach(this, enemy.pos));
 			}
 		}
-		
+
 		@Override
-		public int damageRoll() {
-			int dmg = 0;
-			if (weapon() != null){
-				if (nextBullet != null) {
-					dmg += nextBullet.damageRoll(this);
+		protected boolean doAttack(Char enemy) {
+			sprite.attackAcceleration( buff(StimPack.class) != null ? 1.5f : 1f );
+
+			if (sprite != null && (sprite.visible || enemy.sprite.visible)) {
+				if (missileWep != null) {
+					//animate zap, animate missile, then call onThrowComplete() to actually attack
+					sprite.zap( throwPos, () -> {
+						MissileSprite missileSprite = (MissileSprite) sprite.parent.recycle( MissileSprite.class );
+						missileSprite.reset(sprite, throwPos, missileWep, this::onThrowComplete);
+					});
 				} else {
-					dmg += weapon().damageRoll(this);
+					sprite.attack( enemy.pos );
 				}
+
+				return false;
+
 			} else {
-				dmg += Random.NormalIntRange(0, 5);
+				if (missileWep != null) {
+					missileWep.ghostThrow(this, throwPos);
+				} else {
+					attack( enemy );
+				}
+
+				Invisibility.dispel(this);
+				spend( attackDelay() );
+				missileWep = null;
+				return true;
 			}
-			
-			return dmg;
+		}
+
+		public void onThrowComplete() {
+			missileWep.ghostThrow(this, throwPos);
+			sprite.idle();
+
+			Invisibility.dispel(this);
+			spend( attackDelay() );
+			missileWep = null;
+			next();
 		}
 
 		@Override
-		public boolean attack(Char enemy, float dmgMulti, float dmgBonus, float accMulti) {
-			//nextBullet != null이면 rose.ghostWeapon()은 항상 Gun인데 왜인지 모르게 ClassCastException이 떠서 일단 인스턴스 확인 조건 추가함
-			if (nextBullet != null && rose.ghostWeapon() instanceof Gun && ((Gun) rose.ghostWeapon()).shotsPerRound() > 1) {
-				for (int i = 0; i < ((Gun) rose.ghostWeapon()).shotsPerRound() - 1; i++) { //이 코드는 한 발에 여러 번 타격하는 총기에 한해서 발동할 것
-					super.attack(enemy, dmgMulti, dmgBonus, accMulti);
-				}
+		public int damageRoll() {
+			int dmg = 0;
+			if (missileWep != null) {
+				dmg += missileWep.damageRoll(this);
+			} else if (weapon() != null) {
+				dmg += weapon().damageRoll(this);
+			} else {
+				dmg += Random.NormalIntRange(0, 5);
 			}
-			return super.attack(enemy, dmgMulti, dmgBonus, accMulti);
+
+			return dmg;
 		}
 
 		@Override
 		public int attackProc(Char enemy, int damage) {
 			damage = super.attackProc(enemy, damage);
-			if (weapon() != null) {
-				if (nextBullet != null) {
-					damage = nextBullet.proc(this, enemy, damage);
-				} else {
-					damage = weapon().proc(this, enemy, damage);
-					if (!enemy.isAlive() && enemy == Dungeon.hero) {
-						Dungeon.fail(this);
-						GLog.n(Messages.capitalize(Messages.get(Char.class, "kill", name())));
-					}
+			Weapon wep = (missileWep != null) ? missileWep : weapon();
+			if (wep != null) {
+				damage = wep.proc(this, enemy, damage);
+				if (!enemy.isAlive() && enemy == Dungeon.hero) {
+					Dungeon.fail(this);
+					GLog.n(Messages.capitalize(Messages.get(Char.class, "kill", name())));
 				}
 			}
+
 			return damage;
-		}
-
-		@Override
-		public void onAttackComplete() {
-			super.onAttackComplete();
-			if (nextBullet != null) {
-				((Gun)rose.weapon).useRound();
-			}
-
-			if (rose.autoReload) {
-				tryReload(true);
-			}
-
-			nextBullet = null;
 		}
 
 		@Override
@@ -983,7 +1054,42 @@ public class DriedRose extends Artifact {
 			yell( Messages.get( this, "blessed_ankh_" + Random.IntRange(1, 3) ));
 			Sample.INSTANCE.play( Assets.Sounds.GHOST );
 		}
-		
+
+		protected class Wandering extends DirectableAlly.Wandering {
+			@Override
+			public boolean act(boolean enemyInFOV, boolean justAlerted) {
+				//if directed to defend current pos, reload manually.
+				if (movingToDefendPos && defendingPos == GhostHero.this.pos) {
+					if (doReload(false)) {
+						return true;
+					}
+				}
+
+				//if not moving or in combat, try to reload
+				if (!enemyInFOV && !justAlerted && !movingToDefendPos) {
+					if (doReload(false)) {
+						return true;
+					}
+				}
+
+				return super.act(enemyInFOV, justAlerted);
+			}
+		}
+
+		protected class Hunting extends DirectableAlly.Hunting {
+			@Override
+			public boolean act(boolean enemyInFOV, boolean justAlerted) {
+				//if during combat and auto-reload is on, reload when empty
+				if (rose != null && rose.autoReload) {
+					if (doReload(true)) {
+						return true;
+					}
+				}
+				return super.act(enemyInFOV, justAlerted);
+			}
+		}
+
+
 		{
 			immunities.add( CorrosiveGas.class );
 			immunities.add( Burning.class );
