@@ -84,7 +84,7 @@ public class Challenges {
 
 	public static final int MAX_VALUE           = 511;
     //public static final int MAX_VALUE           = 16383;
-    public static final int MAX_CHALS           = 9;
+    public static final int MAX_CHALS           = 14;
 
 	public static final String[] NAME_IDS = {
 			"champion_enemies",
