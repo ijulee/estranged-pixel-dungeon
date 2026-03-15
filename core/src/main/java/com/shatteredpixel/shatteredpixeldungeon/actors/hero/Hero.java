@@ -2724,7 +2724,7 @@ public class Hero extends Char {
 
 			float delay = 1;
 
-			if (buff(GreaterHaste.class) != null){
+			if (buff(GreaterHaste.class) != null || buff(Talent.QuickStep.class) != null) {
 				delay = 0;
 			}
 
@@ -2751,6 +2751,10 @@ public class Hero extends Char {
 
 			if (buff(GreaterHaste.class) != null){
 				buff(GreaterHaste.class).spendMove();
+			}
+
+			if (buff(Talent.QuickStep.class) != null) {
+				buff(Talent.QuickStep.class).detach();
 			}
 
 			if (subClass == HeroSubClass.FREERUNNER){
@@ -2782,11 +2786,6 @@ public class Hero extends Char {
 
 			sprite.move(pos, step);
 			move(step);
-
-			if (buff(Talent.QuickStep.class) != null) {
-				spend( -delay / speed() );
-				buff(Talent.QuickStep.class).detach();
-			}
 
 			spend( delay / speed()  );
 			justMoved = true;
