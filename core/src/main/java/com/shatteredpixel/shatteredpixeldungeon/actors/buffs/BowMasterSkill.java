@@ -13,6 +13,7 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.CharSprite;
 import com.shatteredpixel.shatteredpixeldungeon.ui.ActionIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.ui.HeroIcon;
+import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.BitmapText;
 import com.watabou.noosa.Image;
 import com.watabou.noosa.Visual;
@@ -44,16 +45,17 @@ public class BowMasterSkill extends Buff implements ActionIndicator.Action {
     @Override
     public void tintIcon(Image icon) {
         if (isPowerShot()) {
-            icon.tint(1, 1, 1, 0.4f);
+            //do nothing
+        } else if (charge >= MAX_CHARGE) {
+            icon.tint(0xCCFF00, 0.5f);
         } else {
-            float tint = Math.min(1, 0.2f*(charge+1));
-            icon.hardlight(tint, tint, tint);
+            icon.tint(0x00CCB0, 0.5f);
         }
     }
 
     @Override
     public float iconFadePercent() {
-        return Math.min(1, (maxCharge() - charge) / ((float) maxCharge()));
+        return 1 - charge / ((float) MAX_CHARGE);
     }
 
     @Override
@@ -62,8 +64,27 @@ public class BowMasterSkill extends Buff implements ActionIndicator.Action {
     }
 
     @Override
+    public String name() {
+        if (isPowerShot()) {
+            return Messages.get(this, "powershot");
+        } else {
+            return Messages.get(this, "arrow_combo");
+        }
+    }
+
+    @Override
     public String desc() {
-        return Messages.get(this, "desc", charge, maxCharge(), 100*dmgMulti(), comboDmgBonus());
+        String desc;
+        if (isPowerShot()) {
+            desc = Messages.get(this, "powershot_desc", 100*dmgMulti(), comboDmgBonus());
+        } else {
+            desc = Messages.get(this, "arrow_combo_desc");
+            if (charge >= MAX_CHARGE) {
+                desc += " " + Messages.get(this, "arrow_combo_ready");
+            }
+            desc += "\n\n" + Messages.get(this, "arrow_combo_stats", charge, maxCharge(), 100*dmgMulti(), comboDmgBonus());
+        }
+        return desc;
     }
 
     public void onShoot() {
@@ -222,7 +243,13 @@ public class BowMasterSkill extends Buff implements ActionIndicator.Action {
 
     @Override
     public String actionName() {
-        return Messages.get(this, "action_name");
+        if (isPowerShot()) {
+            return Messages.get(this, "powershot");
+        } else if (charge >= MAX_CHARGE) {
+            return Messages.get(this, "powershot_ready");
+        } else {
+            return Messages.get(this, "arrow_combo");
+        }
     }
 
     @Override
@@ -232,21 +259,25 @@ public class BowMasterSkill extends Buff implements ActionIndicator.Action {
 
     @Override
     public Visual secondaryVisual() {
-        BitmapText txt = new BitmapText(PixelScene.pixelFont);
-        txt.text(String.format("%d", charge));
-        if (charge >= MAX_CHARGE) {
-            txt.hardlight(CharSprite.POSITIVE);
+        if (isPowerShot()) {
+            return null;
+        } else {
+            BitmapText txt = new BitmapText(PixelScene.pixelFont);
+            txt.text(String.format("%d", charge));
+            if (charge >= MAX_CHARGE) {
+                txt.hardlight(CharSprite.POSITIVE);
+            }
+            txt.measure();
+            return txt;
         }
-        txt.measure();
-        return txt;
     }
 
     @Override
     public int indicatorColor() {
         if (isPowerShot()) {
-            return 0xEE8091;
-        } else if (charge >= MAX_CHARGE) {
             return 0xCC0022;
+        } else if (charge >= MAX_CHARGE) {
+            return 0xCC8011;
         } else {
             return 0x808080;
         }
@@ -258,8 +289,15 @@ public class BowMasterSkill extends Buff implements ActionIndicator.Action {
             ScrollOfRecharging.charge(Dungeon.hero);
             powerShot = true;
             BuffIndicator.refreshHero();
+            ActionIndicator.setAction(this);
+            Item.updateQuickslot();
             Dungeon.hero.sprite.operate(Dungeon.hero.pos);
             Sample.INSTANCE.play(Assets.Sounds.CHARGEUP);
+            GLog.p(Messages.get(this, "powershot_used"));
+        } else if (isPowerShot()) {
+            GLog.p(Messages.get(this, "powershot_prepared"));
+        } else {
+            GLog.w(Messages.get(this, "arrow_combo_building"));
         }
     }
 }

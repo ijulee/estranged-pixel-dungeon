@@ -14,6 +14,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
+import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.items.ArrowBag;
 import com.shatteredpixel.shatteredpixeldungeon.items.ArrowItem;
 import com.shatteredpixel.shatteredpixeldungeon.items.KindOfWeapon;
@@ -31,6 +32,7 @@ import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.Image;
 import com.watabou.noosa.audio.Sample;
+import com.watabou.noosa.particles.Emitter;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.Random;
 
@@ -134,6 +136,21 @@ public class BowWeapon extends GunWeapon {
         }
 
         return info;
+    }
+
+    @Override
+    public Emitter emitter() {
+        if (isEquipped(Dungeon.hero)) {
+            BowMasterSkill bm = Dungeon.hero.buff(BowMasterSkill.class);
+            if (bm != null && bm.isPowerShot()) {
+                Emitter emitter = new Emitter();
+                emitter.pos(ItemSpriteSheet.film.width(image) * 3/4f, ItemSpriteSheet.film.height(image) / 4f);
+                emitter.fillTarget = false;
+                emitter.pour(Speck.factory(Speck.YELLOW_LIGHT), 0.6f);
+                return emitter;
+            }
+        }
+        return super.emitter();
     }
 
     @Override
