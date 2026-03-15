@@ -2780,8 +2780,6 @@ public class Hero extends Char {
 				Buff.affect(this, MindVision.class, 1f);
 			}
 
-			BowMasterSkill.onMove(this);
-
 			if (subClass == HeroSubClass.JUGGLER) Juggling.onMove();
 
 			sprite.move(pos, step);
@@ -2789,6 +2787,8 @@ public class Hero extends Char {
 
 			spend( delay / speed()  );
 			justMoved = true;
+
+			BowMasterSkill.onMove(this);
 
 			search(false);
 

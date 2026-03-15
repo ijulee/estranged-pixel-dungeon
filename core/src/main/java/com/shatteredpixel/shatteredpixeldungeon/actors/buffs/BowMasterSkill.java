@@ -6,6 +6,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
+import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfRecharging;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
@@ -102,36 +103,40 @@ public class BowMasterSkill extends Buff implements ActionIndicator.Action {
         ActionIndicator.setAction(this);
     }
 
+    public void onMove() {
+        if (!justMoved) {
+            switch (Dungeon.hero.pointsInTalent(Talent.MOVING_FOCUS)) {
+                case 3: //advance combo
+                    if (!isPowerShot()) {
+                        charge = Math.min(maxCharge(), charge + 1);
+                    }
+                    break;
+                case 2: //do nothing besides preserving combo
+                    break;
+                case 1: //preserve combo at 80% chance
+                    if (Random.Float() < 0.2f) {
+                        detach();
+                        return;
+                    }
+                    break;
+                case 0: //break combo
+                default:
+                    detach();
+                    return;
+            }
+            justShot = false;
+            justMoved = true;
+            spend( target.cooldown() ); //align with next hero action
+
+        } else {
+            detach();
+        }
+    }
+
     public static void onMove(Hero hero) {
         BowMasterSkill bm = hero.buff(BowMasterSkill.class);
-
-        if (bm != null && !bm.justMoved) {
-            switch (hero.pointsInTalent(Talent.MOVING_FOCUS)) {
-                case 3:
-                    // behave as if the hero has made a shot
-                    if (!bm.isPowerShot()) {
-                        bm.onShoot();
-                    }
-                    break;
-                case 2:
-                    // do nothing
-                    break;
-                case 1:
-                    if (Random.Float() < 0.8f) {
-                        // do nothing
-                    } else {
-                        bm.detach();
-                    }
-                    break;
-                case 0:
-                default:
-                    bm.detach();
-                    break;
-            }
-            bm.justShot = false;
-            bm.justMoved = true;
-        } else {
-            Buff.detach(hero, BowMasterSkill.class);
+        if (bm != null) {
+            bm.onMove();
         }
     }
 
@@ -162,7 +167,7 @@ public class BowMasterSkill extends Buff implements ActionIndicator.Action {
     @Override
     public boolean act() {
         if (!justShot) detach();
-        spend(target.cooldown()); // hopefully acts after next hero action?
+        spend( target.cooldown() ); //align with next hero action
         justShot = false;
 
         return true;
