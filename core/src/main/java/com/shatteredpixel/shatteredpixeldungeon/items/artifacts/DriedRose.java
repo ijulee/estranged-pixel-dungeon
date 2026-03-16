@@ -648,11 +648,11 @@ public class DriedRose extends Artifact {
 					(!Dungeon.level.adjacent( this.pos, enemy.pos ) || wep instanceof SG);
 		}
 
-		public boolean doReload(boolean whenEmpty) {
+		public boolean doReload(boolean forced) {
 			if (weapon() instanceof Gun) {
 				Gun gun = (Gun) weapon();
 
-				if ((whenEmpty && !gun.canShoot()) || !gun.fullyLoaded()) {
+				if (!gun.canShoot() || (forced && !gun.fullyLoaded())) {
 					reloading = true;
 					gun.quickReload();
 					spend( gun.reloadTime(this) );
@@ -666,6 +666,10 @@ public class DriedRose extends Artifact {
 				}
 			}
 			return false;
+		}
+
+		public boolean isReloading() {
+			return reloading;
 		}
 
 		private void updateRose(){
@@ -1060,14 +1064,14 @@ public class DriedRose extends Artifact {
 			public boolean act(boolean enemyInFOV, boolean justAlerted) {
 				//if directed to defend current pos, reload manually.
 				if (movingToDefendPos && defendingPos == GhostHero.this.pos) {
-					if (doReload(false)) {
+					if (doReload(true)) {
 						return true;
 					}
 				}
 
 				//if not moving or in combat, try to reload
 				if (!enemyInFOV && !justAlerted && !movingToDefendPos) {
-					if (doReload(false)) {
+					if (doReload(true)) {
 						return true;
 					}
 				}
@@ -1081,7 +1085,7 @@ public class DriedRose extends Artifact {
 			public boolean act(boolean enemyInFOV, boolean justAlerted) {
 				//if during combat and auto-reload is on, reload when empty
 				if (rose != null && rose.autoReload) {
-					if (doReload(true)) {
+					if (doReload(false)) {
 						return true;
 					}
 				}
