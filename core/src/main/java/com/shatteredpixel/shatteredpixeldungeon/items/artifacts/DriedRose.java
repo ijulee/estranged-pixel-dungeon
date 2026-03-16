@@ -594,7 +594,6 @@ public class DriedRose extends Artifact {
 		private DriedRose rose = null;
 
         private GunWeapon.GunMissile missileWep;
-		//FIXME save reloading state and prevent removing weapon from rose while reloading?
 		private int throwPos = -1;
 		private boolean reloading = false;
 
@@ -1132,6 +1131,10 @@ public class DriedRose extends Artifact {
 				@Override
 				protected void onClick() {
 					if (rose.weapon != null){
+						if (rose.ghost != null && rose.ghost.isReloading()) {
+							GLog.w(Messages.get(GhostHero.class, "wep_reloading"));
+							return;
+						}
 						item(new WndBag.Placeholder(ItemSpriteSheet.WEAPON_HOLDER));
 						if (!rose.weapon.doPickUp(Dungeon.hero)){
 							Dungeon.level.drop( rose.weapon, Dungeon.hero.pos);
