@@ -25,7 +25,6 @@ import static com.shatteredpixel.shatteredpixeldungeon.Dungeon.hero;
 import static com.shatteredpixel.shatteredpixeldungeon.Dungeon.level;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
-import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.GamesInProgress;
 import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
@@ -42,6 +41,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Bleeding;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Bless;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Corruption;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.CountCooldownBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.CounterBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Cripple;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnhancedRings;
@@ -1259,15 +1259,24 @@ public enum Talent {
 
 	}
 
-	public static class KineticBattle extends Buff {
-
+	public static class KineticBattle extends CountCooldownBuff {
 		{
 			type = buffType.POSITIVE;
 		}
 
-		public float duration = 0f;
-		public float maxDuration = 0f;
-		public int dmgBoost = 0;
+		public static final int MAX_DAMAGE = 5;
+
+		public static int maxDuration() {
+			return 1 + 2*Dungeon.hero.pointsInTalent(KINETIC_BATTLE);
+		}
+
+        public int dmgBoost() {
+			return getCount();
+		}
+
+		public int proc(int dmg) {
+			return dmg + dmgBoost();
+		}
 
 		@Override
 		public int icon() {
@@ -1276,61 +1285,29 @@ public enum Talent {
 
 		@Override
 		public void tintIcon(Image icon) {
-			icon.hardlight(0, 1f, 0);
-		}
-
-		public void set() {
-			dmgBoost = Math.min(5, ++dmgBoost);
-			maxDuration = 1+2*hero.pointsInTalent(Talent.KINETIC_BATTLE);
-			duration = maxDuration;
-		}
-
-		public int proc(int damage) {
-			damage += this.dmgBoost;
-			return damage;
-		}
-
-		@Override
-		public boolean act() {
-			if (--duration <= 0) {
-				detach();
-			} else {
-				spend(TICK);
+			int count = getCount();
+			switch (count) {
+				case 5: case 4: case 3:
+					icon.hardlight(1, 1-0.5f*(count-3), 0);
+					break;
+				case 2: case 1:
+					icon.hardlight(1, 1, 1-0.5f*(count-1));
+					break;
+				default:
 			}
-			return true;
-		}
-
-		@Override
-		public String iconTextDisplay() {
-			return Integer.toString((int)duration);
 		}
 
 		@Override
 		public String desc() {
-			return Messages.get(this, "desc", dmgBoost, duration);
+			return Messages.get(this, "desc", dmgBoost());
 		}
 
 		@Override
-		public float iconFadePercent() {
-			return Math.max(0, (maxDuration-duration) / maxDuration);
+		public Class<? extends FlavourBuff> getCounterClass() {
+			return KineticBattleCounter.class;
 		}
 
-		private static final String DURATION = "duration";
-		private static final String MAX_DURATION = "maxDuration";
-
-		@Override
-		public void storeInBundle(Bundle bundle) {
-			super.storeInBundle(bundle);
-			bundle.put( DURATION, duration );
-			bundle.put( MAX_DURATION, maxDuration );
-		}
-
-		@Override
-		public void restoreFromBundle(Bundle bundle) {
-			super.restoreFromBundle(bundle);
-			duration = bundle.getFloat( DURATION );
-			maxDuration = bundle.getFloat( MAX_DURATION );
-		}
+		public static class KineticBattleCounter extends FlavourBuff {}
 	}
 
 	public static class WarCryTracker extends Buff {}

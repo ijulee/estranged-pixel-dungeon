@@ -7,6 +7,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Adrenaline;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AllyBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.CountCooldownBuff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FlavourBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Healing;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Poison;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.RadioactiveMutation;
@@ -32,7 +33,6 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.tiles.DungeonTilemap;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
-import com.watabou.utils.Bundle;
 import com.watabou.utils.DeviceCompat;
 import com.watabou.utils.Random;
 
@@ -93,9 +93,9 @@ public class GammaRayGun extends Item {
         if (Dungeon.hero != null) {
             GammaRayCooldown cooldown = Dungeon.hero.buff(GammaRayCooldown.class);
             if (cooldown != null) {
-                if (cooldown.count() > 1) {
+                if (cooldown.getCount() > 1) {
                     return WHITE_FAST;
-                } else if (cooldown.count() == 1) {
+                } else if (cooldown.getCount() == 1) {
                     return WHITE_SLOW;
                 } else {
                     return null;
@@ -115,9 +115,9 @@ public class GammaRayGun extends Item {
         if (Dungeon.hero != null) {
             GammaRayCooldown cooldown = Dungeon.hero.buff(GammaRayCooldown.class);
             if (cooldown != null) {
-                if (cooldown.count() > 1) {
+                if (cooldown.getCount() > 1) {
                     info += "\n\n" + Messages.get(this, "warning_high");
-                } else if (cooldown.count() == 1) {
+                } else if (cooldown.getCount() == 1) {
                     info += "\n\n" + Messages.get(this, "warning_low");
                 } else {
                     info += "\n\n" + Messages.get(this, "warning_none");
@@ -213,7 +213,7 @@ public class GammaRayGun extends Item {
                 GammaRayCooldown cooldown = curUser.buff(GammaRayCooldown.class);
                 if (cooldown != null) {
                     //1/2-chance per shot to poison user
-                    float poisonChance = (float) Math.pow(0.5f, cooldown.count());
+                    float poisonChance = (float) Math.pow(0.5f, cooldown.getCount());
                     if (Random.Float() > poisonChance) {
                         float poison = 5+Math.round(curUser.lvl/2f);
                         if (curUser.buff(Poison.class) != null) {
@@ -226,7 +226,7 @@ public class GammaRayGun extends Item {
                     }
                 }
                 //add to cooldown count
-                Buff.affect(curUser, GammaRayCooldown.class, getCooldown());
+                Buff.prolong(curUser, GammaRayCooldown.class, getCooldown());
 
                 curUser.spendAndNext(Actor.TICK);
             }
@@ -247,7 +247,7 @@ public class GammaRayGun extends Item {
 
         @Override
         public int icon() {
-            // normally not visible; show only in debug builds.
+            //normally not visible; show only in debug builds.
             return (DeviceCompat.isDebug())? BuffIndicator.RADIOACTIVE : BuffIndicator.NONE;
         }
 
@@ -255,6 +255,13 @@ public class GammaRayGun extends Item {
         public float iconFadePercent() {
             return 1 - cooldown() / getCooldown();
         }
+
+        @Override
+        public Class<? extends FlavourBuff> getCounterClass() {
+            return GammaRayCounter.class;
+        }
+
+        public static class GammaRayCounter extends FlavourBuff{}
     }
 
     @Override

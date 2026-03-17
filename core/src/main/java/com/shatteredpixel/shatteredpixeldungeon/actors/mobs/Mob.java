@@ -40,6 +40,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ChampionEnemy;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Charm;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Command;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Corruption;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.CountCooldownBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Dread;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FirstAidBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FlavourBuff;
@@ -1030,8 +1031,9 @@ public abstract class Mob extends Char {
 				hero.buff(HorseRiding.RidingCooldown.class).kill();
 			}
 
-			if (hero.hasTalent(Talent.KINETIC_BATTLE)) {
-				Buff.affect(hero, Talent.KineticBattle.class).set();
+			if (hero.hasTalent(Talent.KINETIC_BATTLE) &&
+				CountCooldownBuff.getCount(hero, Talent.KineticBattle.class) < Talent.KineticBattle.MAX_DAMAGE) {
+				Buff.prolong(hero, Talent.KineticBattle.class, Talent.KineticBattle.maxDuration());
 			}
 
 			if (hero.subClass == HeroSubClass.MEDICALOFFICER) {

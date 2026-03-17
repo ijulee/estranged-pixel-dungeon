@@ -21,82 +21,37 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 
+import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
-import com.watabou.utils.Bundle;
-
-import java.util.PriorityQueue;
+import com.watabou.utils.Reflection;
 
 // A buff that keeps track of a list of individual cooldowns
-public class CountCooldownBuff extends FlavourBuff{
-    private PriorityQueue<Float> members = new PriorityQueue<>();
+public abstract class CountCooldownBuff extends FlavourBuff {
 
     @Override
-    public boolean act(){
-        while (!members.isEmpty() && members.peek() != null && members.peek() <= 0) {
-            members.poll();
-        }
-
-        if (members.isEmpty()) {
-            detach();
-        } else {
-            Float next = members.peek();
-            if (next != null) {
-                super.spend(next);
-
-                PriorityQueue<Float> newMembers = new PriorityQueue<>();
-                while (!members.isEmpty()) {
-                    newMembers.add(members.poll() - next);
-                }
-                members = newMembers;
-            }
-        }
-        return true;
-    }
-
-    @Override
-    protected void spend( float time ) {
-        // store new cooldown in relation to current cooldown
-        if (members.isEmpty() && cooldown() == 0) {
-            super.spend(time);
-        }
-        members.add(time-cooldown());
-    }
-
-    private static final String MEMBERS = "members";
-
-    @Override
-    public void storeInBundle(Bundle bundle) {
-        super.storeInBundle(bundle);
-        float[] membersArray = new float[members.size()];
-        int i = 0;
-        for (Float f : members.toArray(new Float[]{})) {
-            membersArray[i] = f;
-            i++;
-        }
-        bundle.put(MEMBERS, membersArray);
-    }
-
-    @Override
-    public void restoreFromBundle(Bundle bundle) {
-        super.restoreFromBundle(bundle);
-        float[] membersArray = bundle.getFloatArray(MEMBERS);
-        for (float f : membersArray) {
-            members.add(f);
-        }
-
-    }
-
-    public int count(){
-        return members.size();
-    }
-
-    @Override
-    public String desc() {
-        return Messages.get(this, "desc", count(), dispTurns());
+    protected void postpone(float time) {
+        Buff.append(target, getCounterClass(), time);
+        super.postpone(time);
     }
 
     @Override
     public String iconTextDisplay() {
-        return Integer.toString(count());
+        return Integer.toString(getCount());
     }
+
+    @Override
+    public String desc() {
+        return Messages.get(this, "desc", getCount(), dispTurns());
+    }
+
+    public static int getCount(Char target, Class<? extends CountCooldownBuff> cls) {
+        Class<? extends FlavourBuff> counterClass = Reflection.newInstance(cls).getCounterClass();
+        return target.buffs(counterClass).size();
+    }
+
+    public int getCount() {
+        return getCount(target, this.getClass());
+    }
+
+    public abstract Class<? extends FlavourBuff> getCounterClass();
 }

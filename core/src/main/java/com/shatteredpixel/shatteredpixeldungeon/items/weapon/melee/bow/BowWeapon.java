@@ -9,6 +9,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.BowMasterSkill;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.CountCooldownBuff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FlavourBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
@@ -306,7 +307,7 @@ public class BowWeapon extends GunWeapon {
                 Dungeon.bullet--;
 
                 if (curUser.subClass != HeroSubClass.BOWMASTER) {
-                    Buff.affect(curUser, BowFatigue.class, BowFatigue.MAX_DURATION);
+                    Buff.prolong(curUser, BowFatigue.class, BowFatigue.MAX_DURATION);
                 }
 
                 updateQuickslot();
@@ -316,7 +317,7 @@ public class BowWeapon extends GunWeapon {
         @Override
         public void ghostThrow(DriedRose.GhostHero ghost, int cell) {
             super.ghostThrow(ghost, cell);
-            Buff.affect(ghost, BowFatigue.class, BowFatigue.MAX_DURATION);
+            Buff.prolong(ghost, BowFatigue.class, BowFatigue.MAX_DURATION);
         }
 
         @Override
@@ -350,7 +351,7 @@ public class BowWeapon extends GunWeapon {
 
         private void doAttach(Char ch) {
             if (dropAmmo) {
-                Buff.affect(ch, ArrowAttached.class, ArrowAttached.DURATION);
+                Buff.prolong(ch, ArrowAttached.class, ArrowAttached.DURATION);
                 dropAmmo = false;
             }
         }
@@ -373,7 +374,7 @@ public class BowWeapon extends GunWeapon {
     }
 
     public static void dropArrow(int cell) {
-        Dungeon.level.drop(new ArrowItem(), cell).sprite.drop(cell);
+        dropArrow(1, cell);
     }
 
     public static void dropArrow(int qty, int cell) {
@@ -419,9 +420,6 @@ public class BowWeapon extends GunWeapon {
     };
 
     public static class ArrowAttached extends CountCooldownBuff {
-        {
-            type = buffType.NEUTRAL;
-        }
 
         public static final float DURATION = 30f;
 
@@ -436,25 +434,25 @@ public class BowWeapon extends GunWeapon {
         }
 
         @Override
-        public boolean act() {
-            int oldCount = count();
-            super.act();
-            dropArrow(oldCount-count(), target.pos);
-            return true;
-        }
+        protected void postpone(float time) {
+            super.postpone(time);
 
-        @Override
-        protected void spend(float time) {
-            super.spend(time);
-            if (count() >= 10) {
+            if (getCount() >= 10) {
                 Badges.validateHedgehog();
             }
         }
 
         @Override
-        public void detach() {
-            dropArrow(count(), target.pos);
-            super.detach();
+        public Class<? extends FlavourBuff> getCounterClass() {
+            return ArrowCounter.class;
+        }
+
+        public static class ArrowCounter extends FlavourBuff{
+            @Override
+            public void detach() {
+                dropArrow(target.pos);
+                super.detach();
+            }
         }
     }
 
@@ -475,6 +473,7 @@ public class BowWeapon extends GunWeapon {
     }
 
     public static class BowFatigue extends CountCooldownBuff {
+
         {
             type = buffType.NEGATIVE;
         }
@@ -489,28 +488,35 @@ public class BowWeapon extends GunWeapon {
 
         @Override
         public void tintIcon(Image icon) {
-            int xs = (count() > MAX_SHOTS) ? count() - MAX_SHOTS : 0;
+            int xs = (getCount() > MAX_SHOTS) ? getCount() - MAX_SHOTS : 0;
             float intensity = (float) Math.pow(0.95f, xs);
             icon.hardlight(.6f/intensity, .6f*intensity, .6f*intensity);
         }
 
         @Override
         public String desc() {
-            int xs = (count() > MAX_SHOTS) ? count() - MAX_SHOTS : 0;
-            return Messages.get(this, "desc", MAX_SHOTS, (int) MAX_DURATION, count(), 100f*Math.pow(0.9f, xs));
+            int xs = (getCount() > MAX_SHOTS) ? getCount() - MAX_SHOTS : 0;
+            return Messages.get(this, "desc", MAX_SHOTS, (int) MAX_DURATION, getCount(), 100f*Math.pow(0.9f, xs));
         }
 
         @Override
         public float iconFadePercent() {
-            return Math.max(0, 1f - (float) count() / MAX_SHOTS);
+            return Math.max(0, 1f - (float) getCount() / MAX_SHOTS);
         }
 
         public int damage(int damage) {
-            if (count() > MAX_SHOTS) {
-                int xs = count() - MAX_SHOTS;
+            if (getCount() > MAX_SHOTS) {
+                int xs = getCount() - MAX_SHOTS;
                 damage = Math.round(damage * (float)Math.pow(0.9f, xs));
             }
             return damage;
         }
+
+        @Override
+        public Class<? extends FlavourBuff> getCounterClass() {
+            return BowFatigueCounter.class;
+        }
+
+        public static class BowFatigueCounter extends FlavourBuff {}
     }
 }
