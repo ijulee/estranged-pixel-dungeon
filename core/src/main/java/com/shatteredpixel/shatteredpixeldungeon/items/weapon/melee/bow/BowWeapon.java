@@ -96,11 +96,9 @@ public class BowWeapon extends GunWeapon {
     @Override
     public int proc(Char attacker, Char defender, int damage) {
         // Adjacent melee attacks have 40% chance to knockback, or 100% chance if sneak attack.
-        if (Dungeon.level.adjacent(attacker.pos, defender.pos) &&
-                ((defender instanceof Mob && ((Mob) defender).surprisedBy(attacker)) ||
-                        Random.Float() < 0.4f)) {
-            pushEnemy(this, attacker, defender,
-                    2 + (isEquipped(Dungeon.hero) ? Dungeon.hero.pointsInTalent(Talent.PUSHBACK) : 0));
+        if (((defender instanceof Mob && ((Mob) defender).surprisedBy(attacker)) || Random.Float() < 0.4f)) {
+            int dist = 2 + (isEquipped(Dungeon.hero) ? Dungeon.hero.pointsInTalent(Talent.PUSHBACK) : 0);
+            pushEnemy(this, attacker, defender, dist);
         }
 
         return super.proc(attacker, defender, damage);
