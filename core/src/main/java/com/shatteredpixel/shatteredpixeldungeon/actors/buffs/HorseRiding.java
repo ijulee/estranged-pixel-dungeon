@@ -5,7 +5,9 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.DirectableAlly;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Pushing;
@@ -14,7 +16,6 @@ import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfBlastWave;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.Lance;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.LanceNShield;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
-import com.shatteredpixel.shatteredpixeldungeon.levels.features.Door;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.CellSelector;
@@ -25,14 +26,18 @@ import com.shatteredpixel.shatteredpixeldungeon.ui.ActionIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.ui.HeroIcon;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
+import com.shatteredpixel.shatteredpixeldungeon.windows.WndOptions;
+import com.watabou.noosa.Game;
 import com.watabou.noosa.Image;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Bundle;
-import com.watabou.utils.Callback;
 import com.watabou.utils.PathFinder;
 import com.watabou.utils.Random;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
 
 public class HorseRiding extends Buff implements ActionIndicator.Action, Hero.Doom {
 
@@ -47,13 +52,16 @@ public class HorseRiding extends Buff implements ActionIndicator.Action, Hero.Do
     private int horseHT = 0;
 
     public void set() {
-        horseHT = (15+Dungeon.hero.lvl*5);
-        horseHP = horseHT;
+        set(-1);
     }
 
     public void set(int HP) {
         horseHT = (15+Dungeon.hero.lvl*5);
-        horseHP = HP;
+        if (HP != -1) {
+            horseHP = HP;
+        } else {
+            horseHP = horseHT;
+        }
     }
 
     public void onLevelUp() {
@@ -76,8 +84,10 @@ public class HorseRiding extends Buff implements ActionIndicator.Action, Hero.Do
     }
 
     public void onDamage(int damage) {
+        //FIXME the horse only takes damage from physical attacks in Hero.defenseProc()
+        //  and not other sources.
         damage -= drRoll();
-        damage = Math.max(damage, 0); //최소 0
+        damage = Math.max(damage, 0);
         horseHP -= damage;
         if (horseHP <= 0) {
             detach();
@@ -97,13 +107,13 @@ public class HorseRiding extends Buff implements ActionIndicator.Action, Hero.Do
     }
 
     public static int drRoll() {
-        int baseDr = Random.NormalIntRange(2, 16); //기본 방어력: 2~16
-        return baseDr + Random.NormalIntRange(Dungeon.hero.pointsInTalent(Talent.ARMORED_HORSE), 8*Dungeon.hero.pointsInTalent(Talent.ARMORED_HORSE)); //추가 방어력: 특성 레벨~8*특성 레벨
+        int baseDr = Random.NormalIntRange(2, 16);
+        return baseDr + Random.NormalIntRange(Dungeon.hero.pointsInTalent(Talent.ARMORED_HORSE), 8*Dungeon.hero.pointsInTalent(Talent.ARMORED_HORSE));
     }
 
     @Override
     public float iconFadePercent() {
-        return Math.max(0, (horseHT - horseHP)/(float)horseHT);
+        return Math.max(0, 1 - horseHP/(float)horseHT);
     }
 
     @Override
@@ -129,6 +139,115 @@ public class HorseRiding extends Buff implements ActionIndicator.Action, Hero.Do
     @Override
     public void doAction() {
         GameScene.selectCell(dashDirector);
+    }
+
+    public void doCharge(List<Integer> path) {
+        Hero hero = (Hero) target;
+
+        //process in reverse, mainly for elastic
+        Collections.reverse(path);
+
+        final List<Integer> dashPath = List.copyOf(path);
+        final int dashDist = path.size()-1;
+        final int dashCell = dashPath.get(0);
+
+        hero.busy();
+        Sample.INSTANCE.play(Assets.Sounds.MISS);
+        hero.sprite.emitter().start(Speck.factory(Speck.JET), 0.01f, Math.round(4 + 2*Dungeon.level.trueDistance(hero.pos, dashCell)));
+
+        hero.sprite.jump(hero.pos, dashCell, 0, 0.1f, () -> {
+            //press cells and collect chars in path
+            ArrayList<Char> charsInPath = new ArrayList<>();
+            for (int p : dashPath) {
+                if (!hero.flying) {
+                    Dungeon.level.pressCell( p );
+                }
+
+                Char enemy = Actor.findChar( p );
+                if (enemy != null && enemy != hero) {
+                    charsInPath.add( enemy );
+                }
+            }
+
+            //attack chars
+            for (Char enemy : charsInPath) {
+                hero.attack(enemy, 1f+0.2f*hero.pointsInTalent(Talent.DASH_ENHANCE), 1, 1);
+            }
+
+            //clear destination cell by pushing chars
+            Char pushChar = Actor.findChar( dashCell );
+            HashSet<Integer> excludeCells = new HashSet<>(List.of(dashCell));
+            while (pushChar != null && pushChar != hero && pushChar.isAlive()) {
+                int pushPos = findPushTile(pushChar, excludeCells);
+                Char nextChar = Actor.findChar( pushPos );
+                excludeCells.add( pushPos );
+
+                Actor.add(new Pushing(pushChar, pushChar.pos, pushPos));
+                pushChar.pos = pushPos;
+                Dungeon.level.occupyCell(pushChar);
+                pushChar = nextChar;
+            }
+
+            //move and update fog
+            hero.move(dashCell);
+            Dungeon.observe();
+            GameScene.updateFog();
+
+            //inflict recoil
+            int recoil = dashDist * 5;
+            recoil -= hero.drRoll();
+            for (int i = 0; i < charsInPath.size(); i++) {
+                recoil -= Random.NormalIntRange(hero.pointsInTalent(Talent.BUFFER), 3*hero.pointsInTalent(Talent.BUFFER));
+            }
+            hero.damage(recoil, HorseRiding.this);
+
+            Invisibility.dispel();
+            hero.spendAndNext(Actor.TICK);
+
+            if (hero.hasTalent(Talent.SHOCKWAVE)) {
+                int strength = (int) Math.floor(dashDist/(float)(8-2*hero.pointsInTalent(Talent.SHOCKWAVE)));
+                if (strength > 0) {
+                    WandOfBlastWave.BlastWave.blast(hero.pos);
+
+                    for (int i : PathFinder.NEIGHBOURS8) {
+                        Char mob = Actor.findChar(hero.pos + i);
+                        if (mob != null && mob != hero && mob.alignment != Char.Alignment.ALLY) {
+                            Ballistica trajectory = new Ballistica(mob.pos, mob.pos + i, Ballistica.MAGIC_BOLT);
+                            WandOfBlastWave.throwChar(mob, trajectory, strength, false, true, HorseRiding.this);
+                        }
+                    }
+                }
+            }
+
+            if ((hero.belongings.weapon() instanceof Lance ||
+                (hero.belongings.weapon() instanceof LanceNShield && ((LanceNShield)hero.belongings.weapon()).stance))) {
+                Buff.affect(hero, Lance.LanceBuff.class).setDamageFactor(dashDist, false);
+            }
+
+            Sample.INSTANCE.play(Assets.Sounds.BLAST);
+            CellEmitter.get( hero.pos ).start(Speck.factory(Speck.ROCK), 0.03f, Math.min(dashDist, 10));
+        });
+    }
+
+    public static int findPushTile(Char ch, HashSet<Integer> excludes) {
+        int emptyPos = -1;
+        int occupiedPos = -1;
+
+        for (int c : PathFinder.NEIGHBOURS8) {
+            if (!excludes.contains(ch.pos + c) &&
+                    Dungeon.level.passable[ch.pos + c] &&
+                    (Dungeon.level.openSpace[ch.pos + c] || !Char.hasProp(ch, Char.Property.LARGE))) {
+                if (Actor.findChar(ch.pos + c) == null) {
+                    emptyPos = ch.pos + c;
+                    break;
+                } else if (occupiedPos == -1) {
+                    occupiedPos = ch.pos + c;
+                }
+            }
+        }
+
+        //prioritize an empty tile
+        return (emptyPos != -1) ? emptyPos : occupiedPos;
     }
 
     @Override
@@ -169,8 +288,9 @@ public class HorseRiding extends Buff implements ActionIndicator.Action, Hero.Do
             hero.sprite.operate(hero.pos);
 
             detach();
-        } else
+        } else {
             GLog.i( Messages.get(this, "no_space") );
+        }
     }
 
     public CellSelector.Listener dashDirector = new CellSelector.Listener(){
@@ -182,99 +302,59 @@ public class HorseRiding extends Buff implements ActionIndicator.Action, Hero.Do
                 spawnHorse();
             } else {
                 Hero hero = (Hero) target;
-                Invisibility.dispel();
-                Ballistica dash = new Ballistica(hero.pos, cell, Ballistica.STOP_SOLID | Ballistica.IGNORE_SOFT_SOLID);
-//                if (dash.collisionPos.equals(cell)){
-//                    GLog.w(Messages.get(MeleeWeapon.class, "dash_bad_position"));
-//                    return;
-//                }
-                if (dash.collisionPos == hero.pos) {
+
+                if (hero.rooted) {
+                    PixelScene.shake( 1, 1f );
+                    GLog.w(Messages.get(HorseRiding.class, "rooted"));
                     return;
                 }
-                hero.busy();
-                Sample.INSTANCE.play(Assets.Sounds.MISS);
-                hero.sprite.emitter().start(Speck.factory(Speck.JET), 0.01f, Math.round(4 + 2*Dungeon.level.trueDistance(hero.pos, cell)));
 
-                int finalCell = dash.collisionPos;
-                ArrayList<Char> chars = new ArrayList<>();
-                for (int c : dash.subPath(1, dash.dist)) {
-                    if (!hero.flying) {
-                        Dungeon.level.pressCell(c);
-                    }
-                    Char enemy;
-                    if ((enemy = Actor.findChar( c )) != null) {
-                        chars.add( enemy );
-                    }
-                }
-                for (Char enemyOnDirection : chars) {
-                    hero.attack(enemyOnDirection, 1f+0.2f*hero.pointsInTalent(Talent.DASH_ENHANCE), 1, 1);
+                Ballistica dash = new Ballistica(hero.pos, cell, Ballistica.STOP_SOLID | Ballistica.IGNORE_SOFT_SOLID);
+
+                //check that any char at destination can be pushed
+                //back up if impossible
+                int dist = dash.dist;
+                Char ch;
+                while ( dist > 1 && (ch = Actor.findChar(dash.path.get(dist))) != null &&
+                        (ch.rooted || Char.hasProp(ch, Char.Property.IMMOVABLE))) {
+                    dist--;
                 }
 
-                hero.sprite.jump(hero.pos, finalCell, 0, 0.1f, new Callback() {
-                    @Override
-                    public void call() {
-                        if (Dungeon.level.map[hero.pos] == Terrain.OPEN_DOOR) {
-                            Door.leave( hero.pos );
-                        }
-                        hero.pos = finalCell;
-                        Dungeon.level.occupyCell(hero);
-                        hero.spendAndNext(Actor.TICK);
-                        int damage = dash.dist * 5;
-                        damage -= hero.drRoll();
-                        for (int i = 0; i < chars.size(); i++) {
-                            damage -= Random.NormalIntRange(hero.pointsInTalent(Talent.BUFFER), 3*hero.pointsInTalent(Talent.BUFFER));
-                        }
-                        hero.damage(damage, HorseRiding.this);
+                List<Integer> path = dash.subPath(0, dist);
 
-                        if (hero.hasTalent(Talent.SHOCKWAVE)) {
-                            int knockDist = (int) Math.floor(dash.dist/(float)(8-2*hero.pointsInTalent(Talent.SHOCKWAVE)));
-                            if (knockDist > 0) {
-                                WandOfBlastWave.BlastWave.blast(hero.pos);
-                                for (int i  : PathFinder.NEIGHBOURS8){
-                                    Char ch = Actor.findChar(hero.pos + i);
-                                    if (ch != null){
-                                        if (ch.pos == hero.pos + i) {
-                                            Ballistica trajectory = new Ballistica(ch.pos, ch.pos + i, Ballistica.MAGIC_BOLT);
-                                            WandOfBlastWave.throwChar(ch, trajectory, knockDist, false, true, this);
-                                        }
-                                    }
-                                }
+                if (dist == 1) {
+                    //do nothing
+                } else if (5*dist > Math.round((hero.HP + hero.shielding())*0.9f)) {
+                    GameScene.show(new WndOptions(
+                            new HeroIcon(HeroSubClass.HORSEMAN),
+                            Messages.get(HorseRiding.class, "action_name"),
+                            Messages.get(HorseRiding.class, "charge_confirm"),
+                            Messages.get(HorseRiding.class, "yes"),
+                            Messages.get(HorseRiding.class, "no")) {
+                        private float elapsed = 0f;
+
+                        @Override
+                        public synchronized void update() {
+                            super.update();
+                            elapsed += Game.elapsed;
+                        }
+
+                        @Override
+                        public void hide() {
+                            if (elapsed > 0.2f){
+                                super.hide();
                             }
                         }
 
-                        if ((hero.belongings.weapon instanceof Lance ||
-                                (hero.belongings.weapon instanceof LanceNShield && ((LanceNShield)hero.belongings.weapon).stance))) {
-                            Buff.affect(hero, Lance.LanceBuff.class).setDamageFactor(dash.dist, false);
+                        @Override
+                        protected void onSelect( int index ) {
+                            if (index == 0 && elapsed > 0.2f) {
+                                doCharge(path);
+                            }
                         }
-
-                        Sample.INSTANCE.play(Assets.Sounds.BLAST);
-                        CellEmitter.get( hero.pos ).start(Speck.factory(Speck.ROCK), 0.03f, Math.min(dash.dist, 10));
-                        GameScene.updateFog();
-                    }
-                });
-
-                int pushPos = -1;
-                for (int c : PathFinder.NEIGHBOURS8) {
-                    if (Actor.findChar(finalCell + c) == null
-                            && Dungeon.level.passable[finalCell + c]
-                            && (Dungeon.level.openSpace[finalCell + c] || !Char.hasProp(Actor.findChar(finalCell), Char.Property.LARGE))) {
-                        pushPos = finalCell + c;
-                    }
-                }
-
-                //push enemy, or instantly kills the blocker, even if it is the boss
-                Char ch = Actor.findChar(finalCell);
-                if (ch != null) {
-                    if (pushPos != -1) {
-                        Actor.add( new Pushing( ch, ch.pos, pushPos ) );
-
-                        ch.pos = pushPos;
-                        Dungeon.level.occupyCell( ch );
-                    } else {
-                        if (ch.alignment == Char.Alignment.ENEMY) {
-                            ch.damage(ch.HP, hero);
-                        }
-                    }
+                    });
+                } else {
+                    doCharge(path);
                 }
             }
         }
@@ -339,7 +419,7 @@ public class HorseRiding extends Buff implements ActionIndicator.Action, Hero.Do
             if (this.HP < this.HT && Regeneration.regenOn()) {
                 partialCharge += 0.1f;
                 if (Dungeon.level.map[this.pos] == Terrain.GRASS) {
-                    partialCharge += 0.4f; //풀 위에 있으면 회복 속도 5배
+                    partialCharge += 0.4f;
                 }
                 while (partialCharge > 1) {
                     this.HP++;
@@ -374,11 +454,6 @@ public class HorseRiding extends Buff implements ActionIndicator.Action, Hero.Do
         }
 
         @Override
-        protected boolean canAttack(Char enemy) { //can't attack
-            return false;
-        }
-
-        @Override
         public int damageRoll() {
             return 0;
         }
@@ -408,6 +483,15 @@ public class HorseRiding extends Buff implements ActionIndicator.Action, Hero.Do
         public int posDRRoll() {
             return super.posDRRoll() + HorseRiding.drRoll();
         }
+
+        @Override
+        public int attackProc(Char enemy, int damage) {
+            if (enemy instanceof Mob) {
+                ((Mob)enemy).aggro( this );
+            }
+
+            return super.attackProc(enemy, damage);
+        }
     }
 
     public static class RideFall implements Hero.Doom {
@@ -425,40 +509,39 @@ public class HorseRiding extends Buff implements ActionIndicator.Action, Hero.Do
             announced = false;
         }
 
-        private int coolDown;
-        private int maxCoolDown;
+        private int kills;
+        private static final int MAX_KILLS = 5;
 
         @Override
         public int icon() {
-            return BuffIndicator.TIME;
+            return BuffIndicator.HORSE_RIDING;
         }
 
         @Override
         public void tintIcon(Image icon) {
-            icon.hardlight(0x808080);
+            icon.hardlight(0xFF8000);
         }
 
         @Override
         public float iconFadePercent() {
-            return Math.max(0, (maxCoolDown - coolDown)/(float)maxCoolDown);
+            return Math.max(0, 1 - kills /(float) MAX_KILLS);
         }
 
         @Override
         public String iconTextDisplay() {
-            return Integer.toString(coolDown);
+            return Integer.toString(kills);
         }
 
-        public void kill() {
-            coolDown --;
-            if (coolDown <= 0) {
+        public void onKill() {
+            kills--;
+            if (kills <= 0) {
                 detach();
             }
-            BuffIndicator.refreshHero();    //영웅의 버프창 갱신
+            BuffIndicator.refreshHero();
         }
 
         public void set() {
-            maxCoolDown = 5;
-            coolDown = maxCoolDown;
+            kills = MAX_KILLS;
         }
 
         @Override
@@ -469,24 +552,21 @@ public class HorseRiding extends Buff implements ActionIndicator.Action, Hero.Do
 
         @Override
         public String desc() {
-            return Messages.get(this, "desc", coolDown, maxCoolDown);
+            return Messages.get(this, "desc", kills, MAX_KILLS);
         }
 
-        private static final String MAXCOOLDOWN = "maxCoolDown";
-        private static final String COOLDOWN  = "cooldown";
+        private static final String KILLS = "cooldown";
 
         @Override
         public void storeInBundle(Bundle bundle) {
             super.storeInBundle(bundle);
-            bundle.put(MAXCOOLDOWN, maxCoolDown);
-            bundle.put(COOLDOWN, coolDown);
+            bundle.put(KILLS, kills);
         }
 
         @Override
         public void restoreFromBundle(Bundle bundle) {
             super.restoreFromBundle(bundle);
-            maxCoolDown = bundle.getInt( MAXCOOLDOWN );
-            coolDown = bundle.getInt( COOLDOWN );
+            kills = bundle.getInt(KILLS);
         }
     }
 }
