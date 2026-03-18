@@ -314,7 +314,7 @@ public class Gun extends GunWeapon {
 
 		onReload(hero);
 		if (fullyLoaded()) {
-			manualReload(maxRounds(), true);
+			manualReload(maxRounds()*2-rounds, true);
 		} else {
 			quickReload();
 		}
