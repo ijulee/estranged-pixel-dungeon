@@ -10,6 +10,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.HolyWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Projecting;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
@@ -78,13 +79,11 @@ public class HeroSword extends MeleeWeapon {
     private void copyBaseWeapon() {
         tier = baseWep.tier;
         DLY = baseWep.DLY;
-        RCH = baseWep.RCH;
+        //RCH = baseWep.RCH;
 
         int level = baseWep.trueLevel();
-        if (level > 0) {
-            upgrade( level );
-        } else if (level < 0) {
-            degrade( -level );
+        if (level > this.trueLevel()) {
+            this.level(level);
         }
 
         //don't copy ench or CI bonus
@@ -137,10 +136,13 @@ public class HeroSword extends MeleeWeapon {
 
     @Override
     public int reachFactor(Char owner) {
-        int reach = super.reachFactor(owner);
-        reach += baseWep.reachFactor(owner);
+        int reach = baseWep.reachFactor(owner);
 
-        return reach - 1;
+        if (hasEnchant(Projecting.class, owner) && !baseWep.hasEnchant(Projecting.class, owner)) {
+            return reach + Math.round(Enchantment.genericProcChanceMultiplier(owner));
+        } else {
+            return reach;
+        }
     }
 
     @Override
@@ -171,8 +173,8 @@ public class HeroSword extends MeleeWeapon {
         String info = super.info();
 
         String baseWepName = baseWep.name() + ((baseWep.level() > 0) ? String.format(" +%d", baseWep.level()) : "");
-        info += "\n\n" + Messages.get(this, "properties", baseWep.name());
-        if (baseWep.enchantment != null) {
+        info += "\n\n" + Messages.get(this, "properties", baseWepName);
+        if (baseWep.enchantment != null && baseWep.enchantment.getClass() != enchantment.getClass()) {
             info += " " + baseWep.enchantment.desc();
         }
 
@@ -186,8 +188,16 @@ public class HeroSword extends MeleeWeapon {
 
     @Override
     public int proc(Char attacker, Char defender, int damage) {
-        damage = baseWep.proc( attacker, defender, damage );
-        return super.proc( attacker, defender, damage );
+        if (enchantment.getClass() == baseWep.enchantment.getClass()) {
+            baseWep.enchantment = null;
+            damage = baseWep.proc( attacker, defender, damage );
+            baseWep.enchantment = enchantment;
+        } else {
+            damage = baseWep.proc( attacker, defender, damage );
+        }
+
+        damage = super.proc( attacker, defender, damage );
+        return damage;
     }
 
     @Override
@@ -281,7 +291,7 @@ public class HeroSword extends MeleeWeapon {
 
     @Override
     public String abilityName() {
-        return ability.abilityName();
+        return Messages.upperCase(ability.abilityName());
     }
 
     @Override

@@ -402,12 +402,12 @@ public class OldAmulet extends Item {
         private HeroSword heroSword;
 
         public WndAbilitySelect(MeleeWeapon wep) {
-            super(new ItemSprite(ItemSpriteSheet.HERO_SWORD, wep.glowing()),
+            super(  new ItemSprite(ItemSpriteSheet.HERO_SWORD, wep.glowing()),
                     Messages.titleCase(Messages.get(HeroSword.class, "name")),
                     Messages.get(HeroSword.class, "ability_select"),
-                    abilities[0].abilityName(),
-                    abilities[1].abilityName(),
-                    abilities[2].abilityName(),
+                    Messages.upperCase(abilities[0].abilityName()),
+                    Messages.upperCase(abilities[1].abilityName()),
+                    Messages.upperCase(abilities[2].abilityName()),
                     Messages.get(HeroSword.class, "cancel"));
             this.wep = wep;
             this.heroSword = new HeroSword(wep);
