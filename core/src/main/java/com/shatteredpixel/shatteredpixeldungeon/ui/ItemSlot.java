@@ -244,11 +244,11 @@ public class ItemSlot extends Button {
 			status.resetColor();
 		}
 
-		if (item instanceof Gun
-				&& Dungeon.hero.buff(MeleeWeapon.Charger.class) != null) {
-			if ((Dungeon.hero.belongings.weapon() == item || Dungeon.hero.belongings.secondWep() == item && Dungeon.hero.buff(MeleeWeapon.Charger.class).charges >= 2)) {
-				status.hardlight(ENHANCED);
-			}
+		if (item instanceof Gun && item.isEquipped(Dungeon.hero) &&
+			Dungeon.hero.buff(MeleeWeapon.Charger.class) != null &&
+			Dungeon.hero.buff(MeleeWeapon.Charger.class).charges >=
+				((Gun) item).abilityChargeUse(Dungeon.hero, null)) {
+			status.hardlight(ENHANCED);
 		}
 
 		if (item.icon != -1 && (item.isIdentified() || (item instanceof Ring && ((Ring) item).isKnown()))){
