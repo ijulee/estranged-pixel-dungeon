@@ -30,12 +30,13 @@ public class PocketKnife extends QuickWeapon {
     }
 
     public static final String AC_FORGE	= "FORGE";
-    boolean upgraded = false;
 
     @Override
     public ArrayList<String> actions(Hero hero) {
         ArrayList<String> actions = super.actions(hero);
-        if (upgraded) actions.add(AC_FORGE);
+        if (trueLevel() > 0) {
+            actions.add(AC_FORGE);
+        }
         return actions;
     }
 
@@ -54,15 +55,9 @@ public class PocketKnife extends QuickWeapon {
     }
 
     @Override
-    public Item upgrade() {
-        this.upgraded = true;
-        return super.upgrade();
-    }
-
-    @Override
     public String desc() {
         String desc = super.desc();
-        if (upgraded) {
+        if (trueLevel() > 0) {
             desc += "\n\n" + Messages.get(this, "upgraded");
         }
         return desc;

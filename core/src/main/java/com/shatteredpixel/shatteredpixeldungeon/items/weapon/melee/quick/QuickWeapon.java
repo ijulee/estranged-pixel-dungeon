@@ -3,6 +3,7 @@ package com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.quick;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Charm;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.items.KindOfWeapon;
@@ -49,11 +50,14 @@ public class QuickWeapon extends MeleeWeapon {
                 Char ch = Actor.findChar(target);
                 Hero hero = Dungeon.hero;
                 if (ch != null && ch.alignment == Char.Alignment.ENEMY) {
-                    KindOfWeapon herosWeapon = hero.belongings.weapon; //기존에 사용하던 무기를 저장
-                    hero.belongings.weapon = QuickWeapon.this; //공격에 사용할 무기를 이 무기로 변경
+                    //hacky but works
+                    KindOfWeapon equipped = hero.belongings.weapon;
+                    hero.belongings.weapon = QuickWeapon.this;
 
                     if (!hero.canAttack(ch)) {
                         GLog.w(Messages.get(QuickWeapon.class, "cannot_reach"));
+                    } else if (hero.isCharmedBy(ch)) {
+                        GLog.w(Messages.get(Charm.class, "cant_attack"));
                     } else {
                         hero.sprite.zap(ch.pos);
                         hero.busy();
@@ -62,7 +66,7 @@ public class QuickWeapon extends MeleeWeapon {
                         Invisibility.dispel();
                     }
 
-                    hero.belongings.weapon = herosWeapon; //영웅의 무기를 원래 무기로 되돌림
+                    hero.belongings.weapon = equipped;
                 } else {
                     GLog.w(Messages.get(QuickWeapon.class, "no_enemy"));
                 }
