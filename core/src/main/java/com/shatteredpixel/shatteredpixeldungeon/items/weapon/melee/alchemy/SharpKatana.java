@@ -24,6 +24,7 @@ package com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy;
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
+import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.spells.Evolution;
@@ -31,6 +32,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.spells.UpgradeDust;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.LargeKatana;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.NormalKatana;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.WornKatana;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 
@@ -61,8 +63,20 @@ public class SharpKatana extends MeleeWeapon implements AlchemyWeapon {
 
     @Override
     public int max(int lvl) {
-        return  5*(tier+2) +
-                lvl*(tier+2);
+        return  4 * (tier + 2) +
+                lvl * (tier + 2);
+    }
+
+    @Override
+    public int damageRoll(Char owner) {
+        int damage = augment.damageFactor(WornKatana.damageRoll(owner, min(), max()));
+        if (owner instanceof Hero) {
+            int exStr = ((Hero)owner).STR() - STRReq();
+            if (exStr > 0) {
+                damage += Hero.heroDamageIntRange( 0, exStr );
+            }
+        }
+        return damage;
     }
 
     @Override

@@ -199,19 +199,25 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.DeathSword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.DualDagger;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Flail;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.GunWeapon;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.LargeKatana;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.LargeSword;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.LongKatana;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MagesStaff;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.NormalKatana;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Nunchaku;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Quarterstaff;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.RoundShield;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Sai;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Scimitar;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.ShortKatana;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.WornKatana;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.WornShortsword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.ChainFlail;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.Lance;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.LanceNShield;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.ObsidianShield;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.SharpKatana;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.UnholyBible;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.bow.BowWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.gun.Gun;
@@ -257,8 +263,11 @@ import com.watabou.utils.Random;
 import com.watabou.utils.Reflection;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Set;
 
 public class Hero extends Char {
 
@@ -963,6 +972,14 @@ public class Hero extends Char {
 			return ThirteenLeafClover.alterDamageRoll(min, max);
 		} else {
 			return Random.NormalIntRange(min, max);
+		}
+	}
+
+	public static int heroDamageFlatIntRange(int min, int max ){
+		if (Random.Float() < ThirteenLeafClover.alterHeroDamageChance()){
+			return ThirteenLeafClover.alterDamageRoll(min, max);
+		} else {
+			return Random.IntRange(min, max);
 		}
 	}
 	
@@ -1885,19 +1902,29 @@ public class Hero extends Char {
 	public float critChance(final Weapon wep) {
 		float chance = 0;
 
+		Set<Class<? extends Weapon>> katanaClasses = Set.of(
+				WornKatana.class,
+				ShortKatana.class,
+				NormalKatana.class,
+				LongKatana.class,
+				LargeKatana.class,
+				SharpKatana.class
+		);
+		
+		if (katanaClasses.contains(wep.getClass())) {
+			chance += WornKatana.BASE_CRIT*( 1.1f - 0.1f*((MeleeWeapon)wep).tier() );
+		}
+
 		if (heroClass == HeroClass.SAMURAI) {
-			chance = 0.01f;
-			chance += 0.01f * (lvl - 1);
-			chance += 0.02f * wepSTRExcess(wep);
+			chance += 0.01f * lvl + 0.02f * wepSTRExcess(wep);
 
 			if (subClass == HeroSubClass.SLAYER) {
-
 				if (Awakening.isAwakened()) {
 					if (hasTalent(Talent.ACCELERATED_LETHALITY)) {
 						chance += 0.1f*pointsInTalent(Talent.ACCELERATED_LETHALITY);
 					}
 
-					// Hero.defenseSkill() as of SPD v3.2.5 only captures part of a char's evasion.
+					// Hero.defenseSkill(), as of SPD v3.2.5, only captures part of hero evasion.
 					// The remainder is in Char.hit(), partially copied below.
 					// FIXME correct this when SPD consolidates acc/eva logic
 					float evasion = defenseSkill(null);

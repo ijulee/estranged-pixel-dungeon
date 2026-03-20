@@ -24,9 +24,11 @@ package com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee;
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
+import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
+import com.watabou.utils.Random;
 
 public class WornKatana extends MeleeWeapon {
 
@@ -39,6 +41,8 @@ public class WornKatana extends MeleeWeapon {
 
         bones = false;
     }
+
+    public static final float BASE_CRIT = 0.25f;
 
     @Override
     public boolean doPickUp( Hero hero, int pos ) {
@@ -54,8 +58,28 @@ public class WornKatana extends MeleeWeapon {
 
     @Override
     public int max(int lvl) {
-        return  5*(tier+2) +
-                lvl*(tier+2);
+        return  4 * (tier + 2) +
+                lvl * (tier + 2);
+    }
+
+    @Override
+    public int damageRoll(Char owner) {
+        int damage = augment.damageFactor(WornKatana.damageRoll(owner, min(), max()));
+        if (owner instanceof Hero) {
+            int exStr = ((Hero)owner).STR() - STRReq();
+            if (exStr > 0) {
+                damage += Hero.heroDamageIntRange( 0, exStr );
+            }
+        }
+        return damage;
+    }
+
+    public static int damageRoll(Char owner, int min, int max) {
+        if (owner instanceof Hero) {
+            return Hero.heroDamageFlatIntRange(min, max);
+        } else {
+            return Random.IntRange(min, max);
+        }
     }
 
     @Override

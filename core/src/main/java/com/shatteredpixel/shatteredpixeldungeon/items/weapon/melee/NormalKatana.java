@@ -61,8 +61,20 @@ public class NormalKatana extends MeleeWeapon {
 
     @Override
     public int max(int lvl) {
-        return  5*(tier+2) +
-                lvl*(tier+2);
+        return  4 * (tier + 2) +
+                lvl * (tier + 2);
+    }
+
+    @Override
+    public int damageRoll(Char owner) {
+        int damage = augment.damageFactor(WornKatana.damageRoll(owner, min(), max()));
+        if (owner instanceof Hero) {
+            int exStr = ((Hero)owner).STR() - STRReq();
+            if (exStr > 0) {
+                damage += Hero.heroDamageIntRange( 0, exStr );
+            }
+        }
+        return damage;
     }
 
     @Override
