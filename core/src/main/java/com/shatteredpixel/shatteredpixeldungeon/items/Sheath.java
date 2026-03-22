@@ -1,11 +1,15 @@
 package com.shatteredpixel.shatteredpixeldungeon.items;
 
+import static com.shatteredpixel.shatteredpixeldungeon.ui.QuickSlotButton.lastTarget;
+
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Charm;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FlavourBuff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.TargetingAction;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroAction;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
@@ -13,6 +17,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.NPC;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.bow.SpiritBow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -85,14 +90,14 @@ public class Sheath extends Item {
     }
 
     public static boolean isQuickDraw() {
-        return Dungeon.hero.subClass == HeroSubClass.MASTER &&
-                    Dungeon.hero.belongings.attackingWeapon() instanceof MeleeWeapon &&
-                    Dungeon.hero.buff(Sheathing.class) != null &&
-                    Dungeon.hero.buff(QuickDrawCooldown.class) == null &&
-                    Dungeon.hero.buff(DashDrawTracker.class) == null;
+        return  Dungeon.hero.subClass == HeroSubClass.MASTER &&
+                Dungeon.hero.belongings.attackingWeapon() instanceof MeleeWeapon &&
+                Dungeon.hero.buff(Sheathing.class) != null &&
+                Dungeon.hero.buff(QuickDrawCooldown.class) == null &&
+                Dungeon.hero.buff(DashDrawTracker.class) == null;
     }
 
-    public static class Sheathing extends Buff implements ActionIndicator.Action {
+    public static class Sheathing extends TargetingAction {
         {
             type = buffType.POSITIVE;
             announced = true;
@@ -138,7 +143,7 @@ public class Sheath extends Item {
                 return true;
             }
 
-            spend(TICK);
+            spend( target.cooldown() );
 
             if (Dungeon.hero.subClass == HeroSubClass.MASTER) {
                 if (Dungeon.hero.buff(DashDrawCooldown.class) == null) {
@@ -154,8 +159,11 @@ public class Sheath extends Item {
         public String desc() {
             String desc = super.desc();
             if (Dungeon.hero.subClass == HeroSubClass.MASTER &&
-                    Dungeon.hero.buff(QuickDrawCooldown.class) == null) {
-                desc += "\n\n" + Messages.get(this, "quick_draw");
+                Dungeon.hero.buff(QuickDrawCooldown.class) == null) {
+                float quickCritChance = 100f *
+                        Dungeon.hero.critChance((Weapon) Dungeon.hero.belongings.weapon()) *
+                        (1.4f + 0.2f * Dungeon.hero.pointsInTalent(Talent.ENHANCED_CRIT));
+                desc += "\n\n" + Messages.get(this, "quick_draw", quickCritChance);
             }
             return desc;
         }
@@ -182,23 +190,23 @@ public class Sheath extends Item {
                 detach();
             }
 
-            if (QuickSlotButton.targetingSlot != -1 &&
-                    Dungeon.quickslot.getItem(QuickSlotButton.targetingSlot) == s) {
-                int cell = QuickSlotButton.autoAim(QuickSlotButton.lastTarget, s);
+            if (!GameScene.isCellSelecterActive( attack )) {
+                showCross();
 
-                if (cell != -1) {
-                    GameScene.handleCell(cell);
-                } else {
-                    //couldn't auto-aim, just target the position and hope for the best.
-                    GameScene.handleCell( QuickSlotButton.lastTarget.pos );
-                }
+                GameScene.selectCell( attack );
             } else {
-                GameScene.selectCell(attack);
-
-                if (Dungeon.quickslot.contains(s)) {
-                    QuickSlotButton.useTargeting(Dungeon.quickslot.getSlot(s));
+                if (canAutoAim(lastTarget)) {
+                    GameScene.handleCell(lastTarget.pos);
                 }
             }
+        }
+
+        private boolean canAutoAim(Char lastTarget) {
+            return  lastTarget != null &&
+                    lastTarget.isAlive() && lastTarget.isActive() &&
+                    lastTarget.alignment != Char.Alignment.ALLY &&
+                    !Dungeon.level.adjacent(Dungeon.hero.pos, lastTarget.pos) &&
+                    Dungeon.hero.fieldOfView[lastTarget.pos];
         }
 
         private static final String POS = "pos";
@@ -235,99 +243,103 @@ public class Sheath extends Item {
             return 500;
         }
 
-        private static void showPuff(int cell) {
-            Dungeon.observe();
-            GameScene.updateFog();
-            Dungeon.hero.checkVisibleMobs();
-
-            Dungeon.hero.sprite.place( Dungeon.hero.pos );
-            Dungeon.hero.sprite.turnTo( Dungeon.hero.pos, cell);
-            CellEmitter.get( Dungeon.hero.pos ).burst( Speck.factory( Speck.WOOL ), 6 );
-            Sample.INSTANCE.play( Assets.Sounds.PUFF );
-        }
-
         private final CellSelector.Listener attack = new CellSelector.Listener() {
             @Override
-            public void onSelect(Integer cell) {
-                if (cell == null) return;
-                final Char enemy = Actor.findChar( cell );
-                if (enemy != null) {
-                    if (Dungeon.level.adjacent(target.pos, enemy.pos)) {
-                        GLog.w(Messages.get(Sheathing.class, "bad_target"));
-                    } else if (enemy instanceof NPC || enemy == Dungeon.hero ||
-                            Dungeon.hero.isCharmedBy(enemy)) {
-                        GLog.w(Messages.get(Sheathing.class, "cant_attack"));
-                    } else {
-                        //don't attack targets without blinking.
+            public void onSelect( Integer cell ) {
+                if (cell != null) {
+                    final Char enemy = Actor.findChar(cell);
 
-                        PathFinder.buildDistanceMap(Dungeon.hero.pos,BArray.or(Dungeon.level.passable, Dungeon.level.avoid, null), blinkDistance());
-                        int dest = -1;
-                        for (int i : PathFinder.NEIGHBOURS8) {
-                            //cannot blink into a cell that's occupied or impassable, only over them
-                            if (Actor.findChar(cell+i) != null)     continue;
-                            if (!Dungeon.level.passable[cell+i] && !(target.flying && Dungeon.level.avoid[cell+i])) {
-                                continue;
-                            }
+                    //check if hero can blink.
+                    boolean canBlink = true;
+                    if (enemy != null) {
+                        if (Dungeon.level.adjacent(target.pos, enemy.pos)) {
+                            //don't attack targets without blinking.
+                            GLog.w(Messages.get(Sheathing.class, "bad_target"));
+                            canBlink = false;
+                        } else if (enemy instanceof NPC || enemy == Dungeon.hero) {
+                            GLog.w(Messages.get(Sheathing.class, "cant_attack"));
+                            canBlink = false;
+                        } else if (Dungeon.hero.isCharmedBy(enemy)) {
+                            GLog.w(Messages.get(Charm.class, "cant_attack"));
+                            canBlink = false;
+                        }
+                    } else if (Dungeon.hero.rooted) {
+                        PixelScene.shake(1, 1f);
+                        canBlink = false;
+                    }
 
-                            if (dest == -1 || PathFinder.distance[dest] > PathFinder.distance[cell+i]){
-                                dest = cell+i;
-                                //if two cells have the same pathfinder distance, prioritize the one with the closest true distance to the hero
-                            } else if (PathFinder.distance[dest] == PathFinder.distance[cell+i]){
-                                if (Dungeon.level.trueDistance(Dungeon.hero.pos, dest) > Dungeon.level.trueDistance(Dungeon.hero.pos, cell+i)){
-                                    dest = cell+i;
+                    //set destination
+                    int dest = -1;
+
+                    if (canBlink) {
+                        PathFinder.buildDistanceMap(Dungeon.hero.pos, BArray.or(Dungeon.level.passable, Dungeon.level.avoid, null), blinkDistance());
+
+                        if (enemy != null ||
+                            (!Dungeon.level.passable[cell] && (!Dungeon.hero.flying || !Dungeon.level.avoid[cell]))) {
+                            for (int i : PathFinder.NEIGHBOURS8) {
+                                //cannot blink into a cell that's occupied or impassable, only over them
+                                if (Actor.findChar(cell + i) != null) continue;
+                                if (!Dungeon.level.passable[cell + i] && !(target.flying && Dungeon.level.avoid[cell + i])) {
+                                    continue;
+                                }
+
+                                if (dest == -1 || PathFinder.distance[dest] > PathFinder.distance[cell + i]) {
+                                    dest = cell + i;
+                                    //if two cells have the same pathfinder distance, prioritize the one with the closest true distance to the hero
+                                } else if (PathFinder.distance[dest] == PathFinder.distance[cell + i]) {
+                                    if (Dungeon.level.trueDistance(Dungeon.hero.pos, dest) > Dungeon.level.trueDistance(Dungeon.hero.pos, cell + i)) {
+                                        dest = cell + i;
+                                    }
                                 }
                             }
+                        } else {
+                            dest = cell;
                         }
+                    }
 
-                        if (dest == -1 || PathFinder.distance[dest] == Integer.MAX_VALUE || Dungeon.hero.rooted) {
-                            GLog.w(Messages.get(Sheathing.class, "cant_dash"));
-                            if (Dungeon.hero.rooted) PixelScene.shake(1, 1f);
-                            return;
-                        }
-
-                        Buff.affect(Dungeon.hero, DashDrawTracker.class);
-                        if (Dungeon.hero.hasTalent(Talent.INNER_EYE)) {
-                            Buff.affect(Dungeon.hero, DashDrawVision.class, 2f);
-                        }
-
+                    //blink and attack if possible
+                    if (dest != -1 && PathFinder.distance[dest] != Integer.MAX_VALUE) {
+                        //prevents the hero from being interrupted by seeing new enemies
                         Dungeon.hero.pos = dest;
                         Dungeon.level.occupyCell(Dungeon.hero);
-                        //prevents the hero from being interrupted by seeing new enemies
-                        showPuff(cell);
+                        Dungeon.observe();
+                        GameScene.updateFog();
+                        Dungeon.hero.checkVisibleMobs();
 
-                        Dungeon.hero.curAction = new HeroAction.Attack( enemy );
-                        Dungeon.hero.next();
-                    }
-                } else {
-                    int dest;
-                    PathFinder.buildDistanceMap(Dungeon.hero.pos,BArray.or(Dungeon.level.passable, Dungeon.level.avoid, null), blinkDistance());
-                    if (!Dungeon.level.passable[cell] && !(target.flying && Dungeon.level.avoid[cell])) {
-                        GLog.w(Messages.get(Sheathing.class, "cannot_dash"));
-                        return;
+                        Dungeon.hero.sprite.place( Dungeon.hero.pos );
+                        Dungeon.hero.sprite.turnTo( Dungeon.hero.pos, cell);
+                        CellEmitter.get( Dungeon.hero.pos ).burst( Speck.factory( Speck.WOOL ), 6 );
+
+                        if (enemy != null) {
+                            Sample.INSTANCE.play( Assets.Sounds.PUFF );
+
+                            Buff.affect(Dungeon.hero, DashDrawTracker.class);
+                            if (Dungeon.hero.hasTalent(Talent.INNER_EYE)) {
+                                Buff.affect(Dungeon.hero, DashDrawVision.class, 2f);
+                            }
+
+                            Dungeon.hero.curAction = new HeroAction.Attack(enemy);
+                            Dungeon.hero.next();
+
+                        } else {
+                            Sample.INSTANCE.play( Assets.Sounds.MISS );
+
+                            GLog.w(Messages.get(Sheathing.class, "no_target"));
+                            Buff.prolong(Dungeon.hero, DashDrawCooldown.class,
+                                    (100 - 10 * Dungeon.hero.pointsInTalent(Talent.DYNAMIC_PREPARATION)));
+                            if (Dungeon.hero.buff(DashDrawAccel.class) != null) {
+                                Dungeon.hero.buff(DashDrawAccel.class).detach();
+                            }
+                            ActionIndicator.clearAction(Sheathing.this);
+
+                            Dungeon.hero.spendAndNext( Dungeon.hero.attackDelay() );
+                        }
                     } else {
-                        dest = cell;
+                        GLog.w(Messages.get(Sheathing.class, "cant_dash"));
                     }
-                    if (PathFinder.distance[dest] == Integer.MAX_VALUE || Dungeon.hero.rooted) {
-                        GLog.w(Messages.get(Sheathing.class, "cannot_dash"));
-                        if (Dungeon.hero.rooted) PixelScene.shake( 1, 1f );
-                        return;
-                    }
-
-                    Dungeon.hero.pos = dest;
-                    Dungeon.level.occupyCell(Dungeon.hero);
-                    //prevents the hero from being interrupted by seeing new enemies
-                    showPuff(cell);
-
-                    Dungeon.hero.spendAndNext(Actor.TICK);
-
-                    GLog.w(Messages.get(Sheathing.class, "no_target"));
-                    Buff.prolong(Dungeon.hero, DashDrawCooldown.class,
-                            (100-10*Dungeon.hero.pointsInTalent(Talent.DYNAMIC_PREPARATION)));
-                    if (Dungeon.hero.buff(DashDrawAccel.class) != null) {
-                        Dungeon.hero.buff(DashDrawAccel.class).detach();
-                    }
-                    ActionIndicator.clearAction(Sheathing.this);
                 }
+
+                removeCross();
             }
 
             @Override

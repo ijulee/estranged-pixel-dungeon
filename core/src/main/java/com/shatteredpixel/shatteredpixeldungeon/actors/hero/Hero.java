@@ -1912,6 +1912,7 @@ public class Hero extends Char {
 		);
 		
 		if (katanaClasses.contains(wep.getClass())) {
+			//25%/23%/20%/18%/15%/13% base crit rate
 			chance += WornKatana.BASE_CRIT*( 1.1f - 0.1f*((MeleeWeapon)wep).tier() );
 		}
 
