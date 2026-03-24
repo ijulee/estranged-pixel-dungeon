@@ -46,7 +46,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 
-public class Gun extends GunWeapon {
+public abstract class Gun extends GunWeapon {
 	public static final String AC_RELOAD    = "RELOAD";
 
 	protected int rounds;
@@ -492,20 +492,21 @@ public class Gun extends GunWeapon {
 		if (Dungeon.hero != null && isEquipped(Dungeon.hero)) {
 			talentBonus += 2 * Dungeon.hero.pointsInTalent(Talent.CLOSE_COMBAT);
 		}
-		return (tier()+1) * (lvl + 3) + talentBonus;
+		return 	3 * (tier() + 1) +
+				lvl * (tier() + 1) +
+				talentBonus;
 
 	}
 
 	@Override
     public int missileMin(int lvl) {
-		return tier() + lvl +
+		return 	tier() +
+				lvl +
 				(isEquipped(Dungeon.hero) ? RingOfSharpshooting.levelDamageBonus(Dungeon.hero) : 0);
 	}
 
 	//need to be overridden
-	protected int baseMissileMax(int lvl) {
-		return 0;
-	}
+	protected abstract int baseMissileMax(int lvl);
 
 	@Override
     public int missileMax(int lvl) {
