@@ -24,7 +24,6 @@ package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 import static com.shatteredpixel.shatteredpixeldungeon.items.Item.updateQuickslot;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
-import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -32,44 +31,22 @@ import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.watabou.noosa.Image;
 import com.watabou.utils.Bundle;
 
-public class EnhancedRingsCombo extends FlavourBuff{
+public class EnhancedRingsCombo extends CountCooldownBuff {
 
 	{
 		type = buffType.POSITIVE;
 	}
 
-	int combo = 0;
-
-	public void hit() {
-		if (combo < Dungeon.hero.pointsInTalent(Talent.RING_KNUCKLE)) combo ++;
-		else combo = Dungeon.hero.pointsInTalent(Talent.RING_KNUCKLE);
-		if (target instanceof Hero) ((Hero) target).updateHT(false);
-	}
-
 	public int getCombo() {
-		return combo;
+		return getCount();
 	}
 
-	private static final String COMBO = "combo";
-
-	@Override
-	public void storeInBundle(Bundle bundle) {
-		super.storeInBundle(bundle);
-		bundle.put(COMBO, combo);
+	public static int maxCombo() {
+		return Dungeon.hero.pointsInTalent(Talent.RING_KNUCKLE);
 	}
 
-	@Override
-	public void restoreFromBundle(Bundle bundle) {
-		super.restoreFromBundle(bundle);
-		combo = bundle.getInt(COMBO);
-	}
-
-	@Override
-	public boolean attachTo(Char target) {
-		if (super.attachTo(target)){
-			return true;
-		}
-		return false;
+	public static int maxDuration() {
+		return (maxCombo() >= 2) ? 2 : 1;
 	}
 
 	@Override
@@ -91,8 +68,7 @@ public class EnhancedRingsCombo extends FlavourBuff{
 
 	@Override
 	public float iconFadePercent() {
-		float max = (Dungeon.hero.pointsInTalent(Talent.RING_KNUCKLE) >= 2) ? 2 : 1;
-		return Math.max(0, (max-visualcooldown()) / max);
+		return Math.max(0, 1 - visualcooldown() / maxDuration());
 	}
 
 	@Override
@@ -102,6 +78,13 @@ public class EnhancedRingsCombo extends FlavourBuff{
 
 	@Override
 	public String desc() {
-		return Messages.get(this, "desc", (int)visualcooldown(), combo);
+		return Messages.get(this, "desc", visualcooldown(), getCombo());
 	}
+
+	@Override
+	public Class<? extends FlavourBuff> getCounterClass() {
+		return EnhancedRingsCounter.class;
+	}
+
+	public static class EnhancedRingsCounter extends FlavourBuff {}
 }

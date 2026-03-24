@@ -55,6 +55,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Burning;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Charm;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Cloaking;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Combo;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.CountCooldownBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Daze;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Drowsy;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Enduring;
@@ -2132,20 +2133,40 @@ public class Hero extends Char {
 				}
 				break;
 			case FIGHTER:
-				if (wep == null && Random.Int(3) < pointsInTalent(Talent.QUICK_STEP)) {
-					Buff.prolong(this, Talent.QuickStep.class, 1.0001f);
-				}
-				if (wep == null && hasTalent(Talent.RING_KNUCKLE) && buff(RingOfForce.Force.class) == null) {
-					Buff.prolong(this, EnhancedRingsCombo.class, (pointsInTalent(Talent.RING_KNUCKLE) >= 2) ? 2f : 1f).hit();
-					updateHT(false);
-					updateQuickslot();
-				}
-				if (wep == null && Random.Float() < pointsInTalent(Talent.MYSTICAL_PUNCH)/3f) {
-					if (belongings.ring != null) {
-						damage = belongings.ring.onHit(this, enemy, damage);
+				if (wep == null) {
+					if (Random.Int(3) < pointsInTalent(Talent.QUICK_STEP)) {
+						Buff.prolong(this, Talent.QuickStep.class, Talent.QuickStep.DURATION);
 					}
-					if (belongings.misc instanceof Ring) {
-						damage = ((Ring)belongings.misc).onHit(this, enemy, damage);
+
+					if (hasTalent(Talent.RING_KNUCKLE) && buff(RingOfForce.Force.class) == null) {
+                        Actor.add(new Actor() {
+                            { actPriority = BUFF_PRIO - 1; }
+
+                            @Override
+                            protected boolean act() {
+                                if (CountCooldownBuff.getCount(Hero.this, EnhancedRingsCombo.class) <
+									EnhancedRingsCombo.maxCombo()) {
+
+                                    Buff.prolong(Hero.this, EnhancedRingsCombo.class, EnhancedRingsCombo.maxDuration());
+                                    updateHT(false);
+                                    updateQuickslot();
+                                }
+                                remove(this);
+                                return true;
+                            }
+                        });
+                    }
+
+					if (Random.Int(3) < pointsInTalent(Talent.MYSTICAL_PUNCH)) {
+						if (belongings.ring != null) {
+							damage = belongings.ring.onHit(this, enemy, damage);
+						}
+					}
+
+					if (Random.Int(3) < pointsInTalent(Talent.MYSTICAL_PUNCH)) {
+						if (belongings.misc instanceof Ring) {
+							damage = ((Ring) belongings.misc).onHit(this, enemy, damage);
+						}
 					}
 				}
 				break;

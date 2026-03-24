@@ -28,6 +28,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.CountCooldownBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnhancedRings;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EnhancedRingsCombo;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicImmune;
@@ -388,10 +389,9 @@ public class Ring extends KindofMisc {
 		if (Dungeon.hero.buff(EnhancedRings.class) != null){
 			lvl++;
 		}
-		EnhancedRingsCombo enhancedRingsCombo = Dungeon.hero.buff(EnhancedRingsCombo.class);
-		if (enhancedRingsCombo != null){
-			lvl += enhancedRingsCombo.getCombo();
-		}
+
+		lvl += CountCooldownBuff.getCount(Dungeon.hero, EnhancedRingsCombo.class);
+
 		return lvl;
 	}
 

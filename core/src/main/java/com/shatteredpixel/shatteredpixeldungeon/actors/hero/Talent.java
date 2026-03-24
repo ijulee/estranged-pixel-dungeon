@@ -918,11 +918,6 @@ public enum Talent {
 	//Fighter
 	public static class QuickStep extends FlavourBuff {
 
-		{
-			type = buffType.NEUTRAL;
-			announced = false;
-		}
-
 		public static final float DURATION	= 1f;
 
 		@Override
@@ -936,18 +931,13 @@ public enum Talent {
 		}
 
 		@Override
-		public float iconFadePercent() {
-			return Math.max(0, (DURATION - visualcooldown()) / DURATION);
-		}
-
-		@Override
 		public String toString() {
 			return Messages.get(this, "name");
 		}
 
 		@Override
 		public String desc() {
-			return Messages.get(this, "desc", dispTurns());
+			return Messages.get(this, "desc");
 		}
 	}
 	//Fighter 3-8
