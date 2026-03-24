@@ -222,6 +222,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.Sharp
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.UnholyBible;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.bow.BowWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.gun.Gun;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.gun.SR.SR;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Catalog;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Document;
@@ -1915,6 +1916,11 @@ public class Hero extends Char {
 		if (katanaClasses.contains(wep.getClass())) {
 			//25%/23%/20%/18%/15%/13% base crit rate
 			chance += WornKatana.BASE_CRIT*( 1.1f - 0.1f*((MeleeWeapon)wep).tier() );
+		}
+
+		if (wep instanceof SR.SRBullet) {
+			//20%/15%/13% crit rate
+			chance += WornKatana.BASE_CRIT*( 1.1f - 0.1f*((SR.SRBullet) wep).tier );
 		}
 
 		if (heroClass == HeroClass.SAMURAI) {

@@ -1,5 +1,9 @@
 package com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.gun.SR;
 
+import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.WornKatana;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.gun.Gun;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 public class SR extends Gun {
@@ -26,6 +30,19 @@ public class SR extends Gun {
     public class SRBullet extends Bullet {
         {
             image = ItemSpriteSheet.SNIPER_BULLET;
+        }
+
+        @Override
+        public int damageRoll(Char owner) {
+            int damage = augment.damageFactor(WornKatana.damageRoll(owner, min(), max()));
+            if (owner instanceof Hero) {
+                int exStr = ((Hero)owner).STR() - STRReq();
+                if (exStr > 0) {
+                    damage += Hero.heroDamageIntRange( 0, exStr );
+                }
+            }
+
+            return damage;
         }
     }
 }
