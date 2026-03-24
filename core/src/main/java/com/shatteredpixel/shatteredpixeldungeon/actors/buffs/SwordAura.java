@@ -14,6 +14,8 @@ import com.shatteredpixel.shatteredpixeldungeon.items.KindOfWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.Sheath;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.bow.SpiritBow;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Projecting;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -34,6 +36,7 @@ import com.watabou.utils.Bundle;
 import com.watabou.utils.Random;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class SwordAura extends TargetingAction {
     {
@@ -82,6 +85,7 @@ public class SwordAura extends TargetingAction {
     }
 
     private static final String DAMAGE = "damage";
+
     @Override
     public void storeInBundle(Bundle bundle) {
         super.storeInBundle(bundle);
@@ -149,7 +153,7 @@ public class SwordAura extends TargetingAction {
 
             GameScene.selectCell(shooter);
         } else {
-            if (canAutoAim(lastTarget)){
+            if (canAutoAim(lastTarget)) {
                 int cell = QuickSlotButton.autoAim(lastTarget, knockAura());
                 if (cell != -1) {
                     GameScene.handleCell(cell);
@@ -162,7 +166,7 @@ public class SwordAura extends TargetingAction {
     }
 
     private boolean canAutoAim(Char lastTarget) {
-        return lastTarget != null &&
+        return  lastTarget != null &&
                 lastTarget.isAlive() && lastTarget.isActive() &&
                 lastTarget.alignment != Char.Alignment.ALLY &&
                 Dungeon.hero.fieldOfView[lastTarget.pos];
@@ -215,7 +219,7 @@ public class SwordAura extends TargetingAction {
             int dmg = super.proc(attacker, defender, damage);
 
             KindOfWeapon wep = hero.belongings.weapon();
-            if (Random.Float() < hero.pointsInTalent(Talent.ARCANE_POWER)/3f && wep != null) {
+            if (Random.Int(3) < hero.pointsInTalent(Talent.ARCANE_POWER) && wep != null) {
                 dmg = wep.proc(attacker, defender, dmg);
             }
 
@@ -227,9 +231,36 @@ public class SwordAura extends TargetingAction {
         }
 
         @Override
+        public int throwPos(Hero user, int dst) {
+            int projecting = 0;
+
+            if (Random.Int(3) < user.pointsInTalent(Talent.ARCANE_POWER)) {
+                MeleeWeapon wep = (MeleeWeapon) user.belongings.weapon();
+                if (wep != null && wep.hasEnchant(Projecting.class, user)) {
+                    projecting += 4;
+                }
+            }
+
+            if (Random.Int(3) < user.pointsInTalent(Talent.SHARED_ENCHANTMENT)) {
+                SpiritBow bow = Dungeon.hero.belongings.getItem(SpiritBow.class);
+                if (bow != null && bow.hasEnchant(Projecting.class, user)) {
+                    projecting += 4;
+                }
+            }
+
+            projecting = Math.round(projecting * Enchantment.genericProcChanceMultiplier(user));
+
+            if (Dungeon.level.distance(user.pos, dst) <= projecting) {
+                return dst;
+            }
+
+            return new Ballistica(hero.pos, dst, Ballistica.DASH).collisionPos;
+        }
+
+        @Override
         protected void onThrow( int cell ) {
             if (cell != hero.pos) {
-                // assume cell comes from throwPos(), which applies Ballistica.DASH and Projecting
+                //assume throwPos() has already applied Ballistica.DASH and Projecting
                 Ballistica aim = new Ballistica(hero.pos, cell, Ballistica.STOP_TARGET);
 
                 ArrayList<Char> chars = new ArrayList<>();
@@ -240,15 +271,19 @@ public class SwordAura extends TargetingAction {
                     }
                 }
 
+                //process in reverse, mostly for elastic
+                Collections.reverse(chars);
+
                 for (Char ch : chars) {
                     if (curUser.shoot(ch, this)) {
-                        // don't count ally/neutral NPC
+                        //don't count ally/neutral NPC
                         if (ch.alignment == Char.Alignment.ENEMY ||
                                 (ch instanceof Mimic && ch.alignment == Char.Alignment.NEUTRAL)) {
                             lastTarget = ch;
                         }
 
-                        if (hero.hasTalent(Talent.WIND_BLAST)) {
+                        if (hero.buff(Sheath.Sheathing.class) != null &&
+                            hero.hasTalent(Talent.WIND_BLAST)) {
                             ch.damage(5*hero.pointsInTalent(Talent.WIND_BLAST), new SwordAuraMagicDamage());
                         }
                     }

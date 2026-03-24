@@ -225,15 +225,6 @@ abstract public class MissileWeapon extends Weapon {
 			}
 		}
 
-		if (this instanceof SwordAura.Aura && Random.Int(3) < hero.pointsInTalent(Talent.ARCANE_POWER)) {
-			KindOfWeapon wep = hero.belongings.weapon();
-			if (wep instanceof MeleeWeapon && ((MeleeWeapon) wep).hasEnchant(Projecting.class, user)) {
-				projecting += 4;
-			} else {
-				return new Ballistica(hero.pos, dst, Ballistica.DASH).collisionPos;
-			}
-		}
-
 		if ((projecting > 0
 				&& Dungeon.level.distance(user.pos, dst) <= Math.round(projecting * Enchantment.genericProcChanceMultiplier(user)))
 			|| (this instanceof Gun.Bullet
