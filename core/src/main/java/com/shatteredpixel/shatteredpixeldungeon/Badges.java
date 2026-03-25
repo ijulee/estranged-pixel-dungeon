@@ -958,6 +958,9 @@ public class Badges {
 		case 20:
 			badge = Badge.BOSS_SLAIN_4;
 			break;
+		//case 25:
+			//badge = Badge.BOSS_SLAIN_5;
+			//break;
 		}
 		
 		if (badge != null) {
@@ -1425,6 +1428,7 @@ public class Badges {
 	//don't show the later badge if the earlier one isn't unlocked
 	//we aren't too aggressive with this, mainly just want to prevent boss spoilers,
 	// and all diamond tier badges must have a gold/plat prerequisite
+	//FIXME need to add BOSS_SLAIN_5 to reflect Yog not being final boss
 	private static final Badge[][] prerequisiteBadges = new Badge[][]{
 			{Badge.BOSS_SLAIN_1, Badge.BOSS_CHALLENGE_1},
 			{Badge.BOSS_SLAIN_2, Badge.BOSS_CHALLENGE_2},
