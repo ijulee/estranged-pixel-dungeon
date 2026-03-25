@@ -330,6 +330,7 @@ public class ShopRoom extends SpecialRoom {
 				case 20: case 21:
 					bags = (int)Math.ceil(( 5-hourglass.sandBags) * 0.80f ); break;
 				case 26:
+					//FIXME adjust this?
 					bags = (int)Math.ceil(( 5-hourglass.sandBags) * 0.80f ); break;
 			}
 
@@ -346,11 +347,14 @@ public class ShopRoom extends SpecialRoom {
 				rare.level( 0 );
 				break;
 			case 1:
-				rare = Generator.random(Generator.Category.RING);
+				rare = Generator.random( Generator.Category.RING );
 				rare.level( 0 );
 				break;
 			case 2:
 				rare = Generator.random( Generator.Category.ARTIFACT );
+				break;
+			case 3:
+				rare = Generator.random( Generator.Category.SPELLBOOK );
 				break;
 			default:
 				rare = new Stylus();
@@ -359,7 +363,8 @@ public class ShopRoom extends SpecialRoom {
 		rare.cursedKnown = true;
 		itemsToSpawn.add( rare );
 
-		itemsToSpawn.add( new BulletBelt().quantity(Dungeon.depth/5));
+		//spawns 1/1/2/2/3 for each shop
+		itemsToSpawn.add( new BulletBelt().quantity(Math.round(Dungeon.depth/10f)));
 
 		//use a new generator here to prevent items in shop stock affecting levelgen RNG (e.g. sandbags)
 		//we can use a random long for the seed as it will be the same long every time
