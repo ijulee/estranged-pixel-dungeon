@@ -476,38 +476,36 @@ public class BowWeapon extends GunWeapon {
             type = buffType.NEGATIVE;
         }
 
-        public static final int MAX_SHOTS = 3;
-        public static final float MAX_DURATION = 5f;
+        public static final int MAX_DURATION = 5;
 
         @Override
         public int icon() {
-            return BuffIndicator.WEAKNESS;
+            return BuffIndicator.BOW_FATIGUE;
         }
 
         @Override
         public void tintIcon(Image icon) {
-            int xs = (getCount() > MAX_SHOTS) ? getCount() - MAX_SHOTS : 0;
-            float intensity = (float) Math.pow(0.95f, xs);
-            icon.hardlight(.6f/intensity, .6f*intensity, .6f*intensity);
+            int count = getCount();
+            switch (count) {
+                case 0: //shouldn't happen, blue tint as warning
+                    icon.hardlight(0, 0, 1);
+                    break;
+                case 1: case 2: case 3:
+                    icon.hardlight(1, 1-0.5f*(count-1), 0);
+                    break;
+                default:
+                    icon.hardlight(1, 0, 0);
+            }
         }
 
         @Override
         public String desc() {
-            int xs = (getCount() > MAX_SHOTS) ? getCount() - MAX_SHOTS : 0;
-            return Messages.get(this, "desc", MAX_SHOTS, (int) MAX_DURATION, getCount(), 100f*Math.pow(0.9f, xs));
-        }
-
-        @Override
-        public float iconFadePercent() {
-            return Math.max(0, 1f - (float) getCount() / MAX_SHOTS);
+            return Messages.get(this, "desc", MAX_DURATION, getCount(), damage(100));
         }
 
         public int damage(int damage) {
-            if (getCount() > MAX_SHOTS) {
-                int xs = getCount() - MAX_SHOTS;
-                damage = Math.round(damage * (float)Math.pow(0.9f, xs));
-            }
-            return damage;
+            //100%/90%/70%/50% damage
+            return Math.round(damage * Math.max(0.5f, 1.1f-0.2f*getCount()));
         }
 
         @Override
