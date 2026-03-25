@@ -1254,10 +1254,10 @@ public enum Talent {
 			type = buffType.POSITIVE;
 		}
 
-		public static final int MAX_DAMAGE = 5;
+		public static final int MAX_DAMAGE = 3;
 
 		public static int maxDuration() {
-			return 1 + 2*Dungeon.hero.pointsInTalent(KINETIC_BATTLE);
+			return 2 + 3*Dungeon.hero.pointsInTalent(KINETIC_BATTLE);
 		}
 
         public int dmgBoost() {
@@ -1277,19 +1277,20 @@ public enum Talent {
 		public void tintIcon(Image icon) {
 			int count = getCount();
 			switch (count) {
-				case 5: case 4: case 3:
-					icon.hardlight(1, 1-0.5f*(count-3), 0);
+				case 0: //shouldn't happen, blue tint as warning
+					icon.hardlight(0, 0, 1);
 					break;
-				case 2: case 1:
-					icon.hardlight(1, 1, 1-0.5f*(count-1));
+				case 1: case 2: case 3:
+					icon.hardlight(1, 1-0.5f*(count-1), 0);
 					break;
 				default:
+					icon.hardlight(1, 0, 0);
 			}
 		}
 
 		@Override
 		public String desc() {
-			return Messages.get(this, "desc", dmgBoost());
+			return Messages.get(this, "desc", dmgBoost(), dispTurns());
 		}
 
 		@Override
