@@ -267,7 +267,7 @@ public abstract class Level implements Bundlable {
 				addItemToSpawn( new TrinketCatalyst());
 			}
 			if ( Dungeon.beltNeeded() ) {
-				Dungeon.LimitedDrops.BULLET_BELT.drop();
+				Dungeon.LimitedDrops.BULLET_BELT.count++;
 				addItemToSpawn( new BulletBelt());
 			}
 

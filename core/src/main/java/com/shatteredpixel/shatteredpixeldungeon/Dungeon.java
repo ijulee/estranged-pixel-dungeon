@@ -648,13 +648,14 @@ public class Dungeon {
 	}
 
 	public static boolean beltNeeded() {
-		//1 AS each floor set
-		int asLeftThisSet = 1 - (LimitedDrops.BULLET_BELT.count - (depth / 5));
-		if (asLeftThisSet <= 0) return false;
+		//1 ammo each floor set
+		int ammoLeftThisSet = 1 - (LimitedDrops.BULLET_BELT.count - (depth / 5));
+		if (ammoLeftThisSet <= 0) return false;
 
 		int floorThisSet = (depth % 5);
 		//chance is floors left / scrolls left
-		return Random.Int(5 - floorThisSet) < asLeftThisSet;
+		//drop in 1-3F for region 0 (Sewers)
+		return Random.Int((depth / 5 == 0) ? 4 : 5 - floorThisSet) < ammoLeftThisSet;
 	}
 	private static final String INIT_VER	= "init_ver";
 	public  static final String VERSION		= "version";
