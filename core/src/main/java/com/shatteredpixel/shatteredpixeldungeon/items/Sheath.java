@@ -420,7 +420,14 @@ public class Sheath extends Item {
 
     public static class DashDrawTracker extends Buff {}
 
-    public static class DashDrawVision extends FlavourBuff {}
+    public static class DashDrawVision extends FlavourBuff {
+        @Override
+        public void detach() {
+            super.detach();
+            Dungeon.observe();
+            GameScene.updateFog();
+        }
+    }
 
     public static class DashDrawAccel extends FlavourBuff {
         {

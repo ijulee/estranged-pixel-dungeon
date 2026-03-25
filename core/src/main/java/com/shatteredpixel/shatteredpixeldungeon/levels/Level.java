@@ -1495,18 +1495,23 @@ public abstract class Level implements Bundlable {
 						mindVisRange = 1+2*((Hero) c).pointsInTalent(Talent.DIVINE_SENSE);
 					}
 				}
-				if (((Hero) c).hasTalent(Talent.DRAGONS_EYE) && ((Hero) c).heroClass != HeroClass.SAMURAI){
-					mindVisRange = 1+((Hero) c).pointsInTalent(Talent.DRAGONS_EYE);
+
+				if (((Hero) c).hasTalent(Talent.DRAGONS_EYE)) {
+                    if (c.buff(Sheath.Sheathing.class) != null) {
+						mindVisRange = Math.max(mindVisRange, 2 + ((Hero) c).pointsInTalent(Talent.DRAGONS_EYE));
+					} else if (((Hero) c).heroClass != HeroClass.SAMURAI) {
+                        mindVisRange = Math.max(mindVisRange, 1 + ((Hero) c).pointsInTalent(Talent.DRAGONS_EYE));
+                    }
 				}
-				if (((Hero) c).hasTalent(Talent.DRAGONS_EYE) && ((Hero) c).buff(Sheath.Sheathing.class) != null) {
-					mindVisRange += 2+((Hero) c).pointsInTalent(Talent.DRAGONS_EYE);
+
+				if (((Hero) c).hasTalent(Talent.TACTICAL_SIGHT) && c.buff(ReinforcedArmor.ReinforcedArmorTracker.class) != null) {
+					mindVisRange = Math.max(mindVisRange, 1 + ((Hero) c).pointsInTalent(Talent.TACTICAL_SIGHT));
 				}
-				if (((Hero) c).hasTalent(Talent.TACTICAL_SIGHT) && ((Hero) c).buff(ReinforcedArmor.ReinforcedArmorTracker.class) != null) {
-					mindVisRange += 1+((Hero) c).pointsInTalent(Talent.TACTICAL_SIGHT);
+
+				if (((Hero) c).hasTalent(Talent.INNER_EYE) && c.buff(Sheath.DashDrawVision.class) != null) {
+					mindVisRange = Math.max(mindVisRange, 3 * ((Hero) c).pointsInTalent(Talent.INNER_EYE));
 				}
-				if (((Hero) c).hasTalent(Talent.INNER_EYE) && ((Hero) c).buff(Sheath.DashDrawVision.class) != null) {
-					mindVisRange += 3*((Hero) c).pointsInTalent(Talent.INNER_EYE);
-				}
+
 				mindVisRange = Math.max(mindVisRange, EyeOfNewt.mindVisionRange());
 
 				//power of many's life link spell allows allies to get divine sense
