@@ -491,7 +491,7 @@ public class BowWeapon extends GunWeapon {
                     icon.hardlight(0, 0, 1);
                     break;
                 case 1: case 2: case 3:
-                    icon.hardlight(1, 1-0.5f*(count-1), 0);
+                    icon.hardlight(1, 1-0.33f*(count-1), 0);
                     break;
                 default:
                     icon.hardlight(1, 0, 0);
@@ -504,8 +504,8 @@ public class BowWeapon extends GunWeapon {
         }
 
         public int damage(int damage) {
-            //100%/90%/70%/50% damage
-            return Math.round(damage * Math.max(0.5f, 1.1f-0.2f*getCount()));
+            //100%/95%/80%/65%/50% damage
+            return Math.round(damage * Math.max(0.5f, 1.10f-0.15f*getCount()));
         }
 
         @Override
