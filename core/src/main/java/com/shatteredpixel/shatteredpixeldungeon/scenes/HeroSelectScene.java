@@ -704,7 +704,7 @@ public class HeroSelectScene extends PixelScene {
 					ShatteredPixelDungeon.switchScene( SeedFindScene.class );
 				}
 			};
-			btnSeedTest.icon(Icons.get(Icons.MAGNIFY));
+			btnSeedTest.icon(Icons.get(Icons.MAGNIFY_GRAY));
 			//TODO: Activate when fixing Seedfinder
 			add(btnSeedTest);
 			buttons.add(btnSeedTest);
@@ -715,7 +715,7 @@ public class HeroSelectScene extends PixelScene {
 					ShatteredPixelDungeon.switchScene( SeedAnalysisScene.class );
 				}
 			};
-			btnSeedAnalysis.icon(Icons.get(Icons.NEWS));
+			btnSeedAnalysis.icon(Icons.get(Icons.JOURNAL_GRAY));
 			//TODO: Activate when fixing Seedfinder
 			add(btnSeedAnalysis);
 			buttons.add(btnSeedAnalysis);

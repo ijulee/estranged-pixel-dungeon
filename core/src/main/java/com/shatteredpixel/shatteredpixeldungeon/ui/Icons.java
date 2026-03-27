@@ -68,6 +68,8 @@ public enum Icons {
 	CALENDAR,
 	CHEVRON,
 	SHUFFLE,
+	MAGNIFY_GRAY,
+	JOURNAL_GRAY,
 
 	//misc larger icons, mainly used for buttons, tabs, and journal, spacing for 16x16
 	TARGET,
@@ -254,6 +256,12 @@ public enum Icons {
 				break;
 			case SHUFFLE:
 				icon.frame(icon.texture.uvRectBySize( 240, 32, 15, 12 ) );
+				break;
+			case MAGNIFY_GRAY:
+				icon.frame( icon.texture.uvRectBySize( 224, 0, 14, 14 ) );
+				break;
+			case JOURNAL_GRAY:
+				icon.frame( icon.texture.uvRectBySize( 239, 0, 17, 15 ) );
 				break;
 
 			case TARGET:
