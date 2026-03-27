@@ -174,7 +174,7 @@ public abstract class GunWeapon extends MeleeWeapon {
             GunWeapon wep = GunWeapon.this;
 
             // track identify progress of source weapon
-            if (curUser != null && !wep.levelKnown) {
+            if (isEquipped(curUser) && !wep.levelKnown) {
                 float uses = Math.min( wep.availableUsesToID,
                         Talent.itemIDSpeedFactor(curUser, wep) );
                 wep.availableUsesToID -= uses;
