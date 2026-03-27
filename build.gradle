@@ -15,8 +15,8 @@ allprojects {
         appPackageName = 'com.ijulee.estrangedpixeldungeon'
 
         appVersionCode = 891 // SPD v3.3.6
-        appVersionCode += 103
-        appVersionName = '0.0.4'
+        appVersionCode += 109
+        appVersionName = '0.0.5'
 
         appJavaCompatibility = JavaVersion.VERSION_11
 

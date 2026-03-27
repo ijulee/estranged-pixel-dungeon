@@ -2,6 +2,7 @@ package com.shatteredpixel.shatteredpixeldungeon.scenes;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.items.GammaRayGun;
 import com.shatteredpixel.shatteredpixeldungeon.items.KnightsShield;
@@ -14,6 +15,7 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIcon;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
+import com.shatteredpixel.shatteredpixeldungeon.ui.HeroIcon;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Icons;
 import com.shatteredpixel.shatteredpixeldungeon.ui.TalentIcon;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Window;
@@ -31,7 +33,154 @@ public class EPD_v0_X_Changes {
     }
 
     private static void add_v0_0_Changes(ArrayList<ChangeInfo> changeInfos) {
-        ChangeInfo changes = new ChangeInfo("v0.0.4", true, "");
+        ChangeInfo changes = new ChangeInfo("v0.0.5", true, "");
+        changes.hardlight(Window.TITLE_COLOR);
+        changeInfos.add(changes);
+
+        changes = new ChangeInfo(Messages.get(ChangesScene.class, "new"), false, null);
+        changes.hardlight(Window.TITLE_COLOR);
+        changeInfos.add(changes);
+
+        changes.addButton(new ChangeButton(Icons.ESTRANGED.get(), "Dev Commentary",
+                "**-** Released March 27, 2026\n\n" +
+                "I always try to fix a little bug in one thing, then end up refactoring the " +
+                "entire feature.\n\nV0.0.5 has probably the most significant changes since the " +
+                "start of this mod: **weapon reworks**. Some Re-Arranged weapons have been removed " +
+                "from the pool, while Katanas and Sniper Rifles have a new mechanic now. At the " +
+                "same time, ammo generation has been reduced so that it won't be as abundant now. " +
+                "Further reworks are being planned so stay tuned.\n\n" +
+                "_-- miaomix_") );
+
+        changes.addButton(new ChangeButton(new ItemSprite(ItemSpriteSheet.ARTIFACT_ROSE3), "Dried Rose Ghost Rework",
+                "Reworked the Ghost ally's AI:\n" +
+                "**-** The Ghost will **also shoot bows** until bow fatigue reaches 80% damage.\n" +
+                "**-** The Ghost now has a reloading animation, which will play when reloading a gun " +
+                "until their next action.\n" +
+                "**-** The Ghost can **shoot explosive guns, flamethrowers, and laser guns** with all " +
+                "animations (if visible) and side effects.\n" +
+                "**-** The Ghost will avoid hitting the hero and themselves while shooting the " +
+                "those guns.\n" +
+                "**-** The Ghost now will say exactly how they will behave when Auto-Reloading is " +
+                "toggled ON and OFF. Dried Rose description has also changed accordingly.\n" +
+                "**-** The Ghost now says that they will reload during combat, when you manually " +
+                "direct them to do so by selecting their current position (this part is " +
+                "existing function).\n" +
+                "**-** Fixed quirks like reloading or shooting faster than expected.\n" +
+                "**-** Dried Rose now prevents detaching an equipped gun if Ghost is still " +
+                "reloading."));
+
+        changes.addButton(new ChangeButton(new ItemSprite(ItemSpriteSheet.LARGE_KATANA), "Re-Arranged Weapons Rework 1",
+                "Here is the first part of likely many waves of reworks to weapons introduced in " +
+                "Re-Arranged, including a more comprehensive gun rework being planned.\n\n" +
+                "Removed the following melee weapons from random generation:\n" +
+                "**-** **Tier 2:** Dual Dagger, Kitchen Knife, Short Katana, Antique Handgun\n" +
+                "**-** **Tier 3:** Machine Gun, Grenade Launcher\n" +
+                "**-** **Tier 4:** Long Katana\n" +
+                "**-** **Tier 5:** Broadsword",
+
+                "In addition, **Katanas** (not the Shattered one) and **Sniper Rifle bullets** have been " +
+                "changed, so they're not simply weapons that are 1 tier higher with lower " +
+                "strength requirements.\n" +
+                "**-** Katanas now have lower base max damage, but with a base crit chance that " +
+                "applies regardless of class.\n" +
+                "**-** Both now have a \"flat\" damage distribution, which means they are more " +
+                "likely to roll closer to min and max damage (doubled chances to roll lower than " +
+                "25% or higher than 75% towards max, in fact).",
+
+                "Miscellaneous:\n" +
+                "**-** Drop rates for all melee bows are reduced to 50%, like guns.\n" +
+                "**-** Scalpel base damage reduced to 1-6 (was 1-8).\n" +
+                "**-** Some of the removed weapons may be reworked or returned as blueprint weapons " +
+                "in later updates."));
+
+        changes.addButton(new ChangeButton(new ItemSprite(ItemSpriteSheet.BOOK_OF_FIRE), "Spellbook in Shops",
+                "Added Spellbooks to shop item generation. It takes the same \"rare\" item " +
+                "slot as wands, artifacts, rings, and arcane stylus, occurring with a 10% chance."));
+
+        changes = new ChangeInfo(Messages.get(ChangesScene.class, "changes"), false, null);
+        changes.hardlight(CharSprite.WARNING);
+        changeInfos.add(changes);
+
+        changes.addButton(new ChangeButton(new HeroIcon(HeroSubClass.HORSEMAN), "Horseman",
+                "Fixes and changes to Horseman's Charge attack:\n" +
+                "**-** Added action name (now named **Mounted Charge**).\n" +
+                "**-** Fixed Mounted Charge pushing immobile characters.\n" +
+                "**-** Removed hidden feature that instantly kills characters at the Charge " +
+                "destination that has no tile to move on.\n" +
+                "**-** Instead, characters are successively pushed out of the way after attacks " +
+                "if the Charge destination is occupied.\n" +
+                "**-** Added confirmation window when the Charge recoil (before armor and damage " +
+                "reduction) is greater than 90% HP.\n" +
+                "**-** Horse ally can now attack (for 0 damage) and aggro enemies."));
+
+        changes.addButton(new ChangeButton(new HeroIcon(HeroSubClass.BOWMASTER), "Bowmaster",
+                "**-** Made Bowmaster's Arrow Combo/Powershot descriptions more detailed.\n" +
+                "**-** Added descriptive game log text when pressing the Action Indicator at " +
+                "each stage of Arrow Combo/Powershot.\n"));
+
+        changes.addButton(new ChangeButton(new HeroIcon(HeroSubClass.MASTER), "Swordmaster",
+                "**-** Changed Swordmaster's Dash Draw to use new action targeting function.\n" +
+                "**-** Fixed behavior when clicking Dash Draw with target selected.\n" +
+                "**-** Dash Draw will now blink next to the target tile if it is a wall or chasm."));
+
+        changes.addButton(new ChangeButton(new HeroIcon(HeroSubClass.FIGHTER), "Fighter",
+                "Adjusted Figher's talent attack talent procs (3-9, 3-10, 3-11).\n" +
+                "**-** Text fix for Ring Knuckle (3-9) to indicate that it will not apply only for " +
+                "Ring of Force.\n" +
+                "**-** Mystic Punch (3-10) can now proc separately for each ring equipped.\n" +
+                "**-** Added buff name, desc, and announcement on proc for Quick Step (3-11)."));
+
+        changes.addButton( new ChangeButton(Icons.PREFS.get(), Messages.get(ChangesScene.class, "misc"),
+                "**-** Knight's Kinetic Battle talent was reworked slightly. Max bonus damage is " +
+                "now 3 but lasts for 5/8 turns.\n" +
+                "**-** Various small text changes."));
+
+        changes.addButton(new ChangeButton(bugfix, Messages.get(ChangesScene.class, "bugfixes"),
+                "**-** Fixed issue with Bowmaster Moving Focus talent (3-9) not working as intended.\n" +
+                "**-** Fixed challenge randomizer not able to select more than 9 challenges or any " +
+                "of the RPD challenges.\n" +
+                "**-** Fixed Talent menu's tier 3 randomize button not being aligned correctly.\n" +
+                "**-** Fixed Duelist Quick Reload ability exceeding double capacity in some cases.\n" +
+                "**-** Fixed guns equipped by Duelist not having correct round count text color " +
+                "according to weapon charge.\n" +
+                "**-** Fixed Pocket Knife being able to attack mobs that charmed the hero.",
+                "**-** Fixed bug with Auraslahser's Sword Aura not penetrating characters without " +
+                "Projection enchantment.\n" +
+                "**-** Attempted to fix visual glitches from Swordmaster's Inner Eye talent " +
+                "(3-11) not keeping tiles revealed after expiration.\n" +
+                "**-** Fixed Afterimage glyph on Knight's Shield and Armor Adaptation talent (2-3) " +
+                "applying to every armor in existence.\n" +
+                "**-** Fixed bug where Ghost ally will identify guns and bows by shooting them."));
+
+        changes = new ChangeInfo(Messages.get(ChangesScene.class, "buffs"), false, null);
+        changes.hardlight(CharSprite.POSITIVE);
+        changeInfos.add(changes);
+
+        changes.addButton( new ChangeButton(new ItemSprite(ItemSpriteSheet.LONGBOW), "Melee Bow buff",
+                "**-** Removed adjacency requirement for melee knockback. It should now work with " +
+                "Projecting enchantment, Book of Disintegration, etc.\n" +
+                "**-** Also fixed the debug duration for Arrow Attached debuff, and changed it to a more " +
+                "reasonable 30 turns."));
+
+        changes = new ChangeInfo(Messages.get(ChangesScene.class, "nerfs"), false, null);
+        changes.hardlight(CharSprite.NEGATIVE);
+        changeInfos.add(changes);
+
+        changes.addButton(new ChangeButton(new ItemSprite(ItemSpriteSheet.AMMO_BELT), "Availability of Ammo",
+                "I thought ammo is way too abundant, and have reduced the availability. Hopefully, " +
+                "the changes incentivize people to actually buy and craft ammo belts. These " +
+                "numbers aren't final and may change when I see how it tests. More comprehensive " +
+                "gun reworks may prompt changes here as well.\n\n" +
+                "**-** A bugfix that's effectively a nerf: Ammo Belts were supposed to be " +
+                "limited to 1 per region.\n" +
+                "**-** Shops in each region will only sell half the amount of Ammo Belts (1/1/2/2/3 " +
+                "belts for each shop)."));
+
+        changes.addButton( new ChangeButton(new BuffIcon(BuffIndicator.BOW_FATIGUE, true), "Bow Fatigue",
+                "The damage drop is now a bit harsher, starting after the first shot, but " +
+                "has a cap of 50% damage reduction. It also has a new buff icon."));
+
+        changes = new ChangeInfo("v0.0.4", true, "");
         changes.hardlight(Window.TITLE_COLOR);
         changeInfos.add(changes);
 
@@ -79,6 +228,9 @@ public class EPD_v0_X_Changes {
                 "As an aside, I am back on Discord for now, for as long as Discord delays the " +
                 "unnecessary and intrusive enforcement of age verification.\n\n" +
                 "_-- miaomix_") );
+
+        changes.addButton( new ChangeButton(Icons.SHPX.get(), "SPD v3.3.6",
+                "Rebased to Shattered Pixel Dungeon v3.3.6.") );
 
         changes.addButton( new ChangeButton(new BuffIcon(BuffIndicator.TACKLING, true),
                 "Veteran Rework",
