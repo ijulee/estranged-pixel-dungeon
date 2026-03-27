@@ -499,22 +499,30 @@ public class Armor extends EquipableItem {
 		if (Dungeon.isChallenged(Challenges.NO_ARMOR)){
 			return 1 + tier + lvl + augment.defenseFactor(lvl);
 		}
-		int upgradefactor = tier;
-		if (hero != null && hasGlyph(Afterimage.class, hero)) {
-			upgradefactor --;
-		}
-		if (hero != null) {
-			if (hero.belongings.getItem(KnightsShield.class) != null && hero.belongings.getItem(KnightsShield.class).hasGlyph(Afterimage.class, hero)){
-				upgradefactor --;
-			}
-		}
-		int max;
-		max = (upgradefactor) * (2 + lvl) + augment.defenseFactor(lvl);
-		if (hero != null) {
-			if (hero.hasTalent(Talent.ARMOR_ADAPTION) && this.STRReq() < hero.STR()) {
-				max += Math.round((hero.STR() - this.STRReq())*(0.5f+0.5f*hero.pointsInTalent(Talent.ARMOR_ADAPTION)));
-			}
-		}
+
+		int buffedTier = tier;
+
+        if (hero != null && hasGlyph(Afterimage.class, hero)) {
+            buffedTier--;
+        }
+
+        if (isEquipped(hero)) {
+            KnightsShield shield = hero.belongings.getItem(KnightsShield.class);
+            if (shield != null && shield.hasGlyph(Afterimage.class, hero)) {
+                buffedTier--;
+            }
+        }
+
+        int max = (buffedTier) * (2 + lvl) + augment.defenseFactor(lvl);
+
+		//FIXME should probably move to Hero.drRoll()
+        if (isEquipped(hero) &&
+			hero.hasTalent(Talent.ARMOR_ADAPTION) &&
+			hero.amrSTRExcess(this) > 0) {
+            max += Math.round(  hero.amrSTRExcess(this) *
+								(0.5f + 0.5f*hero.pointsInTalent(Talent.ARMOR_ADAPTION)) );
+        }
+
 		if (lvl > max) {
 			return ((lvl - max) + 1) / 2;
 		} else {
