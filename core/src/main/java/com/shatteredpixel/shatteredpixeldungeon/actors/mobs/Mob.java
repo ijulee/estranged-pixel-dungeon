@@ -759,43 +759,23 @@ public abstract class Mob extends Char {
 			}
 
 			if (enemy instanceof Hero) {
-				if (hero.subClass == HeroSubClass.CHASER
-						&& hero.hasTalent(Talent.CHAIN_CLOCK)
-						&& hero.buff(Talent.ChainCooldown.class) == null){
-					new FlavourBuff() {
-						{
-							actPriority = VFX_PRIO;
+                if (Dungeon.hero.subClass == HeroSubClass.CHASER &&
+					Dungeon.hero.hasTalent(Talent.CHAIN_CLOCK) &&
+					Dungeon.hero.buff(Talent.ChainCooldown.class) == null) {
+					Actor.add(new Actor() {
+						{ actPriority = VFX_PRIO; }
+
+						@Override
+						protected boolean act() {
+							Buff.affect(Dungeon.hero, Invisibility.class, 1f * Dungeon.hero.pointsInTalent(Talent.CHAIN_CLOCK));
+							Buff.affect(Dungeon.hero, Haste.class, 1f * Dungeon.hero.pointsInTalent(Talent.CHAIN_CLOCK));
+							Buff.affect(Dungeon.hero, Talent.ChainCooldown.class, 10f);
+							Sample.INSTANCE.play(Assets.Sounds.MELD);
+
+							Actor.remove( this );
+							return true;
 						}
-
-						public boolean act() {
-							Buff.affect( hero, Invisibility.class, 1f * hero.pointsInTalent(Talent.CHAIN_CLOCK));
-							return super.act();
-						}
-					}.attachTo(hero);
-					Buff.affect( hero, Haste.class, 1f * hero.pointsInTalent(Talent.CHAIN_CLOCK));
-					Buff.affect( hero, Talent.ChainCooldown.class, 10f);
-					Sample.INSTANCE.play( Assets.Sounds.MELD );
-				}
-
-				if (hero.subClass == HeroSubClass.CHASER
-						&& hero.hasTalent(Talent.LETHAL_SURPRISE)
-						&& !this.isAlive()
-						&& hero.buff(Talent.LethalCooldown.class) == null) {
-					for (Mob mob : Dungeon.level.mobs) {
-						if (mob.alignment == Alignment.ENEMY &&
-								Dungeon.level.heroFOV[mob.pos] && mob.state != mob.SLEEPING) {
-							Buff.affect( mob, Vulnerable.class, 1f);
-							if (hero.pointsInTalent(Talent.LETHAL_SURPRISE) >= 2) {
-								Buff.affect( mob, Paralysis.class, 1f);
-							}
-						}
-					}
-
-					if (hero.pointsInTalent(Talent.LETHAL_SURPRISE) == 3) {
-						Buff.affect(hero, Swiftthistle.TimeBubble.class).twoTurns();
-					}
-
-					Buff.affect(hero, Talent.LethalCooldown.class, 5f);
+					});
 				}
 			}
 		}
@@ -976,6 +956,35 @@ public abstract class Mob extends Char {
 						&& Dungeon.hero.buff(Talent.LethalHasteCooldown.class) == null){
 					Buff.affect(Dungeon.hero, Talent.LethalHasteCooldown.class, 100f);
 					Buff.affect(Dungeon.hero, GreaterHaste.class).set(2 + 2*Dungeon.hero.pointsInTalent(Talent.LETHAL_HASTE));
+				}
+				if (surprisedBy(hero) &&
+					hero.hasTalent(Talent.LETHAL_SURPRISE) &&
+					hero.buff(Talent.LethalCooldown.class) == null) {
+					for (Mob mob : Dungeon.level.mobs) {
+						if (mob.isAlive() && mob.alignment == Alignment.ENEMY &&
+							Dungeon.level.heroFOV[mob.pos] && mob.state != mob.SLEEPING) {
+							Buff.affect(mob, Vulnerable.class, 1f);
+
+							if (hero.pointsInTalent(Talent.LETHAL_SURPRISE) >= 2) {
+								Buff.affect(mob, Paralysis.class, 1f);
+							}
+						}
+					}
+
+					if (hero.pointsInTalent(Talent.LETHAL_SURPRISE) >= 3) {
+						Actor.add(new Actor() {
+							{ actPriority = VFX_PRIO; }
+
+							@Override
+							protected boolean act() {
+								Buff.affect(hero, Swiftthistle.TimeBubble.class).set(2f);
+								Actor.remove( this );
+								return true;
+							}
+						});
+					}
+
+					Buff.affect(hero, Talent.LethalCooldown.class, Talent.LethalCooldown.DURATION);
 				}
 			}
 

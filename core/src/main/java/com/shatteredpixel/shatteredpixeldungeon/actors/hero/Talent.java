@@ -872,6 +872,7 @@ public enum Talent {
 	};
 	//Chaser 3-4
 	public static class LethalCooldown extends FlavourBuff{
+		public static final float DURATION = 5f;
 		public int icon() { return BuffIndicator.TIME; }
 		public void tintIcon(Image icon) { icon.hardlight(0.8f, 0.1f, 0.1f); }
 		public float iconFadePercent() { return Math.max(0, visualcooldown() / 5); }
