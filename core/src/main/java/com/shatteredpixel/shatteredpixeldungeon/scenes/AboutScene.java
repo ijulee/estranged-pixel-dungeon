@@ -128,7 +128,7 @@ public class AboutScene extends PixelScene {
 					Icons.ESTRANGED.get(),
 					"Developed by: _miaomix_\nBased on Re-Arranged Pixel Dungeon and Shattered Pixel Dungeon's open source",
 					"GitHub repository",
-					"");
+					"https://github.com/ijulee/estranged-pixel-dungeon");
 
 			if (landscape()){
 				estranged.setRect((w - fullWidth)/2f - 6, spd.bottom()+5, 120, 0);
