@@ -12,11 +12,10 @@ allprojects {
 
     ext {
         appName = 'Estranged Pixel Dungeon'
-        appPackageName = 'com.ijulee.estrangedpixeldungeon'
+        appPackageName = 'com.miaomix.estrangedpixeldungeon'
 
-        appVersionCode = 891 // SPD v3.3.6
-        appVersionCode += 109
-        appVersionName = '0.0.5'
+        appVersionCode = 891 + 110 // Shattered v3.3.6
+        appVersionName = '0.0.6'
 
         appJavaCompatibility = JavaVersion.VERSION_11
 
