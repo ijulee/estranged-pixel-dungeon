@@ -33,7 +33,36 @@ public class EPD_v0_X_Changes {
     }
 
     private static void add_v0_0_Changes(ArrayList<ChangeInfo> changeInfos) {
-        ChangeInfo changes = new ChangeInfo("v0.0.5", true, "");
+        ChangeInfo changes = new ChangeInfo("v0.0.6", true, "");
+        changes.hardlight(Window.TITLE_COLOR);
+        changeInfos.add(changes);
+
+        changes = new ChangeInfo(Messages.get(ChangesScene.class, "new"), false, null);
+        changes.hardlight(Window.TITLE_COLOR);
+        changeInfos.add(changes);
+
+        changes.addButton(new ChangeButton(Icons.ESTRANGED.get(), "Dev Commentary",
+                "**-** Released March 30, 2026\n\n" +
+                "Here's the non-debug Android build, as requested. There's a few minor changes that " +
+                "I've already made, so I will release this as v0.0.6.\n\n" +
+                "_-- miaomix_") );
+
+        changes = new ChangeInfo(Messages.get(ChangesScene.class, "changes"), false, null);
+        changes.hardlight(CharSprite.WARNING);
+        changeInfos.add(changes);
+
+        changes.addButton( new ChangeButton(Icons.PREFS.get(), Messages.get(ChangesScene.class, "misc"),
+                "**-** Corrected old Celesti icon.\n" +
+                "**-** Changed patch messages in Welcome Scene and a few other places.\n" +
+                "**-** Added Estrange PD Github repo link in About Page.\n" +
+                "**-** Changed Re-Arranged PD icon to Estranged PD icon in the Title Scene.\n" +
+                "**-** Added Gray icons for Seed Search and Analysis options in Hero Selection. " +
+                "Actually fixing the features will take a while longer."));
+
+        changes.addButton(new ChangeButton(bugfix, Messages.get(ChangesScene.class, "bugfixes"),
+                "**-** Fixed Chaser's Lethal Surprise talent (3-8) not proccing at all."));
+
+        changes = new ChangeInfo("v0.0.5", true, "");
         changes.hardlight(Window.TITLE_COLOR);
         changeInfos.add(changes);
 
