@@ -44,6 +44,9 @@ public class ShatteredPixelDungeon extends Game {
     public static final int v3_2_0 = 859;
     public static final int v3_2_5 = 877;
     public static final int v3_3_0 = 883;
+    public static final int EPDv0_0_1 = 984;
+    public static final int EPDv0_0_5 = 1000;
+    public static final int EPDv0_0_6 = 1001;
 
 
 	//if you don't want to use google play games service, this must return false
