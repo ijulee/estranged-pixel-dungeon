@@ -94,7 +94,7 @@ public class SeedAnalysisScene extends PixelScene {
 					content.add(alertMsg);
 
 					if(!Objects.isNull(seedThread) && seedThread.isAlive()){
-						SeedFinder.stopFindSeed();
+						//SeedFinder.stopFindSeed();
 						seedThread.interrupt();
 					}
 					seedThread = new Thread(new Runnable() {
@@ -102,7 +102,7 @@ public class SeedAnalysisScene extends PixelScene {
 						public void run() {
 							String resultContent;
 							try {
-								resultContent = new SeedFinder().logSeedItems(text,31);
+								//resultContent = new SeedFinder().logSeedItems(text,31);
 							} catch (NullPointerException e) {
 								//스택 트레이스를 문자열로 받음
 								StringWriter sw = new StringWriter();
@@ -112,7 +112,7 @@ public class SeedAnalysisScene extends PixelScene {
 								//결과 문자열을 에러 메시지로 변경
 								resultContent = Messages.get(SeedFinder.class, "error", text, stackTrace);
 							}
-							String finalResultContent = resultContent;
+							String finalResultContent = null;
 							Gdx.app.postRunnable(new Runnable() {
 								@Override
 								public void run() {
