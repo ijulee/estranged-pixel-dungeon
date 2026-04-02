@@ -9,9 +9,22 @@ import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Transmuting;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
+import com.shatteredpixel.shatteredpixeldungeon.items.spells.Evolution;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.AssassinsBlade;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Bible;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Flail;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Gauntlet;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Glaive;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Greatshield;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Greatsword;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.LargeKatana;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.RoundShield;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.RunicBlade;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Spear;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.WarHammer;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Whip;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.AR_T6;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.AlchemyWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.AssassinsSpear;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.BeamSaber;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.ChainFlail;
@@ -34,7 +47,13 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.Tacti
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.TrueRunicBlade;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.UnformedBlade;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.UnholyBible;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.gun.AR.AR_T5;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.gun.GL.GL_T5;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.gun.Gun;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.gun.HG.HG_T5;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.gun.RL.RL_T5;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.gun.SR.SR_T5;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.ForceCube;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Catalog;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
@@ -49,7 +68,8 @@ import com.watabou.utils.Random;
 import com.watabou.utils.Reflection;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
+
 
 public class BluePrint extends Item {
 
@@ -107,14 +127,6 @@ public class BluePrint extends Item {
         GameScene.selectItem( itemSelector );
     }
 
-    /*private Item changeItem( Item item ){
-        if (item instanceof MeleeWeapon) {
-            return changeWeapon((MeleeWeapon) item);
-        } else {
-            return null;
-        }
-    }*/
-
     private MeleeWeapon changeWeapon(MeleeWeapon wep) {
         MeleeWeapon result = this.newWeapon;
 
@@ -147,6 +159,15 @@ public class BluePrint extends Item {
     
     private String inventoryTitle(){
         return Messages.get(this, "inv_title");
+    }
+
+    @Override
+    public String name() {
+        if (newWeapon == null) {
+            return super.name();
+        } else {
+            return Messages.get(this, "crafted_name", newWeapon.name());
+        }
     }
 
     @Override
@@ -225,11 +246,6 @@ public class BluePrint extends Item {
     }
 
     @Override
-    public boolean isUpgradable() {
-        return true;
-    }
-
-    @Override
     public boolean isIdentified() {
         return true;
     }
@@ -272,102 +288,89 @@ public class BluePrint extends Item {
         }
     };
 
+    public static Recipe[] recipes = new Recipe[] {
+            //Tier 2
+            //Tier 3
+            new Recipe(SpearNShield.class,     new Class[] {Evolution.class, Spear.class, RoundShield.class},          0),
+            //Tier 4
+            new Recipe(ChainWhip.class,        new Class[] {Evolution.class, Whip.class, MeleeWeapon.class},           0),
+            new Recipe(UnholyBible.class,      new Class[] {Evolution.class, Bible.class, MeleeWeapon.class},          0),
+            //Tier 5
+            new Recipe(UnformedBlade.class,    new Class[] {Evolution.class, AssassinsBlade.class, MeleeWeapon.class}, 0),
+            new Recipe(ChainFlail.class,       new Class[] {Evolution.class, ChainWhip.class, Flail.class},                 0),
+            //Tier 6
+            new Recipe(AR_T6.class,            new Class[] {Evolution.class, AR_T5.class, MeleeWeapon.class},          0),
+            new Recipe(AssassinsSpear.class,   new Class[] {Evolution.class, AssassinsBlade.class, Glaive.class},      0),
+            new Recipe(BeamSaber.class,        new Class[] {Evolution.class, Gauntlet.class, MeleeWeapon.class},       0),
+            new Recipe(DualGreatSword.class,   new Class[] {Evolution.class, Greatsword.class, Greatsword.class},      0),
+            new Recipe(ForceGlove.class,       new Class[] {Evolution.class, Gauntlet.class, ForceCube.class},         0),
+            new Recipe(GL_T6.class,            new Class[] {Evolution.class, GL_T5.class, MeleeWeapon.class},          0),
+            new Recipe(HG_T6.class,            new Class[] {Evolution.class, HG_T5.class, MeleeWeapon.class},          0),
+            new Recipe(HugeSword.class,        new Class[] {Evolution.class, Greatsword.class, MeleeWeapon.class},     0),
+            new Recipe(Lance.class,            new Class[] {Evolution.class, Glaive.class, MeleeWeapon.class},         0),
+            new Recipe(MeisterHammer.class,    new Class[] {Evolution.class, WarHammer.class, MeleeWeapon.class},      0),
+            new Recipe(ObsidianShield.class,   new Class[] {Evolution.class, Greatshield.class, MeleeWeapon.class},    0),
+            new Recipe(RL_T6.class,            new Class[] {Evolution.class, RL_T5.class, MeleeWeapon.class},          0),
+            new Recipe(SharpKatana.class,      new Class[] {Evolution.class, LargeKatana.class, MeleeWeapon.class},    0),
+            new Recipe(SR_T6.class,            new Class[] {Evolution.class, SR_T5.class, MeleeWeapon.class},          0),
+            new Recipe(TrueRunicBlade.class,   new Class[] {Evolution.class, RunicBlade.class, MeleeWeapon.class},     0),
+            //Tier 7
+            new Recipe(HolySword.class,        new Class[] {Evolution.class, HugeSword.class, Bible.class},            0),
+            new Recipe(LanceNShield.class,     new Class[] {Evolution.class, Lance.class, ObsidianShield.class},       0),
+            new Recipe(TacticalShield.class,   new Class[] {Evolution.class, ObsidianShield.class, HG_T6.class},       0)
+    };
+
+    public static HashMap<Class<?extends MeleeWeapon>, Recipe> recipeMap = new HashMap<>();
+    static {
+        for (Recipe recipe : recipes) {
+            recipeMap.put(recipe.output, recipe);
+        }
+    }
+
     public static class Recipe extends com.shatteredpixel.shatteredpixeldungeon.items.Recipe {
-        static {
-            // ensures that RecipeInfo is initialized
-            validIngredients = RecipeInfo.getIngredientsList();
+        public Class<?extends MeleeWeapon> output;
+        public Class<?extends Item>[] requirements;
+        public int cost;
+
+        public Recipe() {
+            super();
         }
 
-        public enum RecipeInfo {
-            TRUE_RUNIC_BLADE(new TrueRunicBlade(), 0),
-            LANCE(new Lance(), 0 ),
-            OBSIDIAN_SHIELD(new ObsidianShield(), 0 ),
-            CHAIN_WHIP(new ChainWhip(), 0 ),
-            LANCE_N_SHIELD(new LanceNShield(), 0 ),
-            CHAIN_FLAIL(new ChainFlail(), 0 ),
-            UNFORMED_BLADE(new UnformedBlade(), 0 ),
-            AR_T6(new AR_T6(), 0 ),
-            SR_T6(new SR_T6(), 0 ),
-            HG_T6(new HG_T6(), 0 ),
-            SPEAR_N_SHIELD(new SpearNShield(), 0 ),
-            TACTICAL_SHIELD(new TacticalShield(), 0 ),
-            ASSASSINS_SPEAR(new AssassinsSpear(), 0 ),
-            FORCE_GLOVE(new ForceGlove(), 0 ),
-            UNHOLY_BIBLE(new UnholyBible(), 0 ),
-            HUGE_SWORD(new HugeSword(), 0 ),
-            MEISTER_HAMMER(new MeisterHammer(), 0 ),
-            BEAM_SABER(new BeamSaber(), 0 ),
-            HOLY_SWORD(new HolySword(), 0 ),
-            DUAL_GREATSWORD(new DualGreatSword(), 0 ),
-            SHARP_KATANA(new SharpKatana(), 0 ),
-            GL_T6(new GL_T6(), 0 ),
-            RL_T6(new RL_T6(), 0 );
-            public final Class<? extends MeleeWeapon> outputClass;
-            public final ArrayList<Class<? extends Item>> ingredients;
-            public final int brewCost;
-
-            RecipeInfo(MeleeWeapon weapon, int cost) {
-                this.outputClass = weapon.getClass();
-                this.ingredients = ((AlchemyWeapon) weapon).weaponRecipe();
-                this.brewCost = cost;
-            }
-
-            public static ArrayList<ArrayList<Class<?extends Item>>> getIngredientsList () {
-                ArrayList<RecipeInfo> recipeList = new ArrayList<>(Arrays.asList(RecipeInfo.values()));
-
-                ArrayList<ArrayList<Class<?extends Item>>> ingredientsList = new ArrayList<>();
-                for (RecipeInfo recipe : recipeList) {
-                    ingredientsList.add(recipe.ingredients);
-                }
-
-                return ingredientsList;
-            }
-        }
-
-        public static ArrayList<ArrayList<Class<?extends Item>>> validIngredients;
-
-        public static RecipeInfo ingredientsGetRecipe(ArrayList<Item> ingredients) {
-            ArrayList<Class <? extends Item>> ingredientsClassList = ingredientsGetClass(ingredients);
-
-            int index = 0;
-            for (ArrayList<Class<? extends Item>> a : validIngredients) {
-                if (ingredientsClassList.containsAll(a) && a.containsAll(ingredientsClassList)) {
-                    return RecipeInfo.values()[index];
-                } else {
-                    index++;
-                }
-            }
-
-            return null; // no valid recipe
-        }
-
-        public static ArrayList<Class<? extends Item>> ingredientsGetClass(ArrayList<Item> ingredients) {
-
-            ArrayList<Class<? extends Item>> ingredientsClassList = new ArrayList<>();
-
-            for (Item i : ingredients) {
-                ingredientsClassList.add(i.getClass());
-            }
-
-            return ingredientsClassList;
+        public Recipe(Class<?extends MeleeWeapon> output, Class<?extends Item>[] requirements, int cost) {
+            this.output = output;
+            this.requirements = requirements;
+            this.cost = cost;
         }
 
         @Override
         public boolean testIngredients(ArrayList<Item> ingredients) {
-            return ingredientsGetRecipe(ingredients) != null;
+            ArrayList<Item> inList = new ArrayList<>(ingredients);
+            boolean[] matches = new boolean[requirements.length];
+            while(!inList.isEmpty()) {
+                Item in = inList.remove(0);
+                for (int k = 0; k < matches.length; k++) {
+                    if (!matches[k] && requirements[k].isAssignableFrom(in.getClass())) {
+                        matches[k] = true;
+                        break;
+                    }
+                }
+            }
+
+            for (boolean req : matches) {
+                if (!req) return false;
+            }
+            return true;
         }
 
         @Override
         public int cost(ArrayList<Item> ingredients) {
-            RecipeInfo recipe = ingredientsGetRecipe(ingredients);
-            return (recipe != null) ? recipe.brewCost : 0;
+            return cost;
         }
 
         @Override
         public Item brew(ArrayList<Item> ingredients) {
-            for (Item i : ingredients) {
-
-                i.quantity(i.quantity()-1);
+            for (Item in : ingredients) {
+                in.quantity(in.quantity()-1);
             }
 
             return sampleOutput(ingredients);
@@ -375,26 +378,15 @@ public class BluePrint extends Item {
 
         @Override
         public Item sampleOutput(ArrayList<Item> ingredients) {
-            RecipeInfo recipe = ingredientsGetRecipe(ingredients);
-            Item result = null;
+            Item result = new BluePrint(Reflection.newInstance(output));
 
-            if (recipe != null) {
-                result = new BluePrint(Reflection.newInstance(recipe.outputClass));
-            }
-
-            int outputLevel = 0;
-            for (Item i : ingredients) {
-                if (i instanceof MeleeWeapon && i.isIdentified()) {
-                    outputLevel += i.level();
+            for (Item in : ingredients) {
+                if (in.isIdentified()) {
+                    result.upgrade(in.level());
                 }
-            }
-
-            if (result != null) {
-                result.level(outputLevel);
             }
 
             return result;
         }
     }
-
 }

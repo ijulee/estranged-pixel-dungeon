@@ -382,12 +382,10 @@ public class QuickRecipe extends Component {
 				result.add(new QuickRecipe(new UpgradeDust.Recipe()));
 				result.add(null);
 				result.add(null);
-				result.add(new QuickRecipe( new BluePrint.Recipe(),
-						new ArrayList<Item>(Arrays.asList(new MeleeWeapon.PlaceHolder(), new MeleeWeapon.PlaceHolder(), new Evolution())),
-						new BluePrint(null)));
-				result.add(new QuickRecipe( new BluePrint.Recipe(),
-						new ArrayList<Item>(Arrays.asList(new MeleeWeapon.PlaceHolder(), new UpgradeDust(), new Evolution())),
-						new BluePrint(null)));
+				result.add(new QuickRecipe(
+						new BluePrint.Recipe(),
+						new ArrayList<>(Arrays.asList(new Evolution(), new MeleeWeapon.PlaceHolder(), new MeleeWeapon.PlaceHolder())),
+						new BluePrint()));
 				result.add(null);
 				result.add(null);
 				result.add(new QuickRecipe(new BulletItem.Recipe()));

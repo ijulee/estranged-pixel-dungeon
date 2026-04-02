@@ -249,7 +249,6 @@ public abstract class Recipe {
 		new Potion.SeedToPotion(),
 		new StewedMeat.threeMeat(),
 		new MeatPie.Recipe(),
-		new BluePrint.Recipe(),
 		new Cross.Recipe(),
 		new PotOThunder.Recipe()
 	};
@@ -281,6 +280,12 @@ public abstract class Recipe {
 		} else if (ingredients.size() == 3){
 			for (Recipe recipe : threeIngredientRecipes){
 				if (recipe.testIngredients(ingredients)){
+					result.add(recipe);
+				}
+			}
+
+			for (Recipe recipe : BluePrint.recipes) {
+				if (recipe.testIngredients(ingredients)) {
 					result.add(recipe);
 				}
 			}

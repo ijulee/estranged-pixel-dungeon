@@ -24,25 +24,17 @@ package com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy;
 import static com.shatteredpixel.shatteredpixeldungeon.Dungeon.hero;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
-import com.shatteredpixel.shatteredpixeldungeon.Challenges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Barrier;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
-import com.shatteredpixel.shatteredpixeldungeon.items.Item;
-import com.shatteredpixel.shatteredpixeldungeon.items.LiquidMetal;
-import com.shatteredpixel.shatteredpixeldungeon.items.spells.Evolution;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Bible;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.watabou.noosa.audio.Sample;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class HolySword extends MeleeWeapon implements AlchemyWeapon {
 
@@ -103,7 +95,7 @@ public class HolySword extends MeleeWeapon implements AlchemyWeapon {
             info = Messages.get(this, "normal_desc");
         }
 
-        info += "\n\n" + AlchemyWeapon.hintString(weaponRecipe());
+        info += "\n\n" + discoverHint();
 
         return info;
     }
@@ -133,14 +125,6 @@ public class HolySword extends MeleeWeapon implements AlchemyWeapon {
         }
     }
 
-//    public String swordName() {
-//        if (Dungeon.hero.STR() >= this.STRReq()) {
-//            return Messages.get(this, "true_name");
-//        } else {
-//            return Messages.get(this, "name");
-//        }
-//    }
-
     public String abilityName() {
         if (Dungeon.hero.STR() >= this.STRReq()) {
             return Messages.upperCase(Messages.get(this, "true_ability_name"));
@@ -156,11 +140,6 @@ public class HolySword extends MeleeWeapon implements AlchemyWeapon {
             req -= 2;
         }
         return req;
-    }
-
-    @Override
-    protected int baseChargeUse(Hero hero, Char target){
-        return 1;
     }
 
     @Override
@@ -183,13 +162,8 @@ public class HolySword extends MeleeWeapon implements AlchemyWeapon {
     }
 
     @Override
-    public ArrayList<Class<?extends Item>> weaponRecipe() {
-        return new ArrayList<>(Arrays.asList(Bible.class, HugeSword.class, Evolution.class));
-    }
-
-    @Override
     public String discoverHint() {
-        return AlchemyWeapon.hintString(weaponRecipe());
+        return AlchemyWeapon.hintString(this.getClass());
     }
 
 }

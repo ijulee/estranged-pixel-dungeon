@@ -7,15 +7,10 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Paralysis;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
-import com.shatteredpixel.shatteredpixeldungeon.items.spells.Evolution;
-import com.shatteredpixel.shatteredpixeldungeon.items.spells.UpgradeDust;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Glaive;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.RunicBlade;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.levels.features.Door;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
@@ -27,11 +22,8 @@ import com.watabou.noosa.Image;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.Callback;
-import com.watabou.utils.Random;
 
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
 
 public class Lance extends MeleeWeapon implements AlchemyWeapon {
 
@@ -215,22 +207,13 @@ public class Lance extends MeleeWeapon implements AlchemyWeapon {
     }
 
     @Override
-    public ArrayList<Class<?extends Item>> weaponRecipe() {
-        return new ArrayList<>(Arrays.asList(Glaive.class, UpgradeDust.class, Evolution.class));
-    }
-
-    @Override
     public String discoverHint() {
-        return AlchemyWeapon.hintString(weaponRecipe());
+        return AlchemyWeapon.hintString(this.getClass());
     }
 
     @Override
     public String desc() {
-        String info = super.desc();
-
-        info += "\n\n" + AlchemyWeapon.hintString(weaponRecipe());
-
-        return info;
+        return super.desc() + "\n\n" + discoverHint();
     }
 
 }

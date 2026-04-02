@@ -22,20 +22,11 @@
 package com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
-import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Bleeding;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
-import com.shatteredpixel.shatteredpixeldungeon.items.Item;
-import com.shatteredpixel.shatteredpixeldungeon.items.LiquidMetal;
-import com.shatteredpixel.shatteredpixeldungeon.items.spells.Evolution;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.AssassinsBlade;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Glaive;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
@@ -44,9 +35,6 @@ import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Callback;
 import com.watabou.utils.Random;
-
-import java.util.ArrayList;
-import java.util.Arrays;
 
 public class AssassinsSpear extends MeleeWeapon implements AlchemyWeapon {
 
@@ -138,7 +126,7 @@ public class AssassinsSpear extends MeleeWeapon implements AlchemyWeapon {
 				Invisibility.dispel();
 				hero.spendAndNext(hero.attackDelay());
 				if (!enemy.isAlive()){
-					wep.onAbilityKill(hero, enemy);
+					onAbilityKill(hero, enemy);
 				}
 				wep.afterAbilityUsed(hero);
 			}
@@ -146,22 +134,13 @@ public class AssassinsSpear extends MeleeWeapon implements AlchemyWeapon {
 	}
 
 	@Override
-	public ArrayList<Class<?extends Item>> weaponRecipe() {
-		return new ArrayList<>(Arrays.asList(Glaive.class, AssassinsBlade.class, Evolution.class));
-	}
-
-	@Override
 	public String discoverHint() {
-		return AlchemyWeapon.hintString(weaponRecipe());
+		return AlchemyWeapon.hintString(this.getClass());
 	}
 
 	@Override
 	public String desc() {
-		String info = super.desc();
-
-		info += "\n\n" + AlchemyWeapon.hintString(weaponRecipe());
-
-		return info;
+		return super.desc() + "\n\n" + discoverHint();
 	}
 
 }

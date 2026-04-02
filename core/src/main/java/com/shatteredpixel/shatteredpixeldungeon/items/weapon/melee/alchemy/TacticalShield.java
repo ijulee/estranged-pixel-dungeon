@@ -22,16 +22,9 @@
 package com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy;
 
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
-import com.shatteredpixel.shatteredpixeldungeon.items.Item;
-import com.shatteredpixel.shatteredpixeldungeon.items.spells.Evolution;
-import com.shatteredpixel.shatteredpixeldungeon.items.spells.UpgradeDust;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.gun.AR.AR_T5;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.gun.HG.HG;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
-
-import java.util.ArrayList;
-import java.util.Arrays;
 
 public class TacticalShield extends HG implements AlchemyWeapon {
     {
@@ -69,22 +62,13 @@ public class TacticalShield extends HG implements AlchemyWeapon {
     }
 
     @Override
-    public ArrayList<Class<?extends Item>> weaponRecipe() {
-        return new ArrayList<>(Arrays.asList(HG_T6.class, ObsidianShield.class, Evolution.class));
-    }
-
-    @Override
     public String discoverHint() {
-        return AlchemyWeapon.hintString(weaponRecipe());
+        return AlchemyWeapon.hintString(this.getClass());
     }
 
     @Override
     public String desc() {
-        String info = super.desc();
-
-        info += "\n\n" + AlchemyWeapon.hintString(weaponRecipe());
-
-        return info;
+        return super.desc() + "\n\n" + discoverHint();
     }
 
 }

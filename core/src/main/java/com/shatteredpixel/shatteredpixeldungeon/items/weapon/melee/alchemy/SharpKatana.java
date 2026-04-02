@@ -26,18 +26,11 @@ import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
-import com.shatteredpixel.shatteredpixeldungeon.items.Item;
-import com.shatteredpixel.shatteredpixeldungeon.items.spells.Evolution;
-import com.shatteredpixel.shatteredpixeldungeon.items.spells.UpgradeDust;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.LargeKatana;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.NormalKatana;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.WornKatana;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
-
-import java.util.ArrayList;
-import java.util.Arrays;
 
 public class SharpKatana extends MeleeWeapon implements AlchemyWeapon {
 
@@ -99,22 +92,13 @@ public class SharpKatana extends MeleeWeapon implements AlchemyWeapon {
     }
 
     @Override
-    public ArrayList<Class<?extends Item>> weaponRecipe() {
-        return new ArrayList<>(Arrays.asList(LargeKatana.class, UpgradeDust.class, Evolution.class));
-    }
-
-    @Override
     public String discoverHint() {
-        return AlchemyWeapon.hintString(weaponRecipe());
+        return AlchemyWeapon.hintString(this.getClass());
     }
 
 
     @Override
     public String desc() {
-        String info = super.desc();
-
-        info += "\n\n" + AlchemyWeapon.hintString(weaponRecipe());
-
-        return info;
+        return super.desc() + "\n\n" + discoverHint();
     }
 }

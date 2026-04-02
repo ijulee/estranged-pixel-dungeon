@@ -1,14 +1,7 @@
 package com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy;
 
-import com.shatteredpixel.shatteredpixeldungeon.items.Item;
-import com.shatteredpixel.shatteredpixeldungeon.items.spells.Evolution;
-import com.shatteredpixel.shatteredpixeldungeon.items.spells.UpgradeDust;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.gun.AR.AR;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.gun.AR.AR_T5;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
-
-import java.util.ArrayList;
-import java.util.Arrays;
 
 public class AR_T6 extends AR implements AlchemyWeapon {
     {
@@ -18,21 +11,12 @@ public class AR_T6 extends AR implements AlchemyWeapon {
     }
 
     @Override
-    public ArrayList<Class<?extends Item>> weaponRecipe() {
-        return new ArrayList<>(Arrays.asList(AR_T5.class, UpgradeDust.class, Evolution.class));
-    }
-
-    @Override
     public String discoverHint() {
-        return AlchemyWeapon.hintString(weaponRecipe());
+        return AlchemyWeapon.hintString(this.getClass());
     }
 
     @Override
     public String desc() {
-        String info = super.desc();
-
-        info += "\n\n" + AlchemyWeapon.hintString(weaponRecipe());
-
-        return info;
+        return super.desc() + "\n\n" + discoverHint();
     }
 }
