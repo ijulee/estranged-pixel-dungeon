@@ -12,6 +12,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
 import com.shatteredpixel.shatteredpixeldungeon.items.spells.Evolution;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.AssassinsBlade;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Bible;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Dirk;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Flail;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Gauntlet;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Glaive;
@@ -29,6 +30,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.Assas
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.BeamSaber;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.ChainFlail;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.ChainWhip;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.DualDagger;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.DualGreatSword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.ForceGlove;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.GL_T6;
@@ -290,6 +292,7 @@ public class BluePrint extends Item {
 
     public static Recipe[] recipes = new Recipe[] {
             //Tier 2
+            new Recipe(DualDagger.class,       new Class[] {Evolution.class, Dirk.class, MeleeWeapon.class},           0),
             //Tier 3
             new Recipe(SpearNShield.class,     new Class[] {Evolution.class, Spear.class, RoundShield.class},          0),
             //Tier 4
