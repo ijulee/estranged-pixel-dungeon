@@ -42,16 +42,16 @@ public class ChainFlail extends MeleeWeapon implements AlchemyWeapon {
 		hitSound = Assets.Sounds.HIT_CRUSH;
 		hitSoundPitch = 0.8f;
 
-		tier = 6;
-		RCH = 2;
+		tier = 5;
+		RCH = 3;
 		ACC = 0.8f; //0.8x accuracy
 		//also cannot surprise attack, see Hero.canSurpriseAttack
 	}
 
 	@Override
 	public int max(int lvl) {
-		return  Math.round(7*(tier)) +        //42 base
-				lvl*(tier+3);  //+9 per level
+		return  Math.round(7*tier) +          //35 base
+				lvl*Math.round(1.6f*tier);    //+8 per level
 	}
 
 	private static int spinBoost = 0;
@@ -105,7 +105,7 @@ public class ChainFlail extends MeleeWeapon implements AlchemyWeapon {
 
 		Flail.SpinAbilityTracker spin = hero.buff(Flail.SpinAbilityTracker.class);
 		if (spin != null && spin.spins >= 3){
-			GLog.w(Messages.get(this, "spin_warn"));
+			GLog.w(Messages.get(Flail.class, "spin_warn"));
 			return;
 		}
 
@@ -128,72 +128,14 @@ public class ChainFlail extends MeleeWeapon implements AlchemyWeapon {
 	public String abilityInfo() {
 		int dmgBoost = levelKnown ? 8 + 2*buffedLvl() : 8;
 		if (levelKnown){
-			return Messages.get(this, "ability_desc", augment.damageFactor(dmgBoost));
+			return Messages.get(Flail.class, "ability_desc", augment.damageFactor(dmgBoost));
 		} else {
-			return Messages.get(this, "typical_ability_desc", augment.damageFactor(dmgBoost));
+			return Messages.get(Flail.class, "typical_ability_desc", augment.damageFactor(dmgBoost));
 		}
 	}
 
 	public String upgradeAbilityStat(int level){
 		return "+" + augment.damageFactor(8 + 2*level);
-	}
-
-	public static class SpinAbilityTracker extends FlavourBuff {
-
-		{
-			type = buffType.POSITIVE;
-		}
-
-		public int spins = 0;
-
-		@Override
-		public int icon() {
-			return BuffIndicator.DUEL_SPIN;
-		}
-
-		@Override
-		public void tintIcon(Image icon) {
-			switch (spins){
-				case 1: default:
-					icon.hardlight(0, 1, 0);
-					break;
-				case 2:
-					icon.hardlight(1, 1, 0);
-					break;
-				case 3:
-					icon.hardlight(1, 0, 0);
-					break;
-			}
-		}
-
-		@Override
-		public float iconFadePercent() {
-			return Math.max(0, (3 - visualcooldown()) / 3);
-		}
-
-		@Override
-		public String desc() {
-			return Messages.get(this, "desc", (int)Math.round((spins/3f)*100f), dispTurns());
-		}
-
-		public static String SPINS = "spins";
-
-		@Override
-		public void storeInBundle(Bundle bundle) {
-			super.storeInBundle(bundle);
-			bundle.put(SPINS, spins);
-		}
-
-		@Override
-		public void restoreFromBundle(Bundle bundle) {
-			super.restoreFromBundle(bundle);
-			spins = bundle.getInt(SPINS);
-		}
-	}
-
-	@Override
-	public ArrayList<Class<?extends Item>> weaponRecipe() {
-		return new ArrayList<>(Arrays.asList(ChainWhip.class, Flail.class, Evolution.class));
 	}
 
 	@Override

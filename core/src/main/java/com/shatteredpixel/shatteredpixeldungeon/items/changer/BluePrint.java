@@ -300,7 +300,7 @@ public class BluePrint extends Item {
             new Recipe(UnholyBible.class,      new Class[] {Evolution.class, Bible.class, MeleeWeapon.class},          0),
             //Tier 5
             new Recipe(UnformedBlade.class,    new Class[] {Evolution.class, AssassinsBlade.class, MeleeWeapon.class}, 0),
-            new Recipe(ChainFlail.class,       new Class[] {Evolution.class, ChainWhip.class, Flail.class},                 0),
+            new Recipe(ChainFlail.class,       new Class[] {Evolution.class, Whip.class, Flail.class},                 0),
             //Tier 6
             new Recipe(AR_T6.class,            new Class[] {Evolution.class, AR_T5.class, MeleeWeapon.class},          0),
             new Recipe(AssassinsSpear.class,   new Class[] {Evolution.class, AssassinsBlade.class, Glaive.class},      0),
