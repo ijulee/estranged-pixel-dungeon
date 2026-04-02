@@ -152,11 +152,7 @@ public class LanceNShield extends MeleeWeapon implements AlchemyWeapon {
 
     public String statsInfo(){
         if (stance) {
-            if (isIdentified()){
-                return Messages.get(this, "stats_desc_attack");
-            } else {
-                return Messages.get(this, "typical_stats_desc_attack");
-            }
+            return Messages.get(this, "stats_desc_attack");
         } else {
             if (isIdentified()){
                 return Messages.get(this, "stats_desc_defense", DRMax());

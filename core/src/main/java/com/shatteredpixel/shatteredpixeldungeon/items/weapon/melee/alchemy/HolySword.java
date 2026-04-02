@@ -21,14 +21,14 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy;
 
-import static com.shatteredpixel.shatteredpixeldungeon.Dungeon.hero;
-
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Barrier;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.HolyWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
@@ -48,10 +48,10 @@ public class HolySword extends MeleeWeapon implements AlchemyWeapon {
 
     @Override
     public int image() {
-        if (Dungeon.hero.STR() < this.STRReq()){
-            return ItemSpriteSheet.HOLYSWORD;
-        } else {
+        if (Dungeon.hero.STR() >= this.STRReq()) {
             return ItemSpriteSheet.HOLYSWORD_TRUE;
+        } else {
+            return ItemSpriteSheet.HOLYSWORD;
         }
     }
 
@@ -66,9 +66,9 @@ public class HolySword extends MeleeWeapon implements AlchemyWeapon {
 
     @Override
     public int proc(Char attacker, Char defender, int damage) {
-        if (hero.STR() >= STRReq()) {
+        if (attacker == Dungeon.hero && Dungeon.hero.STR() >= STRReq()) {
             int healAmt = Math.round(damage * 0.4f);
-            healAmt = Math.min( healAmt, attacker.HT - hero.HP );
+            healAmt = Math.min( healAmt, attacker.HT - attacker.HP );
             attacker.heal(healAmt);
         }
         return super.proc( attacker, defender, damage );
@@ -101,6 +101,15 @@ public class HolySword extends MeleeWeapon implements AlchemyWeapon {
     }
 
     @Override
+    public String statsInfo() {
+        if (Dungeon.hero != null && Dungeon.hero.STR() >= this.STRReq()) {
+            return Messages.get(this, "true_stats_desc");
+        } else {
+            return super.statsInfo();
+        }
+    }
+
+    @Override
     protected float baseDelay(Char owner) {
         float delay = augment.delayFactor(this.DLY);
         if (owner instanceof Hero) {
@@ -116,12 +125,19 @@ public class HolySword extends MeleeWeapon implements AlchemyWeapon {
 
     @Override
     public String name() {
+        String name;
         if (Dungeon.hero != null && Dungeon.hero.STR() >= this.STRReq()) {
-            String trueName = Messages.get(this, "true_name");
-            return enchantment != null && (cursedKnown || !enchantment.curse()) ? enchantment.name( trueName ) : trueName;
+            name = Messages.get(this, "true_name");
         } else {
-            String name = Messages.get(this, "name");
+            name = Messages.get(this, "name");
+        }
+
+        if (isEquipped(Dungeon.hero) && !hasCurseEnchant() && Dungeon.hero.buff(HolyWeapon.HolyWepBuff.class) != null
+                && (Dungeon.hero.subClass != HeroSubClass.PALADIN || enchantment == null)){
+            return Messages.get(HolyWeapon.class, "ench_name", name);
+        } else {
             return enchantment != null && (cursedKnown || !enchantment.curse()) ? enchantment.name( name ) : name;
+
         }
     }
 
