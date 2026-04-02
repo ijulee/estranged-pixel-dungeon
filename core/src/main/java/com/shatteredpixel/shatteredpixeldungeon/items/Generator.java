@@ -55,6 +55,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.TalismanOfForesi
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.TimekeepersHourglass;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.UnstableSpellbook;
 import com.shatteredpixel.shatteredpixeldungeon.items.bombs.Bomb;
+import com.shatteredpixel.shatteredpixeldungeon.items.changer.BluePrint;
 import com.shatteredpixel.shatteredpixeldungeon.items.food.Food;
 import com.shatteredpixel.shatteredpixeldungeon.items.food.MysteryMeat;
 import com.shatteredpixel.shatteredpixeldungeon.items.food.Pasty;
@@ -198,6 +199,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Bible;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Crossbow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Cudgel;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Dagger;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.DeathSword;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Dirk;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.DualDagger;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.EnhancedMachete;
@@ -344,6 +346,7 @@ public class Generator {
 		WEP_T3	( 0, 0, MeleeWeapon.class),
 		WEP_T4	( 0, 0, MeleeWeapon.class),
 		WEP_T5	( 0, 0, MeleeWeapon.class),
+		WEP_AL_T2 (0, 0, MeleeWeapon.class),
 		WEP_AL_T3	( 0, 0, MeleeWeapon.class),
 		WEP_AL_T4	( 0, 0, MeleeWeapon.class),
 		WEP_AL_T5	( 0, 0, MeleeWeapon.class),
@@ -613,7 +616,6 @@ public class Generator {
 					Sickle.class,
 					Pickaxe.class,
 					Nunchaku.class,
-					DualDagger.class,
 					Knife.class,
 					ShortKatana.class,
 					AR_T2.class,
@@ -621,7 +623,7 @@ public class Generator {
 					SMG_T2.class,
 					ShortBow.class
 			};
-			WEP_T2.defaultProbs = new float[]{ 2, 2, 2, 2, 2, 2, 0, 2, 0, 0, 0, 1, 0, 1, 1 };
+			WEP_T2.defaultProbs = new float[]{ 2, 2, 2, 2, 2, 2, 0, 2, 0, 0, 1, 0, 1, 1 };
 			WEP_T2.probs = WEP_T2.defaultProbs.clone();
 			
 			WEP_T3.classes = new Class<?>[]{
@@ -685,60 +687,67 @@ public class Generator {
 			WEP_T5.defaultProbs = new float[]{ 2, 2, 2, 2, 2, 2, 2, 0, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
 			WEP_T5.probs = WEP_T5.defaultProbs.clone();
 
+			WEP_AL_T2.classes = new Class<?>[]{
+					DualDagger.class
+			};
+			WEP_AL_T2.defaultProbs = new float[]{ 1 };
+			WEP_AL_T2.probs = WEP_AL_T2.defaultProbs.clone();
+
 			WEP_AL_T3.classes = new Class<?>[]{
 					SpearNShield.class
 			};
-			WEP_AL_T3.defaultProbs = new float[]{ 0 };
+			WEP_AL_T3.defaultProbs = new float[]{ 1 };
 			WEP_AL_T3.probs = WEP_AL_T3.defaultProbs.clone();
 
 			WEP_AL_T4.classes = new Class<?>[]{
 					UnholyBible.class
 			};
-			WEP_AL_T4.defaultProbs = new float[]{ 0 };
+			WEP_AL_T4.defaultProbs = new float[]{ 1 };
 			WEP_AL_T4.probs = WEP_AL_T4.defaultProbs.clone();
 
 			WEP_AL_T5.classes = new Class<?>[]{
-					TrueRunicBlade.class,
+					ChainFlail.class,
 					ChainWhip.class,
 					UnformedBlade.class
 			};
-			WEP_AL_T5.defaultProbs = new float[]{ 0, 0, 0 };
+			WEP_AL_T5.defaultProbs = new float[]{ 1, 1, 1 };
 			WEP_AL_T5.probs = WEP_AL_T5.defaultProbs.clone();
 
 			WEP_AL_T6.classes = new Class<?>[]{
 					AR_T6.class,
-					SR_T6.class,
-					HG_T6.class,
-					GL_T6.class,
-					RL_T6.class,
-					ChainFlail.class,
-					ForceGlove.class,
-					Lance.class,
-					ObsidianShield.class,
-					DualGreatSword.class,
-					HugeSword.class,
-					MeisterHammer.class,
+					AssassinsSpear.class,
 					BeamSaber.class,
+					DualGreatSword.class,
+					ForceGlove.class,
+					GL_T6.class,
+					HG_T6.class,
+					HugeSword.class,
+					Lance.class,
+					MeisterHammer.class,
+					ObsidianShield.class,
+					RL_T6.class,
 					SharpKatana.class,
-					AssassinsSpear.class
+					SR_T6.class,
+					TrueRunicBlade.class
 			};
-			WEP_AL_T6.defaultProbs = new float[]{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+			WEP_AL_T6.defaultProbs = new float[]{ 1, 2, 2, 2, 2, 1, 1, 2, 2, 2, 2, 1, 2, 1, 2 };
 			WEP_AL_T6.probs = WEP_AL_T6.defaultProbs.clone();
 
 			WEP_AL_T7.classes = new Class<?>[]{
 					LanceNShield.class,
-					TacticalShield.class,
-					HolySword.class
+					HolySword.class,
+					TacticalShield.class
 			};
 			WEP_AL_T7.defaultProbs = new float[]{ 0, 0, 0 };
 			WEP_AL_T7.probs = WEP_AL_T7.defaultProbs.clone();
 
 			WEP_SP.classes = new Class<?>[]{
+					DeathSword.class,
+					EnhancedMachete.class,
 					Spade.class,
-					MinersTool.class,
-					EnhancedMachete.class
+					MinersTool.class
 			};
-			WEP_SP.defaultProbs = new float[]{ 0, 0, 0 };
+			WEP_SP.defaultProbs = new float[]{ 0, 0, 0, 0 };
 			WEP_SP.probs = WEP_SP.defaultProbs.clone();
 
 			//see Generator.randomBow
@@ -1120,6 +1129,47 @@ public class Generator {
 			w = (MeleeWeapon) random(wepTiers[Random.chances(floorSetTierProbs[floorSet])]);
 		}
 		return w;
+	}
+
+	private static final float[][] floorSetBlueprintProbs = new float[][] {
+			{0, 25, 40, 25,  9,   1, 0},
+			{0,  5, 20, 40, 30,   5, 0},
+			{0,  0,  0, 30, 60,  10, 0},
+			{0,  0,  0, 15, 40,  45, 0},
+			{0,  0,  0,  0, 20,  80, 0},
+			{0,  0,  0,  0,  0, 100, 0}
+	};
+
+	private static Category[] blueprintTiers = new Category[] {
+			null,
+			Category.WEP_AL_T2,
+			Category.WEP_AL_T3,
+			Category.WEP_AL_T4,
+			Category.WEP_AL_T5,
+			Category.WEP_AL_T6,
+			Category.WEP_AL_T7
+	};
+
+	public static BluePrint randomBlueprint() {
+		return randomBlueprint(Dungeon.depth/5);
+	}
+	public static BluePrint randomBlueprint(int floorSet) {
+		return randomBlueprint(floorSet, false);
+	}
+	public static BluePrint randomBlueprint(boolean useDefaults) {
+		return randomBlueprint(Dungeon.depth/5, useDefaults);
+	}
+
+	public static BluePrint randomBlueprint(int floorSet, boolean useDefaults) {
+		floorSet = (int)GameMath.gate(0, floorSet, floorSetBlueprintProbs.length-1);
+
+		MeleeWeapon w;
+		if (useDefaults) {
+			w = (MeleeWeapon) randomUsingDefaults(blueprintTiers[Random.chances(floorSetBlueprintProbs[floorSet])]);
+		} else {
+			w = (MeleeWeapon) random(blueprintTiers[Random.chances(floorSetBlueprintProbs[floorSet])]);
+		}
+		return new BluePrint(w);
 	}
 
 	public static SpiritBow randomBow(Class<? extends SpiritBow> curBowClass) {
