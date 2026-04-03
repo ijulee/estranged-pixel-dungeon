@@ -160,6 +160,7 @@ public enum Catalog {
 
 	//EQUIPMENT
 	MELEE_WEAPONS,
+	BLUEPRINT_WEAPONS,
 	ARMOR,
 	ENCHANTMENTS,
 	GLYPHS,
@@ -226,13 +227,14 @@ public enum Catalog {
 		MELEE_WEAPONS.addItems(Generator.Category.WEP_T3.classes);
 		MELEE_WEAPONS.addItems(Generator.Category.WEP_T4.classes);
 		MELEE_WEAPONS.addItems(Generator.Category.WEP_T5.classes);
-
-		MELEE_WEAPONS.addItems(Generator.Category.WEP_AL_T3.classes);
-		MELEE_WEAPONS.addItems(Generator.Category.WEP_AL_T4.classes);
-		MELEE_WEAPONS.addItems(Generator.Category.WEP_AL_T5.classes);
-		MELEE_WEAPONS.addItems(Generator.Category.WEP_AL_T6.classes);
-		MELEE_WEAPONS.addItems(Generator.Category.WEP_AL_T7.classes);
 		MELEE_WEAPONS.addItems(Generator.Category.WEP_SP.classes);
+
+		BLUEPRINT_WEAPONS.addItems(Generator.Category.WEP_AL_T2.classes);
+		BLUEPRINT_WEAPONS.addItems(Generator.Category.WEP_AL_T3.classes);
+		BLUEPRINT_WEAPONS.addItems(Generator.Category.WEP_AL_T4.classes);
+		BLUEPRINT_WEAPONS.addItems(Generator.Category.WEP_AL_T5.classes);
+		BLUEPRINT_WEAPONS.addItems(Generator.Category.WEP_AL_T6.classes);
+		BLUEPRINT_WEAPONS.addItems(Generator.Category.WEP_AL_T7.classes);
 
 		ARMOR.addItems(Generator.Category.ARMOR.classes);
 
@@ -268,8 +270,6 @@ public enum Catalog {
 				Sheath.class, GammaRayGun.class,
 				Waterskin.class, VelvetPouch.class, PotionBandolier.class, ScrollHolder.class, MagicalHolster.class,
 				OldAmulet.class, Amulet.class);
-
-
 
 		POTIONS.addItems(Generator.Category.POTION.classes);
 
@@ -335,6 +335,7 @@ public enum Catalog {
 	public static ArrayList<Catalog> equipmentCatalogs = new ArrayList<>();
 	static {
 		equipmentCatalogs.add(MELEE_WEAPONS);
+		equipmentCatalogs.add(BLUEPRINT_WEAPONS);
 		equipmentCatalogs.add(ARMOR);
 		equipmentCatalogs.add(ENCHANTMENTS);
 		equipmentCatalogs.add(GLYPHS);
