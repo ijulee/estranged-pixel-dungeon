@@ -21,6 +21,7 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.levels.rooms.secret;
 
+import com.shatteredpixel.shatteredpixeldungeon.items.Generator;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.Scroll;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfIdentify;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfLullaby;
@@ -104,6 +105,15 @@ public class SecretLibraryRoom extends SecretRoom {
 
 			level.drop( Reflection.newInstance(scrollCls), pos );
 		}
-	}
+
+        if (Random.Int(2) == 0) {
+            int pos;
+            do {
+                pos = level.pointToCell(random());
+            } while (level.map[pos] != Terrain.EMPTY_SP || level.heaps.get( pos ) != null);
+
+            level.drop(Generator.randomBlueprint(), pos);
+        }
+    }
 	
 }

@@ -270,6 +270,10 @@ public abstract class Level implements Bundlable {
 				Dungeon.LimitedDrops.BULLET_BELT.count++;
 				addItemToSpawn( new BulletBelt());
 			}
+			if ( Dungeon.blueprintNeeded() ) {
+				Dungeon.LimitedDrops.BLUEPRINT.drop();
+				addItemToSpawn( Generator.randomBlueprint(5, true));
+			}
 
 			if (Dungeon.depth > 1) {
 				//50% chance of getting a level feeling
@@ -936,27 +940,38 @@ public abstract class Level implements Bundlable {
 		}
 	}
 
+	private static float[] prizeDefaultProbs = new float[] {2, 1, 1, 16};
+
 	public void destroy( int pos ) {
-		Item prize = null;
-		switch (Random.Int(10)) {
-			case 0: prize = new ScrollOfTransmutation();
+		float[] prizeProbs = prizeDefaultProbs.clone();
+		Item prize;
+		switch (Random.chances(prizeProbs)) {
+			case 0:
+				prize = new ScrollOfTransmutation();
 				break;
-			case 1: prize = Generator.randomUsingDefaults(Generator.Category.SPELLBOOK);
+			case 1:
+				prize = Generator.randomUsingDefaults(Generator.Category.SPELLBOOK);
 				break;
-			default:
+			case 2:
+				prize = Generator.randomBlueprint(true);
+				break;
+			case 3: default:
 				prize = Generator.randomUsingDefaults(Generator.Category.SCROLL);
 				break;
 		}
+
 		//if raw tile type is flammable or empty
 		int terr = map[pos];
 		if (terr == Terrain.EMPTY || terr == Terrain.EMPTY_DECO
 				|| (Terrain.flags[map[pos]] & Terrain.FLAMABLE) != 0) {
-			if (terr == Terrain.BOOKSHELF && Random.Float() < (1/20f)*RingOfWealth.dropChanceMultiplier( Dungeon.hero )) {
-				if (prize == null) { //this will never be activated, but this is used to prevent a crash in unpredicted case
-					prize = Generator.randomUsingDefaults(Generator.Category.SCROLL);
-				}
-				Dungeon.level.drop(prize, pos).sprite.drop();
-			} //generates prize for 5% chance when a bookshelf has destroyed
+
+			if (terr == Terrain.BOOKSHELF) {
+				float prizeChance = (1/20f) * RingOfWealth.dropChanceMultiplier(Dungeon.hero);
+                if (Random.Float() < prizeChance ) {
+                    Dungeon.level.drop(prize, pos).sprite.drop();
+                }
+            }
+
 			set(pos, Terrain.EMBERS);
 		}
 		Blob web = blobs.get(Web.class);

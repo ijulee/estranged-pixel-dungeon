@@ -121,7 +121,7 @@ public class Dungeon {
 		TRINKET_CATA,
 		LAB_ROOM, //actually a room, but logic is the same
 		BULLET_BELT,
-
+		BLUEPRINT,
 		//Health potion sources
 		//enemies
 		SWARM_HP,
@@ -657,6 +657,20 @@ public class Dungeon {
 		//drop in 1-3F for region 0 (Sewers)
 		return Random.Int((depth / 5 == 0) ? 4 : 5 - floorThisSet) < ammoLeftThisSet;
 	}
+
+	public static boolean blueprintNeeded() {
+		//1 blueprint, spawns on chapter 3 or 4
+		if (!LimitedDrops.BLUEPRINT.dropped()) {
+			int region = 1+depth/5;
+			if (region > 2){
+				int floorsVisited = depth - 10;
+				if (floorsVisited > 4) floorsVisited--; //skip floor 15
+				return Random.Int(9-floorsVisited) == 0; //1/8 chance each floor
+			}
+		}
+		return false;
+	}
+
 	private static final String INIT_VER	= "init_ver";
 	public  static final String VERSION		= "version";
 	private static final String SEED		= "seed";
