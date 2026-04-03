@@ -33,8 +33,8 @@ public class SpiritHorseSprite extends MobSprite {
 
 		TextureFilm frames = new TextureFilm( texture, 17, 13 );
 
-		idle = new Animation( 2, true );
-		idle.frames( frames, 0, 0, 0, 0, 1 );
+		idle = new Animation( 5, true );
+		idle.frames( frames, 0, 0, 0, 1, 0, 1 );
 
 		run = new Animation( 15, true );
 		run.frames( frames, 2, 3, 4, 5, 6, 7, 8, 9, 10 );
@@ -42,7 +42,7 @@ public class SpiritHorseSprite extends MobSprite {
 		attack = new Animation( 8, false );
 		attack.frames( frames, 0, 7, 8, 9, 1 );
 
-		die = new Animation( 15, false );
+		die = new Animation( 10, false );
 		die.frames( frames, 11, 12, 13, 14, 14, 14 );
 
 		play( idle );
