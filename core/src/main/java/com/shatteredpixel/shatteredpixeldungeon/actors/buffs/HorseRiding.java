@@ -47,6 +47,8 @@ public class HorseRiding extends Buff implements ActionIndicator.Action, Hero.Do
         announced = true;
     }
 
+    private static final String TXT_DISMOUNT = "DISMOUNT";
+
     private HorseAlly horse = null;
     private int horseHP = 0;
     private int horseHT = 0;
@@ -70,7 +72,7 @@ public class HorseRiding extends Buff implements ActionIndicator.Action, Hero.Do
     }
 
     public void healHorse(int amount) {
-        this.horseHP = Math.min(HorseRiding.this.horseHP + amount, HorseRiding.this.horseHT);;
+        this.horseHP = Math.min(HorseRiding.this.horseHP + amount, HorseRiding.this.horseHT);
     }
 
     @Override
@@ -139,6 +141,8 @@ public class HorseRiding extends Buff implements ActionIndicator.Action, Hero.Do
     @Override
     public void doAction() {
         GameScene.selectCell(dashDirector);
+
+        GameScene.labelCell(Dungeon.hero.sprite, TXT_DISMOUNT).hardlight(0x350ABC);
     }
 
     public void doCharge(List<Integer> path) {
