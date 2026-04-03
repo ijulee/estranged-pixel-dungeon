@@ -82,8 +82,7 @@ public class Challenges {
 	public static final int FATIGUE				= 4096;
 	public static final int MUTATION			= 8192;
 
-	public static final int MAX_VALUE           = 511;
-    //public static final int MAX_VALUE           = 16383;
+    public static final int MAX_VALUE           = 16383;
     public static final int MAX_CHALS           = 14;
 
 	public static final String[] NAME_IDS = {
