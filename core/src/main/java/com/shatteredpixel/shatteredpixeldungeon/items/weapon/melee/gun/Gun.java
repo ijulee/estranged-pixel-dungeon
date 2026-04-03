@@ -291,8 +291,14 @@ public abstract class Gun extends GunWeapon {
 
 	@Override
 	public void noAmmoAction(Hero hero) {
-		execute(hero, AC_RELOAD);
-	}
+		//let duelist ability take precedence first
+		if (hero.heroClass == HeroClass.DUELIST) {
+			execute(hero, AC_ABILITY);
+		}
+        if (!fullyLoaded()) {
+            execute(hero, AC_RELOAD);
+        }
+    }
 
 	public boolean fullyLoaded() {
 		return rounds >= maxRounds();
@@ -935,7 +941,8 @@ public abstract class Gun extends GunWeapon {
 				if (target == curUser.pos ) {
 					if (curUser.heroClass == HeroClass.DUELIST) {
 						execute(Dungeon.hero, AC_ABILITY);
-					} else {
+					}
+					if (!fullyLoaded()) {
 						execute(Dungeon.hero, AC_RELOAD);
 					}
 				} else {
