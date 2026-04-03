@@ -85,6 +85,7 @@ public enum Icons {
 	SCROLL_COLOR,
 	COPY,
 	PASTE,
+	CELL_LABEL,
 
 	BACKPACK_LRG,
 	TALENT,
@@ -302,6 +303,9 @@ public enum Icons {
 				break;
 			case PASTE:
 				icon.frame( icon.texture.uvRectBySize( 192, 32, 13, 13 ) );
+				break;
+			case CELL_LABEL:
+				icon.frame( icon.texture.uvRectBySize( 205, 32, 16, 16 ) );
 				break;
 
 			case BACKPACK_LRG:

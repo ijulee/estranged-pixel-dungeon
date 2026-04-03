@@ -48,6 +48,8 @@ import java.util.HashSet;
 
 public abstract class Gun extends GunWeapon {
 	public static final String AC_RELOAD    = "RELOAD";
+	public static final String TXT_RELOAD = "RELOAD";
+	public static final String TXT_ABIL = "Q. RELOAD";
 
 	protected int rounds;
 	protected int maxRounds;
@@ -267,7 +269,19 @@ public abstract class Gun extends GunWeapon {
 	public void execute(Hero hero, String action) {
 		super.execute(hero, action);
 
-		if (action.equals(AC_RELOAD)) {
+		if (action.equals(AC_SHOOT)) {
+			if (GameScene.isCellSelecterActive(shooter)) {
+                if (hero.heroClass == HeroClass.DUELIST &&
+					hero.buff(Charger.class).charges + hero.buff(Charger.class).partialCharge >= abilityChargeUse(hero, null)) {
+					GameScene.labelCell(hero.sprite, TXT_ABIL).hardlight(0x5500BB);
+                } else {
+					GameScene.labelCell(hero.sprite, TXT_RELOAD);
+
+				}
+
+
+			}
+		} else if (action.equals(AC_RELOAD)) {
 			usesTargeting = false;
 			if (fullyLoaded()){
 				if (hero.heroClass == HeroClass.DUELIST) {
@@ -950,6 +964,7 @@ public abstract class Gun extends GunWeapon {
 				}
 			}
 		}
+
 		@Override
 		public String prompt() {
 			return Messages.get(SpiritBow.class, "prompt");

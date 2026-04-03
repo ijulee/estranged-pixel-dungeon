@@ -101,6 +101,7 @@ import com.shatteredpixel.shatteredpixeldungeon.ui.ActionIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.ui.AttackIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Banner;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BossHealthBar;
+import com.shatteredpixel.shatteredpixeldungeon.ui.CellLabel;
 import com.shatteredpixel.shatteredpixeldungeon.ui.CharHealthIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.ui.GameLog;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Icons;
@@ -108,6 +109,7 @@ import com.shatteredpixel.shatteredpixeldungeon.ui.InventoryPane;
 import com.shatteredpixel.shatteredpixeldungeon.ui.LootIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.ui.MenuPane;
 import com.shatteredpixel.shatteredpixeldungeon.ui.QuickSlotButton;
+import com.shatteredpixel.shatteredpixeldungeon.ui.RenderedTextBlock;
 import com.shatteredpixel.shatteredpixeldungeon.ui.ResumeIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RightClickMenu;
 import com.shatteredpixel.shatteredpixeldungeon.ui.StatusPane;
@@ -204,6 +206,7 @@ public class GameScene extends PixelScene {
 	private Group emoicons;
 	private Group overFogEffects;
 	private Group healthIndicators;
+	private Group selectorLabels;
 
 	private InventoryPane inventory;
 	private static boolean invVisible = true;
@@ -372,7 +375,8 @@ public class GameScene extends PixelScene {
 		add( new TargetHealthIndicator() );
 		
 		add( emoicons );
-		
+
+		add( selectorLabels = new Group() );
 		add( cellSelector = new CellSelector( tiles ) );
 
 		int uiSize = SPDSettings.interfaceSize();
@@ -1633,6 +1637,9 @@ public class GameScene extends PixelScene {
 	
 	public static boolean cancelCellSelector() {
 		if (cellSelector.listener != null && cellSelector.listener != defaultCellListener) {
+			if (scene != null) {
+				scene.selectorLabels.clear();
+			}
 			cellSelector.resetKeyHold();
 			cellSelector.cancel();
 			return true;
@@ -1643,6 +1650,28 @@ public class GameScene extends PixelScene {
 
 	public static boolean isCellSelecterActive( CellSelector.Listener listener ) {
 		return cellSelector.listener == listener;
+	}
+
+	public static CellLabel labelCell(int cell, String text) {
+		PointF center = DungeonTilemap.tileCenterToWorld(cell);
+
+		CellLabel label = new CellLabel(text);
+		label.setPos(center.x, center.y);
+		label.visible = true;
+		scene.selectorLabels.addToFront(label);
+
+		return label;
+	}
+
+	public static CellLabel labelCell(CharSprite sprite, String text) {
+		PointF center = sprite.center();
+
+		CellLabel label = new CellLabel(text);
+		label.setPos(center.x, center.y);
+		label.visible = true;
+		scene.selectorLabels.addToFront(label);
+
+		return label;
 	}
 	
 	public static WndBag selectItem( WndBag.ItemSelector listener ) {
@@ -1718,6 +1747,9 @@ public class GameScene extends PixelScene {
 		QuickSlotButton.cancel();
 		InventoryPane.cancelTargeting();
 		TargetingAction.removeCross();
+		if (scene != null) {
+			scene.selectorLabels.clear();
+		}
 		if (scene != null && scene.toolbar != null) scene.toolbar.examining = false;
 		if (tagDisappeared) {
 			tagDisappeared = false;
