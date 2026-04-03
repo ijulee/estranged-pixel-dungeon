@@ -944,6 +944,7 @@ public abstract class Level implements Bundlable {
 
 	public void destroy( int pos ) {
 		float[] prizeProbs = prizeDefaultProbs.clone();
+		prizeProbs[3] *= RingOfWealth.dropChanceMultiplier( Dungeon.hero );
 		Item prize;
 		switch (Random.chances(prizeProbs)) {
 			case 0:
@@ -966,7 +967,7 @@ public abstract class Level implements Bundlable {
 				|| (Terrain.flags[map[pos]] & Terrain.FLAMABLE) != 0) {
 
 			if (terr == Terrain.BOOKSHELF) {
-				float prizeChance = (1/20f) * RingOfWealth.dropChanceMultiplier(Dungeon.hero);
+				float prizeChance = 0.01f + 0.04f * RingOfWealth.dropChanceMultiplier(Dungeon.hero);
                 if (Random.Float() < prizeChance ) {
                     Dungeon.level.drop(prize, pos).sprite.drop();
                 }
