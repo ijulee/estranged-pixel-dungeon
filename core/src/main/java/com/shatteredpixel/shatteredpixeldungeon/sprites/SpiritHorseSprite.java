@@ -39,7 +39,8 @@ public class SpiritHorseSprite extends MobSprite {
 		run = new Animation( 15, true );
 		run.frames( frames, 2, 3, 4, 5, 6, 7, 8, 9, 10 );
 
-		attack = idle.clone();
+		attack = new Animation( 8, false );
+		attack.frames( frames, 0, 7, 8, 9, 1 );
 
 		die = new Animation( 15, false );
 		die.frames( frames, 11, 12, 13, 14, 14, 14 );
