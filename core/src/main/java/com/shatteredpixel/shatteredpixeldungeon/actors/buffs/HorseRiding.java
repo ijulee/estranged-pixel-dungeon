@@ -496,6 +496,11 @@ public class HorseRiding extends Buff implements ActionIndicator.Action, Hero.Do
 
             return super.attackProc(enemy, damage);
         }
+
+        @Override
+        public int attackSkill(Char target) {
+            return INFINITE_ACCURACY;
+        }
     }
 
     public static class RideFall implements Hero.Doom {
