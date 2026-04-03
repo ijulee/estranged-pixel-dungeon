@@ -578,10 +578,11 @@ public class Armor extends EquipableItem {
 			if (awakening != null) {
 				evasion += awakening.evasionBonus(((Hero) owner).lvl, Math.max(0, -aEnc));
 			}
+		}
 
-			if (hasGlyph(Afterimage.class, owner)){
-				evasion *= Math.pow(1.2f, this.buffedLvl());
-			}
+		//FIXME this looks overly effective
+		if (hasGlyph(Afterimage.class, owner)){
+			evasion *= Math.pow(1.2f, this.buffedLvl());
 		}
 
 		return evasion + augment.evasionFactor(buffedLvl());
