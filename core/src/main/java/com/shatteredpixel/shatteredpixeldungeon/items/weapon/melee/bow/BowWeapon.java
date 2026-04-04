@@ -28,6 +28,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.GunWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.CellSelector;
+import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
@@ -39,6 +40,18 @@ import com.watabou.utils.Random;
 
 // TODO allow ghost to shoot bows when equipped (this will be a nightmare)
 public class BowWeapon extends GunWeapon {
+    private static final String TXT_ABIL = "P. SHOT";
+
+    @Override
+    public void execute(Hero hero, String action) {
+        super.execute(hero, action);
+
+        if (action.equals(AC_SHOOT)) {
+            if (hero.heroClass == HeroClass.DUELIST && GameScene.isCellSelecterActive(shooter)) {
+                GameScene.labelCell(hero.sprite, TXT_ABIL).hardlight(0x5500BB);
+            }
+        }
+    }
 
     @Override
     public boolean canShoot() {
