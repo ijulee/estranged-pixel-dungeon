@@ -23,6 +23,7 @@ package com.shatteredpixel.shatteredpixeldungeon.items.spells;
 
 import com.shatteredpixel.shatteredpixeldungeon.Challenges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Transmuting;
 import com.shatteredpixel.shatteredpixeldungeon.items.EquipableItem;
@@ -45,7 +46,8 @@ public class Evolution extends InventorySpell {
 
     {
         image = ItemSpriteSheet.EVOLUTION;
-
+        talentChance = 1/(float) Recipe.OUT_QUANTITY;
+        talentFactor = 2;
         unique = true;
     }
 
