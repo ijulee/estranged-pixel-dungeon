@@ -28,9 +28,11 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FireImbue;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FlavourBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.FlameParticle;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.elixirs.ElixirOfDragonsBlood;
 import com.shatteredpixel.shatteredpixeldungeon.items.quest.Embers;
+import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.Scroll;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Catalog;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
@@ -38,25 +40,26 @@ import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.Image;
 import com.watabou.noosa.audio.Sample;
+import com.watabou.utils.Random;
 
 public class FireImbueSpell extends Spell {
 	
 	{
 		image = ItemSpriteSheet.FIRE_IMBUE;
 
-		talentChance = 0;
-
 		unique = true;
 		bones = false;
 	}
+
+	public static final float DURATION = 20f;
 	
 	@Override
 	protected void onCast(Hero hero) {
 		if (hero.buff(ImbueCooldown.class) == null) {
 			if (Dungeon.isChallenged(Challenges.PYRO)) {
-				Buff.affect(hero, FireImbue.class).set(10f/2);
+				Buff.affect(hero, FireImbue.class).set(DURATION/2);
 			} else {
-				Buff.affect(hero, FireImbue.class).set(10f);
+				Buff.affect(hero, FireImbue.class).set(DURATION);
 			}
 			Buff.affect(hero, ImbueCooldown.class, ImbueCooldown.DURATION);
 			hero.sprite.operate(hero.pos);
@@ -68,6 +71,9 @@ public class FireImbueSpell extends Spell {
 
 			updateQuickslot();
 			hero.spendAndNext( 1f );
+			if (Random.Float() < talentChance) {
+				Talent.onScrollUsed(curUser, curUser.pos, talentFactor, getClass());
+			}
 		} else {
 			GLog.w(Messages.get(this, "cooldown"));
 		}
@@ -79,39 +85,24 @@ public class FireImbueSpell extends Spell {
 			announced = false;
 		}
 
-		public static final float DURATION	= 200f;
+		public static final float DURATION	= 250f;
 
 		@Override
 		public int icon() {
-			return BuffIndicator.TIME;
+			return BuffIndicator.IMBUE;
 		}
 
 		@Override
 		public void tintIcon(Image icon) {
-			icon.hardlight(0xFF0000);
+			icon.hardlight(0x808080);
 		}
 
 		@Override
 		public float iconFadePercent() {
 			return Math.max(0, (DURATION - visualcooldown()) / DURATION);
 		}
+    }
 
-		@Override
-		public String toString() {
-			return Messages.get(this, "name");
-		}
-
-		@Override
-		public String desc() {
-			return Messages.get(this, "desc", dispTurns());
-		}
-	}
-	
-	@Override
-	public int value() {
-		return 0;
-	}
-	
 	public static class Recipe extends com.shatteredpixel.shatteredpixeldungeon.items.Recipe.SimpleRecipe {
 		
 		{
