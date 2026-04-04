@@ -28,6 +28,8 @@ public class SharpShooterBuff extends Buff implements ActionIndicator.Action {
         revivePersists = true;
     }
 
+    public static final String TXT_RANDOM = "RANDOM";
+
     @Override
     public boolean attachTo(Char target) {
         if (!(target instanceof Hero)) return false;
@@ -86,6 +88,7 @@ public class SharpShooterBuff extends Buff implements ActionIndicator.Action {
         }
 
         GameScene.selectCell(burstShooter);
+        GameScene.labelCell(hero.sprite, TXT_RANDOM).hardlight(0x1F1F1F);
     }
 
     CellSelector.Listener burstShooter = new CellSelector.Listener() {
