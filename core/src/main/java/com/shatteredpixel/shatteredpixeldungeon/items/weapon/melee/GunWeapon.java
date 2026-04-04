@@ -404,23 +404,4 @@ public abstract class GunWeapon extends MeleeWeapon {
     }
 
     protected abstract CellSelector.Listener getShooter();
-
-    /*protected CellSelector.Listener shooter = new CellSelector.Listener() {
-        @Override
-        public void onSelect(Integer cell) {
-            if (cell != null) {
-                if (cell == curUser.pos && curUser.heroClass == HeroClass.DUELIST) {
-                    execute(curUser, AC_ABILITY);
-                } else {
-                    getMissile().cast(curUser, cell);
-                }
-            }
-        }
-
-        @Override
-        public String prompt() {
-            return Messages.get(SpiritBow.class, "prompt");
-        }
-    };*/
-
 }
