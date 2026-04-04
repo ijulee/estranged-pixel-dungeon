@@ -296,7 +296,7 @@ public abstract class Gun extends GunWeapon {
 	}
 
 	@Override
-	public boolean canShoot() {
+	public boolean canShoot(Char owner) {
 		if (isEquipped(Dungeon.hero) && Dungeon.hero.buff(InfiniteBullet.class)!=null)
 			return true;
 		else
@@ -373,6 +373,26 @@ public abstract class Gun extends GunWeapon {
 		hero.spendAndNext(reloadTime(hero));
 		GLog.i(Messages.get(this, "reload"));
 	}
+
+	public boolean ghostReload(DriedRose.GhostHero ghost) {
+		if (Dungeon.bullet < ammoPerRound()) {
+			ghost.sayNoAmmo();
+			return false;
+		}
+
+		if (Dungeon.bullet < reloadAmmoUse()) {
+			while (Dungeon.bullet >= ammoPerRound()) {
+				Dungeon.bullet -= ammoPerRound();
+				singleReload();
+			}
+			ghost.sayNoAmmo();
+        } else {
+			Dungeon.bullet -= reloadAmmoUse();
+			quickReload();
+        }
+        return true;
+
+    }
 
 	private int ammoPerRound() {
 		return ammoPerRound + inscribeMod.shotBonus();

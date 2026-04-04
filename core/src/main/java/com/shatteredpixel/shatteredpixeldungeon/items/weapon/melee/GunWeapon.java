@@ -67,7 +67,7 @@ public abstract class GunWeapon extends MeleeWeapon {
                     GLog.w(Messages.get(this, "not_equipped"));
                 }
             } else {
-                if (canShoot()) {
+                if (canShoot(hero)) {
                     usesTargeting = true;
                     curUser = hero;
                     curItem = this;
@@ -80,7 +80,7 @@ public abstract class GunWeapon extends MeleeWeapon {
         }
     }
 
-    public abstract boolean canShoot();
+    public abstract boolean canShoot(Char owner);
 
     public abstract void noAmmoAction(Hero hero);
     public int missileMin(int lvl) {
@@ -313,7 +313,7 @@ public abstract class GunWeapon extends MeleeWeapon {
 
                                         burstCount--;
                                         if (burstCount > 0) {
-                                            if (canShoot()) {
+                                            if (canShoot(curUser)) {
                                                 Actor.add(new Actor() {
                                                     {
                                                         actPriority = VFX_PRIO - 1;

@@ -637,11 +637,18 @@ public class DriedRose extends Artifact {
 
 			Weapon wep = weapon();
 
-			boolean willShootBow =  wep instanceof BowWeapon &&
-									(buff(BowWeapon.BowFatigue.class) == null ||
-									buff(BowWeapon.BowFatigue.class).damage(100) >= 80);
+			boolean willShootBow;
+			if (wep instanceof BowWeapon) {
+				if (Dungeon.bullet < 1) sayNoAmmo();
 
-			boolean willShootGun =	wep instanceof Gun && ((Gun) wep).canShoot();
+				willShootBow = ((BowWeapon) wep).canShoot(this) &&
+						(buff(BowWeapon.BowFatigue.class) == null ||
+						buff(BowWeapon.BowFatigue.class).damage(100) >= 80);
+            } else {
+				willShootBow = false;
+			}
+
+            boolean willShootGun =	wep instanceof Gun && ((Gun) wep).canShoot(this);
 
 			return 	(willShootGun || willShootBow) &&
 					(!Dungeon.level.adjacent( this.pos, enemy.pos ) || wep instanceof SG);
@@ -651,17 +658,19 @@ public class DriedRose extends Artifact {
 			if (weapon() instanceof Gun) {
 				Gun gun = (Gun) weapon();
 
-				if (!gun.canShoot() || (forced && !gun.fullyLoaded())) {
-					reloading = true;
-					gun.quickReload();
-					spend( gun.reloadTime(this) );
+				if (!gun.canShoot(this) || (forced && !gun.fullyLoaded())) {
+					if (gun.ghostReload(this)) {
+						reloading = true;
+						spend( gun.reloadTime(this) );
+						sprite.showStatus( CharSprite.POSITIVE, Messages.get(this, "reloading") );
+						((GhostSprite) sprite).reload();
 
-					sprite.showStatus( CharSprite.POSITIVE, Messages.get(this, "reloading") );
-					((GhostSprite) sprite).reload();
+						Sample.INSTANCE.play(Assets.Sounds.UNLOCK);
 
-					Sample.INSTANCE.play(Assets.Sounds.UNLOCK);
-
-					return true;
+						return true;
+					} else {
+						return false;
+					}
 				}
 			}
 			return false;
@@ -1055,6 +1064,11 @@ public class DriedRose extends Artifact {
 		
 		public void sayAnhk(){
 			yell( Messages.get( this, "blessed_ankh_" + Random.IntRange(1, 3) ));
+			Sample.INSTANCE.play( Assets.Sounds.GHOST );
+		}
+
+		public void sayNoAmmo() {
+			yell( Messages.get( this, "no_ammo_" + Random.IntRange(1, 3) ));
 			Sample.INSTANCE.play( Assets.Sounds.GHOST );
 		}
 

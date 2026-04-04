@@ -54,11 +54,12 @@ public class BowWeapon extends GunWeapon {
     }
 
     @Override
-    public boolean canShoot() {
-        if (isEquipped(Dungeon.hero))
+    public boolean canShoot(Char owner) {
+        if (isEquipped(Dungeon.hero) || owner instanceof DriedRose.GhostHero) {
             return Dungeon.bullet >= 1;
-        else
+        } else {
             return true;
+        }
     }
 
     @Override
@@ -328,7 +329,9 @@ public class BowWeapon extends GunWeapon {
         @Override
         public void ghostThrow(DriedRose.GhostHero ghost, int cell) {
             super.ghostThrow(ghost, cell);
+            Dungeon.bullet--;
             Buff.prolong(ghost, BowFatigue.class, BowFatigue.MAX_DURATION);
+            updateQuickslot();
         }
 
         @Override

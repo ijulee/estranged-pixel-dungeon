@@ -80,7 +80,7 @@ public class SharpShooterBuff extends Buff implements ActionIndicator.Action {
             return;
         }
 
-        if (!((GunWeapon) wep).canShoot()) {
+        if (!((GunWeapon) wep).canShoot(hero)) {
             GLog.w(Messages.get(SharpShooterBuff.class, "no_ammo"));
             return;
         }
@@ -245,7 +245,7 @@ public class SharpShooterBuff extends Buff implements ActionIndicator.Action {
 
             Hero hero = (Hero) target;
             GunWeapon wep = (GunWeapon) hero.belongings.weapon();
-            if (!wep.canShoot()) return;
+            if (!wep.canShoot(hero)) return;
 
             GunWeapon.GunMissile missile = wep.getMissile();
             if (missile == null) return;
