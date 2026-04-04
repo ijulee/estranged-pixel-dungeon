@@ -40,15 +40,15 @@ public class CellLabel extends Component {
 
     @Override
     protected void layout() {
-        labelImage.scale = new PointF(width()/labelImage.width(), height()/labelImage.height());
-
-        labelImage.center(new PointF(this.x, this.y));
-        labelImage.visible = true;
-
         labelText.setPos(this.x - labelText.width()/2,
                 this.y - labelImage.height()/2 - labelText.height() - GAP);
         labelText.visible = true;
 
+        labelImage.center(new PointF(this.x, this.y));
+        labelImage.visible = true;
+
+        width = Math.max(labelText.width(), labelImage.width());
+        height = labelText.height() + GAP + labelImage.height();
     }
 
     public Image image() {
