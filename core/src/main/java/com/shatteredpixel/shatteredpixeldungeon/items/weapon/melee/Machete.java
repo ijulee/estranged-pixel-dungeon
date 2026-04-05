@@ -172,6 +172,7 @@ public class Machete extends MeleeWeapon {
             if (target != null) {
                 Char ch = Actor.findChar(target);
                 Hero hero = Dungeon.hero;
+                //FIXME either Slash shouldn't attack enemies, or it should also reveal mimics
                 if (ch != null && ch.alignment == Char.Alignment.ENEMY) {
                     KindOfWeapon herosWeapon = hero.belongings.weapon; //기존에 사용하던 무기를 저장
                     hero.belongings.weapon = Machete.this; //공격에 사용할 무기를 마체테로 변경

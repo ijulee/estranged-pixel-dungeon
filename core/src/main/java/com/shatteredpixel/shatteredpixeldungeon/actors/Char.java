@@ -398,6 +398,7 @@ public abstract class Char extends Actor {
 	}
 
 	final public boolean attack( Char enemy ){
+		//FIXME feel like this check should be elsewhere
 		if (hero.buff(Awake.awakeTracker.class) != null && (this instanceof Hero || enemy instanceof Hero)) {
 			return attack(enemy, 1.2f+0.2f*hero.pointsInTalent(Talent.AWAKE_LIMIT), 0f, 1f);
 		} else {
@@ -407,6 +408,7 @@ public abstract class Char extends Actor {
 	
 	public boolean attack( Char enemy, float dmgMulti, float dmgBonus, float accMulti ) {
 
+		//TODO look this part over
 		if (this instanceof Hero && hero.subClass == HeroSubClass.EXPLORER) {
 			Rope rope = hero.belongings.getItem(Rope.class);
 			KindOfWeapon wep = hero.belongings.attackingWeapon();
@@ -636,6 +638,7 @@ public abstract class Char extends Actor {
 
 			enemy.damage( effectiveDamage, this );
 
+			//FIXME should probably combine the different elemental imbues
 			if (buff(FireImbue.class) != null)  buff(FireImbue.class).proc(enemy);
 			if (buff(FrostImbue.class) != null) buff(FrostImbue.class).proc(enemy);
 			if (buff(ThunderImbue.class) != null) buff(ThunderImbue.class).proc(enemy, (int)dmg);

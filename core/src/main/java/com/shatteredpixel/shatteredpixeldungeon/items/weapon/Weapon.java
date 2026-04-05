@@ -339,7 +339,7 @@ abstract public class Weapon extends KindOfWeapon {
 	}
 
 	//FIXME Look over this. Swords Dance is additive but applies last?
-	// Might need to apply Adrenaline to hero here.
+	// Might need to apply Adrenaline to hero here instead of Hero.attackDelay().
 	protected float speedMultiplier(Char owner ){
 		float multi = RingOfFuror.attackSpeedMultiplier(owner);
 

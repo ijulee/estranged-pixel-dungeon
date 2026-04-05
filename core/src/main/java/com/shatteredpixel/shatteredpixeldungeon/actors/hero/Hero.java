@@ -806,6 +806,7 @@ public class Hero extends Char {
 			}
 		}
 
+		//FIXME maybe nerf this
 		if (belongings.getItem(KnightsShield.class) != null &&
 				belongings.getItem(KnightsShield.class).hasGlyph(Afterimage.class, this)) {
 			evasion *= Math.pow(1.2f, belongings.getItem(KnightsShield.class).buffedLvl()) *
