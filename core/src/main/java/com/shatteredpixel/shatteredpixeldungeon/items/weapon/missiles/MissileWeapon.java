@@ -34,13 +34,11 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Momentum;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.PinCushion;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.RevealedArea;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.SharpShooterBuff;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.SwordAura;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
-import com.shatteredpixel.shatteredpixeldungeon.items.KindOfWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.MagicalHolster;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfSharpshooting;
@@ -50,7 +48,6 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.bow.SpiritBow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.curses.Explosive;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Projecting;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.gun.FT.FT;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.gun.Gun;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.gun.LG.LG;
@@ -83,6 +80,8 @@ abstract public class MissileWeapon extends Weapon {
 		defaultAction = AC_THROW;
 		usesTargeting = true;
 	}
+
+	public static final String TXT_JUGGLE = "JUGGLE";
 
 	//TODO maybe make this like actor IDs, instead of random? collisions unlikely, but it's messy
 	public long setID = new SecureRandom().nextLong();
@@ -428,12 +427,27 @@ abstract public class MissileWeapon extends Weapon {
 		//show quantity even when it is 1
 		return Integer.toString( quantity );
 	}
-	
+
+	@Override
+	public void cast(Hero user, int dst) {
+		if (user.subClass == HeroSubClass.JUGGLER && user.STR() >= STRReq() &&
+			dst == user.pos) {
+			execute(user, AC_JUGGLE);
+		} else {
+			super.cast(user, dst);
+		}
+	}
+
 	@Override
 	public float castDelay(Char user, int cell) {
 		if (Actor.findChar(cell) != null && Actor.findChar(cell) != user){
-			// TODO Adrenaline buff on hero doesn't affect missile attacks.
-			return delayFactor( user );
+			if (user.buff(Juggling.JugglingTracker.class) != null) {
+				//handled inside Juggling shooter
+				return 0;
+			} else {
+				//FIXME seems like Adrenaline buff on hero doesn't affect missile attacks?
+				return delayFactor( user );
+            }
 		} else {
 			return super.castDelay(user, cell);
 		}
@@ -801,20 +815,13 @@ abstract public class MissileWeapon extends Weapon {
 	public static final String AC_JUGGLE		= "JUGGLE";
 
 	@Override
-	public String defaultAction() {
-		if (Dungeon.hero.subClass == HeroSubClass.JUGGLER && this.STRReq() <= Dungeon.hero.STR()) {
-			usesTargeting = false;
-			return AC_JUGGLE;
-		} else {
-			usesTargeting = true;
-			return super.defaultAction();
-		}
-	}
-
-	@Override
 	public void execute(Hero hero, String action) {
 		super.execute(hero, action);
-		if (action.equals(AC_JUGGLE)) {
+		if (action.equals(AC_THROW)) {
+			if (hero.subClass == HeroSubClass.JUGGLER) {
+				GameScene.labelCell(hero.sprite, TXT_JUGGLE).hardlight(0xE8E8E8);
+			}
+		} else if (action.equals(AC_JUGGLE)) {
 			Item i = this.split(1);
 			if (i == null) {
 				i = this;

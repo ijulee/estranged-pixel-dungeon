@@ -158,6 +158,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Blazing;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Grim;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Kinetic;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Lucky;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.enchantments.Shocking;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.GunWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon;
@@ -719,7 +720,18 @@ public abstract class Char extends Actor {
 				}
 			}
 
-            if (enemy.sprite != null) {
+			Juggling.JugglingTracker juggle = buff(Juggling.JugglingTracker.class);
+            if (juggle != null && ((Hero) this).hasTalent(Talent.FANCY_PERFORMANCE) &&
+				juggle.weapons.contains(((Hero) this).belongings.attackingWeapon())) {
+
+				float procChance = 0.005f * (1 + ((Hero) this).pointsInTalent(Talent.FANCY_PERFORMANCE));
+				if (Random.Float() < procChance) {
+					Dungeon.level.drop(Lucky.genLoot(), enemy.pos).sprite.drop(enemy.pos);
+					Lucky.showFlare(enemy.sprite);
+				}
+            }
+
+			if (enemy.sprite != null) {
 				enemy.sprite.bloodBurstA(sprite.center(), effectiveDamage);
 				enemy.sprite.flash();
 			}

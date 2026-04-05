@@ -28,8 +28,10 @@ import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.Waterskin;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
@@ -334,6 +336,12 @@ public class QuickSlotButton extends Button {
 			crossB.point(slot.sprite.center(crossB));
 			crossB.visible = true;
 
+		} else if (slot.item instanceof MissileWeapon &&
+			Dungeon.hero.subClass == HeroSubClass.JUGGLER) {
+			//hacky way to force default action when no enemy is targeted
+			//since QuickSlotButtons doesn't normally target the hero
+			lastTarget = Dungeon.hero;
+			targetingSlot = slotNum;
 		} else {
 
 			lastTarget = null;

@@ -21,8 +21,6 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.items;
 
-import static com.shatteredpixel.shatteredpixeldungeon.Dungeon.hero;
-
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
@@ -33,12 +31,12 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Awakening;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Blindness;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Degrade;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Juggling;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Belongings;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.darts.Dart;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.darts.TippedDart;
@@ -49,7 +47,6 @@ import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.CellSelector;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
-import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.MissileSprite;
 import com.shatteredpixel.shatteredpixeldungeon.ui.QuickSlotButton;
 import com.watabou.noosa.audio.Sample;
@@ -689,9 +686,17 @@ public class Item implements Bundlable {
 							//TODO check if checks in Hero.onAttackComplete() that also apply to missile attacks
 							// should be repeated here
 
-							if (Item.this instanceof MissileWeapon && critTracker != null) {
-								critTracker.detach();
-							}
+                            if (Item.this instanceof MissileWeapon) {
+                                if (critTracker != null) {
+                                    critTracker.detach();
+                                }
+
+								Juggling.JugglingTracker juggle = user.buff(Juggling.JugglingTracker.class);
+								if (juggle != null) {
+									juggle.weapons.remove(Item.this);
+									if (juggle.weapons.isEmpty()) juggle.detach();
+								}
+                            }
 						}
 					});
 		} else {
@@ -710,78 +715,6 @@ public class Item implements Bundlable {
 						}
 					});
 		}
-	}
-	
-	public void cast( final Hero user, final int dst, boolean detach, float turnsUse, Callback callback ) {
-
-		final int cell = throwPos( user, dst );
-		user.sprite.zap( cell );
-		user.busy();
-
-		throwSound();
-
-		Char enemy = Actor.findChar( cell );
-		QuickSlotButton.target(enemy);
-
-		final float delay = turnsUse;
-
-		if (enemy != null) {
-			((MissileSprite) user.sprite.parent.recycle(MissileSprite.class)).
-					reset(user.sprite,
-							enemy.sprite,
-							this,
-							new Callback() {
-						@Override
-						public void call() {
-							curUser = user;
-							Item i;
-							if (detach) {
-								i = Item.this.detach(user.belongings.backpack);
-							} else {
-								i = Item.this;
-							}
-							if (i != null) i.onThrow(cell);
-							if (curUser.hasTalent(Talent.IMPROVISED_PROJECTILES)
-									&& !(Item.this instanceof MissileWeapon)
-									&& curUser.buff(Talent.ImprovisedProjectileCooldown.class) == null){
-								if (enemy != null && enemy.alignment != curUser.alignment){
-									Sample.INSTANCE.play(Assets.Sounds.HIT);
-									Buff.affect(enemy, Blindness.class, 1f + curUser.pointsInTalent(Talent.IMPROVISED_PROJECTILES));
-									Buff.affect(curUser, Talent.ImprovisedProjectileCooldown.class, 50f);
-								}
-							}
-							if (user.buff(Talent.LethalMomentumTracker.class) != null){
-								user.buff(Talent.LethalMomentumTracker.class).detach();
-								user.next();
-							} else {
-								user.spendAndNext(delay);
-							}
-							if (callback != null) callback.call();
-						}
-					});
-		} else {
-			((MissileSprite) user.sprite.parent.recycle(MissileSprite.class)).
-					reset(user.sprite,
-							cell,
-							this,
-							new Callback() {
-						@Override
-						public void call() {
-							curUser = user;
-							Item i;
-							if (detach) {
-								i = Item.this.detach(user.belongings.backpack);
-							} else {
-								i = Item.this;
-							}
-							user.spend(delay);
-							if (i != null) i.onThrow(cell);
-							user.next();
-							if (callback != null) callback.call();
-						}
-					});
-		}
-		updateQuickslot();
 	}
 
 	public float castDelay( Char user, int cell ){

@@ -4,13 +4,10 @@ import static com.shatteredpixel.shatteredpixeldungeon.ui.QuickSlotButton.lastTa
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
-import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
-import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mimic;
-import com.shatteredpixel.shatteredpixeldungeon.items.Gold;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.bow.SpiritBow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.bow.BowWeapon;
@@ -32,16 +29,18 @@ import com.watabou.utils.Bundlable;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.Random;
 
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.Queue;
 
 public class Juggling extends TargetingAction {
     {
         type = buffType.NEUTRAL;
     }
 
-    Queue<MissileWeapon> weapons = new LinkedList<>();
+    public static final String TXT_STACK = "%d/%d";
+
+    private LinkedList<MissileWeapon> weapons = new LinkedList<>();
 
     private int maxWeapons() {
         return 3 + ((Hero) target).pointsInTalent(Talent.SKILLFUL_JUGGLING);
@@ -133,7 +132,7 @@ public class Juggling extends TargetingAction {
     @Override
     public Visual secondaryVisual() {
         BitmapText txt = new BitmapText(PixelScene.pixelFont);
-        txt.text(String.format("%d/%d", weapons.size(), maxWeapons()));
+        txt.text(Messages.format(TXT_STACK, weapons.size(), maxWeapons()));
         txt.hardlight(CharSprite.POSITIVE);
         txt.measure();
         return txt;
@@ -202,22 +201,12 @@ public class Juggling extends TargetingAction {
                 Hero hero = (Hero) target;
 
                 if (cell != -1) {
+                    JugglingTracker tracker = Buff.affect(hero, JugglingTracker.class, 0f);
+                    tracker.weapons = new HashSet<>(Juggling.this.weapons);
                     while (!weapons.isEmpty()) {
                         MissileWeapon wep = weapons.poll();
                         if (wep.STRReq() <= hero.STR()) {
-                            int dst = wep.throwPos(hero, cell);
-                            wep.cast(hero, dst, false, 0, () -> {
-                                if (hero.hasTalent(Talent.FANCY_PERFORMANCE)) {
-                                    Char ch = Actor.findChar(dst);
-                                    if (ch != null && ch.alignment == Char.Alignment.ENEMY ||
-                                            (ch instanceof Mimic && ch.alignment == Char.Alignment.NEUTRAL)) {
-                                        lastTarget = ch;
-                                        Dungeon.level.drop(
-                                                new Gold(5 * hero.pointsInTalent(Talent.FANCY_PERFORMANCE)), dst)
-                                                .sprite.drop();
-                                    }
-                                }
-                            });
+                            wep.cast(hero, cell);
                         } else {
                             if (wep instanceof BowWeapon.Arrow) {
                                 BowWeapon.dropArrow(hero.pos);
@@ -279,5 +268,9 @@ public class Juggling extends TargetingAction {
             Buff.affect(Dungeon.hero, Juggling.class).juggle(arrow, false);
             Item.updateQuickslot();
         }
+    }
+
+    public static class JugglingTracker extends FlavourBuff {
+        public HashSet<MissileWeapon> weapons;
     }
 }
