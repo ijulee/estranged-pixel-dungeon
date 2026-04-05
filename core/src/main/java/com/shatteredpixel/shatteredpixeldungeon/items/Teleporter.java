@@ -2,52 +2,37 @@ package com.shatteredpixel.shatteredpixeldungeon.items;
 
 import static com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfMagicMapping.discover;
 
-import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Command;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FirstAidBuff;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Haste;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.HorseRiding;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Poison;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.effects.SpellSprite;
-import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.MedicKit;
-import com.shatteredpixel.shatteredpixeldungeon.items.bombs.Bomb;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.Potion;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfExperience;
-import com.shatteredpixel.shatteredpixeldungeon.items.potions.elixirs.ElixirOfFeatherFall;
-import com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic.ExoticPotion;
-import com.shatteredpixel.shatteredpixeldungeon.items.quest.GooBlob;
-import com.shatteredpixel.shatteredpixeldungeon.items.quest.MetalShard;
-import com.shatteredpixel.shatteredpixeldungeon.items.quest.Pickaxe;
-import com.shatteredpixel.shatteredpixeldungeon.items.rings.Ring;
-import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfAccuracy;
-import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfHaste;
-import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ExoticScroll;
-import com.shatteredpixel.shatteredpixeldungeon.items.spells.UpgradeDust;
-import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.TrinketCatalyst;
+import com.shatteredpixel.shatteredpixeldungeon.journal.Catalog;
+import com.shatteredpixel.shatteredpixeldungeon.levels.TempleChasmLevel;
 import com.shatteredpixel.shatteredpixeldungeon.levels.TempleLevel;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
-import com.shatteredpixel.shatteredpixeldungeon.levels.features.Chasm;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.DistortionTrap;
 import com.shatteredpixel.shatteredpixeldungeon.levels.traps.SummoningTrap;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.CellSelector;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.InterlevelScene;
+import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Icons;
+import com.shatteredpixel.shatteredpixeldungeon.ui.RenderedTextBlock;
+import com.shatteredpixel.shatteredpixeldungeon.ui.ScrollPane;
+import com.shatteredpixel.shatteredpixeldungeon.ui.Window;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
+import com.shatteredpixel.shatteredpixeldungeon.windows.IconTitle;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndTextInput;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndTitledMessage;
 import com.watabou.noosa.Game;
-import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Reflection;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Objects;
 //This is from Elemental PD
 
 public class Teleporter extends Item {
@@ -69,60 +54,11 @@ public class Teleporter extends Item {
         defaultAction = AC_TELEPORT;
         image = ItemSpriteSheet.TELEPORTER;
 
-        Collections.addAll(itemClass, Generator.Category.WEP_T1.classes);
-        Collections.addAll(itemClass, Generator.Category.WEP_T2.classes);
-        Collections.addAll(itemClass, Generator.Category.WEP_T3.classes);
-        Collections.addAll(itemClass, Generator.Category.WEP_T4.classes);
-        Collections.addAll(itemClass, Generator.Category.WEP_T5.classes);
-        Collections.addAll(itemClass, Generator.Category.WEP_AL_T3.classes);
-        Collections.addAll(itemClass, Generator.Category.WEP_AL_T4.classes);
-        Collections.addAll(itemClass, Generator.Category.WEP_AL_T5.classes);
-        Collections.addAll(itemClass, Generator.Category.WEP_AL_T6.classes);
-        Collections.addAll(itemClass, Generator.Category.WEP_AL_T7.classes);
-        Collections.addAll(itemClass, Generator.Category.MIS_T1.classes);
-        Collections.addAll(itemClass, Generator.Category.MIS_T2.classes);
-        Collections.addAll(itemClass, Generator.Category.MIS_T3.classes);
-        Collections.addAll(itemClass, Generator.Category.MIS_T4.classes);
-        Collections.addAll(itemClass, Generator.Category.MIS_T5.classes);
-        Collections.addAll(itemClass, Generator.Category.SPELLBOOK.classes);
-        Collections.addAll(itemClass, Generator.Category.ARMOR.classes);
-        Collections.addAll(itemClass, Generator.Category.WAND.classes);
-        Collections.addAll(itemClass, Generator.Category.RING.classes);
-        Collections.addAll(itemClass, Generator.Category.ARTIFACT.classes);
-        Collections.addAll(itemClass, Generator.Category.SEED.classes);
-        Collections.addAll(itemClass, Generator.Category.STONE.classes);
-        Collections.addAll(itemClass, Generator.Category.FOOD.classes);
-        Collections.addAll(itemClass, Generator.Category.PILL.classes);
-        for (Class classes : Generator.Category.POTION.classes){
-            itemClass.add(classes);
-            itemClass.add(ExoticPotion.regToExo.get(classes));
+        for (Catalog cat : Catalog.values()) {
+            if (cat != Catalog.GLYPHS && cat != Catalog.ENCHANTMENTS) {
+                itemClass.addAll(cat.items());
+            }
         }
-        for (Class classes : Generator.Category.SCROLL.classes){
-            itemClass.add(classes);
-            itemClass.add(ExoticScroll.regToExo.get(classes));
-        }
-        Collections.addAll(itemClass,
-                Honeypot.class,
-                Bomb.class,
-                TengusMask.class,
-                KingsCrown.class,
-                EnergyCrystal.class,
-                Stylus.class,
-                Torch.class,
-                Gold.class,
-                BulletItem.class,
-                BulletBelt.class,
-                Ankh.class,
-                LiquidMetal.class,
-                Pickaxe.class,
-                UpgradeDust.class,
-                TrinketCatalyst.class,
-                MetalShard.class,
-                GooBlob.class,
-                GunSmithingTool.class,
-                Rope.class
-        );
-        Collections.addAll(itemClass, Generator.Category.TRINKET.classes);
     }
 
     @Override
@@ -144,42 +80,33 @@ public class Teleporter extends Item {
 
         super.execute(hero, action);
         if (action.equals(AC_TELEPORT)) {
-            Buff.affect(hero, ElixirOfFeatherFall.FeatherBuff.class, 3f);
-            Chasm.heroFall(hero.pos);
-            int length = Dungeon.level.length();
-            int[] map = Dungeon.level.map;
-            boolean[] mapped = Dungeon.level.mapped;
-            boolean[] discoverable = Dungeon.level.discoverable;
-
-            for (int i=0; i < length; i++) {
-
-                int terr = map[i];
-
-                if (discoverable[i]) {
-
-                    mapped[i] = true;
-                    if ((Terrain.flags[terr] & Terrain.SECRET) != 0) {
-
-                        Dungeon.level.discover( i );
-
-                        if (Dungeon.level.heroFOV[i]) {
-                            GameScene.discoverTile( i, terr );
-                            discover( i );
-                        }
-                    }
-                }
+            InterlevelScene.mode = InterlevelScene.Mode.RETURN;
+            if (Dungeon.level instanceof TempleLevel && Dungeon.depth == 14) {
+                InterlevelScene.returnDepth = 14;
+                InterlevelScene.returnBranch = 3;
+            } else if (Dungeon.level instanceof TempleChasmLevel && Dungeon.depth == 14) {
+                InterlevelScene.returnDepth = 14;
+                InterlevelScene.returnBranch = 0;
+            } else {
+                InterlevelScene.returnDepth = Math.max(1, (Dungeon.depth + 1));
+                InterlevelScene.returnBranch = Dungeon.branch;
             }
-            GameScene.updateFog();
+            InterlevelScene.returnPos = -1;
+            Game.switchScene( InterlevelScene.class );
         }
         if (action.equals(AC_RETURN)) {
             InterlevelScene.mode = InterlevelScene.Mode.RETURN;
-            InterlevelScene.returnDepth = Math.max(1, (Dungeon.depth - 1));
-            InterlevelScene.returnBranch = Dungeon.branch;
-            InterlevelScene.returnPos = -2;
-            if (Dungeon.level instanceof TempleLevel && Dungeon.depth == 16) {
-                InterlevelScene.returnBranch = 0;
+            if (Dungeon.level instanceof TempleLevel) {
                 InterlevelScene.returnDepth = 14;
+                InterlevelScene.returnBranch = 0;
+            } else if (Dungeon.level instanceof TempleChasmLevel) {
+                InterlevelScene.returnDepth = 14;
+                InterlevelScene.returnBranch = 2;
+            } else {
+                InterlevelScene.returnDepth = Math.max(1, (Dungeon.depth - 1));
+                InterlevelScene.returnBranch = Dungeon.branch;
             }
+            InterlevelScene.returnPos = -2;
             Game.switchScene( InterlevelScene.class );
         }
         if (action.equals(AC_SPAWN)) {
@@ -208,7 +135,7 @@ public class Teleporter extends Item {
                     Messages.get(Teleporter.class, "getitem_no")){
                 @Override
                 public void onSelect(boolean positive, String text) {
-                    if (positive && text != "") {
+                    if (positive && !Objects.equals(text, "")) {
                         if (text.trim().equals("help")) {
                             GameScene.show(new WndTitledMessage(
                                     Icons.get(Icons.INFO),
@@ -219,10 +146,39 @@ public class Teleporter extends Item {
                             for (Class classes : itemClass) {
                                 itemList.append(Messages.get(classes, "name")).append(", ");
                             }
-                            GameScene.show(new WndTitledMessage(
-                                    Icons.get(Icons.INFO),
-                                    Messages.titleCase(Messages.get(Teleporter.class, "list_title")),
-                                    itemList.toString()));
+                            GameScene.show(new Window() {
+                                {
+                                    IconTitle titlebar = new IconTitle(Icons.get(Icons.INFO),
+                                        Messages.titleCase(Messages.get(Teleporter.class, "list_title")));
+                                    int width = 120;
+                                    int height = PixelScene.uiCamera.height - 20;
+
+                                    titlebar.setRect( 0, 0, width, 0 );
+                                    add(titlebar);
+
+                                    RenderedTextBlock text = PixelScene.renderTextBlock( 6 );
+                                    text.setHightlighting(false);
+                                    text.text( itemList.toString(), width );
+                                    text.setPos( titlebar.left(), titlebar.bottom() + 4 );
+
+                                    while (PixelScene.landscape()
+                                            && text.bottom() > 150
+                                            && width < 220){
+                                        width += 20;
+                                        titlebar.setRect(0, 0, width, 0);
+                                        text.setPos( titlebar.left(), titlebar.bottom() + 4 );
+                                        text.maxWidth(width);
+                                    }
+
+                                    ScrollPane scroll = new ScrollPane(text);
+                                    add( scroll );
+
+                                    bringToFront(titlebar);
+                                    resize( width, height );
+                                    scroll.setRect(titlebar.left(), titlebar.bottom() + 4,
+                                            width, height - titlebar.height() - 4);
+                                }
+                            });
                         } else {
                             //받은 문장을 엔터 단위로 끊는다.
                             String[] strInput = text.split("\n");
@@ -315,8 +271,6 @@ public class Teleporter extends Item {
             boolean[] mapped = Dungeon.level.mapped;
             boolean[] discoverable = Dungeon.level.discoverable;
 
-            boolean noticed = false;
-
             for (int i=0; i < length; i++) {
 
                 int terr = map[i];
@@ -331,8 +285,6 @@ public class Teleporter extends Item {
                         if (Dungeon.level.heroFOV[i]) {
                             GameScene.discoverTile( i, terr );
                             discover( i );
-
-                            noticed = true;
                         }
                     }
                 }
@@ -340,9 +292,6 @@ public class Teleporter extends Item {
             GameScene.updateFog();
 
             GLog.i( Messages.get(this, "layout") );
-            if (noticed) {
-                Sample.INSTANCE.play( Assets.Sounds.SECRET );
-            }
 
             SpellSprite.show( curUser, SpellSprite.MAP );
         }
@@ -353,57 +302,6 @@ public class Teleporter extends Item {
             }
         }
         if (action.equals(AC_TEST)) {
-            /*
-            //목걸이 레벨 확인
-            if (hero.necklaceRing != null)  {
-                GLog.i(hero.necklaceRing.toString());
-                GLog.i(""+hero.necklaceRing.level());
-            } else {
-                GLog.i("null");
-            }
-            *
-            /*
-            //현재 층 비밀방 개수 확인
-
-            if (Dungeon.depth < 32) {
-                for (int i= 0; i < 6; i++) {
-                    GLog.i(""+SuspiciousKey.additionalRoomsThisRun_0[i] + ", ");
-                }
-                GLog.newLine();
-                for (int i= 0; i < 6; i++) {
-                    GLog.i(""+SuspiciousKey.additionalRoomsThisRun_1[i] + ", ");
-                }
-                GLog.newLine();
-                for (int i= 0; i < 6; i++) {
-                    GLog.i(""+SuspiciousKey.additionalRoomsThisRun_2[i] + ", ");
-                }
-                GLog.newLine();
-                for (int i= 0; i < 6; i++) {
-                    GLog.i(""+SuspiciousKey.additionalRoomsThisRun_3[i] + ", ");
-                }
-                GLog.newLine();
-                GLog.i("현재 비밀방 개수: " + secretRooms[Dungeon.depth]);
-             }
-             */
-//            if (hero.buff(HorseRiding.RidingCooldown.class) != null) {
-//                hero.buff(HorseRiding.RidingCooldown.class).kill();
-//            }
-
-//            Buff.affect(hero, Command.class).kill(true);
-
-//            Buff b = hero.buff(MedicKit.MedicKitBuff.class);
-//            if (b != null) {
-//                GLog.i(b.toString());
-//            }
-
-            //사원으로 이동
-//            InterlevelScene.mode = InterlevelScene.Mode.RETURN;
-//            InterlevelScene.returnDepth = 14;
-//            InterlevelScene.returnBranch = 2;
-//            InterlevelScene.returnPos = -2;
-//            Game.switchScene( InterlevelScene.class );
-
-//            GameScene.selectCell(listener);
 
         }
     }
@@ -435,5 +333,4 @@ public class Teleporter extends Item {
     public boolean isUpgradable() {
         return false;
     }
-
 }
