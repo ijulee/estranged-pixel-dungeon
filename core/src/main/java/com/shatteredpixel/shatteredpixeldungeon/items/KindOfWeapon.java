@@ -270,7 +270,9 @@ abstract public class KindOfWeapon extends EquipableItem {
 		int reach = reachFactor(owner);
 		if (owner instanceof Hero) {
 			if (hero.subClass == HeroSubClass.EXPLORER && hero.belongings.getItem(Rope.class) != null) {
-				reach += hero.belongings.getItem(Rope.class).quantity();
+				int ropeReach = (int) (hero.belongings.getItem(Rope.class).quantity() /
+                                        (0.9f-0.1f*Dungeon.hero.pointsInTalent(Talent.DURABLE_ROPE)));
+				reach += ropeReach;
 			}
 			reach += additionalReach();
 		}
@@ -288,6 +290,7 @@ abstract public class KindOfWeapon extends EquipableItem {
 		}
 	}
 
+	//FIXME probably belongs in MeleeWeapon.reachFactor()
 	public static int additionalReach() {
 		int reach = 0;
 

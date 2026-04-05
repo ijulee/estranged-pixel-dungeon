@@ -401,29 +401,28 @@ public abstract class Char extends Actor {
 	
 	public boolean attack( Char enemy, float dmgMulti, float dmgBonus, float accMulti ) {
 
-		//TODO look this part over
-		if (this instanceof Hero && Dungeon.hero.subClass == HeroSubClass.EXPLORER) {
-			Rope rope = Dungeon.hero.belongings.getItem(Rope.class);
-			KindOfWeapon wep = Dungeon.hero.belongings.attackingWeapon();
+		//FIXME maybe only use rope if attack hits?
+		if (this instanceof Hero && ((Hero) this).subClass == HeroSubClass.EXPLORER) {
+			Rope rope = ((Hero) this).belongings.getItem(Rope.class);
+			KindOfWeapon wep = ((Hero) this).belongings.attackingWeapon();
 			if (rope != null && wep instanceof MeleeWeapon) {
-				int weaponReach = wep.reachFactor(Dungeon.hero) + KindOfWeapon.additionalReach();
-				int attackReach = weaponReach + rope.quantity();
+				int reach = wep.reachFactor(this) + KindOfWeapon.additionalReach();
 
 				boolean[] passable = BArray.not(Dungeon.level.solid, null);
 				for (Char ch : Actor.chars()) {
-					if (ch != Dungeon.hero) passable[ch.pos] = false;
+					if (ch != this) passable[ch.pos] = false;
 				}
-				//enemy.pos를 중심으로 attackReach거리까지 타일마다 거리를 계산하여 기록
-				PathFinder.buildDistanceMap(enemy.pos, passable, attackReach);
-				//위에서 만든 거리 목록 중 영웅이 있는 좌표를 주소로 가지는 거리가 무기 기본 사정거리를 넘으면 그만큼 로프를 사용함
-				if (PathFinder.distance[Dungeon.hero.pos] > weaponReach) {
-					//PathFinder.distance[Dungeon.hero.pos]가 Integer.MAX_VALUE가 될 수는 없기 때문에 이것에 대한 조건 처리는 따로 하지 않는다.
-					//왜냐하면 [영웅이 공격을 했다 -> PathFinder.distance[Dungeon.hero.pos]가 공격 거리보다 짧거나 같다]는 의미이기 때문.
-					int ropeUse = (PathFinder.distance[Dungeon.hero.pos] - weaponReach);
+
+				PathFinder.buildDistanceMap(enemy.pos, passable, reach + rope.quantity());
+
+				if (PathFinder.distance[Dungeon.hero.pos] > reach) {
+					int ropeUsed = PathFinder.distance[Dungeon.hero.pos] - reach;
+
 					if (Dungeon.hero.hasTalent(Talent.DURABLE_ROPE)) {
-						ropeUse = (int)(ropeUse*(0.9f-0.1f*Dungeon.hero.pointsInTalent(Talent.DURABLE_ROPE)));
+						ropeUsed = (int) (ropeUsed*(0.9f-0.1f*Dungeon.hero.pointsInTalent(Talent.DURABLE_ROPE)));
 					}
-					rope.quantity(rope.quantity() - ropeUse);
+					rope.quantity(rope.quantity() - ropeUsed);
+
 					if (rope.quantity() <= 0) {
 						rope.detachAll(Dungeon.hero.belongings.backpack);
 					}
@@ -431,6 +430,7 @@ public abstract class Char extends Actor {
 				}
 			}
 		}
+
 		if (enemy == null) return false;
 		
 		boolean visibleFight = Dungeon.level.heroFOV[pos] || Dungeon.level.heroFOV[enemy.pos];
