@@ -21,8 +21,6 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.actors;
 
-import static com.shatteredpixel.shatteredpixeldungeon.Dungeon.hero;
-
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
@@ -398,41 +396,36 @@ public abstract class Char extends Actor {
 	}
 
 	final public boolean attack( Char enemy ){
-		//FIXME feel like this check should be elsewhere
-		if (hero.buff(Awake.awakeTracker.class) != null && (this instanceof Hero || enemy instanceof Hero)) {
-			return attack(enemy, 1.2f+0.2f*hero.pointsInTalent(Talent.AWAKE_LIMIT), 0f, 1f);
-		} else {
-			return attack(enemy, 1f, 0f, 1f);
-		}
+		return attack(enemy, 1f, 0f, 1f);
 	}
 	
 	public boolean attack( Char enemy, float dmgMulti, float dmgBonus, float accMulti ) {
 
 		//TODO look this part over
-		if (this instanceof Hero && hero.subClass == HeroSubClass.EXPLORER) {
-			Rope rope = hero.belongings.getItem(Rope.class);
-			KindOfWeapon wep = hero.belongings.attackingWeapon();
+		if (this instanceof Hero && Dungeon.hero.subClass == HeroSubClass.EXPLORER) {
+			Rope rope = Dungeon.hero.belongings.getItem(Rope.class);
+			KindOfWeapon wep = Dungeon.hero.belongings.attackingWeapon();
 			if (rope != null && wep instanceof MeleeWeapon) {
-				int weaponReach = wep.reachFactor(hero) + KindOfWeapon.additionalReach();
+				int weaponReach = wep.reachFactor(Dungeon.hero) + KindOfWeapon.additionalReach();
 				int attackReach = weaponReach + rope.quantity();
 
 				boolean[] passable = BArray.not(Dungeon.level.solid, null);
 				for (Char ch : Actor.chars()) {
-					if (ch != hero) passable[ch.pos] = false;
+					if (ch != Dungeon.hero) passable[ch.pos] = false;
 				}
 				//enemy.pos를 중심으로 attackReach거리까지 타일마다 거리를 계산하여 기록
 				PathFinder.buildDistanceMap(enemy.pos, passable, attackReach);
 				//위에서 만든 거리 목록 중 영웅이 있는 좌표를 주소로 가지는 거리가 무기 기본 사정거리를 넘으면 그만큼 로프를 사용함
-				if (PathFinder.distance[hero.pos] > weaponReach) {
-					//PathFinder.distance[hero.pos]가 Integer.MAX_VALUE가 될 수는 없기 때문에 이것에 대한 조건 처리는 따로 하지 않는다.
-					//왜냐하면 [영웅이 공격을 했다 -> PathFinder.distance[hero.pos]가 공격 거리보다 짧거나 같다]는 의미이기 때문.
-					int ropeUse = (PathFinder.distance[hero.pos] - weaponReach);
-					if (hero.hasTalent(Talent.DURABLE_ROPE)) {
-						ropeUse = (int)(ropeUse*(0.9f-0.1f*hero.pointsInTalent(Talent.DURABLE_ROPE)));
+				if (PathFinder.distance[Dungeon.hero.pos] > weaponReach) {
+					//PathFinder.distance[Dungeon.hero.pos]가 Integer.MAX_VALUE가 될 수는 없기 때문에 이것에 대한 조건 처리는 따로 하지 않는다.
+					//왜냐하면 [영웅이 공격을 했다 -> PathFinder.distance[Dungeon.hero.pos]가 공격 거리보다 짧거나 같다]는 의미이기 때문.
+					int ropeUse = (PathFinder.distance[Dungeon.hero.pos] - weaponReach);
+					if (Dungeon.hero.hasTalent(Talent.DURABLE_ROPE)) {
+						ropeUse = (int)(ropeUse*(0.9f-0.1f*Dungeon.hero.pointsInTalent(Talent.DURABLE_ROPE)));
 					}
 					rope.quantity(rope.quantity() - ropeUse);
 					if (rope.quantity() <= 0) {
-						rope.detachAll(hero.belongings.backpack);
+						rope.detachAll(Dungeon.hero.belongings.backpack);
 					}
 					Item.updateQuickslot();
 				}
@@ -459,8 +452,8 @@ public abstract class Char extends Actor {
 
 		} else if (hit( this, enemy, accMulti, false )) {
 			boolean isDirectedToHero = false;
-			if (enemy != hero && enemy.alignment == Alignment.ALLY && Dungeon.level.heroFOV[enemy.pos] && hero.hasTalent(Talent.CHIVALRY)) {
-				enemy = hero;
+			if (enemy != Dungeon.hero && enemy.alignment == Alignment.ALLY && Dungeon.level.heroFOV[enemy.pos] && Dungeon.hero.hasTalent(Talent.CHIVALRY)) {
+				enemy = Dungeon.hero;
 				isDirectedToHero = true;
 			}
 
@@ -484,12 +477,12 @@ public abstract class Char extends Actor {
 					dr *= ((Gun.Bullet) h.belongings.attackingWeapon()).bulletMod().armorFactor();
 				}
 
-				if (hero.buff(ShadowBlade.shadowBladeTracker.class) != null && Random.Int(2) == 0) {
-					if (hero.hasTalent(Talent.CRITICAL_SHADOW)) {
-						dmgBonus += Random.NormalIntRange(0, 5*hero.pointsInTalent(Talent.CRITICAL_SHADOW));
+				if (Dungeon.hero.buff(ShadowBlade.shadowBladeTracker.class) != null && Random.Int(2) == 0) {
+					if (Dungeon.hero.hasTalent(Talent.CRITICAL_SHADOW)) {
+						dmgBonus += Random.NormalIntRange(0, 5*Dungeon.hero.pointsInTalent(Talent.CRITICAL_SHADOW));
 					}
-					if (hero.hasTalent(Talent.HERBAL_SHADOW)) {
-						hero.heal(hero.pointsInTalent(Talent.HERBAL_SHADOW));
+					if (Dungeon.hero.hasTalent(Talent.HERBAL_SHADOW)) {
+						Dungeon.hero.heal(Dungeon.hero.pointsInTalent(Talent.HERBAL_SHADOW));
 					}
 					dr = 0;
 				}
@@ -548,6 +541,11 @@ public abstract class Char extends Actor {
 				}
 			}
 
+			if ((this instanceof Hero || enemy instanceof Hero) &&
+					Dungeon.hero.buff(Awake.awakeTracker.class)!= null) {
+				dmg *= 1.2f+0.2f * Dungeon.hero.pointsInTalent(Talent.AWAKE_LIMIT);
+			}
+
 			for (ChampionEnemy buff : buffs(ChampionEnemy.class)){
 				dmg *= buff.meleeDamageFactor();
 			}
@@ -586,13 +584,13 @@ public abstract class Char extends Actor {
 				dmg *= 0.67f;
 			}
 
-			if (isDirectedToHero && hero.pointsInTalent(Talent.CHIVALRY) > 1) {
+			if (isDirectedToHero && Dungeon.hero.pointsInTalent(Talent.CHIVALRY) > 1) {
 				dmg *= 0.5f;
 			}
 
-			if ( buff(SoulMark.class) != null && hero.hasTalent(Talent.MARK_OF_WEAKNESS)) {
+			if ( buff(SoulMark.class) != null && Dungeon.hero.hasTalent(Talent.MARK_OF_WEAKNESS)) {
 				if (this.alignment != Alignment.ALLY) {
-					dmg *= Math.pow(0.9f, hero.pointsInTalent(Talent.MARK_OF_WEAKNESS));
+					dmg *= Math.pow(0.9f, Dungeon.hero.pointsInTalent(Talent.MARK_OF_WEAKNESS));
 				}
 			}
 
@@ -659,12 +657,12 @@ public abstract class Char extends Actor {
 				if (enemy.sprite != null) {
 					enemy.sprite.showStatus(CharSprite.NEGATIVE, Messages.get(Preparation.class, "assassinated"));
 				}
-				if (Random.Float() < hero.pointsInTalent(Talent.ENERGY_DRAW)/3f) {
-					CloakOfShadows cloak = hero.belongings.getItem(CloakOfShadows.class);
+				if (Random.Float() < Dungeon.hero.pointsInTalent(Talent.ENERGY_DRAW)/3f) {
+					CloakOfShadows cloak = Dungeon.hero.belongings.getItem(CloakOfShadows.class);
 					if (cloak != null) {
 						cloak.directCharge(1);
 						ScrollOfRecharging.charge(Dungeon.hero);
-						SpellSprite.show(hero, SpellSprite.CHARGE);
+						SpellSprite.show(Dungeon.hero, SpellSprite.CHARGE);
 					}
 				}
 			}
@@ -763,30 +761,30 @@ public abstract class Char extends Actor {
 		} else {
 
 			if (enemy instanceof Hero) {
-				if (hero.pointsInTalent(Talent.SWIFT_MOVEMENT) == 3) {
-					Buff.prolong(hero, Invisibility.class, 1.0001f);
+				if (Dungeon.hero.pointsInTalent(Talent.SWIFT_MOVEMENT) == 3) {
+					Buff.prolong(Dungeon.hero, Invisibility.class, 1.0001f);
 				}
-				if (Random.Int(5) < hero.pointsInTalent(Talent.COUNTER_ATTACK)) {
-					Buff.affect(hero, Talent.CounterAttackTracker.class);
+				if (Random.Int(5) < Dungeon.hero.pointsInTalent(Talent.COUNTER_ATTACK)) {
+					Buff.affect(Dungeon.hero, Talent.CounterAttackTracker.class);
 				}
 
-				if (hero.hasTalent(Talent.QUICK_PREP)) {
-					Momentum momentum = hero.buff(Momentum.class);
+				if (Dungeon.hero.hasTalent(Talent.QUICK_PREP)) {
+					Momentum momentum = Dungeon.hero.buff(Momentum.class);
 					if (momentum != null) {
-						momentum.quickPrep(hero.pointsInTalent(Talent.QUICK_PREP));
+						momentum.quickPrep(Dungeon.hero.pointsInTalent(Talent.QUICK_PREP));
 					}
 				}
 
-				if (hero.hasTalent(Talent.HONORABLE_SHOT)) {
-					RouletteOfDeath roulette = hero.buff(RouletteOfDeath.class);
+				if (Dungeon.hero.hasTalent(Talent.HONORABLE_SHOT)) {
+					RouletteOfDeath roulette = Dungeon.hero.buff(RouletteOfDeath.class);
 					if (roulette != null && roulette.overHalf()) {
-						Buff.prolong(hero, Talent.HonorableShotTracker.class, 1f);
+						Buff.prolong(Dungeon.hero, Talent.HonorableShotTracker.class, 1f);
 					}
 				}
 
-				if (hero.hasTalent(Talent.HASTE_EVASION)) {
+				if (Dungeon.hero.hasTalent(Talent.HASTE_EVASION)) {
 					if (Awakening.isAwakened()) {
-						Buff.prolong(hero, Haste.class, 1 + hero.pointsInTalent(Talent.HASTE_EVASION));
+						Buff.prolong(Dungeon.hero, Haste.class, 1 + Dungeon.hero.pointsInTalent(Talent.HASTE_EVASION));
 					}
 				}
 			}
@@ -995,7 +993,7 @@ public abstract class Char extends Actor {
 
 		if ( this.alignment != Alignment.ALLY
 				&& buff( Ooze.class ) != null
-				&& hero.hasTalent(Talent.STICKY_OOZE)) speed *= 1-0.1f*hero.pointsInTalent(Talent.STICKY_OOZE);
+				&& Dungeon.hero.hasTalent(Talent.STICKY_OOZE)) speed *= 1-0.1f*Dungeon.hero.pointsInTalent(Talent.STICKY_OOZE);
 		return speed;
 	}
 
@@ -1248,7 +1246,7 @@ public abstract class Char extends Actor {
 
 
 			String dmgText = Integer.toString(dmg + shielded);
-			if (src == hero && hero.buff(Sheath.CriticalAttack.class) != null) {
+			if (src == Dungeon.hero && Dungeon.hero.buff(Sheath.CriticalAttack.class) != null) {
 				dmgText += "!";
 			}
 
