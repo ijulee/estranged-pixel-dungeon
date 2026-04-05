@@ -166,7 +166,7 @@ public class Awakening extends Buff implements ActionIndicator.Action {
                 hero.sprite.centerEmitter().start( Speck.factory( Speck.SCREAM ), 0.3f, 3 );
                 //GameScene.flash(0xFF0000);
                 if (hero.hasTalent(Talent.FASTER_THAN_LIGHT)) {
-                    Buff.prolong(hero, EvasiveMove.class, hero.pointsInTalent(Talent.FASTER_THAN_LIGHT) + 0.0001f);
+                    Buff.prolong(hero, EvasiveMove.class, hero.pointsInTalent(Talent.FASTER_THAN_LIGHT));
                 }
                 hero.spendAndNext(Actor.TICK);
             } else {

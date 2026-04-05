@@ -30,6 +30,7 @@ public class EvasiveMove extends FlavourBuff {
     {
         type = buffType.POSITIVE;
         announced = true;
+        actPriority = HERO_PRIO+1;
     }
 
     public static final float DURATION	= 1f;

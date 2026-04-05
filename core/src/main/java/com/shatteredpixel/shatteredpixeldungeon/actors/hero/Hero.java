@@ -3406,9 +3406,9 @@ public class Hero extends Char {
 			Buff.affect( this, Sai.ComboStrikeTracker.class).addHit();
 		}
 
-		if (!hit && belongings.weapon == null && subClass == HeroSubClass.FIGHTER &&
-				Random.Int(5) == 0 && pointsInTalent(Talent.SWIFT_MOVEMENT) > 1) {
-			Buff.prolong(this, EvasiveMove.class, 0.9999f);
+		if (!hit && subClass == HeroSubClass.FIGHTER && belongings.attackingWeapon() == null &&
+			pointsInTalent(Talent.SWIFT_MOVEMENT) > 1 && Random.Int(5) == 0) {
+			Buff.prolong(this, EvasiveMove.class, EvasiveMove.DURATION);
 		}
 
         if (hit && heroClass == HeroClass.SAMURAI) {

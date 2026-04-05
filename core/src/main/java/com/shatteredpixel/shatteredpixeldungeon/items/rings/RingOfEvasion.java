@@ -73,7 +73,7 @@ public class RingOfEvasion extends Ring {
         float enemyAcc = enemy.attackSkill(hero);
         int heroEva = hero.defenseSkill(enemy);
         if (Random.Float() < heroEva / (4*enemyAcc)) {
-            Buff.prolong(hero, EvasiveMove.class, 1.0001f);
+            Buff.prolong(hero, EvasiveMove.class, 1f);
         }
         return damage;
     }
