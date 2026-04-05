@@ -40,6 +40,7 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.HeroSprite;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.watabou.noosa.audio.Sample;
+import com.watabou.utils.Random;
 
 public class Bible extends MeleeWeapon {
 
@@ -51,25 +52,24 @@ public class Bible extends MeleeWeapon {
 		tier = 3;
 	}
 
+	public static final float[] procChances = new float[] {3, 3, 3, 1};
+
 	@Override
 	public int proc(Char attacker, Char defender, int damage) {
-		if (attacker.buff(Bless.class) == null) {
-			Buff.affect( attacker, Bless.class, 2f);
-		} else if (attacker.buff(PotionOfCleansing.Cleanse.class) == null) {
-			for (Buff b : attacker.buffs()){
-				if (b.type == Buff.buffType.NEGATIVE
-						&& !(b instanceof AllyBuff)
-						&& !(b instanceof LostInventory)){
-					b.detach();
-				}
-			}
-			Buff.affect( attacker, PotionOfCleansing.Cleanse.class, 2f);
-		} else if (attacker.buff(Adrenaline.class) == null) {
-			Buff.affect( attacker, Adrenaline.class, 2f);
-		} else {
-			int healAmt = 1;
-			attacker.heal(healAmt);
+		switch (Random.chances(procChances)) {
+			case 0: default:
+				Buff.affect( attacker, Bless.class, 2f );
+				break;
+			case 1:
+				PotionOfCleansing.cleanseButHunger(attacker, 2f);
+				break;
+			case 2:
+				Buff.affect( attacker, Adrenaline.class, 2f);
+				break;
+			case 3:
+				attacker.heal(1+buffedLvl());
 		}
+
 		return super.proc( attacker, defender, damage );
 	}
 
