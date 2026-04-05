@@ -27,6 +27,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.Statistics;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Adrenaline;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Berserk;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicImmune;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MonkEnergy;
@@ -338,42 +339,48 @@ abstract public class Weapon extends KindOfWeapon {
 		return delay;
 	}
 
-	//FIXME Look over this. Swords Dance is additive but applies last?
-	// Might need to apply Adrenaline to hero here instead of Hero.attackDelay().
-	protected float speedMultiplier(Char owner ){
+	protected float speedMultiplier( Char owner ) {
 		float multi = RingOfFuror.attackSpeedMultiplier(owner);
 
-		if (hero.hasTalent(Talent.LIGHT_WEAPON) && hero.belongings.attackingWeapon() instanceof MeleeWeapon) {
-			int aEnc = ((MeleeWeapon)hero.belongings.attackingWeapon()).STRReq() - hero.STR();
-			if (aEnc < 0) {
-				multi *= 1 + 0.05f * hero.pointsInTalent(Talent.LIGHT_WEAPON) * (-aEnc);
+        if (owner instanceof Hero) {
+			Hero hero = (Hero) owner;
+
+            if (hero.hasTalent(Talent.LIGHT_WEAPON) && hero.belongings.attackingWeapon() instanceof MeleeWeapon) {
+                int strXS = hero.STR() - ((MeleeWeapon) hero.belongings.attackingWeapon()).STRReq();
+                if (strXS < 0) {
+                    multi *= 1 + 0.05f * hero.pointsInTalent(Talent.LIGHT_WEAPON) * (-strXS);
+                }
+            }
+
+			if (hero.hasTalent(Talent.QUICK_FOLLOWUP) && hero.buff(Talent.QuickFollowupTracker.class) != null) {
+				multi *= 1+hero.pointsInTalent(Talent.QUICK_FOLLOWUP)/3f;
+			}
+
+			if (hero.buff(MonkEnergy.class) != null && hero.buff(MonkEnergy.class).harmonized(hero)) {
+				multi *= 1.5f;
+			}
+
+			if (hero.belongings.weapon() != null && hero.belongings.secondWep() != null &&
+					hero.belongings.weapon().getClass() == hero.belongings.secondWep().getClass() &&
+					hero.pointsInTalent(Talent.TWIN_SWORD) > 2) {
+				multi *= 2;
+			}
+
+			if (hero.hasTalent(Talent.ATK_SPEED_ENHANCE)) {
+				multi *= 1 + 0.05f * hero.pointsInTalent(Talent.ATK_SPEED_ENHANCE);
+			}
+
+			if (hero.buff(ShadowBlade.shadowBladeTracker.class) != null) {
+				multi *= 2f + 0.05f * hero.pointsInTalent(Talent.DOUBLE_BLADE_PRACTICE);
 			}
 		}
 
-		if (hero.hasTalent(Talent.QUICK_FOLLOWUP) && hero.buff(Talent.QuickFollowupTracker.class) != null) {
-			multi *= 1+hero.pointsInTalent(Talent.QUICK_FOLLOWUP)/3f;
-		}
-
-		if (hero.subClass == HeroSubClass.MONK && hero.buff(MonkEnergy.class) != null && hero.buff(MonkEnergy.class).harmonized(hero)) {
-			multi *= 1.5f;
-		}
-
-		if (hero.hasTalent(Talent.ATK_SPEED_ENHANCE)) {
-			multi *= 1 + 0.05f * hero.pointsInTalent(Talent.ATK_SPEED_ENHANCE);
-		}
-
-		if (hero.belongings.weapon != null && hero.belongings.secondWep != null
-				&& hero.pointsInTalent(Talent.TWIN_SWORD) > 2
-				&& hero.belongings.weapon.getClass() == hero.belongings.secondWep.getClass()) {
-			multi *= 2;
-		}
-
-		if (hero.buff(DualDagger.ReverseBlade.class) != null) {
+		if (owner.buff(DualDagger.ReverseBlade.class) != null) {
 			multi *= 2f;
 		}
 
-		if (hero.buff(ShadowBlade.shadowBladeTracker.class) != null) {
-			multi *= 2f + 0.05f * hero.pointsInTalent(Talent.DOUBLE_BLADE_PRACTICE);
+		if (owner.buff(Adrenaline.class) != null) {
+			multi *= 1.5f;
 		}
 
 		if (owner.buff(Scimitar.SwordDance.class) != null){

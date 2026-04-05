@@ -445,7 +445,6 @@ abstract public class MissileWeapon extends Weapon {
 				//handled inside Juggling shooter
 				return 0;
 			} else {
-				//FIXME seems like Adrenaline buff on hero doesn't affect missile attacks?
 				return delayFactor( user );
             }
 		} else {

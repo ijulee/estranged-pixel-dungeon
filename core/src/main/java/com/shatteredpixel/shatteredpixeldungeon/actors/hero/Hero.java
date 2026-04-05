@@ -1116,8 +1116,6 @@ public class Hero extends Char {
 
 		float delay = 1f;
 
-		if ( buff(Adrenaline.class) != null) delay /= 1.5f;
-
 		if (!RingOfForce.fightingUnarmed(this)) {
 			
 			return delay * belongings.attackingWeapon().delayFactor( this );
@@ -1154,6 +1152,10 @@ public class Hero extends Char {
 			if (buff(ShadowBlade.shadowBladeTracker.class) != null) {
 				speed *= 2f + 0.05f * pointsInTalent(Talent.DOUBLE_BLADE_PRACTICE);
 			}
+
+			if (buff(Adrenaline.class) != null) {
+                speed *= 1.5f;
+            }
 
 			//ditto for furor + sword dance!
 			if (buff(Scimitar.SwordDance.class) != null) {
