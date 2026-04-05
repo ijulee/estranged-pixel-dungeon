@@ -671,6 +671,8 @@ public class Item implements Bundlable {
 									Buff.affect(curUser, Talent.ImprovisedProjectileCooldown.class, 50f);
 								}
 							}
+
+							//equivalent to Hero.onAttackComplete() for missile attacks
 							Sheath.CriticalAttack critTracker = user.buff(Sheath.CriticalAttack.class);
 
 							if (user.buff(Talent.LethalMomentumTracker.class) != null){
@@ -682,9 +684,6 @@ public class Item implements Bundlable {
 							} else {
 								user.spendAndNext(delay);
 							}
-
-							//TODO check if checks in Hero.onAttackComplete() that also apply to missile attacks
-							// should be repeated here
 
                             if (Item.this instanceof MissileWeapon) {
                                 if (critTracker != null) {
