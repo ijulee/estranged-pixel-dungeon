@@ -21,7 +21,6 @@ import com.shatteredpixel.shatteredpixeldungeon.ui.ActionIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.ui.HeroIcon;
 import com.shatteredpixel.shatteredpixeldungeon.ui.QuickSlotButton;
-import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.BitmapText;
 import com.watabou.noosa.Visual;
 import com.watabou.noosa.audio.Sample;
@@ -52,12 +51,9 @@ public class Juggling extends TargetingAction {
         weapons.offer(wep);
         if (weapons.size() > maxWeapons()) {
             MissileWeapon lastWep = weapons.poll();
-            if (lastWep != null) {
+            if (lastWep != null && !(lastWep instanceof BowWeapon.Arrow)) {
                 if(lastWep.doPickUp(hero, hero.pos)) {
                     hero.spend(-lastWep.pickupDelay());
-                    if (!(lastWep instanceof BowWeapon.Arrow)) {
-                        GLog.i(Messages.capitalize(Messages.get(hero, "you_now_have", lastWep.name())));
-                    }
                 } else {
                     Dungeon.level.drop(lastWep, hero.pos).sprite.drop();
                 }
@@ -76,9 +72,7 @@ public class Juggling extends TargetingAction {
     @Override
     public void detach() {
         for (MissileWeapon weapon : weapons) {
-            if (weapon instanceof BowWeapon.Arrow) {
-                BowWeapon.dropArrow(target.pos);
-            } else {
+            if (!(weapon instanceof BowWeapon.Arrow)) {
                 Dungeon.level.drop(weapon, target.pos);
             }
         }
@@ -208,9 +202,7 @@ public class Juggling extends TargetingAction {
                         if (wep.STRReq() <= hero.STR()) {
                             wep.cast(hero, cell);
                         } else {
-                            if (wep instanceof BowWeapon.Arrow) {
-                                BowWeapon.dropArrow(hero.pos);
-                            } else {
+                            if (!(wep instanceof BowWeapon.Arrow)) {
                                 Dungeon.level.drop(wep, hero.pos);
                             }
                         }
