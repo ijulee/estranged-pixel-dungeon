@@ -100,7 +100,7 @@ public class Juggling extends TargetingAction {
         while (iterator.hasNext()) {
             MissileWeapon weapon = iterator.next();
 
-            sb.append(weapon.name());
+            sb.append(weapon.title());
             if (iterator.hasNext()) {
                 sb.append(", ");
             }
