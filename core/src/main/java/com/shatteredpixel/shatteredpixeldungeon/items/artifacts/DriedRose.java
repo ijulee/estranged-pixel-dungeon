@@ -695,6 +695,10 @@ public class DriedRose extends Artifact {
 			HT = 20 + 8*rose.level();
 		}
 
+		public Weapon attackingWeapon() {
+			return (missileWep != null) ? missileWep : weapon();
+		}
+
 		public Weapon weapon(){
 			if (rose != null)   return rose.weapon;
 			else                return null;
@@ -734,11 +738,7 @@ public class DriedRose extends Artifact {
 			//same accuracy as the hero.
 			int acc = Dungeon.hero.lvl + 9;
 
-			if (missileWep != null) {
-				acc *= missileWep.accuracyFactor(this, target);
-			} else if (weapon() != null) {
-				acc *= weapon().accuracyFactor(this, target);
-			}
+			acc *= attackingWeapon().accuracyFactor(this, target);
 
 			return acc;
 		}
@@ -747,17 +747,15 @@ public class DriedRose extends Artifact {
 		public float attackDelay() {
 			float delay = super.attackDelay();
 
-			if (missileWep != null) {
-				delay *= missileWep.delayFactor(this);
-			} else if (weapon() != null) {
-				delay *= weapon().delayFactor(this);
-			}
+			delay *= attackingWeapon().delayFactor(this);
+
 			return delay;
 		}
 
 		@Override
 		protected boolean canAttack(Char enemy) {
 			if ( missileWep != null ) {
+				//a previous call assigned this so ghost can shoot
 				return true;
 			}
 
@@ -865,10 +863,8 @@ public class DriedRose extends Artifact {
 		@Override
 		public int damageRoll() {
 			int dmg = 0;
-			if (missileWep != null) {
-				dmg += missileWep.damageRoll(this);
-			} else if (weapon() != null) {
-				dmg += weapon().damageRoll(this);
+			if (attackingWeapon() != null) {
+				dmg += attackingWeapon().damageRoll(this);
 			} else {
 				dmg += Random.NormalIntRange(0, 5);
 			}
@@ -879,9 +875,8 @@ public class DriedRose extends Artifact {
 		@Override
 		public int attackProc(Char enemy, int damage) {
 			damage = super.attackProc(enemy, damage);
-			Weapon wep = (missileWep != null) ? missileWep : weapon();
-			if (wep != null) {
-				damage = wep.proc(this, enemy, damage);
+			if (attackingWeapon() != null) {
+				damage = attackingWeapon().proc(this, enemy, damage);
 				if (!enemy.isAlive() && enemy == Dungeon.hero) {
 					Dungeon.fail(this);
 					GLog.n(Messages.capitalize(Messages.get(Char.class, "kill", name())));
