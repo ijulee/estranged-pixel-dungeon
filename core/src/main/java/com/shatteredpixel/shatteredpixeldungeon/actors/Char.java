@@ -1214,10 +1214,27 @@ public abstract class Char extends Actor {
 				icon = FloatingText.PHYS_DMG_NO_BLOCK;
 			}
 
+			//special case for duelist using penetration shot
 			if (src == Dungeon.hero
 					&& Dungeon.hero.buff(BowWeapon.PenetrationShotBuff.class) != null
 					&& !Dungeon.level.adjacent(Dungeon.hero.pos, pos)
 					&& Dungeon.hero.belongings.attackingWeapon() instanceof BowWeapon.Arrow){
+				icon = FloatingText.PHYS_DMG_NO_BLOCK;
+			}
+
+			//special case for samurai using shadow blade
+            if (src == Dungeon.hero
+					&& Dungeon.hero.buff(ShadowBlade.ArmorPenetration.class) != null) {
+                icon = FloatingText.PHYS_DMG_NO_BLOCK;
+            }
+
+			KindOfWeapon wep;
+			if (src == Dungeon.hero) 					 wep = ((Hero) src).belongings.attackingWeapon();
+            else if (src instanceof DriedRose.GhostHero) wep = ((DriedRose.GhostHero) src).attackingWeapon();
+            else 										 wep = null;
+
+			//special case for guns with AP bullet mod
+			if (wep instanceof Gun.Bullet && ((Gun.Bullet) wep).bulletMod() == Gun.BulletMod.AP_BULLET) {
 				icon = FloatingText.PHYS_DMG_NO_BLOCK;
 			}
 
@@ -1245,6 +1262,9 @@ public abstract class Char extends Actor {
 
 			if ((icon == FloatingText.PHYS_DMG || icon == FloatingText.PHYS_DMG_NO_BLOCK) && hitMissIcon != -1){
 				if (icon == FloatingText.PHYS_DMG_NO_BLOCK) hitMissIcon += 18; //extra row
+				if (src == Dungeon.hero && Dungeon.hero.buff(Sheath.CriticalAttack.class) != null) {
+					hitMissIcon += 54; //3 rows down
+				}
 				icon = hitMissIcon;
 			}
 			hitMissIcon = -1;

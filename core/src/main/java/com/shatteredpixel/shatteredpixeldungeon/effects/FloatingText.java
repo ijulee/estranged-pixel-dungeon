@@ -22,6 +22,7 @@
 package com.shatteredpixel.shatteredpixeldungeon.effects;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
+import com.shatteredpixel.shatteredpixeldungeon.Challenges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Bless;
@@ -138,6 +139,8 @@ public class FloatingText extends RenderedTextBlock {
 	public static int MISS_DEF  = 80;
 	public static int MISS_TUFT = 81;
 	public static int MISS_RUN  = 82;
+
+	//2 rows for critical attack versions of hit icons (+54)
 
 	//new icons
 	public static int EXPERIENCE_USE = 27;
