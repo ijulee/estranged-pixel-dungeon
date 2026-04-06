@@ -723,9 +723,9 @@ public class Armor extends EquipableItem {
 		return damage;
 	}
 
-	public int procTackle(Char attacker, Char defender, int damage) {
+	public int procTackle(Hero attacker, Char defender, int damage) {
 
-		if (attacker.buff(MagicImmune.class) == null && hero.hasTalent(Talent.MYSTICAL_TACKLE)) {
+		if (attacker.buff(MagicImmune.class) == null && attacker.hasTalent(Talent.MYSTICAL_TACKLE)) {
 			if (glyph != null) {
 				damage = glyph.procTackle(this, attacker, defender, damage);
 
@@ -737,11 +737,9 @@ public class Armor extends EquipableItem {
 			}
 		}
 
-		if (!levelKnown && attacker == Dungeon.hero) {
+		if (!levelKnown) {
 			progressID();
 		}
-
-		Sample.INSTANCE.play(Assets.Sounds.HIT_STRONG);
 
 		return damage;
 	}

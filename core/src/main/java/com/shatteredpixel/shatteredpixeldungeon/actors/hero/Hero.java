@@ -2052,14 +2052,6 @@ public class Hero extends Char {
 
 		damage = Talent.onAttackProc( this, enemy, damage );
 
-		if (buff(Tackle.TackleTracker.class) != null) {
-			damage = Tackle.procTackle(this, enemy, damage);
-
-			if (belongings.armor() != null) {
-				damage = belongings.armor().procTackle(this, enemy, damage);
-			}
-		}
-
 		if (wep != null) {
 			damage = wep.proc( this, enemy, damage );
 		} else {
@@ -2221,6 +2213,9 @@ public class Hero extends Char {
 							return true;
 						}
 					});
+				}
+				if (buff(Tackle.TackleTracker.class) != null) {
+					damage = Tackle.procTackle(this, enemy, damage);
 				}
 				break;
 			case OUTLAW:

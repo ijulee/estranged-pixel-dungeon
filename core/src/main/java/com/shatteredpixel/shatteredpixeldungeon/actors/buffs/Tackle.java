@@ -44,7 +44,6 @@ import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.ui.HeroIcon;
 import com.shatteredpixel.shatteredpixeldungeon.ui.QuickSlotButton;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
-import com.watabou.noosa.Image;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Bundle;
 import com.watabou.utils.PathFinder;
@@ -225,6 +224,8 @@ public class Tackle extends TargetingAction {
 
 			Invisibility.dispel();
 
+			Sample.INSTANCE.play(Assets.Sounds.HIT_STRONG);
+
 			hero.spendAndNext(tackleDelay());
 
 			if (hit) {
@@ -237,11 +238,15 @@ public class Tackle extends TargetingAction {
         });
 	}
 
-	public static int procTackle(Char attacker, Char defender, int damage) {
-		if (hero.hasTalent(Talent.POWERFUL_TACKLE)) {
+	public static int procTackle(Hero attacker, Char defender, int damage) {
+		if (attacker.hasTalent(Talent.POWERFUL_TACKLE)) {
 			int recoil = Math.round( (damage - attacker.drRoll()) * Tackle.recoilMulti() );
 
 			attacker.damage(Math.min(recoil, attacker.HP + attacker.shielding() - 1), Tackle.class);
+		}
+
+		if (attacker.belongings.armor() != null) {
+			damage = attacker.belongings.armor().procTackle(attacker, defender, damage);
 		}
 
 		return damage;
