@@ -702,8 +702,6 @@ public class Hero extends Char {
 			accuracy *= 1.2f;
 		}
 
-		accuracy *= Juggling.accuracyFactor(this);
-
 		if (buff(UnholyBible.Demon.class) != null) {
 			accuracy = INFINITE_ACCURACY;
 		}

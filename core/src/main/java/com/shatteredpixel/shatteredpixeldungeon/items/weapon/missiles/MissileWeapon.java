@@ -244,6 +244,10 @@ abstract public class MissileWeapon extends Weapon {
 		if (owner instanceof Hero && ((Hero) owner).heroClass != HeroClass.ARCHER && ((Hero) owner).hasTalent(Talent.MAKESHIFT_BOW)) {
 			accFactor *= 1f + 0.2f*((Hero) owner).pointsInTalent(Talent.MAKESHIFT_BOW);
 		}
+		Juggling.JugglingTracker juggle = owner.buff(Juggling.JugglingTracker.class);
+		if (juggle != null && juggle.weapons.contains(this)) {
+			accFactor *= Juggling.accuracyFactor();
+		}
 
 		accFactor *= adjacentAccFactor(owner, target);
 

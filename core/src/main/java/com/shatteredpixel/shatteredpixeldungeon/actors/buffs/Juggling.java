@@ -221,12 +221,8 @@ public class Juggling extends TargetingAction {
         }
     };
 
-    public static float accuracyFactor(Hero hero) {
-        if (hero.buff(Juggling.class) != null) {
-            return 0.5f + 0.2f*Dungeon.hero.pointsInTalent(Talent.FOCUS_MAINTAIN);
-        } else {
-            return 1;
-        }
+    public static float accuracyFactor() {
+        return 0.5f + 0.2f*Dungeon.hero.pointsInTalent(Talent.FOCUS_MAINTAIN);
     }
 
     public static BowWeapon getBow() {
