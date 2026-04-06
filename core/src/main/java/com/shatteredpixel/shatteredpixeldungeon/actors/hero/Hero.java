@@ -710,10 +710,7 @@ public class Hero extends Char {
 			accuracy = INFINITE_ACCURACY;
 		}
 
-		if (subClass == HeroSubClass.MASTER &&
-				buff(Sheath.Sheathing.class) != null &&
-				buff(Sheath.QuickDrawCooldown.class) == null &&
-				buff(Sheath.DashDrawTracker.class) == null) {
+		if (Sheath.isQuickDraw()) {
 			accuracy = INFINITE_ACCURACY;
 		}
 
