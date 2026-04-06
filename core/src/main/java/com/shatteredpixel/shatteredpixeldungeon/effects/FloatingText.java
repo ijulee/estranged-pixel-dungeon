@@ -40,14 +40,18 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Statue;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.MirrorImage;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.PrismaticImage;
 import com.shatteredpixel.shatteredpixeldungeon.items.KindOfWeapon;
+import com.shatteredpixel.shatteredpixeldungeon.items.Sheath;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Stone;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.DriedRose;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfAccuracy;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfEvasion;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.FerretTuft;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Quarterstaff;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Scimitar;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.UnholyBible;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.bow.BowWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
@@ -346,7 +350,7 @@ public class FloatingText extends RenderedTextBlock {
 		if (attacker instanceof Hero) wep = ((Hero) attacker).belongings.attackingWeapon();
 		if (attacker instanceof MirrorImage) wep = Dungeon.hero.belongings.weapon();
 		if (attacker instanceof Statue) wep = ((Statue)attacker).weapon();
-		if (attacker instanceof DriedRose.GhostHero) wep = ((DriedRose.GhostHero)attacker).weapon();
+		if (attacker instanceof DriedRose.GhostHero) wep = ((DriedRose.GhostHero)attacker).attackingWeapon();
 
 		Armor arm = null;
 		if (defender instanceof Hero) arm = ((Hero) defender).belongings.armor();
@@ -394,6 +398,30 @@ public class FloatingText extends RenderedTextBlock {
 				hitReasons.put(HIT_MOMEN, 1f + ((Hero) attacker).pointsInTalent(Talent.PROJECTILE_MOMENTUM) / 2f);
 			}
 		}
+		if (attacker instanceof Hero) {
+            if (Dungeon.isChallenged(Challenges.SUPERMAN)) {
+                hitReasons.put(HIT_WEP, 2f);
+            }
+			if (((Hero) attacker).hasTalent(Talent.ACC_ENHANCE)) {
+				hitReasons.put(HIT_ACC, 1 + 0.05f * ((Hero) attacker).pointsInTalent(Talent.ACC_ENHANCE));
+			}
+			//TODO add hit icon for acc buffs related to Samurai
+			if (attacker.buff(Sheath.Sheathing.class) != null) {
+				hitReasons.put(HIT_WEP, 1.2f);
+			}
+			if (Sheath.isQuickDraw()) {
+				return HIT_WEP;
+			}
+			if (attacker.buff(BowWeapon.PenetrationShotBuff.class) != null && wep instanceof BowWeapon.Arrow) {
+				return HIT_DANCE;
+			}
+			if (attacker.buff(UnholyBible.Demon.class) != null) {
+				return HIT_DANCE;
+			}
+			if (attacker.buff(MeleeWeapon.DashAttack.class) != null) {
+				return HIT_DANCE;
+			}
+        }
 
 		//evasion reductions (always < 1)
 		if (defender.buff(Hex.class) != null)                   hitReasons.put(HIT_HEX, 0.8f);
@@ -405,6 +433,9 @@ public class FloatingText extends RenderedTextBlock {
 			int baseDef = defender.defenseSkill(attacker);
 			Armor.testingNoArmDefSkill = false;
 			hitReasons.put(HIT_ARM, defender.defenseSkill(attacker)/(float)baseDef);
+		}
+		if (defender.buff(UnholyBible.Demon.class) != null) {
+			hitReasons.put(HIT_DANCE, 0.5f);
 		}
 		//hero specifically gets 1/2 eva when stunned, for mobs its a garunteed hit
 		if (defender.paralysed > 0)  {
