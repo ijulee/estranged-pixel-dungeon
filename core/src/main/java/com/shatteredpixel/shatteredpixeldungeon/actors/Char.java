@@ -477,14 +477,13 @@ public abstract class Char extends Actor {
 					dr *= ((Gun.Bullet) h.belongings.attackingWeapon()).bulletMod().armorFactor();
 				}
 
-				if (Dungeon.hero.buff(ShadowBlade.shadowBladeTracker.class) != null && Random.Int(2) == 0) {
-					if (Dungeon.hero.hasTalent(Talent.CRITICAL_SHADOW)) {
-						dmgBonus += Random.NormalIntRange(0, 5*Dungeon.hero.pointsInTalent(Talent.CRITICAL_SHADOW));
-					}
-					if (Dungeon.hero.hasTalent(Talent.HERBAL_SHADOW)) {
-						Dungeon.hero.heal(Dungeon.hero.pointsInTalent(Talent.HERBAL_SHADOW));
-					}
-					dr = 0;
+				ShadowBlade.ShadowBladeTracker sb = h.buff(ShadowBlade.ShadowBladeTracker.class);
+				if (sb != null && Random.Int(2) == 0) {
+					Buff.affect(h, ShadowBlade.ArmorPenetration.class);
+                    if (h.hasTalent(Talent.HERBAL_SHADOW)) {
+                        h.heal(h.pointsInTalent(Talent.HERBAL_SHADOW));
+                    }
+                    dr = 0;
 				}
 
 				if (h.buff(MonkEnergy.MonkAbility.UnarmedAbilityTracker.class) != null){
@@ -523,6 +522,12 @@ public abstract class Char extends Actor {
 				if (this != Dungeon.hero && Dungeon.hero.subClass == HeroSubClass.PRIEST){
 					enemy.damage(5+Dungeon.hero.lvl, GuidingLight.INSTANCE);
 				}
+			}
+
+			ShadowBlade.ArmorPenetration ap = buff(ShadowBlade.ArmorPenetration.class);
+			if (ap != null && Dungeon.hero.hasTalent(Talent.CRITICAL_SHADOW)) {
+				//doubled here because the bonus gets halved by Shadow Blade itself
+				dmg += 2 * Hero.heroDamageIntRange(0, 5*Dungeon.hero.pointsInTalent(Talent.CRITICAL_SHADOW));
 			}
 
 			Berserk berserk = buff(Berserk.class);

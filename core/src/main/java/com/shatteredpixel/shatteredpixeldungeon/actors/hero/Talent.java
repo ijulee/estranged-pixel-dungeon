@@ -2408,10 +2408,6 @@ public enum Talent {
 			}
 		}
 
-		if (hero.buff(ShadowBlade.shadowBladeTracker.class) != null) {
-            dmg = Math.round(dmg * 0.5f);
-		}
-
 		if (hero.hasTalent(Talent.BIOLOGY_PROJECT)) {
 			if (!(enemy.properties().contains(Char.Property.INORGANIC) || enemy.properties().contains(Char.Property.UNDEAD))){
 				enemy.sprite.emitter().start( ShadowParticle.UP, 0.05f, 3 );

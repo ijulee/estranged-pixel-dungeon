@@ -35,6 +35,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Juggling;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Belongings;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.samurai.ShadowBlade;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
@@ -689,6 +690,10 @@ public class Item implements Bundlable {
                                 if (critTracker != null) {
                                     critTracker.detach();
                                 }
+
+								if (user.buff(ShadowBlade.ArmorPenetration.class) != null) {
+									user.buff(ShadowBlade.ArmorPenetration.class).detach();
+								}
 
 								Juggling.JugglingTracker juggle = user.buff(Juggling.JugglingTracker.class);
 								if (juggle != null) {

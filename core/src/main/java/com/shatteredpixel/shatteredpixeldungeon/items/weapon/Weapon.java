@@ -370,7 +370,7 @@ abstract public class Weapon extends KindOfWeapon {
 				multi *= 1 + 0.05f * hero.pointsInTalent(Talent.ATK_SPEED_ENHANCE);
 			}
 
-			if (hero.buff(ShadowBlade.shadowBladeTracker.class) != null) {
+			if (hero.buff(ShadowBlade.ShadowBladeTracker.class) != null) {
 				multi *= 2f + 0.05f * hero.pointsInTalent(Talent.DOUBLE_BLADE_PRACTICE);
 			}
 		}

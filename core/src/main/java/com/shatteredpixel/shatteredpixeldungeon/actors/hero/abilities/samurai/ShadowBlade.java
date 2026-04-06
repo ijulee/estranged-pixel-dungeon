@@ -35,6 +35,7 @@ import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.ui.HeroIcon;
 import com.watabou.noosa.audio.Sample;
+import com.watabou.utils.Random;
 
 public class ShadowBlade extends ArmorAbility {
 
@@ -45,7 +46,7 @@ public class ShadowBlade extends ArmorAbility {
 	@Override
 	protected void activate(ClassArmor armor, Hero hero, Integer target) {
 
-		Buff.prolong(hero, shadowBladeTracker.class, shadowBladeTracker.DURATION);
+		Buff.prolong(hero, ShadowBladeTracker.class, ShadowBladeTracker.DURATION);
 		hero.sprite.operate(hero.pos);
 		Sample.INSTANCE.play(Assets.Sounds.MISS);
 		hero.sprite.emitter().burst(ShadowParticle.UP, 10);
@@ -67,7 +68,7 @@ public class ShadowBlade extends ArmorAbility {
 		return new Talent[]{Talent.DOUBLE_BLADE_PRACTICE, Talent.CRITICAL_SHADOW, Talent.HERBAL_SHADOW, Talent.HEROIC_ENERGY};
 	}
 
-	public static class shadowBladeTracker extends FlavourBuff {
+	public static class ShadowBladeTracker extends FlavourBuff {
 
 		public static final float DURATION = 10f;
 
@@ -90,8 +91,9 @@ public class ShadowBlade extends ArmorAbility {
 		public String desc() {
 			return Messages.get(this, "desc", dispTurns());
 		}
-
 	}
+
+	public static class ArmorPenetration extends Buff {}
 }
 
 

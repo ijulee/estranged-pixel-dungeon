@@ -1159,7 +1159,7 @@ public class Hero extends Char {
 				speed *= 2f;
 			}
 
-			if (buff(ShadowBlade.shadowBladeTracker.class) != null) {
+			if (buff(ShadowBlade.ShadowBladeTracker.class) != null) {
 				speed *= 2f + 0.05f * pointsInTalent(Talent.DOUBLE_BLADE_PRACTICE);
 			}
 
@@ -2091,6 +2091,11 @@ public class Hero extends Char {
 			Buff.affect(this, Fatigue.class).hit(true);
 		}
 
+		ShadowBlade.ShadowBladeTracker sb = buff(ShadowBlade.ShadowBladeTracker.class);
+		if (sb != null) {
+			damage = Math.round(damage * 0.5f);
+		}
+
 		switch (subClass) {
 			case SNIPER:
 				if (wep instanceof MissileWeapon && !(wep instanceof SpiritBow.SpiritArrow) && enemy != this) {
@@ -2362,6 +2367,7 @@ public class Hero extends Char {
 			}
 		}
 
+		//FIXME maybe detach when crit is determined
 		if (buff(Sheath.CertainCrit.class) != null) {
 			buff(Sheath.CertainCrit.class).hit();
 		}
@@ -3453,6 +3459,10 @@ public class Hero extends Char {
 
 		if (isCritical) {
 			buff(Sheath.CriticalAttack.class).detach();
+		}
+
+		if (buff(ShadowBlade.ArmorPenetration.class) != null) {
+			buff(ShadowBlade.ArmorPenetration.class).detach();
 		}
 
 		curAction = null;
