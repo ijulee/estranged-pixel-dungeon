@@ -22,19 +22,23 @@
 package com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
+import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
+import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Charm;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FlavourBuff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Invisibility;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
-import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
+import com.shatteredpixel.shatteredpixeldungeon.effects.Pushing;
+import com.shatteredpixel.shatteredpixeldungeon.items.wands.WandOfBlastWave;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.RoundShield;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.Spear;
+import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
+import com.shatteredpixel.shatteredpixeldungeon.ui.AttackIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.audio.Sample;
-import com.watabou.utils.Bundle;
-
-import java.util.ArrayList;
 
 public class SpearNShield extends MeleeWeapon implements AlchemyWeapon {
 
@@ -47,69 +51,21 @@ public class SpearNShield extends MeleeWeapon implements AlchemyWeapon {
         hitSoundPitch = 1.1f;
 
         tier = 3;
-        stance = true;
+        RCH = 2;
 
         defaultAction = AC_CHANGE;
     }
 
     @Override
-    public ArrayList<String> actions(Hero hero) {
-        ArrayList<String> actions = super.actions(hero);
-        if (isEquipped(hero)) {
-            actions.add(AC_CHANGE);
-        }
-        return actions;
-    }
-
-    @Override
-    public void execute(Hero hero, String action) {
-
-        super.execute(hero, action);
-
-        if (action.equals(AC_CHANGE)) {
-            if (!isEquipped(hero)) {
-                GLog.w(Messages.get(this,"not_equipped"));
-            } else {
-                if (stance) {
-                    stance = false;
-                    GLog.p(Messages.get(this,"change_defense"));
-                } else {
-                    stance = true;
-                    GLog.p(Messages.get(this,"change_attack"));
-                }
-                Sample.INSTANCE.play(Assets.Sounds.MISS, 1f, 0.8f);
-                hero.sprite.emitter().burst(Speck.factory(Speck.JET), 5);
-            }
-        }
-    }
-
-    @Override
-    public int reachFactor(Char owner) {
-        int reach = super.reachFactor(owner);
-        if (stance) {
-            reach += 1;
-        }
-        return reach;
-    }
-
-    @Override
     public int max(int lvl) {
-        if (stance) {
-            return  Math.round(6.67f*(tier)) +    //20 base, up from 15
-                    lvl*Math.round(1.33f*(tier)); //+4 per level, up from +3
-        } else {
-            return  Math.round(2.5f*(tier+1)) +     //10 base, down from 20
-                    lvl*(tier-1);                   //+2 per level, down from +4
-        }
+        //halved in proc() if no reach
+        return  5 * (tier+1) + //20 base
+                lvl * (tier+1);  //+4 per level
     }
 
     @Override
     public int defenseFactor( Char owner ) {
-        if (stance) {
-            return 0;
-        } else {
-            return DRMax();
-        }
+        return DRMax();
     }
 
     public int DRMax(){
@@ -122,86 +78,127 @@ public class SpearNShield extends MeleeWeapon implements AlchemyWeapon {
     }
 
     public String statsInfo(){
-        if (stance) {
-            return Messages.get(this, "stats_desc_attack");
+        if (isIdentified()) {
+            return Messages.get(this, "stats_desc", DRMax());
         } else {
-            if (isIdentified()){
-                return Messages.get(this, "stats_desc_defense", DRMax());
-            } else {
-                return Messages.get(this, "typical_stats_desc_defense", DRMax(0));
-            }
+            return Messages.get(this, "typical_stats_desc", DRMax(0));
         }
     }
 
     @Override
     protected float baseDelay( Char owner ){
         float delay = augment.delayFactor(this.DLY);
-        if (stance) {
+        if (owner.buff(SpearTracker.class) != null) {
             delay *= 1.5f;
-        } else {
-            delay *= 1f;
         }
         return delay;
     }
 
-    private static final String STANCE = "stance";
+    public static class SpearTracker extends FlavourBuff {}
 
     @Override
-    public void storeInBundle(Bundle bundle) {
-        super.storeInBundle(bundle);
-        bundle.put( STANCE, stance );
-    }
+    public int proc(Char attacker, Char defender, int damage) {
+        damage = super.proc(attacker, defender, damage);
 
-    @Override
-    public void restoreFromBundle(Bundle bundle) {
-        super.restoreFromBundle(bundle);
-        stance = bundle.getBoolean( STANCE );
+        if (attacker.buff(SpearTracker.class) != null ||
+            Dungeon.level.distance(attacker.pos, defender.pos) > 1) {
+            Buff.affect(attacker, SpearTracker.class, 0);
+        } else {
+            damage = Math.round(damage/2f);
+        }
+
+        return damage;
     }
 
     @Override
     public String targetingPrompt() {
-        if (stance) {
-            return Messages.get(this, "prompt");
-        } else {
-            return null;
-        }
+        return Messages.get(this, "prompt");
     }
 
     @Override
     protected void duelistAbility(Hero hero, Integer target) {
-        if (stance) {
-            //roughly +65% base damage, +60% scaling
-            int dmgBoost = augment.damageFactor(7 + Math.round(1.5f*buffedLvl()));
-            Spear.spikeAbility(hero, target, 1, dmgBoost, this);
-        } else {
-            RoundShield.guardAbility(hero, 5+buffedLvl(), this);
+        if (target == null) {
+            return;
         }
+
+        //can parry charmed enemies but not attack them
+        Char enemy = Actor.findChar(target);
+        if (enemy == null || enemy == hero || !Dungeon.level.heroFOV[target]) {
+            GLog.w(Messages.get(this, "ability_no_target"));
+            return;
+        }
+
+        hero.belongings.abilityWeapon = this;
+        if (!hero.canAttack(enemy)){
+            GLog.w(Messages.get(this, "ability_target_range"));
+            hero.belongings.abilityWeapon = null;
+            return;
+        }
+        hero.belongings.abilityWeapon = null;
+
+        beforeAbilityUsed(hero, null);
+        Buff.affect(hero, ParryTracker.class, Actor.TICK).enemy = enemy;
+        hero.spendAndNext(Actor.TICK);
+        hero.busy();
+
     }
 
-    public String abilityName() {
-        if (stance) {
-            return Messages.upperCase(Messages.get(this, "ability1_name"));
-        } else {
-            return Messages.upperCase(Messages.get(this, "ability2_name"));
+    public static class ParryTracker extends FlavourBuff {
+        { actPriority = HERO_PRIO+1;}
+
+        public Char enemy;
+        public boolean parried;
+
+        @Override
+        public boolean act() {
+            Hero hero = (Hero) target;
+            MeleeWeapon wep = (MeleeWeapon) hero.belongings.attackingWeapon();
+
+            //+(9+2*lvl) damage, roughly +83% base damage, +80% scaling
+            int dmgBoost = (parried) ? wep.augment.damageFactor(9 + Math.round(2f*wep.buffedLvl())) : 0;
+
+            if (!hero.canAttack(enemy)) {
+                GLog.w(Messages.get(MeleeWeapon.class, "ability_target_range"));
+                hero.belongings.abilityWeapon = null;
+            } else if (hero.isCharmedBy(enemy)) {
+                GLog.w(Messages.get(Charm.class, "cant_attack"));
+                hero.belongings.abilityWeapon = null;
+            } else {
+                hero.sprite.attack(enemy.pos, () -> {
+                    AttackIndicator.target(enemy);
+                    int oldPos = enemy.pos;
+                    int power = Math.min(3-Dungeon.level.distance(hero.pos, enemy.pos), 1);
+                    //do not push if enemy has moved, or another push is active (e.g. elastic)
+                    if (hero.attack(enemy, 1, dmgBoost, Char.INFINITE_ACCURACY)) {
+                        if (enemy.isAlive() && enemy.pos == oldPos && !Pushing.pushingExistsForChar(enemy)) {
+                            //trace a ballistica to our target (which will also extend past them
+                            Ballistica trajectory = new Ballistica(hero.pos, enemy.pos, Ballistica.STOP_TARGET);
+                            //trim it to just be the part that goes past them
+                            trajectory = new Ballistica(trajectory.collisionPos, trajectory.path.get(trajectory.path.size() - 1), Ballistica.PROJECTILE);
+                            //knock them back along that ballistica
+                            WandOfBlastWave.throwChar(enemy, trajectory, power, true, false, hero);
+                        } else if (!enemy.isAlive()) {
+                            onAbilityKill(hero, enemy);
+                        }
+                        Sample.INSTANCE.play(Assets.Sounds.HIT_STRONG);
+                    }
+                    Invisibility.dispel();
+                    float delay = Math.max(0, hero.attackDelay() - TICK);
+                    hero.spendAndNext(delay);
+                    wep.afterAbilityUsed(hero);
+                });
+            }
+            return super.act();
         }
     }
 
     @Override
     public String abilityInfo() {
-        if (stance) {
-            int dmgBoost = levelKnown ? 7 + Math.round(1.5f*buffedLvl()) : 7;
-            if (levelKnown){
-                return Messages.get(this, "ability1_desc", augment.damageFactor(min()+dmgBoost), augment.damageFactor(max()+dmgBoost));
-            } else {
-                return Messages.get(this, "typical_ability1_desc", min(0)+dmgBoost, max(0)+dmgBoost);
-            }
+        int dmgBoost = levelKnown ? 7 + Math.round(1.5f*buffedLvl()) : 7;
+        if (levelKnown) {
+            return Messages.get(this, "ability_desc", augment.damageFactor(min()+dmgBoost), augment.damageFactor(max()+dmgBoost));
         } else {
-            int duration = levelKnown ? 5+buffedLvl() : 5;
-            if (levelKnown){
-                return Messages.get(this, "ability2_desc", duration);
-            } else {
-                return Messages.get(this, "typical_ability2_desc", duration);
-            }
+            return Messages.get(this, "typical_ability_desc", min(0)+dmgBoost, max(0)+dmgBoost);
         }
     }
 

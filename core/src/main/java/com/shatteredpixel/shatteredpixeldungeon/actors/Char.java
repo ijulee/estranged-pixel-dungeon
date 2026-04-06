@@ -722,7 +722,7 @@ public abstract class Char extends Actor {
 			}
 
 			Juggling.JugglingTracker juggle = buff(Juggling.JugglingTracker.class);
-            if (juggle != null && ((Hero) this).hasTalent(Talent.FANCY_PERFORMANCE) &&
+			if (juggle != null && ((Hero) this).hasTalent(Talent.FANCY_PERFORMANCE) &&
 				juggle.weapons.contains(((Hero) this).belongings.attackingWeapon())) {
 
 				float procChance = 0.005f * (1 + ((Hero) this).pointsInTalent(Talent.FANCY_PERFORMANCE));

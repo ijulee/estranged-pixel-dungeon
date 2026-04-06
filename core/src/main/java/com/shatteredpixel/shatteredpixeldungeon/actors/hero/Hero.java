@@ -219,6 +219,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.Lance
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.LanceNShield;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.ObsidianShield;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.SharpKatana;
+import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.SpearNShield;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.UnholyBible;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.bow.BowWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.gun.Gun;
@@ -757,6 +758,10 @@ public class Hero extends Char {
 				}
 				return INFINITE_EVASION;
 			}
+
+			if (buff(SpearNShield.ParryTracker.class) != null) {
+				return INFINITE_EVASION;
+			}
 		}
 		
 		float evasion = defenseSkill;
@@ -855,16 +860,26 @@ public class Hero extends Char {
 		}
 
 		Talent.ParryTracker parryTracker = buff(Talent.ParryTracker.class);
-		if (hasTalent(Talent.PARRY)) {
-			if (parryTracker != null) {
-				parryTracker.detach();
-				return Messages.get(Monk.class, "parried");
+		if (parryTracker != null) {
+			parryTracker.detach();
+			if (sprite != null && sprite.visible) {
+				Sample.INSTANCE.play(Assets.Sounds.HIT_PARRY, 1, Random.Float(0.96f, 1.05f));
 			}
+			return Messages.get(Monk.class, "parried");
 		}
 
 		Nunchaku.ParryTracker nunchakuParry = buff(Nunchaku.ParryTracker.class);
 		if (nunchakuParry != null){
 			nunchakuParry.parried = true;
+			if (sprite != null && sprite.visible) {
+				Sample.INSTANCE.play(Assets.Sounds.HIT_PARRY, 1, Random.Float(0.96f, 1.05f));
+			}
+			return Messages.get(Monk.class, "parried");
+		}
+
+		SpearNShield.ParryTracker counterSpike = buff(SpearNShield.ParryTracker.class);
+		if (counterSpike != null) {
+			counterSpike.parried = true;
 			if (sprite != null && sprite.visible) {
 				Sample.INSTANCE.play(Assets.Sounds.HIT_PARRY, 1, Random.Float(0.96f, 1.05f));
 			}
