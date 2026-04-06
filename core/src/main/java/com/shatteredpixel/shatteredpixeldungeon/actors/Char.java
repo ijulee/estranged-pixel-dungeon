@@ -1269,13 +1269,7 @@ public abstract class Char extends Actor {
 			}
 			hitMissIcon = -1;
 
-
-			String dmgText = Integer.toString(dmg + shielded);
-			if (src == Dungeon.hero && Dungeon.hero.buff(Sheath.CriticalAttack.class) != null) {
-				dmgText += "!";
-			}
-
-			sprite.showStatusWithIcon(CharSprite.NEGATIVE, dmgText, icon);
+			sprite.showStatusWithIcon(CharSprite.NEGATIVE, Integer.toString(dmg + shielded), icon);
 		}
 
 		if (HP < 0) HP = 0;
