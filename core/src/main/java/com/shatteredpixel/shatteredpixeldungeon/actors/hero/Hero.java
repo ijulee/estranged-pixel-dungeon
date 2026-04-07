@@ -944,8 +944,14 @@ public class Hero extends Char {
 		if (!RingOfForce.fightingUnarmed(this)) {
 			dmg = wep.damageRoll( this );
 			if (wep instanceof Weapon) {
-				if (Random.Float() < critChance((Weapon)wep)) {
-					dmg = critDamage(dmg, (Weapon)wep);
+				float critChance = critChance((Weapon)wep);
+				if (Random.Float() < critChance) {
+					//mark critical attack, should remove when attack completes
+					Buff.affect(this, Sheath.CriticalAttack.class);
+					dmg = critDamage(dmg, (Weapon)wep, critChance);
+
+					Sheath.CertainCrit certainCrit = buff(Sheath.CertainCrit.class);
+					if (certainCrit != null) certainCrit.hit();
 				}
 			}
 
@@ -2001,14 +2007,10 @@ public class Hero extends Char {
 		return GameMath.gate(0, chance, 2);
 	}
 
-	public int critDamage(int damage, Weapon wep) {
-		// mark the attack as critical, should be removed upon completion of attack
-		Buff.affect(this, Sheath.CriticalAttack.class);
-
+	public int critDamage(int damage, Weapon wep, float critChance) {
 		int max = wep.max() + ((wep instanceof GunWeapon.GunMissile)? 0 : wepSTRExcess(wep));
-		float multi = 1f+Math.max(0, critChance(wep)-1);
-		int bonusDamage = 0;
-		float critDmg = (int)(max * 0.75f + damage * 0.25f);
+		float critDmg = max * 0.75f + damage * 0.25f;
+		float multi = Math.max(1, critChance);
 
 		multi += 0.05f * pointsInTalent(Talent.LETHAL_POWER);
 
@@ -2020,6 +2022,7 @@ public class Hero extends Char {
 			multi += 0.15f * pointsInTalent(Talent.POWERFUL_SLASH);
 		}
 
+		//FIXME should probably be moved to attackProc()
 		if (Awakening.isAwakened()) {
 			if (hasTalent(Talent.STABLE_BARRIER)) {
 				int shield = 1;
@@ -2034,7 +2037,7 @@ public class Hero extends Char {
 			}
 		}
 
-		return Math.round(critDmg * multi) + bonusDamage;
+		return Math.round(critDmg * multi);
 	}
 
 	@Override
@@ -2360,11 +2363,6 @@ public class Hero extends Char {
 
 				Dungeon.level.occupyCell(newEnemy);
 			}
-		}
-
-		//FIXME maybe detach when crit is determined
-		if (buff(Sheath.CertainCrit.class) != null) {
-			buff(Sheath.CertainCrit.class).hit();
 		}
 
 		return damage;
