@@ -41,6 +41,7 @@ import com.watabou.utils.PathFinder;
 
 import java.text.DecimalFormat;
 
+//TODO recycle parts of this for Huge Sword
 public class LargeSword extends MeleeWeapon {
 
 	{

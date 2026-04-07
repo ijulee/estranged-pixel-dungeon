@@ -616,14 +616,14 @@ public class Generator {
 					Sickle.class,
 					Pickaxe.class,
 					Nunchaku.class,
-					Knife.class,
-					ShortKatana.class,
+					/*Knife.class,*/
+					/*ShortKatana.class,*/
 					AR_T2.class,
-					HG_T2.class,
+					/*HG_T2.class,*/
 					SMG_T2.class,
 					ShortBow.class
 			};
-			WEP_T2.defaultProbs = new float[]{ 2, 2, 2, 2, 2, 2, 0, 2, 0, 0, 1, 0, 1, 1 };
+			WEP_T2.defaultProbs = new float[]{ 2, 2, 2, 2, 2, 2, 0, 2, /*0, 0,*/ 1, /*0,*/ 1, 1 };
 			WEP_T2.probs = WEP_T2.defaultProbs.clone();
 			
 			WEP_T3.classes = new Class<?>[]{
@@ -636,13 +636,13 @@ public class Generator {
 					NormalKatana.class,
 					Whip.class,
 					AR_T3.class,
-					MG_T3.class,
+					/*MG_T3.class,*/
 					SG_T3.class,
 					SR_T3.class,
-					GL_T3.class,
+					/*GL_T3.class,*/
 					Bow.class
 			};
-			WEP_T3.defaultProbs = new float[]{ 2, 2, 2, 2, 2, 2, 2, 2, 1, 0, 1, 1, 0, 1 };
+			WEP_T3.defaultProbs = new float[]{ 2, 2, 2, 2, 2, 2, 2, 2, 1, /*0,*/ 1, 1, /*0,*/ 1 };
 			WEP_T3.probs = WEP_T1.defaultProbs.clone();
 			
 			WEP_T4.classes = new Class<?>[]{
@@ -653,13 +653,13 @@ public class Generator {
 					AssassinsBlade.class,
 					Crossbow.class,
 					Katana.class,
-					LongKatana.class,
+					/*LongKatana.class,*/
 					AR_T4.class,
 					SMG_T4.class,
 					RL_T4.class,
 					LongBow.class
 			};
-			WEP_T4.defaultProbs = new float[]{ 2, 2, 2, 2, 2, 2, 2, 0, 1, 1, 1, 1 };
+			WEP_T4.defaultProbs = new float[]{ 2, 2, 2, 2, 2, 2, 2, /*0,*/ 1, 1, 1, 1 };
 			WEP_T4.probs = WEP_T4.defaultProbs.clone();
 			
 			WEP_T5.classes = new Class<?>[]{
@@ -670,7 +670,7 @@ public class Generator {
 					Greatshield.class,
 					Gauntlet.class,
 					WarScythe.class,
-					LargeSword.class,
+					/*LargeSword.class,*/
 					LargeKatana.class,
 					AR_T5.class,
 					HG_T5.class,
@@ -684,7 +684,7 @@ public class Generator {
 					LG_T5.class,
 					GreatBow.class
 			};
-			WEP_T5.defaultProbs = new float[]{ 2, 2, 2, 2, 2, 2, 2, 0, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
+			WEP_T5.defaultProbs = new float[]{ 2, 2, 2, 2, 2, 2, 2, /*0,*/ 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
 			WEP_T5.probs = WEP_T5.defaultProbs.clone();
 
 			WEP_AL_T2.classes = new Class<?>[]{
