@@ -2183,7 +2183,7 @@ public enum Talent {
 			} else if (hero.buff(FollowupStrikeTracker.class) != null
 					&& hero.buff(FollowupStrikeTracker.class).object == enemy.id()){
 				dmg += 1 + hero.pointsInTalent(FOLLOWUP_STRIKE);
-				if (hero.belongings.weapon == null && hero.subClass == HeroSubClass.FIGHTER) {
+				if (hero.belongings.attackingWeapon() == null && hero.subClass == HeroSubClass.FIGHTER) {
 					Buff.affect( enemy, Paralysis.class, 1f );
 				}
 				hero.buff(FollowupStrikeTracker.class).detach();
@@ -2240,7 +2240,7 @@ public enum Talent {
 		}
 
 		if (hero.buff(SkilledHandTracker.class) != null) {
-            dmg += 1+hero.pointsInTalent(Talent.SKILLED_HAND);
+			dmg += 1+hero.pointsInTalent(Talent.SKILLED_HAND);
 			hero.buff(SkilledHandTracker.class).detach();
 			Sample.INSTANCE.play(Assets.Sounds.HIT_STRONG);
 		}
@@ -2248,8 +2248,6 @@ public enum Talent {
 		if (hero.hasTalent(Talent.SKILLED_HAND) && hero.heroClass != HeroClass.DUELIST) {
             dmg += Random.NormalIntRange(0, 1+hero.pointsInTalent(Talent.SKILLED_HAND));
 		}
-
-
 
 		if (hero.buff(KineticBattle.class) != null) {
             dmg = hero.buff(KineticBattle.class).proc(dmg);
@@ -2391,14 +2389,17 @@ public enum Talent {
 			spellBookCoolDown.hit(hero.pointsInTalent(Talent.BRIG_BOOST));
 		}
 
+		//FIXME move to Hero.attackProc()
 		if (hero.buff(Bible.Angel.class) != null) {
 			hero.heal(Math.max(Math.round(0.2f*dmg), 1));
 		}
 
+		//FIXME move to Hero.attackProc()
 		if (hero.buff(UnholyBible.Demon.class) != null) {
             dmg = Math.round(dmg * 1.33f);
 		}
 
+		//FIXME move to Hero.attackProc()
 		if (hero.buff(DualDagger.ReverseBlade.class) != null) {
             dmg = Math.round(dmg * 0.5f);
 			Buff.affect(enemy, Bleeding.class).add(Random.NormalIntRange(1, 3));
@@ -2440,12 +2441,13 @@ public enum Talent {
 			}
 		}
 
+		//FIXME move to Hero.attackProc()
 		if (hero.subClass == HeroSubClass.SLASHER &&
 				!(hero.belongings.attackingWeapon() instanceof SwordAura.Aura)) {
 			Buff.affect(hero, SwordAura.class).hit(dmg);
 		}
 
-
+		//FIXME move to Hero.attackProc()
 		if (hero.subClass == HeroSubClass.RESEARCHER && Random.Float() < 0.2f) {
 			Buff.affect(enemy, Ooze.class).set(Ooze.DURATION/4f * (1+0.5f*hero.pointsInTalent(Talent.POWERFUL_ACID)));
 		}
@@ -2455,6 +2457,7 @@ public enum Talent {
 			Buff.affect(enemy, Lucky.LuckProc.class);
 		}
 
+		//FIXME move to Hero.attackProc()
 		if (hero.subClass == HeroSubClass.CRUSADER && hero.buff(Bless.class) != null) {
 			int healAmt = Math.round(dmg*0.4f);
 			int excessHeal = healAmt - (hero.HT - hero.HP);
