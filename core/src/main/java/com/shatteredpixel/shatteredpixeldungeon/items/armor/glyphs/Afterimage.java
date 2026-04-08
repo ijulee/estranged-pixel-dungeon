@@ -25,11 +25,14 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.duelist.Feint;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
+import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
+import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfArcana;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.watabou.utils.Random;
 
 public class Afterimage extends Armor.Glyph {
+	private static final double EVA_FACTOR = 1.125;
 
 	private static ItemSprite.Glowing BLACK = new ItemSprite.Glowing( 0x888888, 0.5f );
 
@@ -60,6 +63,10 @@ public class Afterimage extends Armor.Glyph {
 	@Override
 	public ItemSprite.Glowing glowing() {
 		return BLACK;
+	}
+
+	public static float evasionFactor(Char owner, Item item) {
+		return (float) Math.pow(EVA_FACTOR, item.buffedLvl() + 1) * RingOfArcana.enchantPowerMultiplier(owner);
 	}
 
 }

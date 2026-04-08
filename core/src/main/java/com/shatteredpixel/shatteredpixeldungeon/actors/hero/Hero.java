@@ -740,10 +740,6 @@ public class Hero extends Char {
 		
 		evasion *= RingOfEvasion.evasionMultiplier( this );
 
-		if (hasTalent(Talent.SWIFT_MOVEMENT)) {
-			evasion += STR()-10;
-		}
-
 		if (Dungeon.isChallenged(Challenges.SUPERMAN)) {
 			evasion *= 3;
 		}
@@ -774,6 +770,11 @@ public class Hero extends Char {
 			evasion /= 2;
 		}
 
+		KnightsShield shield = belongings.getItem(KnightsShield.class);
+		if (shield != null && shield.hasGlyph(Afterimage.class, this)) {
+			evasion *= Afterimage.evasionFactor(this, shield);
+		}
+
 		if (belongings.armor() != null) {
 			evasion = belongings.armor().evasionFactor(this, evasion);
 
@@ -783,11 +784,9 @@ public class Hero extends Char {
 			}
 		}
 
-		//FIXME maybe nerf this
-		if (belongings.getItem(KnightsShield.class) != null &&
-				belongings.getItem(KnightsShield.class).hasGlyph(Afterimage.class, this)) {
-			evasion *= Math.pow(1.2f, belongings.getItem(KnightsShield.class).buffedLvl()) *
-					RingOfArcana.enchantPowerMultiplier(this);
+		//only bonus evasion points after this point
+		if (hasTalent(Talent.SWIFT_MOVEMENT)) {
+			evasion += STR()-10;
 		}
 
 		if (hasTalent(Talent.BREAKTHROUGH)) {

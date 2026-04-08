@@ -557,6 +557,10 @@ public class Armor extends EquipableItem {
 		if (hasGlyph(Stone.class, owner) && !Stone.testingEvasion()){
 			return 0;
 		}
+
+		if (hasGlyph(Afterimage.class, owner)) {
+			evasion *= Afterimage.evasionFactor(owner, this);
+		}
 		
 		if (owner instanceof Hero){
 			int aEnc = STRReq() - ((Hero) owner).STR();
@@ -567,22 +571,17 @@ public class Armor extends EquipableItem {
 				evasion += momentum.evasionBonus(((Hero) owner).lvl, Math.max(0, -aEnc));
 			}
 
+			//only bonus evasion points after this point
 			MeleeWeapon.Charger charger = owner.buff(MeleeWeapon.Charger.class);
-			if (charger != null && hero.hasTalent(Talent.UNENCUMBERED_MOVEMENT) && ((Hero) owner).belongings.weapon instanceof MeleeWeapon) {
-				int wEnc = ((MeleeWeapon)((Hero) owner).belongings.weapon).STRReq() - ((Hero) owner).STR();
-				evasion += 0.5f*Math.max(0, -aEnc);
-				evasion += 0.5f*Math.max(0, -wEnc);
+			if (charger != null && hero.hasTalent(Talent.UNENCUMBERED_MOVEMENT) && ((Hero) owner).belongings.weapon() instanceof MeleeWeapon) {
+				int wEnc = ((MeleeWeapon)((Hero) owner).belongings.weapon()).STRReq() - ((Hero) owner).STR();
+				evasion += 0.5f * (Math.max(0, -aEnc) + Math.max(0, -wEnc));
 			}
 
 			Awakening awakening = owner.buff(Awakening.class);
 			if (awakening != null) {
 				evasion += awakening.evasionBonus(((Hero) owner).lvl, Math.max(0, -aEnc));
 			}
-		}
-
-		//FIXME this looks overly effective
-		if (hasGlyph(Afterimage.class, owner)){
-			evasion *= Math.pow(1.2f, this.buffedLvl());
 		}
 
 		return evasion + augment.evasionFactor(buffedLvl());
