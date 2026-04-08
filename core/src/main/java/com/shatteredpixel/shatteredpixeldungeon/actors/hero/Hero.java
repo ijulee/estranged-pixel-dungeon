@@ -1895,26 +1895,40 @@ public class Hero extends Char {
 		return Math.max(0, STR() - amr.STRReq());
 	}
 
+	public static final Set<Class<? extends Weapon>> KATANA_CLASSES = Set.of(
+			WornKatana.class,
+			ShortKatana.class,
+			NormalKatana.class,
+			LongKatana.class,
+			LargeKatana.class,
+			SharpKatana.class
+	);
+
+	public static boolean testQuickDraw = false;
+
 	public float critChance(final Weapon wep) {
 		float chance = 0;
 
-		Set<Class<? extends Weapon>> katanaClasses = Set.of(
-				WornKatana.class,
-				ShortKatana.class,
-				NormalKatana.class,
-				LongKatana.class,
-				LargeKatana.class,
-				SharpKatana.class
-		);
-		
-		if (katanaClasses.contains(wep.getClass())) {
-			//25%/23%/20%/18%/15%/13% base crit rate
-			chance += WornKatana.BASE_CRIT*( 1.1f - 0.1f*((MeleeWeapon)wep).tier() );
+		if (KATANA_CLASSES.contains(wep.getClass())) {
+			//25%/23%/20%/18%/15%/13% crit rate
+			chance += WornKatana.BASE_CRIT*( 1.1f - 0.1f*((MeleeWeapon) wep).tier );
 		}
 
 		if (wep instanceof SR.SRBullet) {
-			//20%/15%/13% crit rate
+			//20%/15%/13% crit rate, not affected by tier mod
 			chance += WornKatana.BASE_CRIT*( 1.1f - 0.1f*((SR.SRBullet) wep).tier );
+		}
+
+		if (hasTalent(Talent.BASIC_PRACTICE)) {
+			chance += 0.02f * pointsInTalent(Talent.BASIC_PRACTICE);
+		}
+
+		if (heroClass != HeroClass.SAMURAI && hasTalent(Talent.UNEXPECTED_SLASH)) {
+			chance += 0.04f * pointsInTalent(Talent.UNEXPECTED_SLASH);
+		}
+
+		if (hasTalent(Talent.WEAPON_MASTERY)) {
+			chance += 0.005f * pointsInTalent(Talent.WEAPON_MASTERY) * wepSTRExcess(wep);
 		}
 
 		if (heroClass == HeroClass.SAMURAI) {
@@ -1923,7 +1937,7 @@ public class Hero extends Char {
 			if (subClass == HeroSubClass.SLAYER) {
 				if (Awakening.isAwakened()) {
 					if (hasTalent(Talent.ACCELERATED_LETHALITY)) {
-						chance += 0.1f*pointsInTalent(Talent.ACCELERATED_LETHALITY);
+						chance += 0.1f * pointsInTalent(Talent.ACCELERATED_LETHALITY);
 					}
 
 					// Hero.defenseSkill(), as of SPD v3.2.5, only captures part of hero evasion.
@@ -1947,7 +1961,7 @@ public class Hero extends Char {
 			}
 
 			if (buff(Sheath.Sheathing.class) != null) {
-				if (buff(Sheath.QuickDrawTracker.class) != null) {
+				if (buff(Sheath.QuickDrawTracker.class) != null || testQuickDraw) {
 					chance *= 1.4f + 0.2f * pointsInTalent(Talent.ENHANCED_CRIT);
 				} else {
 					chance *= 1.2f;
@@ -1961,24 +1975,12 @@ public class Hero extends Char {
 			chance += 0.03f * wepSTRExcess(wep);
 		}
 
-		if (buff(Sheath.CertainCrit.class) != null) {
-			chance += 1f;
-		}
-
-		if (hasTalent(Talent.BASIC_PRACTICE)) {
-			chance += 0.02f * pointsInTalent(Talent.BASIC_PRACTICE);
-		}
-
-		if (hasTalent(Talent.WEAPON_MASTERY)) {
-			chance += 0.005f * pointsInTalent(Talent.WEAPON_MASTERY) * wepSTRExcess(wep);
-		}
-
-		if (heroClass != HeroClass.SAMURAI && hasTalent(Talent.UNEXPECTED_SLASH)) {
-			chance += 0.03f * pointsInTalent(Talent.UNEXPECTED_SLASH);
-		}
-
 		if (wep instanceof MissileWeapon && hasTalent(Talent.CRITICAL_THROW)) {
 			chance += 0.125f * pointsInTalent(Talent.CRITICAL_THROW);
+		}
+
+		if (buff(Sheath.CertainCrit.class) != null) {
+			chance += 1f;
 		}
 
 		return GameMath.gate(0, chance, 2);
