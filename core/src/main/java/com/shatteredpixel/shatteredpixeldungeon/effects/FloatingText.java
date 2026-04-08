@@ -149,6 +149,9 @@ public class FloatingText extends RenderedTextBlock {
 
 	//2 rows for critical attack versions of hit icons (+54)
 
+	public static int CRIT_DMG = 126;
+	public static int CRIT_DMG_NO_BLOCK = 127;
+
 	//new icons
 	public static int EXPERIENCE_USE = 27;
 	public static int RADIOACTIVE	 = 28;

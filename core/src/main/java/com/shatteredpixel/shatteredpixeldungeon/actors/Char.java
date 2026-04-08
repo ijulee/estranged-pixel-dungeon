@@ -1260,13 +1260,17 @@ public abstract class Char extends Actor {
 			if (src instanceof AscensionChallenge)                      icon = FloatingText.AMULET;
 			if (src instanceof RadioactiveMutation)                     icon = FloatingText.RADIOACTIVE;
 
+			boolean isCrit = (src == Dungeon.hero) && (Dungeon.hero.buff(Sheath.CriticalAttack.class) != null);
+
 			if ((icon == FloatingText.PHYS_DMG || icon == FloatingText.PHYS_DMG_NO_BLOCK) && hitMissIcon != -1){
 				if (icon == FloatingText.PHYS_DMG_NO_BLOCK) hitMissIcon += 18; //extra row
-				if (src == Dungeon.hero && Dungeon.hero.buff(Sheath.CriticalAttack.class) != null) {
-					hitMissIcon += 54; //3 rows down
-				}
+				if (isCrit) 								hitMissIcon += 54; //3 rows down
 				icon = hitMissIcon;
-			}
+			} else if (icon == FloatingText.PHYS_DMG && isCrit) {
+				icon = FloatingText.CRIT_DMG;
+            } else if (icon == FloatingText.PHYS_DMG_NO_BLOCK && isCrit) {
+				icon = FloatingText.CRIT_DMG_NO_BLOCK;
+            }
 			hitMissIcon = -1;
 
 			sprite.showStatusWithIcon(CharSprite.NEGATIVE, Integer.toString(dmg + shielded), icon);
