@@ -28,6 +28,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Bless;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ChampionEnemy;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Daze;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EvasiveMove;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Hex;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Momentum;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
@@ -40,8 +41,10 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Statue;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.MirrorImage;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.PrismaticImage;
 import com.shatteredpixel.shatteredpixeldungeon.items.KindOfWeapon;
+import com.shatteredpixel.shatteredpixeldungeon.items.KnightsShield;
 import com.shatteredpixel.shatteredpixeldungeon.items.Sheath;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Afterimage;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Stone;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.DriedRose;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfAccuracy;
@@ -399,7 +402,7 @@ public class FloatingText extends RenderedTextBlock {
 			}
 		}
 		if (attacker instanceof Hero) {
-            if (Dungeon.isChallenged(Challenges.SUPERMAN)) {
+			if (Dungeon.isChallenged(Challenges.SUPERMAN)) {
                 hitReasons.put(HIT_WEP, 2f);
             }
 			if (((Hero) attacker).hasTalent(Talent.ACC_ENHANCE)) {
@@ -474,6 +477,9 @@ public class FloatingText extends RenderedTextBlock {
 		if (defRoll == Char.INFINITE_EVASION && defender.buff(Talent.LiquidAgilEVATracker.class) != null){
 			return MISS_LIQ;
 		}
+		if (defRoll == Char.INFINITE_EVASION && defender.buff(EvasiveMove.class) != null) {
+			return MISS_RUN;
+		}
 
 		KindOfWeapon wep = null;
 		if (attacker instanceof Hero) wep = ((Hero) attacker).belongings.attackingWeapon();
@@ -517,6 +523,26 @@ public class FloatingText extends RenderedTextBlock {
 			}
 		}
 		if (defender.buff(Talent.LiquidAgilEVATracker.class) != null)   missReasons.put(MISS_LIQ, 3f);
+		if (defender instanceof Hero) {
+			if (Dungeon.isChallenged(Challenges.SUPERMAN)) {
+				missReasons.put(MISS_ARM, 3f);
+			}
+			KnightsShield shield = Dungeon.hero.belongings.getItem(KnightsShield.class);
+			if (shield != null && shield.hasGlyph(Afterimage.class, defender)) {
+				missReasons.put(MISS_ARM, Afterimage.evasionFactor(defender, shield));
+			}
+			if (Dungeon.hero.hasTalent(Talent.EVA_ENHANCE)) {
+				missReasons.put(MISS_EVA, 1 + 0.05f * Dungeon.hero.pointsInTalent(Talent.EVA_ENHANCE));
+			}
+			//similar logic as armor test, includes Fighter's Swift Movement and Medic's Breakthrough talents
+			Hero.testBonusEva = true;
+			float baseDef = defender.defenseSkill(attacker);
+			Hero.testBonusEva = false;
+			float buffedDef = defender.defenseSkill(attacker);
+			if (buffedDef > baseDef) {
+				missReasons.put(MISS_EVA, buffedDef / baseDef);
+			}
+		}
 
 		//accuracy reductions (always < 1)
 		if (wep != null && wep.accuracyFactor(attacker, defender) < 1){
