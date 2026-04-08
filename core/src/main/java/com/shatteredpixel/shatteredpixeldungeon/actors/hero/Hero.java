@@ -790,14 +790,10 @@ public class Hero extends Char {
 		}
 
 		if (hasTalent(Talent.BREAKTHROUGH)) {
-			int debuffs = 0;
 			for (Buff b : buffs()) {
 				if (Buff.isDebuff(b)) {
-					debuffs++;
+					evasion += 1+1*pointsInTalent(Talent.BREAKTHROUGH);
 				}
-			}
-			if (debuffs > 0) {
-				evasion += defenseSkill * (0.9f+0.3f*pointsInTalent(Talent.BREAKTHROUGH));
 			}
 		}
 
