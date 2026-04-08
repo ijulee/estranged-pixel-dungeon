@@ -680,7 +680,7 @@ public class Item implements Bundlable {
 								user.buff(Talent.LethalMomentumTracker.class).detach();
 								user.next();
 							} else if (Item.this instanceof MissileWeapon &&
-									Awakening.isAwakened() && critTracker != null){
+									Awakening.isAwakened(user) && critTracker != null){
 								user.next();
 							} else {
 								user.spendAndNext(delay);

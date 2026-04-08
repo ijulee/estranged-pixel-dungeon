@@ -26,6 +26,7 @@ import static com.shatteredpixel.shatteredpixeldungeon.Dungeon.hero;
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
+import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -74,11 +75,8 @@ public class Awakening extends Buff implements ActionIndicator.Action {
         }
     }
 
-    public static boolean isAwakened() {
-        if (Dungeon.hero == null) {
-            return false;
-        }
-        Awakening awakening = Dungeon.hero.buff(Awakening.class);
+    public static boolean isAwakened(Char ch) {
+        Awakening awakening = ch.buff(Awakening.class);
         return awakening != null && awakening.state == State.ON;
     }
 

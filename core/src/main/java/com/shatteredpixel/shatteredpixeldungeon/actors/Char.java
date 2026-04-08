@@ -788,8 +788,8 @@ public abstract class Char extends Actor {
 				}
 
 				if (Dungeon.hero.hasTalent(Talent.HASTE_EVASION)) {
-					if (Awakening.isAwakened()) {
-						Buff.prolong(Dungeon.hero, Haste.class, 1 + Dungeon.hero.pointsInTalent(Talent.HASTE_EVASION));
+					if (Awakening.isAwakened(enemy)) {
+						Buff.prolong(enemy, Haste.class, 1 + Dungeon.hero.pointsInTalent(Talent.HASTE_EVASION));
 					}
 				}
 			}

@@ -174,7 +174,6 @@ import com.shatteredpixel.shatteredpixeldungeon.items.quest.Pickaxe;
 import com.shatteredpixel.shatteredpixeldungeon.items.remains.BrokenShield;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.Ring;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfAccuracy;
-import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfArcana;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfEvasion;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfForce;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfFuror;
@@ -1087,7 +1086,7 @@ public class Hero extends Char {
 			return 0;
 		}
 
-		if (Awakening.isAwakened() && buff(Sheath.CriticalAttack.class) != null) {
+		if (Awakening.isAwakened(this) && buff(Sheath.CriticalAttack.class) != null) {
 			return 0;
 		}
 
@@ -1922,31 +1921,28 @@ public class Hero extends Char {
 		if (heroClass == HeroClass.SAMURAI) {
 			chance += 0.01f * lvl + 0.02f * wepSTRExcess(wep);
 
-			if (subClass == HeroSubClass.SLAYER) {
-				if (Awakening.isAwakened()) {
-					if (hasTalent(Talent.ACCELERATED_LETHALITY)) {
-						chance += 0.1f * pointsInTalent(Talent.ACCELERATED_LETHALITY);
-					}
+            if (subClass == HeroSubClass.SLAYER && Awakening.isAwakened(this)) {
+                if (hasTalent(Talent.ACCELERATED_LETHALITY)) {
+                    chance += 0.1f * pointsInTalent(Talent.ACCELERATED_LETHALITY);
+                }
 
-					// Hero.defenseSkill(), as of SPD v3.2.5, only captures part of hero evasion.
-					// The remainder is in Char.hit(), partially copied below.
-					// FIXME correct this when SPD consolidates acc/eva logic
-					float evasion = defenseSkill(null);
-					if (buff(Bless.class) != null) evasion *= 1.25f;
-					if (buff(  Hex.class) != null) evasion *= 0.8f;
-					if (buff( Daze.class) != null) evasion *= 0.5f;
+                // Hero.defenseSkill(), as of SPD v3.2.5, only captures part of hero evasion.
+                // The remainder is in Char.hit(), partially copied below.
+                // FIXME correct this when SPD consolidates acc/eva logic
+                float evasion = defenseSkill(null);
+                if (buff(Bless.class) != null) evasion *= 1.25f;
+                if (buff(  Hex.class) != null) evasion *= 0.8f;
+                if (buff( Daze.class) != null) evasion *= 0.5f;
 
-					evasion *= AscensionChallenge.statModifier(this);
-					if (Dungeon.hero.hasTalent(Talent.BLESS)){
-						// + 3%/5%
-						evasion *= 1.01f + 0.02f*Dungeon.hero.pointsInTalent(Talent.BLESS);
-					}
-					evasion *= FerretTuft.evasionMultiplier();
-					// end copy-pasta
+                if (Dungeon.hero.hasTalent(Talent.BLESS)) {
+                    // + 3%/5%
+                    evasion *= 1.01f + 0.02f * Dungeon.hero.pointsInTalent(Talent.BLESS);
+                }
+                evasion *= FerretTuft.evasionMultiplier();
+                // end copy-pasta
 
-					chance += Math.max(0, 0.01f*(evasion - defenseSkill));
-				}
-			}
+                chance += Math.max(0, 0.01f * (evasion - defenseSkill));
+            }
 
 			if (buff(Sheath.Sheathing.class) != null) {
 				if (buff(Sheath.QuickDrawTracker.class) != null || testQuickDraw) {
@@ -1987,21 +1983,6 @@ public class Hero extends Char {
 
 		if (buff(Sheath.QuickDrawTracker.class) != null) {
 			multi += 0.15f * pointsInTalent(Talent.POWERFUL_SLASH);
-		}
-
-		//FIXME should probably be moved to attackProc()
-		if (Awakening.isAwakened()) {
-			if (hasTalent(Talent.STABLE_BARRIER)) {
-				int shield = 1;
-				int maxShield = Math.round(HT * 0.2f * pointsInTalent(Talent.STABLE_BARRIER));
-				Barrier barrier = buff(Barrier.class);
-				int curShield = (barrier != null) ? barrier.shielding() : 0;
-				shield = Math.min(shield, maxShield-curShield);
-				if (shield > 0) {
-					Buff.affect(this, Barrier.class).incShield(shield);
-					this.sprite.showStatusWithIcon( CharSprite.POSITIVE, Integer.toString(shield), FloatingText.SHIELDING );
-				}
-			}
 		}
 
 		return Math.round(critDmg * multi);
@@ -2230,6 +2211,18 @@ public class Hero extends Char {
 						}
 						enemy.sprite.emitter().burst( ShadowParticle.UP, 5 );
 						buff(RouletteOfDeath.class).detach();
+					}
+				}
+				break;
+			case SLAYER:
+				if (Awakening.isAwakened(this)) {
+					if (hasTalent(Talent.STABLE_BARRIER)) {
+						int maxShield = Math.round(HT * 0.2f * pointsInTalent(Talent.STABLE_BARRIER));
+						Barrier barrier = Buff.affect(this, Barrier.class);
+						if (barrier.shielding() <= maxShield) {
+							Buff.affect(this, Barrier.class).incShield(1);
+							this.sprite.showStatusWithIcon( CharSprite.POSITIVE, Integer.toString(1), FloatingText.SHIELDING );
+						}
 					}
 				}
 				break;
