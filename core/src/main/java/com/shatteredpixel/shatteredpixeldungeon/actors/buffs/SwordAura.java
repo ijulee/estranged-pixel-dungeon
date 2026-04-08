@@ -70,6 +70,7 @@ public class SwordAura extends TargetingAction {
 
     public void useEnergy() {
         energy -= getCost() - recovered;
+        energy = Math.min(energy, maxEnergy());
         if (energy <= 0) {
             detach();
         }
