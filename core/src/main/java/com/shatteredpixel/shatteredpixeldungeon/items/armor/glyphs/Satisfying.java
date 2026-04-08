@@ -25,6 +25,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Hunger;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.WellFed;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor.Glyph;
@@ -39,16 +40,20 @@ public class Satisfying extends Glyph {
 	@Override
 	public int proc( Armor armor, Char attacker, Char defender, int damage) {
 
-		int level = Math.max(0, armor.buffedLvl()+1);
+		int level = Math.max(1, armor.buffedLvl()+1);
 		
 		// 25% fixed
 		float procChance = 0.25f * procChanceMultiplier(defender);
 		float powerMulti = Math.max(1f, procChance);
-		if (Random.Float() < procChance && defender == Dungeon.hero) {
-
-			Buff.affect(Dungeon.hero, Hunger.class).satisfy( Math.max(1, Math.round(damage*0.4f*level*powerMulti)) );
-			Dungeon.hero.sprite.emitter().burst(Speck.factory(Speck.HUNGER), 1);
-
+		if (defender == Dungeon.hero && Random.Float() < procChance) {
+			float satiation = Math.max(1, Math.round(damage*0.4f*level)) * powerMulti;
+			Hunger hunger = Buff.affect(defender, Hunger.class);
+			if (hunger.hunger() >= satiation) {
+                hunger.satisfy( satiation );
+            } else {
+				hunger.satisfy( hunger.hunger() );
+				Buff.affect(defender, WellFed.class).extend(satiation - hunger.hunger());
+			}
 		}
 		
 		return damage;
