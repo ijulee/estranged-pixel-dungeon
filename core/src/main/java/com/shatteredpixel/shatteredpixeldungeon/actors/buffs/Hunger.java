@@ -27,6 +27,7 @@ import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
+import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.TimekeepersHourglass.timeStasis;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.exotic.ScrollOfChallenge;
 import com.shatteredpixel.shatteredpixeldungeon.items.trinkets.SaltCube;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Document;
@@ -148,7 +149,8 @@ public class Hunger extends Buff implements Hero.Doom {
 			return;
 		}
 
-		if (energy > 0 && target.sprite != null && !overrideLimits) {
+		if (energy > 0 && target.sprite != null &&
+			(target.buff(TimeStasis.class) == null || target.buff(timeStasis.class) == null)) {
 			target.sprite.emitter().burst(Speck.factory(Speck.HUNGER), 1);
 		}
 
