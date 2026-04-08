@@ -659,10 +659,6 @@ public class Hero extends Char {
 			}
 		}
 
-		if (subClass == HeroSubClass.GUNSLINGER && justMoved && wep instanceof MissileWeapon) {
-			accuracy *= 0.25f*(1+0.5f*pointsInTalent(Talent.MOVING_SHOT));
-		}
-
 		if (buff(Scimitar.SwordDance.class) != null){
 			accuracy *= 1.50f;
 		}

@@ -248,6 +248,9 @@ abstract public class MissileWeapon extends Weapon {
 		if (juggle != null && juggle.weapons.contains(this)) {
 			accFactor *= Juggling.accuracyFactor();
 		}
+		if (owner instanceof Hero && ((Hero) owner).subClass == HeroSubClass.GUNSLINGER && ((Hero) owner).justMoved) {
+			accFactor *= 0.25f*(1+0.5f*((Hero) owner).pointsInTalent(Talent.MOVING_SHOT));
+		}
 
 		accFactor *= adjacentAccFactor(owner, target);
 
