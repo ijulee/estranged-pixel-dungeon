@@ -610,7 +610,14 @@ public class Hero extends Char {
 	@Override
 	public int attackSkill( Char target ) {
 		KindOfWeapon wep = belongings.attackingWeapon();
-		
+
+		if (Sheath.isQuickDraw() ||
+			buff(UnholyBible.Demon.class) != null ||
+			buff(MeleeWeapon.DashAttack.class) != null ||
+			(buff(BowWeapon.PenetrationShotBuff.class) != null && wep instanceof BowWeapon.Arrow)) {
+			return INFINITE_ACCURACY;
+		}
+
 		float accuracy = 1;
 		accuracy *= RingOfAccuracy.accuracyMultiplier( this );
 
@@ -673,22 +680,6 @@ public class Hero extends Char {
 
 		if (buff(Sheath.Sheathing.class) != null) {
 			accuracy *= 1.2f;
-		}
-
-		if (buff(UnholyBible.Demon.class) != null) {
-			accuracy = INFINITE_ACCURACY;
-		}
-
-		if (buff(MeleeWeapon.DashAttack.class) != null) {
-			accuracy = INFINITE_ACCURACY;
-		}
-
-		if (Sheath.isQuickDraw()) {
-			accuracy = INFINITE_ACCURACY;
-		}
-
-		if (buff(BowWeapon.PenetrationShotBuff.class) != null && wep instanceof BowWeapon.Arrow) {
-			accuracy = INFINITE_ACCURACY;
 		}
 
 		if (!RingOfForce.fightingUnarmed(this)) {
