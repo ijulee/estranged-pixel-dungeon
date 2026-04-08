@@ -21,9 +21,6 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.actors.hero;
 
-import static com.shatteredpixel.shatteredpixeldungeon.Dungeon.level;
-import static com.shatteredpixel.shatteredpixeldungeon.items.Item.updateQuickslot;
-
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Badges;
 import com.shatteredpixel.shatteredpixeldungeon.Bones;
@@ -437,13 +434,6 @@ public class Hero extends Char {
 
 		HTBoost = bundle.getInt(HTBOOST);
 
-		necklaceRing = (Ring) bundle.get(NECKLACE_BUFF);
-		/*if (necklaceRing != null) {
-			Ring.RingBuff ringBuff = necklaceRing.buff();
-			ringBuff.attachTo( this );
-			Necklace.buff = ringBuff;
-		}*/
-
 		super.restoreFromBundle( bundle );
 
 		heroClass = bundle.getEnum( CLASS, HeroClass.class );
@@ -458,14 +448,6 @@ public class Hero extends Char {
 		justMoved = bundle.getBoolean( JUST_MOVED );
 
 		belongings.restoreFromBundle( bundle );
-	}
-
-	public void removeNecklaceRing() {
-		necklaceRing = null;
-	}
-
-	public void setNecklaceRing(Ring r) {
-		necklaceRing = r;
 	}
 
 	public static void preview( GamesInProgress.Info info, Bundle bundle ) {
@@ -1044,7 +1026,7 @@ public class Hero extends Char {
 			speed *= 1f + 0.25f * pointsInTalent(Talent.HASTE_MOVE);
 		}
 
-		if (level.map[pos] == Terrain.FURROWED_GRASS && hasTalent(Talent.JUNGLE_EXPLORE)) {
+		if (Dungeon.level.map[pos] == Terrain.FURROWED_GRASS && hasTalent(Talent.JUNGLE_EXPLORE)) {
 			speed *= Math.pow(1.2f, pointsInTalent(Talent.JUNGLE_EXPLORE));
 		}
 
@@ -1889,7 +1871,7 @@ public class Hero extends Char {
 			if (Dungeon.level.map[pos] == Terrain.FURROWED_GRASS && subClass == HeroSubClass.SPECIALIST) {
 				boolean adjacentMob = false;
 				for (Mob mob : Dungeon.level.mobs.toArray( new Mob[0] )) {
-					if (level.adjacent(pos, mob.pos)) {
+					if (Dungeon.level.adjacent(pos, mob.pos)) {
 						adjacentMob = true;
 						break;
 					}
@@ -2119,7 +2101,7 @@ public class Hero extends Char {
 				}
 				if (hasTalent(Talent.KICK)
 						&& enemy.buff(PinCushion.class) != null
-						&& level.adjacent(pos, enemy.pos)
+						&& Dungeon.level.adjacent(pos, enemy.pos)
 						&& buff(Talent.KickCooldown.class) == null) {
 					Item item = enemy.buff(PinCushion.class).grabOne();
 					if (item.doPickUp(this, enemy.pos)){
@@ -2166,7 +2148,7 @@ public class Hero extends Char {
 
                                     Buff.prolong(Hero.this, EnhancedRingsCombo.class, EnhancedRingsCombo.maxDuration());
                                     updateHT(false);
-                                    updateQuickslot();
+                                    Item.updateQuickslot();
                                 }
                                 remove(this);
                                 return true;
@@ -2253,7 +2235,7 @@ public class Hero extends Char {
 							}
 							if (hasTalent(Talent.BULLET_TIME)) {
 								for (Char ch : Actor.chars()) {
-									if (level.heroFOV[ch.pos] && ch != this && ch.alignment == Alignment.ENEMY) {
+									if (Dungeon.level.heroFOV[ch.pos] && ch != this && ch.alignment == Alignment.ENEMY) {
 										Buff.affect(ch, Slow.class, 4*pointsInTalent(Talent.BULLET_TIME));
 									}
 								}
