@@ -129,6 +129,7 @@ public class Sheath extends Item {
             if (Dungeon.hero != null) {
                 Dungeon.observe();
                 GameScene.updateFog();
+                removeCross();
                 ActionIndicator.clearAction(this);
             }
         }
