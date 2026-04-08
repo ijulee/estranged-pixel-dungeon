@@ -168,6 +168,13 @@ public class Ring extends KindofMisc {
 		buff.attachTo( ch );
 	}
 
+	public void deactivate() {
+		if (buff != null) {
+			buff.detach();
+			buff = null;
+		}
+	}
+
 	@Override
 	public boolean doUnequip( Hero hero, boolean collect, boolean single ) {
 		if (super.doUnequip( hero, collect, single )) {
@@ -431,7 +438,7 @@ public class Ring extends KindofMisc {
 		if (cursed){
 			return Math.min( 0, Ring.this.level()-2 );
 		} else {
-			return Ring.this.buffedLvl()+1;
+			return Ring.this.level()+1;
 		}
 	}
 
@@ -452,6 +459,10 @@ public class Ring extends KindofMisc {
 		}
 		if (hero.belongings.misc() != null && hero.belongings.misc().getClass() == getClass()){
 			bonus += ((Ring)hero.belongings.misc()).soloBonus();
+		}
+		Ring necklaceRing = Necklace.getNecklaceRing();
+		if (necklaceRing != null && necklaceRing.getClass() == getClass()) {
+			bonus += necklaceRing.soloBonus();
 		}
 		return bonus;
 	}

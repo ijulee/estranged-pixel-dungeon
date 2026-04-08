@@ -319,8 +319,6 @@ public class Hero extends Char {
 	// for enemies we know we aren't seeing normally, resulting in better performance
 	public ArrayList<Mob> mindVisionEnemies = new ArrayList<>();
 
-	public Ring necklaceRing;
-
 	public Hero() {
 		super();
 
@@ -396,7 +394,6 @@ public class Hero extends Char {
 	private static final String LEVEL		= "lvl";
 	private static final String EXPERIENCE	= "exp";
 	private static final String HTBOOST     = "htboost";
-	private static final String NECKLACE_BUFF = "necklaceBuff";
 	private static final String JUST_MOVED	= "justMoved";
 
 	@Override
@@ -418,8 +415,6 @@ public class Hero extends Char {
 		bundle.put( EXPERIENCE, exp );
 		
 		bundle.put( HTBOOST, HTBoost );
-
-		bundle.put( NECKLACE_BUFF, necklaceRing );
 
 		bundle.put( JUST_MOVED, justMoved );
 
