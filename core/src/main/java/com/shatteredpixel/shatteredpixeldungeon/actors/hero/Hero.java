@@ -688,7 +688,9 @@ public class Hero extends Char {
 			return Math.max(1, Math.round(attackSkill * accuracy));
 		}
 	}
-	
+
+	public static boolean testBonusEva = false;
+
 	@Override
 	public int defenseSkill( Char enemy ) {
 
@@ -772,6 +774,10 @@ public class Hero extends Char {
 		}
 
 		//only bonus evasion points after this point
+		if (testBonusEva) {
+			return Math.max(1, Math.round(evasion));
+		}
+
 		if (hasTalent(Talent.SWIFT_MOVEMENT)) {
 			evasion += STR()-10;
 		}
