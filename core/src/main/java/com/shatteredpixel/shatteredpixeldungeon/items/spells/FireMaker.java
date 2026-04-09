@@ -22,6 +22,7 @@
 package com.shatteredpixel.shatteredpixeldungeon.items.spells;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
+import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Blob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.Fire;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
@@ -32,6 +33,7 @@ import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.watabou.noosa.audio.Sample;
 import com.watabou.utils.Callback;
+import com.watabou.utils.PathFinder;
 
 public class FireMaker extends TargetedSpell {
 	
@@ -45,7 +47,20 @@ public class FireMaker extends TargetedSpell {
 	protected void affectTarget(Ballistica bolt, Hero hero) {
 		int cell = bolt.collisionPos;
 
-		GameScene.add( Blob.seed(cell, 3, Fire.class));
+		//only ignite source cell if it's flammable
+		if (cell != bolt.sourcePos || Dungeon.level.flamable[cell]) {
+            GameScene.add( Blob.seed( cell, 2, Fire.class ) );
+        }
+
+		//ignite cells that share a side with target cell, are flammable, and are further from the source pos
+		//This prevents short-range casts not igniting barricades or bookshelves
+		for (int i : PathFinder.NEIGHBOURS4) {
+			if (Dungeon.level.trueDistance(cell+i, bolt.sourcePos) > Dungeon.level.trueDistance(cell, bolt.sourcePos)
+					&& Dungeon.level.flamable[cell+i]
+					&& Fire.volumeAt(cell+i, Fire.class) == 0) {
+				GameScene.add( Blob.seed( cell+i, 2, Fire.class ) );
+			}
+		}
 
 		onSpellused();
 	}
