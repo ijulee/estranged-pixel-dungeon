@@ -78,17 +78,17 @@ public class FireMaker extends TargetedSpell {
 	@Override
 	public int value() {
 		//prices of ingredients, divided by output quantity
-		return Math.round((50 + 40) * (quantity/(float) Recipe.OUT_QUANTITY));
+		return Math.round((30+20) * (quantity/(float) Recipe.OUT_QUANTITY));
 	}
 
 	@Override
 	public int energyVal() {
-		return (int)(14 * (quantity/(float) Recipe.OUT_QUANTITY));
+		return (int)((6+4+4) * (quantity/(float) Recipe.OUT_QUANTITY));
 	}
 	
 	public static class Recipe extends com.shatteredpixel.shatteredpixeldungeon.items.Recipe.SimpleRecipe {
 
-		private static final int OUT_QUANTITY = 3;
+		private static final int OUT_QUANTITY = 4;
 		
 		{
 			inputs =  new Class[]{PotionOfDragonsBreath.class};
