@@ -155,7 +155,7 @@ public class SwordAura extends TargetingAction {
             GameScene.selectCell(shooter);
         } else {
             if (canAutoAim(lastTarget)) {
-                int cell = QuickSlotButton.autoAim(lastTarget, knockAura());
+                int cell = QuickSlotButton.autoAim(lastTarget);
                 if (cell != -1) {
                     GameScene.handleCell(cell);
                 } else {
@@ -242,13 +242,6 @@ public class SwordAura extends TargetingAction {
                 }
             }
 
-            if (Random.Int(3) < user.pointsInTalent(Talent.SHARED_ENCHANTMENT)) {
-                SpiritBow bow = Dungeon.hero.belongings.getItem(SpiritBow.class);
-                if (bow != null && bow.hasEnchant(Projecting.class, user)) {
-                    projecting += 4;
-                }
-            }
-
             projecting = Math.round(projecting * Enchantment.genericProcChanceMultiplier(user));
 
             if (Dungeon.level.distance(user.pos, dst) <= projecting) {
@@ -261,7 +254,7 @@ public class SwordAura extends TargetingAction {
         @Override
         protected void onThrow( int cell ) {
             if (cell != hero.pos) {
-                //assume throwPos() has already applied Ballistica.DASH and Projecting
+                //throwPos() has already applied Ballistica.STOP_SOLID and Projecting
                 Ballistica aim = new Ballistica(hero.pos, cell, Ballistica.STOP_TARGET);
 
                 ArrayList<Char> chars = new ArrayList<>();
