@@ -25,11 +25,9 @@ import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Adrenaline;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.AllyBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Bless;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FlavourBuff;
-import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.LostInventory;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Flare;
@@ -52,11 +50,20 @@ public class Bible extends MeleeWeapon {
 		tier = 3;
 	}
 
-	public static final float[] procChances = new float[] {3, 3, 3, 1};
+	public static final float[] defaultChances = new float[] {3, 3, 3, 1};
 
 	@Override
 	public int proc(Char attacker, Char defender, int damage) {
-		switch (Random.chances(procChances)) {
+		float[] chances = defaultChances.clone();
+		if (attacker.buff(Bless.class) != null) {
+			chances[0] /= 2;
+		} else if (attacker.buff(PotionOfCleansing.Cleanse.class) != null) {
+			chances[1] /= 2;
+		} else if (attacker.buff(Adrenaline.class) != null) {
+			chances[2] /= 2;
+		}
+
+		switch (Random.chances(chances)) {
 			case 0: default:
 				Buff.affect( attacker, Bless.class, 2f );
 				break;
