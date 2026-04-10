@@ -43,6 +43,11 @@ public class ElectricityImbue extends Spell {
         return Math.round(quantity * (30 /(float) Recipe.OUT_QUANTITY));
     }
 
+    @Override
+    public int energyVal() {
+        return (int)((6+10) * (quantity/(float) Recipe.OUT_QUANTITY));
+    }
+
     public static class ElectricityImbueBuff extends FlavourBuff {
         {
             type = buffType.POSITIVE;
