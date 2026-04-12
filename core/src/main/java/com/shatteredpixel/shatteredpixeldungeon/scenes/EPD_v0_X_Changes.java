@@ -6,6 +6,8 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.items.GammaRayGun;
 import com.shatteredpixel.shatteredpixeldungeon.items.KnightsShield;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Afterimage;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.glyphs.Satisfying;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.bow.SpiritBow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.alchemy.PotOThunder;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
@@ -27,13 +29,191 @@ import java.util.ArrayList;
 
 public class EPD_v0_X_Changes {
     public static Image bugfix = new Image(Assets.Sprites.SPINNER, 144, 0, 16, 16);
+    public static Image bookshelf = new Image(Assets.Environment.TILES_CITY, 240, 96, 16, 16);
 
     public static void addAllChanges( ArrayList<ChangeInfo> changeInfos ) {
         add_v0_0_Changes(changeInfos);
     }
 
     private static void add_v0_0_Changes(ArrayList<ChangeInfo> changeInfos) {
-        ChangeInfo changes = new ChangeInfo("v0.0.6", true, "");
+        ChangeInfo changes = new ChangeInfo("v0.0.7", true, "");
+        changes.hardlight(Window.TITLE_COLOR);
+        changeInfos.add(changes);
+
+        changes = new ChangeInfo(Messages.get(ChangesScene.class, "new"), false, null);
+        changes.hardlight(Window.TITLE_COLOR);
+        changeInfos.add(changes);
+
+        changes.addButton(new ChangeButton(Icons.ESTRANGED.get(), "Dev Commentary",
+                "**-** Released April 12, 2026\n\n" +
+                "Here is the first stage of reworks (likely of many) to Blueprints to make them " +
+                "more accessible and less complex. The end result will probably be a rare item, " +
+                "that you have guaranteed access to but a limited number of, that takes in 2 " +
+                "items to transform one of them into a stronger version. But that takes time " +
+                "and planning, so I've made adjustments in the time being.\n" +
+                "You'll also notice that there have been various Samurai changes. It's mostly " +
+                "because I've been playing with the class in preparation of a rework. I might " +
+                "start with the base class and 1/2 subclasses for the next update. Stay tuned.\n\n" +
+                "_-- miaomix_") );
+
+        changes.addButton(new ChangeButton(
+                new ItemSprite(ItemSpriteSheet.BLUEPRINT), "Blueprints Rework 1",
+                "Blueprints have been reworked to make them more accessible and reduce complexity. " +
+                "I'm not happy with how it looks yet, so an overhaul will come.\n\n" +
+                "**-** Added naturally spawning Blueprints:\n" +
+                "  - 1 guaranteed spawn between 11-19F.\n" +
+                "  - Can spawn in secret library rooms with 50% chance\n" +
+                "  - Can spawn in locked armory rooms with 5% chance.\n" +
+                "  - Can spawn in destroyed bookshelves with 5% chance (0.25% overall)\n" +
+                "**-** Moved _Blueprint Weapons_ to its own category in Catalog.\n" +
+                "**-** Changed Upgrade Dust requirement in 1-weapon recipes to any uncursed " +
+                "melee weapon. If it's identified and upgraded, the upgrade will be transferred to " +
+                "the Blueprint, which increases success rate.\n" +
+                "**-** Blueprint name will now show the weapon name (e.g. \"_Chain Flail_ Blueprint\").\n" +
+                "**-** If multiple weapon Blueprints can be crafted, they will all be shown in the " +
+                "alchemy scene.\n" +
+                "**-** Changed _Dual Dagger_ into a Blueprint weapon that requires a Dirk.") );
+
+        changes.addButton(new ChangeButton(
+                new ItemSprite(ItemSpriteSheet.SPEAR_N_SHIELD), "Spear and Shield Rework",
+                "**-** Removed stance changing.\n" +
+                "**-** Instead the weapon always provides blocking (same as Round Shield).\n" +
+                "**-** Always has extra reach. Base damage, damage scaling, and attack delay " +
+                "at range are the same as Spear.\n" +
+                "**-** As close range, it has the same Base damage, damage scaling, and attack " +
+                "delay as Round Shield.\n" +
+                "**-** New Duelist ability: _Counter Spike_, which parries the next physical or " +
+                "magical attack from a target enemy, then attacks and knocks back the " +
+                "target up to 3 tiles away.") );
+
+        changes.addButton(new ChangeButton(
+                new ItemSprite(ItemSpriteSheet.CHAIN_FLAIL), "Chain Flail Rework",
+                "**-** Now Tier 5 and has extra reach (3 tiles).\n" +
+                "**-** Requirement changed to Whip from Chain Whip.\n" +
+                "**-** Same accuracy, base damage, and damage scaling as Flail.") );
+
+        changes.addButton(new ChangeButton(
+                new TalentIcon(Talent.BASIC_PRACTICE), "Hit, Miss, and Critical Icons",
+                "**-** Implemented critical hit damage icons, including versions for different " +
+                "hit reasons and for armor penetration.\n" +
+                "**-** In exchange, the _\"!\"_ crit indicator in text has been removed.\n" +
+                "**-** Added new cases for armor penetration damage icons (Duelist Penetration " +
+                "Shot ability, Samurai Shadow Blade armor ability, guns with AP bullet mod).\n" +
+                "**-** Added logic to display more hit and miss icons.") );
+
+        changes.addButton(new ChangeButton(Icons.CELL_LABEL.get(), "Cell Labels",
+                "Added cell labels for certain actions with different behavior when selecting the hero:\n" +
+                "**-** Sharpshooter's _Burst Shot_ for random targeting.\n" +
+                "**-** Duelist's melee bow _SHOOT_ action for _Penetration Shot_ ability.\n" +
+                "**-** Horseman's _Mounted Charge_ for dismounting the horse.\n" +
+                "**-** Gun _SHOOT_ action for reloading (changes color when Duelist's " +
+                "Quick Reload is available).\n" +
+                "**-** Juggler's thrown weapons _THROW_ action for juggling.") );
+
+        changes = new ChangeInfo(Messages.get(ChangesScene.class, "changes"), false, null);
+        changes.hardlight(CharSprite.WARNING);
+        changeInfos.add(changes);
+
+        changes.addButton( new ChangeButton(Icons.PREFS.get(), Messages.get(ChangesScene.class, "misc"),
+                "**-** \n" +
+                "**-** Changed Medic's Breakthrough talent (1-5) to give a bonus 2/3 points of " +
+                "evasion per debuff.\n" +
+                "**-** Slight adjustment to Spirit Horse animations.\n" +
+                "**-** Clarified some Samurai T2 talent descriptions.\n" +
+                "**-** Changed Blueprint weapon descriptions.\n" +
+                "**-** Changed all katanas' stat descriptions to reflect their critical chance.\n" +
+                "**-** Spirit Horse now has infinite accuracy.\n" +
+                "**-** Changed description of Gunslinger's Moving Shot talent (3-8) for clarity.") );
+
+        changes.addButton(new ChangeButton(
+                new Image(bugfix), Messages.get(ChangesScene.class, "bugfixes"),
+                "**-** Corrected fix for time stasis effects showing satiation specks.\n" +
+                "**-** Fixed Spirit Horse sprite taking too long to attack.\n" +
+                "**-** Fixed debug teleporter oddities.\n" +
+                "**-** Fixed the lack of an energy value on Electricity Imbue Spell.\n" +
+                "**-** Fixed sell value and energy of Rapid Growth, Freezing, and Ignition.\n" +
+                "**-** Fixed bug where certain spells do not correctly trigger spell talents.\n" +
+                "**-** Fixed Honeyed Healing energizing bug (present in ShatteredPD).\n" +
+                "**-** Added missing name and desc for Duelist's Unholy Bible ability buff.\n" +
+                "**-** Fixed bug where Duelist's Chain Flail Spin ability consumes Precise " +
+                "Assault and Liquid Agility.",
+
+                "**-** Fixed rare cases where Explorer with Durable Rope talent (3-8) can't attack " +
+                "despite having enough rope after discount.\n" +
+                "**-** Fixed Auraslasher Sword Aura autotarget oddities.\n" +
+                "**-** Fixed Auraslasher's Sword Aura recovering more energy than maximum.\n" +
+                "**-** Fixed bug where targeting cross sometimes isn't removed for Swordmaster's " +
+                "Dash-Draw.\n" +
+                "**-** Fixed incorrect crit chance in buff description of Swordmaster's Quick-Draw.\n" +
+                "**-** Fixed potential bug where Swordsmaster has infinite accuracy with missile " +
+                "weapons when Sheathed.\n" +
+                "**-** Fixed bug where Samurai Shadow Blade ability's Piercing Shadow Talent (4-2) " +
+                "bonus damage is halved.\n",
+
+                "**-** Fixed Juggling generating arrow ammo when it shouldn't because arrows " +
+                "don't consume ammo until they are thrown.\n" +
+                "**-** Fixed Juggling buff potentially affecting non-juggling accuracy when active.\n" +
+                "**-** Fixed Adrenaline on hero not affecting thrown weapon attack speed.\n" +
+                "**-** Fixed hero button layout in Hero Select scene when there is a bottom inset " +
+                "and future-proofed it (!), hopefully.\n" +
+                "**-** Fixed bug where last chosen Challenges are not correctly loaded in some cases.") );
+
+        changes.addButton(new ChangeButton(new HeroIcon(HeroSubClass.JUGGLER), "Juggler",
+                "**-** Changed default action of thrown weapons for Juggler back to _THROW_.\n" +
+                "**-** Added function to juggle instead of throw by selecting the hero.\n" +
+                "**-** Juggling buff description now shows the enchantments and upgrade values of " +
+                "thrown weapons.\n" +
+                "**-** Changed Juggler talent names and updated descriptions."));
+
+        changes = new ChangeInfo(Messages.get(ChangesScene.class, "buffs"), false, null);
+        changes.hardlight(CharSprite.POSITIVE);
+        changeInfos.add(changes);
+
+        changes.addButton(new ChangeButton(
+                new ItemSprite(ItemSpriteSheet.ARTIFACT_TOOLKIT), "Spell Buffs",
+                "**-** Ignition spell can now ignite barricades and bookshelves even in storm " +
+                "clouds. When targeting the hero, it will only ignite if current tile is flammable.\n" +
+                "**-** Fire Imbue Spell now triggers Inscribed talents and has increased duration " +
+                "of 20 turns (was 10). Cooldown increased to 250 turns in exchange.") );
+
+        changes.addButton(new ChangeButton(new ItemSprite(ItemSpriteSheet.NECKLACE_RUBY), "Gem Necklace",
+                "Duelist using Gem Necklace with Ring of Force can now use Brawler Stance.") );
+
+        changes.addButton(new ChangeButton(
+                new ItemSprite(ItemSpriteSheet.ARMOR_SCALE, new Satisfying().glowing()),
+                "Satiation Glyph",
+                "Satiation glyph can now grant Well Fed buff if hero is fully satiated.") );
+
+        changes.addButton(new ChangeButton(new ItemSprite(ItemSpriteSheet.BIBLE), "Bible",
+                "Changed Bible proc effect to instead randomly choose a buff to proc. If the buff " +
+                "already applies, the chance is lowered. Healing amount also increased to (1+lvl).") );
+
+        changes = new ChangeInfo(Messages.get(ChangesScene.class, "nerfs"), false, null);
+        changes.hardlight(CharSprite.NEGATIVE);
+        changeInfos.add(changes);
+
+        changes.addButton(new ChangeButton(
+                new TalentIcon(Talent.BASIC_PRACTICE), "Critical Chance Calculation",
+                "Changed crit chance calculation order, so \"bonus\" increases are not " +
+                "affected by multipliers. Most notably, Samurai's Deadly Throw talent (2-6)."));
+
+        changes.addButton(new ChangeButton(
+                new ItemSprite(ItemSpriteSheet.ARMOR_SCALE, new Afterimage().glowing()),
+                "Afterimage Glyph",
+                "**-** Changed Afterimage glyph calculations to also apply to Ghost ally and " +
+                "armored statues.\n" +
+                "**-** Nerfed Afterimage glyph multiplier (1.125x per level, same as Ring of " +
+                "Evasion) and applied before any \"bonus\" points of evasion.") );
+
+        changes.addButton(new ChangeButton(new Image(bookshelf), "Bookshelf Loot",
+                "Ring of Wealth only increases regular scroll drops from destroying bookshelves, " +
+                "not other prizes.") );
+
+        changes.addButton(new ChangeButton(
+                new ItemSprite(ItemSpriteSheet.ARTIFACT_ROSE3), "Ghost Ally",
+                "Ghost ally using melee bows and guns now uses the hero's ammo."));
+
+        changes = new ChangeInfo("v0.0.6", true, "");
         changes.hardlight(Window.TITLE_COLOR);
         changeInfos.add(changes);
 
@@ -59,7 +239,7 @@ public class EPD_v0_X_Changes {
                 "**-** Added Gray icons for Seed Search and Analysis options in Hero Selection. " +
                 "Actually fixing the features will take a while longer."));
 
-        changes.addButton(new ChangeButton(bugfix, Messages.get(ChangesScene.class, "bugfixes"),
+        changes.addButton(new ChangeButton(new Image(bugfix), Messages.get(ChangesScene.class, "bugfixes"),
                 "**-** Fixed Chaser's Lethal Surprise talent (3-8) not proccing at all."));
 
         changes = new ChangeInfo("v0.0.5", true, "");
@@ -164,7 +344,7 @@ public class EPD_v0_X_Changes {
                 "now 3 but lasts for 5/8 turns.\n" +
                 "**-** Various small text changes."));
 
-        changes.addButton(new ChangeButton(bugfix, Messages.get(ChangesScene.class, "bugfixes"),
+        changes.addButton(new ChangeButton(new Image(bugfix), Messages.get(ChangesScene.class, "bugfixes"),
                 "**-** Fixed issue with Bowmaster Moving Focus talent (3-9) not working as intended.\n" +
                 "**-** Fixed challenge randomizer not able to select more than 9 challenges or any " +
                 "of the RPD challenges.\n" +
@@ -232,8 +412,7 @@ public class EPD_v0_X_Changes {
                 "has an enchantment, and dual glow if the sword itself has a different one. The " +
                 "item name will also contain the source weapon's enchantment name."));
 
-        changes.addButton(new ChangeButton(bugfix,
-                Messages.get(ChangesScene.class, "bugfixes"),
+        changes.addButton(new ChangeButton(new Image(bugfix), Messages.get(ChangesScene.class, "bugfixes"),
                 "**-** Fixed Skeleton Key causing crash when picking up keys in Lab region. " +
                 "I tried to salvage EPD v0.0.3 save files as best I could.\n" +
                 "**-** Fixed Skeleton Key incorrectly discarding Crystal Keys in Old Temple.\n" +
@@ -304,8 +483,7 @@ public class EPD_v0_X_Changes {
                 "**-** The Medic's Gamma Ray Gun will now aggro enemies, like damage-dealing wands.\n" +
                 "**-** Spellbooks can now be transmuted into other flavors."));
 
-        changes.addButton(new ChangeButton(bugfix,
-                Messages.get(ChangesScene.class, "bugfixes"),
+        changes.addButton(new ChangeButton(new Image(bugfix), Messages.get(ChangesScene.class, "bugfixes"),
                 "**-** Some mobs and allies were not affected by Mystic Grindstone.\n" +
                 "**-** Fixed bug where Sword Aura can't be used.\n" +
                 "**-** Fixed Satiation glyph giving 0 satiation at +0 (and triggering starvation " +
@@ -397,8 +575,7 @@ public class EPD_v0_X_Changes {
                 "**-** Added ReARranged additional enchantments (Stunning, Eldritch, " +
                 "Venomous, and Vorpal) to potential Unstable effects."));
 
-        changes.addButton(new ChangeButton(bugfix,
-                Messages.get(ChangesScene.class, "bugfixes"),
+        changes.addButton(new ChangeButton(new Image(bugfix), Messages.get(ChangesScene.class, "bugfixes"),
                 "**-** Fixed Swordmaster Quick Draw proccing incorrectly, sometimes " +
                 "alongside Dash Draw.\n" +
                 "**-** Fixed incorrect critical indicator for a non-critical physical attack " +
@@ -596,8 +773,7 @@ public class EPD_v0_X_Changes {
                 "**-** Changed Elixir of Talent description to be more clear and concise " +
                 "(felt like writing a modern Yu-Gi-Oh! card)."));
 
-        changes.addButton(new ChangeButton(bugfix,
-                Messages.get(ChangesScene.class, "bugfixes"),
+        changes.addButton(new ChangeButton(new Image(bugfix), Messages.get(ChangesScene.class, "bugfixes"),
                 "Fixed the following bugs:\n" +
                 "**Weapons**\n" +
                 "**-** Cursed bow weapons causing \"cursed thrown weapon\" message.\n" +
