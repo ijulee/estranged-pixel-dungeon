@@ -677,8 +677,8 @@ public class Hero extends Char {
 			accuracy *= buff(LargeSword.LargeSwordBuff.class).getAccuracyFactor();
 		}
 
-		if (buff(Sheath.Sheathing.class) != null) {
-			accuracy *= 1.2f;
+		if (buff(Sheath.Sheathing.class) != null && wep instanceof MeleeWeapon) {
+			accuracy *= 1.5f;
 		}
 
 		if (!RingOfForce.fightingUnarmed(this)) {
@@ -890,8 +890,8 @@ public class Hero extends Char {
 			dr += buff(HoldFast.class).armorBonus();
 		}
 
-		if (hasTalent(Talent.PARRYING)) {
-			dr += Random.NormalIntRange(0, 1+pointsInTalent(Talent.PARRYING));
+		if (hasTalent(Talent.PARRYING) && buff(Sheath.Sheathing.class) != null) {
+			dr += Random.NormalIntRange(1, 2) * pointsInTalent(Talent.PARRYING);
 		}
 
 		ReinforcedArmor.ReinforcedArmorTracker reArmor = buff(ReinforcedArmor.ReinforcedArmorTracker.class);

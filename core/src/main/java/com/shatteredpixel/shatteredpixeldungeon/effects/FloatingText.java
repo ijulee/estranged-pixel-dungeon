@@ -412,8 +412,8 @@ public class FloatingText extends RenderedTextBlock {
 				hitReasons.put(HIT_ACC, 1 + 0.05f * ((Hero) attacker).pointsInTalent(Talent.ACC_ENHANCE));
 			}
 			//TODO add hit icon for acc buffs related to Samurai
-			if (attacker.buff(Sheath.Sheathing.class) != null) {
-				hitReasons.put(HIT_WEP, 1.2f);
+			if (attacker.buff(Sheath.Sheathing.class) != null && wep instanceof MeleeWeapon) {
+				hitReasons.put(HIT_WEP, 1.5f);
 			}
 			if (Sheath.isQuickDraw()) {
 				return HIT_WEP;
@@ -523,7 +523,7 @@ public class FloatingText extends RenderedTextBlock {
 				missReasons.put(MISS_RUN, defender.defenseSkill(attacker) / (float) baseDef);
 			} else {
 				missReasons.put(MISS_ARM, defender.defenseSkill(attacker) / (float) baseDef);
-			}
+			} //TODO add separate icon for Demonslayer's Awakening here.
 		}
 		if (defender.buff(Talent.LiquidAgilEVATracker.class) != null)   missReasons.put(MISS_LIQ, 3f);
 		if (defender instanceof Hero) {
