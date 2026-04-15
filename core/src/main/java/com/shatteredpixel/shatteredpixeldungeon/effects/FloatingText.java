@@ -25,12 +25,14 @@ import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Challenges;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Awakening;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Bless;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ChampionEnemy;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Daze;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.EvasiveMove;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Hex;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Momentum;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.SwordAura;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
@@ -131,6 +133,7 @@ public class FloatingText extends RenderedTextBlock {
 	public static int HIT_SUPR  = 45;
 	public static int HIT_PRES  = 46;
 	public static int HIT_MOMEN = 47;
+	public static int HIT_SAM = 48;
 
 	//extra row for hit icons that are armor-piercing
 
@@ -146,6 +149,7 @@ public class FloatingText extends RenderedTextBlock {
 	public static int MISS_DEF  = 80;
 	public static int MISS_TUFT = 81;
 	public static int MISS_RUN  = 82;
+	public static int MISS_SAM  = 83;
 
 	//2 rows for critical attack versions of hit icons (+54)
 
@@ -411,12 +415,14 @@ public class FloatingText extends RenderedTextBlock {
 			if (((Hero) attacker).hasTalent(Talent.ACC_ENHANCE)) {
 				hitReasons.put(HIT_ACC, 1 + 0.05f * ((Hero) attacker).pointsInTalent(Talent.ACC_ENHANCE));
 			}
-			//TODO add hit icon for acc buffs related to Samurai
 			if (attacker.buff(Sheath.Sheathing.class) != null && wep instanceof MeleeWeapon) {
-				hitReasons.put(HIT_WEP, 1.5f);
+				hitReasons.put(HIT_SAM, 1.5f);
 			}
 			if (Sheath.isQuickDraw()) {
-				return HIT_WEP;
+				return HIT_SAM;
+			}
+			if (wep instanceof SwordAura.Aura) {
+				return HIT_SAM;
 			}
 			if (attacker.buff(BowWeapon.PenetrationShotBuff.class) != null && wep instanceof BowWeapon.Arrow) {
 				return HIT_DANCE;
@@ -521,9 +527,11 @@ public class FloatingText extends RenderedTextBlock {
 			if (defender.buff(Momentum.class) != null){
 				//this is cheating a little, as evasion aug gets wrapped into this too
 				missReasons.put(MISS_RUN, defender.defenseSkill(attacker) / (float) baseDef);
+			} else if (Awakening.isAwakened(defender)) {
+				missReasons.put(MISS_SAM, defender.defenseSkill(attacker) / (float) baseDef);
 			} else {
 				missReasons.put(MISS_ARM, defender.defenseSkill(attacker) / (float) baseDef);
-			} //TODO add separate icon for Demonslayer's Awakening here.
+			}
 		}
 		if (defender.buff(Talent.LiquidAgilEVATracker.class) != null)   missReasons.put(MISS_LIQ, 3f);
 		if (defender instanceof Hero) {
