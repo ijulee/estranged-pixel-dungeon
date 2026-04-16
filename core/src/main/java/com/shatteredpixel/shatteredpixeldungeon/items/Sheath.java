@@ -28,7 +28,6 @@ import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.ui.ActionIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.ui.BuffIndicator;
 import com.shatteredpixel.shatteredpixeldungeon.ui.HeroIcon;
-import com.shatteredpixel.shatteredpixeldungeon.ui.QuickSlotButton;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 import com.watabou.noosa.Image;
 import com.watabou.noosa.audio.Sample;
@@ -62,12 +61,17 @@ public class Sheath extends Item {
         super.execute(hero, action);
         if (action.equals( AC_USE )) {
             if (hero.belongings.weapon() instanceof MeleeWeapon) {
-                if (hero.buff(Sheathing.class) != null) {
-                    hero.buff(Sheathing.class).detach();
-                } else {
+                if (hero.buff(Sheathing.class) == null) {
                     Buff.affect(hero, Sheathing.class);
+                    if (hero.buff(Talent.PreparedMealTracker.class) != null) {
+                        hero.buff(Talent.PreparedMealTracker.class).use();
+                    } else {
+                        hero.spendAndNext(Actor.TICK);
+                    }
+                } else {
+                    hero.buff(Sheathing.class).detach();
+                    hero.spendAndNext(Actor.TICK);
                 }
-                hero.spendAndNext(Actor.TICK);
             } else {
                 GLog.w(Messages.get(this, "no_weapon"));
             }

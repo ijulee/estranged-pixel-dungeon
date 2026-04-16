@@ -72,7 +72,6 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.Ratmogrify
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.adventurer.TreasureMap;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.gunner.ReinforcedArmor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.medic.HealingGenerator;
-import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.samurai.ShadowBlade;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.DivineSense;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.PowerOfLife;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.RecallInscription;
@@ -520,18 +519,19 @@ public enum Talent {
 	FASTER_HEALING				(39, 6, 4),
 
 	//Samurai T1
-	BASIC_PRACTICE				(0, 7),	//치명 확률 2/4% 증가
-	MASTERS_INTUITION			(1, 7),	//총기를 제외한 근접 무기 장착 시 즉시 감정/총기를 제외한 근접 무기 획득 시 저주 여부 감정
-	DRAWING_ENHANCE				(2, 7),	//발도술 공격이 2/3의 추가 피해를 입힘
-	PARRYING(3, 7),	//방어력 0-2/0-3 증가
-	ADRENALINE_SURGE			(4, 7),	//적 처치 시 3/5턴의 아드레날린 획득
+	BASIC_PRACTICE				(0, 7),
+	MASTERS_INTUITION			(1, 7),
+	DRAWING_ENHANCE				(2, 7),
+	PREPARED_MEAL(2, 7),
+	PARRYING					(3, 7),
+	ADRENALINE_SURGE			(4, 7),
 	//Samurai T2
-	CRITICAL_MEAL				(5, 7),	//식사에 1턴만 소모, 식사 시 다음 1/2회의 물리 공격에 반드시 치명타 발생
-	INSCRIBED_LETHALITY			(6, 7),	//주문서 사용 시 다음 1/2회의 물리 공격에 반드시 치명타 발생
-	UNEXPECTED_SLASH			(7, 7),	//납도 중 치명 확률 +10%/20% 증가
-	DRAGONS_EYE					(8, 7),	//납도 중 주변 반경 3/4타일 이내의 적 위치를 파악할 수 있게 됨
-	WEAPON_MASTERY				(9, 7),	//무기의 힘 요구 수치를 넘은 힘 1당 치명 확률 +1/+2%
-	CRITICAL_THROW				(10, 7),	//투척 무기와 탄환의 치명 확률이 +25/50% 증가
+	CRITICAL_MEAL				(5, 7),
+	INSCRIBED_LETHALITY			(6, 7),
+	UNEXPECTED_SLASH			(7, 7),
+	DRAGONS_EYE					(8, 7),
+	WEAPON_MASTERY				(9, 7),
+	CRITICAL_THROW				(10, 7),
 	//Samurai T3
 	QUICK_SHEATHING				(11, 7, 3),
 	LETHAL_POWER				(12, 7, 3),
@@ -1180,6 +1180,26 @@ public enum Talent {
 
 	//Samurai 1-3 meta
 	public static class DrawEnhanceMetaTracker extends Buff {}
+	public static class PreparedMealTracker extends Buff {
+		{
+			type = buffType.POSITIVE;
+		}
+		private int count;
+
+		@Override
+		public int icon() {
+			return BuffIndicator.SAMURAI_FOOD;
+		}
+
+		public void set(int count) {
+			this.count = count;
+		}
+
+		public void use() {
+			this.count--;
+			if (this.count <= 0) detach();
+		}
+	}
 
 	//Knight 1-1
 	public static class ArmorEmpower extends Buff {
@@ -1812,6 +1832,10 @@ public enum Talent {
 
 		if (hero.hasTalent(Talent.INFINITE_BULLET_MEAL)) {
 			Buff.affect(hero, InfiniteBullet.class, 1+hero.pointsInTalent(Talent.INFINITE_BULLET_MEAL));
+		}
+
+		if (hero.hasTalent(PREPARED_MEAL)) {
+			Buff.affect(hero, PreparedMealTracker.class).set(1+hero.pointsInTalent(PREPARED_MEAL));
 		}
 
 		if (hero.hasTalent(Talent.CRITICAL_MEAL)) {
@@ -2719,7 +2743,7 @@ public enum Talent {
 				Collections.addAll(tierTalents, RELOADING_MEAL, GUNNERS_INTUITION, SPEEDY_MOVE, SAFE_RELOAD, CLOSE_COMBAT);
 				break;
 			case SAMURAI:
-				Collections.addAll(tierTalents, BASIC_PRACTICE, MASTERS_INTUITION, DRAWING_ENHANCE, PARRYING, ADRENALINE_SURGE);
+				Collections.addAll(tierTalents, PREPARED_MEAL, MASTERS_INTUITION, BASIC_PRACTICE, PARRYING, ADRENALINE_SURGE);
 				break;
 			case ADVENTURER:
 				Collections.addAll(tierTalents, HARVEST_BERRY, SAFE_POTION, ROOT, PROTECTIVE_SLASH, KINETIC_ATTACK);
@@ -3015,12 +3039,12 @@ public enum Talent {
 
 	private static final HashSet<String> removedTalents = new HashSet<>();
 	static{
-		//nothing atm
+		removedTalents.add("DRAWING_ENHANCEMENT");
 	}
 
 	private static final HashMap<String, String> renamedTalents = new HashMap<>();
 	static{
-		//nothing atm
+		renamedTalents.put("PARYING", "PARRYING");
 	}
 
 	public static void restoreTalentsFromBundle( Bundle bundle, Hero hero ){
