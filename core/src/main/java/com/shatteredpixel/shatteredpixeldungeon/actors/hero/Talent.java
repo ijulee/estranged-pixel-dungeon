@@ -521,10 +521,9 @@ public enum Talent {
 	//Samurai T1
 	BASIC_PRACTICE				(0, 7),
 	MASTERS_INTUITION			(1, 7),
-	DRAWING_ENHANCE				(2, 7),
 	PREPARED_MEAL				(2, 7),
 	PARRYING					(3, 7),
-	ADRENALINE_SURGE			(4, 7),
+	DRAWING_ENHANCE				(4, 7),
 	//Samurai T2
 	CRITICAL_MEAL				(5, 7),
 	INSCRIBED_LETHALITY			(6, 7),
@@ -2275,7 +2274,7 @@ public enum Talent {
 			}
 		}
 
-		if (hero.hasTalent(DRAWING_ENHANCE) && hero.buff(Sheath.Sheathing.class) != null) {
+		if (hero.buff(Sheath.Sheathing.class) != null && hero.hasTalent(DRAWING_ENHANCE)) {
 			dmg += 1+hero.pointsInTalent(DRAWING_ENHANCE);
 		}
 
@@ -2769,7 +2768,7 @@ public enum Talent {
 				Collections.addAll(tierTalents, RELOADING_MEAL, GUNNERS_INTUITION, SPEEDY_MOVE, SAFE_RELOAD, CLOSE_COMBAT);
 				break;
 			case SAMURAI:
-				Collections.addAll(tierTalents, PREPARED_MEAL, MASTERS_INTUITION, BASIC_PRACTICE, PARRYING, ADRENALINE_SURGE);
+				Collections.addAll(tierTalents, PREPARED_MEAL, MASTERS_INTUITION, BASIC_PRACTICE, PARRYING, DRAWING_ENHANCE);
 				break;
 			case ADVENTURER:
 				Collections.addAll(tierTalents, HARVEST_BERRY, SAFE_POTION, ROOT, PROTECTIVE_SLASH, KINETIC_ATTACK);
@@ -3065,7 +3064,7 @@ public enum Talent {
 
 	private static final HashSet<String> removedTalents = new HashSet<>();
 	static{
-		removedTalents.add("DRAWING_ENHANCEMENT");
+		removedTalents.add("ADRENALINE_SURGE");
 	}
 
 	private static final HashMap<String, String> renamedTalents = new HashMap<>();
