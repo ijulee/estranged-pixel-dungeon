@@ -1201,6 +1201,32 @@ public enum Talent {
 		}
 	}
 
+	public static class PowerfulDrawMetaTracker extends Buff {
+		public int pos;
+		{ type = Buff.buffType.POSITIVE; }
+		public int icon() { return BuffIndicator.TIME; }
+		public void tintIcon(Image icon) { icon.hardlight(0xC21313); }
+		@Override
+		public boolean act() {
+			if (pos != target.pos) {
+				detach();
+			} else {
+				spend(TICK);
+			}
+			return true;
+		}
+		private static final String POS = "pos";
+		@Override
+		public void storeInBundle(Bundle bundle) {
+			super.storeInBundle(bundle);
+			bundle.put(POS, pos);
+		}
+		@Override
+		public void restoreFromBundle(Bundle bundle) {
+			super.restoreFromBundle(bundle);
+			pos = bundle.getInt(POS);
+		}
+	}
 	//Knight 1-1
 	public static class ArmorEmpower extends Buff {
 

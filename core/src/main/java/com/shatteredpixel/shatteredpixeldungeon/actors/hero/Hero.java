@@ -917,6 +917,10 @@ public class Hero extends Char {
 
 					Sheath.CertainCrit certainCrit = buff(Sheath.CertainCrit.class);
 					if (certainCrit != null) certainCrit.hit();
+
+					if (buff(Talent.PowerfulDrawMetaTracker.class) != null) {
+						buff(Talent.PowerfulDrawMetaTracker.class).detach();
+					}
 				}
 			}
 
@@ -1911,8 +1915,9 @@ public class Hero extends Char {
 			chance += 0.01f + 0.02f * pointsInTalent(Talent.BASIC_PRACTICE);
 		}
 
-		if (heroClass != HeroClass.SAMURAI && hasTalent(Talent.UNEXPECTED_SLASH)) {
-			chance += 0.04f * pointsInTalent(Talent.UNEXPECTED_SLASH);
+		if (buff(Talent.PowerfulDrawMetaTracker.class) != null &&
+			wep instanceof MeleeWeapon) {
+			chance += 0.05f * pointsInTalent(Talent.UNEXPECTED_SLASH);
 		}
 
 		if (hasTalent(Talent.WEAPON_MASTERY)) {
