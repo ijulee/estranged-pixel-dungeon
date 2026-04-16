@@ -88,6 +88,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.RouletteOfDeath;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Slow;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.SnipersMark;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.SoulCollect;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.SwordAura;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Tackle;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.TimeStasis;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Undead;
@@ -1921,7 +1922,7 @@ public class Hero extends Char {
 		if (heroClass == HeroClass.SAMURAI) {
 			chance += 0.01f * lvl + 0.02f * wepSTRExcess(wep);
 
-            if (subClass == HeroSubClass.SLAYER && Awakening.isAwakened(this)) {
+			if (subClass == HeroSubClass.SLAYER && Awakening.isAwakened(this)) {
                 if (hasTalent(Talent.ACCELERATED_LETHALITY)) {
                     chance += 0.1f * pointsInTalent(Talent.ACCELERATED_LETHALITY);
                 }
@@ -1944,7 +1945,8 @@ public class Hero extends Char {
                 chance += Math.max(0, 0.01f * (evasion - defenseSkill));
             }
 
-			if (buff(Sheath.Sheathing.class) != null) {
+			if (buff(Sheath.Sheathing.class) != null &&
+					(wep instanceof MeleeWeapon || wep instanceof SwordAura.Aura)) {
 				if (buff(Sheath.QuickDrawTracker.class) != null || testQuickDraw) {
 					chance *= 1.4f + 0.2f * pointsInTalent(Talent.ENHANCED_CRIT);
 				} else {
