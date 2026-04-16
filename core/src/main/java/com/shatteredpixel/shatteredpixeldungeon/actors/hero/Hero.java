@@ -1962,7 +1962,7 @@ public class Hero extends Char {
 		}
 
 		if (wep instanceof MissileWeapon && hasTalent(Talent.CRITICAL_THROW)) {
-			chance += 0.125f * pointsInTalent(Talent.CRITICAL_THROW);
+			chance += 0.15f * pointsInTalent(Talent.CRITICAL_THROW);
 		}
 
 		if (buff(Sheath.CertainCrit.class) != null) {
