@@ -1864,7 +1864,7 @@ public enum Talent {
 		}
 
 		if (hero.hasTalent(Talent.CRITICAL_MEAL)) {
-			Buff.affect(hero, Sheath.CertainCrit.class).set(hero.pointsInTalent(Talent.CRITICAL_MEAL));
+			Buff.affect(hero, Sheath.CertainCrit.class).set(1+hero.pointsInTalent(Talent.CRITICAL_MEAL));
 		}
 
 		if (hero.hasTalent(Talent.NATURES_MEAL)) {
@@ -2051,7 +2051,8 @@ public enum Talent {
 			bulletItem.doPickUp(hero);
 		}
 		if (hero.hasTalent(Talent.INSCRIBED_LETHALITY)) {
-			Buff.affect(hero, Sheath.CertainCrit.class).set((int)(factor * hero.pointsInTalent(Talent.INSCRIBED_LETHALITY)));
+			Buff.affect(hero, Sheath.CertainCrit.class).set(
+					(int) (factor * (1+hero.pointsInTalent(Talent.INSCRIBED_LETHALITY))));
 		}
 		if (hero.hasTalent(Talent.SMITHING_SPELL)) {
 			Buff.affect(hero, WeaponEnhance.class).set(hero.pointsInTalent(Talent.SMITHING_SPELL), Math.round(10*factor));

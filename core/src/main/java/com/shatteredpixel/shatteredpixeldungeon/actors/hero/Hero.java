@@ -1971,7 +1971,7 @@ public class Hero extends Char {
 		}
 
 		if (buff(Sheath.CertainCrit.class) != null) {
-			chance += 1f;
+			chance += 0.5f;
 		}
 
 		return GameMath.gate(0, chance, 2);
