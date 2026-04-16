@@ -522,7 +522,7 @@ public enum Talent {
 	BASIC_PRACTICE				(0, 7),
 	MASTERS_INTUITION			(1, 7),
 	DRAWING_ENHANCE				(2, 7),
-	PREPARED_MEAL(2, 7),
+	PREPARED_MEAL				(2, 7),
 	PARRYING					(3, 7),
 	ADRENALINE_SURGE			(4, 7),
 	//Samurai T2
