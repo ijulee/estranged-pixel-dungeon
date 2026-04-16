@@ -1908,7 +1908,7 @@ public class Hero extends Char {
 		}
 
 		if (hasTalent(Talent.BASIC_PRACTICE)) {
-			chance += 0.02f * pointsInTalent(Talent.BASIC_PRACTICE);
+			chance += 0.01f + 0.02f * pointsInTalent(Talent.BASIC_PRACTICE);
 		}
 
 		if (heroClass != HeroClass.SAMURAI && hasTalent(Talent.UNEXPECTED_SLASH)) {
