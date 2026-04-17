@@ -97,7 +97,7 @@ public class FireMaker extends TargetedSpell {
 			cost = 4;
 			
 			output = FireMaker.class;
-			outQuantity = 3;
+			outQuantity = OUT_QUANTITY;
 		}
 		
 	}
