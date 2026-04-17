@@ -1990,7 +1990,7 @@ public class Hero extends Char {
 		float critDmg = max * 0.75f + damage * 0.25f;
 		float multi = Math.max(1, critChance);
 
-		multi += 0.05f * pointsInTalent(Talent.LETHAL_POWER);
+		multi += 0.1f * pointsInTalent(Talent.LETHAL_POWER);
 
 		if (hasTalent(Talent.POWERFUL_CRIT) && wep instanceof MissileWeapon) {
 			multi += 0.1f * pointsInTalent(Talent.POWERFUL_CRIT);
