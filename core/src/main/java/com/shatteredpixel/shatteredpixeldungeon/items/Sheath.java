@@ -63,7 +63,9 @@ public class Sheath extends Item {
             if (hero.belongings.weapon() instanceof MeleeWeapon) {
                 if (hero.buff(Sheathing.class) == null) {
                     Buff.affect(hero, Sheathing.class);
-                    if (hero.buff(Talent.PreparedMealTracker.class) != null) {
+                    if (hero.buff(Talent.LethalFocusTracker.class) != null) {
+                        hero.buff(Talent.LethalFocusTracker.class).detach();
+                    } else if (hero.buff(Talent.PreparedMealTracker.class) != null) {
                         hero.buff(Talent.PreparedMealTracker.class).use();
                     } else {
                         hero.spendAndNext(Actor.TICK);
@@ -151,7 +153,7 @@ public class Sheath extends Item {
             spend( target.cooldown() );
 
             if (Dungeon.hero.subClass == HeroSubClass.MASTER) {
-                if (Dungeon.hero.buff(DashDrawCooldown.class) == null) {
+                if (target.buff(DashDrawCooldown.class) == null) {
                     ActionIndicator.setAction(this);
                 } else {
                     ActionIndicator.clearAction(this);

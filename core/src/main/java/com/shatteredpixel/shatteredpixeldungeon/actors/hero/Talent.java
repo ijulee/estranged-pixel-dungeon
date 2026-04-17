@@ -1254,6 +1254,8 @@ public enum Talent {
 		}
 	}
 
+	public static class LethalFocusTracker extends FlavourBuff {}
+
 	//Knight 1-1
 	public static class ArmorEmpower extends Buff {
 

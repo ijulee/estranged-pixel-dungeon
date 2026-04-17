@@ -986,6 +986,15 @@ public abstract class Mob extends Char {
 
 					Buff.affect(hero, Talent.LethalCooldown.class, Talent.LethalCooldown.DURATION);
 				}
+                if (Dungeon.hero.hasTalent(Talent.QUICK_SHEATHING)) {
+                    if (Dungeon.hero.heroClass == HeroClass.SAMURAI) {
+                        Buff.affect(Dungeon.hero, Talent.LethalFocusTracker.class,
+								5 * Dungeon.hero.pointsInTalent(Talent.QUICK_SHEATHING));
+                    } else {
+						Buff.affect(Dungeon.hero, Haste.class,
+								2 * Dungeon.hero.pointsInTalent(Talent.QUICK_SHEATHING));
+					}
+                }
 			}
 
 		}

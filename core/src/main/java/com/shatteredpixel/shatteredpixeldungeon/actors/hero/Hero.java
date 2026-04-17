@@ -3397,13 +3397,10 @@ public class Hero extends Char {
 			Buff.prolong(this, EvasiveMove.class, EvasiveMove.DURATION);
 		}
 
-        if (hit && heroClass == HeroClass.SAMURAI) {
+		if (hit && heroClass == HeroClass.SAMURAI) {
 			Buff sheathing = buff(Sheath.Sheathing.class);
 			if (sheathing != null) {
 				sheathing.detach();
-				if (!attackTarget.isAlive() && Random.Int(3) < pointsInTalent(Talent.QUICK_SHEATHING)) {
-					Buff.affect(this, Sheath.Sheathing.class);
-				}
 			}
 
 			if (subClass == HeroSubClass.MASTER) {
@@ -3418,11 +3415,6 @@ public class Hero extends Char {
 				Buff dashTracker = buff(Sheath.DashDrawTracker.class);
 				if (dashTracker != null) dashTracker.detach();
 			}
-		}
-
-		if (hit && heroClass != HeroClass.SAMURAI &&
-				hasTalent(Talent.QUICK_SHEATHING) && !attackTarget.isAlive()) {
-			Buff.affect(this, Haste.class, 3f * pointsInTalent(Talent.QUICK_SHEATHING));
 		}
 
 		if (isCritical) {
