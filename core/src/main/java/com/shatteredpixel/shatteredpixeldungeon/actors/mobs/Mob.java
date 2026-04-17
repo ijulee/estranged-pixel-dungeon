@@ -1028,10 +1028,6 @@ public abstract class Mob extends Char {
 				Buff.affect(hero, InfiniteBullet.class, hero.pointsInTalent(Talent.SOUL_BULLET));
 			}
 
-			if (hero.hasTalent(Talent.ADRENALINE_SURGE)) {
-				Buff.prolong(hero, Adrenaline.class, 1+2*hero.pointsInTalent(Talent.ADRENALINE_SURGE));
-			}
-
 			if (hero.hasTalent(Talent.PRAY_FOR_DEAD)) {
 				Buff.affect(hero, Talent.PrayForDeadTracker.class, Talent.PrayForDeadTracker.DURATION);
 			}

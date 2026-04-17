@@ -1179,6 +1179,7 @@ public enum Talent {
 
 	//Samurai 1-3 meta
 	public static class DrawEnhanceMetaTracker extends Buff {}
+
 	public static class PreparedMealTracker extends Buff {
 		{
 			type = buffType.POSITIVE;
@@ -1226,6 +1227,33 @@ public enum Talent {
 			pos = bundle.getInt(POS);
 		}
 	}
+
+	public static class DragonsEyeMetaTracker extends FlavourBuff {
+		public int pos;
+		{ type = Buff.buffType.POSITIVE; }
+		public int icon() { return BuffIndicator.MIND_VISION; }
+		@Override
+		public boolean act() {
+			if (pos != target.pos) {
+				detach();
+				return true;
+			} else {
+				return super.act();
+			}
+		}
+		private static final String POS = "pos";
+		@Override
+		public void storeInBundle(Bundle bundle) {
+			super.storeInBundle(bundle);
+			bundle.put(POS, pos);
+		}
+		@Override
+		public void restoreFromBundle(Bundle bundle) {
+			super.restoreFromBundle(bundle);
+			pos = bundle.getInt(POS);
+		}
+	}
+
 	//Knight 1-1
 	public static class ArmorEmpower extends Buff {
 
@@ -1581,7 +1609,8 @@ public enum Talent {
 		}
 
 		//huntress
-		if (talent == HEIGHTENED_SENSES || talent == FARSIGHT || talent == DIVINE_SENSE || talent == TELESCOPE || talent == DRAGONS_EYE){
+		if (talent == HEIGHTENED_SENSES || talent == FARSIGHT || talent == DIVINE_SENSE ||
+				talent == TELESCOPE || talent == DRAGONS_EYE) {
 			Dungeon.observe();
 		}
 

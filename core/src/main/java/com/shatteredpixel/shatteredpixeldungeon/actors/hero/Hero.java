@@ -1826,6 +1826,11 @@ public class Hero extends Char {
 		if (hasTalent(Talent.PATIENT_STRIKE)){
 			Buff.affect(Dungeon.hero, Talent.PatientStrikeTracker.class).pos = Dungeon.hero.pos;
 		}
+		if (Dungeon.hero.heroClass != HeroClass.SAMURAI) {
+			if (Dungeon.hero.hasTalent(Talent.DRAGONS_EYE)) {
+				Buff.affect(Dungeon.hero, Talent.DragonsEyeMetaTracker.class, 1f).pos = Dungeon.hero.pos;
+			}
+		}
 		if (!fullRest) {
 			if (sprite != null) {
 				sprite.showStatus(CharSprite.DEFAULT, Messages.get(this, "wait"));

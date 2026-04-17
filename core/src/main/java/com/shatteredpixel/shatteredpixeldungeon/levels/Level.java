@@ -1513,10 +1513,9 @@ public abstract class Level implements Bundlable {
 				}
 
 				if (((Hero) c).hasTalent(Talent.DRAGONS_EYE)) {
-                    if (c.buff(Sheath.Sheathing.class) != null) {
-						mindVisRange = Math.max(mindVisRange, 2 + ((Hero) c).pointsInTalent(Talent.DRAGONS_EYE));
-					} else if (((Hero) c).heroClass != HeroClass.SAMURAI) {
-                        mindVisRange = Math.max(mindVisRange, 1 + ((Hero) c).pointsInTalent(Talent.DRAGONS_EYE));
+                    if (c.buff(Sheath.Sheathing.class) != null ||
+						c.buff(Talent.DragonsEyeMetaTracker.class) != null) {
+                        mindVisRange = Math.max(mindVisRange, 2 + ((Hero) c).pointsInTalent(Talent.DRAGONS_EYE));
                     }
 				}
 

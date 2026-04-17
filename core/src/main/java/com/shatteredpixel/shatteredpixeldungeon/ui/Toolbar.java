@@ -29,6 +29,7 @@ import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.HoldFast;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Belongings;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
@@ -265,6 +266,12 @@ public class Toolbar extends Component {
 							Buff.affect(Dungeon.hero, Talent.PowerfulDrawMetaTracker.class).pos = Dungeon.hero.pos;
 						}
 						Dungeon.hero.next();
+                        if (Dungeon.hero.heroClass != HeroClass.SAMURAI) {
+                            if (Dungeon.hero.hasTalent(Talent.DRAGONS_EYE)) {
+                                Buff.affect(Dungeon.hero, Talent.DragonsEyeMetaTracker.class, 1f).pos = Dungeon.hero.pos;
+                            }
+                        }
+                        Dungeon.hero.next();
 					} else {
 						examining = false;
 						Dungeon.hero.rest(false);
