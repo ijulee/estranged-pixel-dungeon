@@ -262,11 +262,10 @@ public class Toolbar extends Component {
 						if (Dungeon.hero.hasTalent(Talent.PATIENT_STRIKE)){
 							Buff.affect(Dungeon.hero, Talent.PatientStrikeTracker.class).pos = Dungeon.hero.pos;
 						}
-						if (Dungeon.hero.hasTalent(Talent.UNEXPECTED_SLASH)) {
-							Buff.affect(Dungeon.hero, Talent.PowerfulDrawMetaTracker.class).pos = Dungeon.hero.pos;
-						}
-						Dungeon.hero.next();
                         if (Dungeon.hero.heroClass != HeroClass.SAMURAI) {
+                            if (Dungeon.hero.hasTalent(Talent.UNEXPECTED_SLASH)) {
+                                Buff.affect(Dungeon.hero, Talent.PowerfulDrawMetaTracker.class).pos = Dungeon.hero.pos;
+                            }
                             if (Dungeon.hero.hasTalent(Talent.DRAGONS_EYE)) {
                                 Buff.affect(Dungeon.hero, Talent.DragonsEyeMetaTracker.class, 1f).pos = Dungeon.hero.pos;
                             }
