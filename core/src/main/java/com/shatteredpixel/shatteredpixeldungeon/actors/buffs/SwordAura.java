@@ -52,7 +52,7 @@ public class SwordAura extends TargetingAction {
     }
 
     private float chargeMulti() {
-        return 1 + hero.pointsInTalent(Talent.MIND_FOCUSING)/3f;
+        return 0.4f + 0.2f * Dungeon.hero.pointsInTalent(Talent.MIND_FOCUSING);
     }
 
     private int maxEnergy() {
