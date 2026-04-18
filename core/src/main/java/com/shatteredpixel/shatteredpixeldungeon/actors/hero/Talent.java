@@ -1201,6 +1201,8 @@ public enum Talent {
 		}
 	}
 
+	public static class ScabbardBlockTracker extends FlavourBuff {}
+
 	public static class PowerfulDrawMetaTracker extends Buff {
 		public int pos;
 		{ type = Buff.buffType.POSITIVE; }
