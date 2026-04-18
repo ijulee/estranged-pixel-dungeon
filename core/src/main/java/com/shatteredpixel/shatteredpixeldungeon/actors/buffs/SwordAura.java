@@ -48,7 +48,7 @@ public class SwordAura extends TargetingAction {
     private int recovered = 0;
 
     public int getCost() {
-        return Math.round(energy * (1 - 0.4f*hero.pointsInTalent(Talent.ENERGY_SAVING)/3));
+        return energy;
     }
 
     private float chargeMulti() {
