@@ -196,22 +196,32 @@ public class SwordAura extends TargetingAction {
         }
 
         @Override
+        public int min() {
+            return 1;
+        }
+
+        @Override
         public int max() {
             return SwordAura.this.energy;
         }
 
         @Override
         public int damageRoll(Char owner) {
-            return SwordAura.this.energy;
+            //not affected by augment or excess str
+            if (owner instanceof Hero) {
+                return Hero.heroDamageIntRange(min(), max());
+            } else {
+                return Random.NormalIntRange(min(), max());
+            }
         }
 
         @Override
         public int STRReq(int lvl) {
-            KindOfWeapon wep = hero.belongings.weapon();
+            KindOfWeapon wep = Dungeon.hero.belongings.weapon();
             if (wep instanceof Weapon) {
                 return ((Weapon) wep).STRReq();
             } else {
-                return hero.STR();
+                return Dungeon.hero.STR();
             }
         }
 
