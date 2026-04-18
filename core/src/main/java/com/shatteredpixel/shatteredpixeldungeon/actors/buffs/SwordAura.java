@@ -56,33 +56,34 @@ public class SwordAura extends TargetingAction {
     }
 
     private int maxEnergy() {
-        return 60 + 30 * hero.pointsInTalent(Talent.STORED_POWER);
+        return 60 + 30 * Dungeon.hero.pointsInTalent(Talent.STORED_POWER);
     }
 
     public void hit(int damage) {
         energy += Math.round(damage * chargeMulti());
-        energy = Math.min(energy, maxEnergy());
-        ActionIndicator.setAction(this);
-        if (energy <= 0) {
-            detach();
-        }
+        refresh();
     }
 
     public void useEnergy() {
         energy -= getCost() - recovered;
+        refresh();
+        recovered = 0;
+    }
+
+    public void refresh() {
         energy = Math.min(energy, maxEnergy());
         if (energy <= 0) {
-            detach();
+            ActionIndicator.clearAction(this);
+        } else {
+            ActionIndicator.setAction(this);
         }
-
-        recovered = 0;
         ActionIndicator.refresh();
     }
 
     @Override
     public void detach() {
         super.detach();
-        ActionIndicator.clearAction();
+        ActionIndicator.clearAction(this);
     }
 
     private static final String DAMAGE = "damage";
@@ -96,8 +97,8 @@ public class SwordAura extends TargetingAction {
     @Override
     public void restoreFromBundle(Bundle bundle) {
         super.restoreFromBundle(bundle);
-        ActionIndicator.setAction(this);
         energy = bundle.getInt( DAMAGE );
+        refresh();
     }
 
     @Override
@@ -107,7 +108,7 @@ public class SwordAura extends TargetingAction {
 
     @Override
     public float iconFadePercent(){
-        return Math.max(0, (maxEnergy() - energy)/(float) maxEnergy());
+        return Math.max(0, 1 - (energy/(float) maxEnergy()));
     }
 
     @Override
