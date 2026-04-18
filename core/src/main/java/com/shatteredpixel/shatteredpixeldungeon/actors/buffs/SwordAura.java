@@ -134,9 +134,8 @@ public class SwordAura extends TargetingAction {
     @Override
     public Visual secondaryVisual() {
         BitmapText txt = new BitmapText(PixelScene.pixelFont);
-        int charge = (int) (100* energy /((float) maxEnergy()));
-        txt.text(String.format("%d%%", charge));
-        if (charge >= 100) {
+        txt.text(Messages.format("%d", energy));
+        if (energy >= maxEnergy()) {
             txt.hardlight(CharSprite.POSITIVE);
         }
         txt.measure();
