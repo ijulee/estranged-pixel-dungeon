@@ -31,6 +31,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Adrenaline;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Berserk;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MagicImmune;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.MonkEnergy;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.SwordAura;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.WeaponEnhance;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
@@ -627,14 +628,19 @@ abstract public class Weapon extends KindOfWeapon {
 				multi = rage.enchantFactor(multi);
 			}
 
-			if (attacker instanceof DriedRose.GhostHero &&
-				((DriedRose.GhostHero) attacker).weapon() instanceof Gun) {
-				multi *= ((Gun) ((DriedRose.GhostHero) attacker).weapon()).getMissile().enchantMod().enchantFactor();
-			}
+            if (attacker instanceof DriedRose.GhostHero) {
+				Weapon wep = ((DriedRose.GhostHero) attacker).attackingWeapon();
+                if (wep instanceof Gun.Bullet) {
+                    multi *= ((Gun.Bullet) wep).enchantMod().enchantFactor();
+                }
+            }
 
-			if (attacker instanceof Hero && ((Hero) attacker).belongings.attackingWeapon() instanceof Gun.Bullet) {
-				multi *= ((Gun.Bullet) ((Hero) attacker).belongings.attackingWeapon()).enchantMod().enchantFactor();
-			}
+            if (attacker instanceof Hero) {
+				KindOfWeapon wep = Dungeon.hero.belongings.attackingWeapon();
+				if (wep instanceof Gun.Bullet) {
+					multi *= ((Gun.Bullet) wep).enchantMod().enchantFactor();
+                }
+            }
 
 			if (attacker.buff(RunicBlade.RunicSlashTracker.class) != null){
 				multi += attacker.buff(RunicBlade.RunicSlashTracker.class).boost;
@@ -669,10 +675,15 @@ abstract public class Weapon extends KindOfWeapon {
 				multi += 0.2f;
 			}
 
+			if (attacker instanceof Hero && Dungeon.hero.heroClass != HeroClass.MEDIC &&
+					Dungeon.hero.hasTalent(Talent.HIGH_POWER)) {
+				multi += 0.1f * Dungeon.hero.pointsInTalent(Talent.HIGH_POWER);
+			}
+
 			if (attacker instanceof Hero &&
-				((Hero)attacker).hasTalent(Talent.HIGH_POWER) &&
-				((Hero)attacker).heroClass != HeroClass.MEDIC) {
-				multi += 0.1f * ((Hero)attacker).pointsInTalent(Talent.HIGH_POWER);
+					Dungeon.hero.belongings.attackingWeapon() instanceof SwordAura.Aura &&
+					Dungeon.hero.pointsInTalent(Talent.ARCANE_POWER) == 3) {
+				multi += 0.2f;
 			}
 
 			return multi;

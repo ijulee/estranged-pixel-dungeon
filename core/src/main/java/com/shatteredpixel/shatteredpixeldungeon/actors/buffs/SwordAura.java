@@ -227,18 +227,20 @@ public class SwordAura extends TargetingAction {
 
         @Override
         public int proc(Char attacker, Char defender, int damage) {
-            int dmg = super.proc(attacker, defender, damage);
+            damage = super.proc(attacker, defender, damage);
 
-            KindOfWeapon wep = hero.belongings.weapon();
-            if (Random.Int(3) < hero.pointsInTalent(Talent.ARCANE_POWER) && wep != null) {
-                dmg = wep.proc(attacker, defender, dmg);
+            Weapon wep = (Weapon) Dungeon.hero.belongings.weapon();
+            if (wep.enchantment != null &&
+                (2 <= Dungeon.hero.pointsInTalent(Talent.ARCANE_POWER) ||
+                Random.Int(2) < Dungeon.hero.pointsInTalent(Talent.ARCANE_POWER))) {
+                damage = wep.enchantment.proc(wep, attacker, defender, damage);
             }
 
             if (hero.hasTalent(Talent.ENERGY_COLLECT)) {
                 recovered += Math.round(dmg / (float) (7 - hero.pointsInTalent(Talent.ENERGY_COLLECT)));
             }
 
-            return dmg;
+            return damage;
         }
 
         @Override
