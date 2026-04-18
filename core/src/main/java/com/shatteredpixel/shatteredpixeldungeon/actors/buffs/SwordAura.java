@@ -236,8 +236,10 @@ public class SwordAura extends TargetingAction {
                 damage = wep.enchantment.proc(wep, attacker, defender, damage);
             }
 
-            if (hero.hasTalent(Talent.ENERGY_COLLECT)) {
-                recovered += Math.round(dmg / (float) (7 - hero.pointsInTalent(Talent.ENERGY_COLLECT)));
+            if (Dungeon.hero.hasTalent(Talent.ENERGY_COLLECT) &&
+                defender.alignment != Char.Alignment.ALLY) {
+                recovered += Math.round(damage *
+                        (0.05f + 0.15f * Dungeon.hero.pointsInTalent(Talent.ENERGY_COLLECT)));
             }
 
             return damage;
