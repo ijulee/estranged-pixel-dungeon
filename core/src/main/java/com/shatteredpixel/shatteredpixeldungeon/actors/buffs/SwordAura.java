@@ -1,6 +1,5 @@
 package com.shatteredpixel.shatteredpixeldungeon.actors.buffs;
 
-import static com.shatteredpixel.shatteredpixeldungeon.Dungeon.hero;
 import static com.shatteredpixel.shatteredpixeldungeon.ui.QuickSlotButton.lastTarget;
 
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
@@ -229,6 +228,11 @@ public class SwordAura extends TargetingAction {
         public int proc(Char attacker, Char defender, int damage) {
             damage = super.proc(attacker, defender, damage);
 
+            if (Dungeon.hero.hasTalent(Talent.WIND_BLAST) &&
+                Dungeon.hero.buff(Sheath.Sheathing.class) != null) {
+                damage += 5 * Dungeon.hero.pointsInTalent(Talent.WIND_BLAST);
+            }
+
             Weapon wep = (Weapon) Dungeon.hero.belongings.weapon();
             if (wep.enchantment != null &&
                 (2 <= Dungeon.hero.pointsInTalent(Talent.ARCANE_POWER) ||
@@ -262,14 +266,14 @@ public class SwordAura extends TargetingAction {
                 return dst;
             }
 
-            return new Ballistica(hero.pos, dst, Ballistica.DASH).collisionPos;
+            return new Ballistica(Dungeon.hero.pos, dst, Ballistica.DASH).collisionPos;
         }
 
         @Override
         protected void onThrow( int cell ) {
-            if (cell != hero.pos) {
+            if (cell != Dungeon.hero.pos) {
                 //throwPos() has already applied Ballistica.STOP_SOLID and Projecting
-                Ballistica aim = new Ballistica(hero.pos, cell, Ballistica.STOP_TARGET);
+                Ballistica aim = new Ballistica(Dungeon.hero.pos, cell, Ballistica.STOP_TARGET);
 
                 ArrayList<Char> chars = new ArrayList<>();
                 for (int c : aim.subPath(1, aim.dist)) {
@@ -289,11 +293,6 @@ public class SwordAura extends TargetingAction {
                                 (ch instanceof Mimic && ch.alignment == Char.Alignment.NEUTRAL)) {
                             lastTarget = ch;
                         }
-
-                        if (hero.buff(Sheath.Sheathing.class) != null &&
-                            hero.hasTalent(Talent.WIND_BLAST)) {
-                            ch.damage(5*hero.pointsInTalent(Talent.WIND_BLAST), new SwordAuraMagicDamage());
-                        }
                     }
                 }
             }
@@ -301,8 +300,9 @@ public class SwordAura extends TargetingAction {
             useEnergy();
 
             Invisibility.dispel();
-            if (hero.buff(Sheath.Sheathing.class) != null) {
-                hero.buff(Sheath.Sheathing.class).detach();
+
+            if (Dungeon.hero.buff(Sheath.Sheathing.class) != null) {
+                Dungeon.hero.buff(Sheath.Sheathing.class).detach();
             }
         }
 
@@ -316,8 +316,8 @@ public class SwordAura extends TargetingAction {
         @Override
         public void onSelect( Integer target ) {
             if (target != null) {
-                if (target != hero.pos) {
-                    knockAura().cast(hero, target);
+                if (target != Dungeon.hero.pos) {
+                    knockAura().cast(Dungeon.hero, target);
                 } else {
                     GLog.w(Messages.get(this, "cannot_hero"));
                 }
