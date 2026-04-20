@@ -631,4 +631,17 @@ public enum HeroClass {
 		return shortDesc() + "\n\n" + Messages.get(HeroClass.class, name()+"_unlock");
 	}
 
+	public static void unlockAll() {
+		Badges.unlock(Badges.Badge.UNLOCK_MAGE);
+		Badges.unlock(Badges.Badge.UNLOCK_ROGUE);
+		Badges.unlock(Badges.Badge.UNLOCK_HUNTRESS);
+		Badges.unlock(Badges.Badge.UNLOCK_DUELIST);
+		Badges.unlock(Badges.Badge.UNLOCK_CLERIC);
+		Badges.unlock(Badges.Badge.UNLOCK_GUNNER);
+		Badges.unlock(Badges.Badge.UNLOCK_SAMURAI);
+		Badges.unlock(Badges.Badge.UNLOCK_ADVENTURER);
+		Badges.unlock(Badges.Badge.UNLOCK_KNIGHT);
+		Badges.unlock(Badges.Badge.UNLOCK_MEDIC);
+		Badges.unlock(Badges.Badge.UNLOCK_ARCHER);
+	}
 }

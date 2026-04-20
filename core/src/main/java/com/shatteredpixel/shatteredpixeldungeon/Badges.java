@@ -86,6 +86,12 @@ public class Badges {
 		UNLOCK_HUNTRESS             ( 3 ),
 		UNLOCK_DUELIST              ( 4 ),
 		UNLOCK_CLERIC               ( 5 ),
+		UNLOCK_GUNNER				(136),
+		UNLOCK_SAMURAI				(137),
+		UNLOCK_ADVENTURER			(138),
+		UNLOCK_KNIGHT				(139),
+		UNLOCK_MEDIC				(140),
+		UNLOCK_ARCHER				(141),
 		MONSTERS_SLAIN_1            ( 6 ),
 		MONSTERS_SLAIN_2            ( 7 ),
 		GOLD_COLLECTED_1            ( 8 ),
@@ -159,6 +165,7 @@ public class Badges {
 		BAG_BOUGHT_MAGICAL_HOLSTER,
 		ALL_BAGS_BOUGHT             ( 67 ),
 		MASTERY_COMBO               ( 68 ),
+		HEDGEHOG					( 142 ),
 		MONSTERS_SLAIN_5            ( 69 ),
 		GOLD_COLLECTED_5            ( 70 ),
 		ITEM_LEVEL_4                ( 71 ),
@@ -174,6 +181,8 @@ public class Badges {
 		ALL_ARTIFACTS_IDENTIFIED    , //still exists internally for pre-2.5 saves
 		ALL_RARE_ENEMIES            ( 80, BadgeType.JOURNAL ), //no longer all, just 10 as of v3.1
 		DEATH_FROM_GRIM_TRAP        ( 81 ), //also disintegration traps
+
+		SKIPPED_TUTORIAL			( 143, BadgeType.GLOBAL ),
 		VICTORY                     ( 82 ),
 		BOSS_CHALLENGE_1            ( 83 ),
 		BOSS_CHALLENGE_2            ( 84 ),
@@ -274,16 +283,7 @@ public class Badges {
 		VICTORY_ADVENTURER,
 		VICTORY_KNIGHT,
 		VICTORY_MEDIC,
-		VICTORY_ARCHER,
-
-		UNLOCK_GUNNER				(136),
-		UNLOCK_SAMURAI				(137),
-		UNLOCK_ADVENTURER			(138),
-		UNLOCK_KNIGHT				(139),
-		UNLOCK_MEDIC				(140),
-		UNLOCK_ARCHER				(141),
-
-		HEDGEHOG					(142);
+		VICTORY_ARCHER;
 
 		public boolean meta;
 

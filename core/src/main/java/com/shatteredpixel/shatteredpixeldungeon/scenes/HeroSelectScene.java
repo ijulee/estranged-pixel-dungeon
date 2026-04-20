@@ -97,6 +97,9 @@ public class HeroSelectScene extends PixelScene {
 	private static boolean heroWasRandomized = true;
 	private static boolean chalWasRandomized = false;
 
+	private static int unlockAllClicks = 0;
+	private static final int UNLOCK_CLICKS_NEEDED = 7;
+
 	@Override
 	public void create() {
 		super.create();
@@ -233,7 +236,8 @@ public class HeroSelectScene extends PixelScene {
 			add(btnOptions);
 		}
 
-		if (!Badges.isUnlocked(Badges.Badge.VICTORY) && !DeviceCompat.isDebug()){
+		if (!Badges.isUnlocked(Badges.Badge.VICTORY) &&
+			!Badges.isUnlocked(Badges.Badge.SKIPPED_TUTORIAL) && !DeviceCompat.isDebug()){
 			Dungeon.challenges = 0;
 			SPDSettings.challenges(0);
 			SPDSettings.customSeed("");
@@ -606,7 +610,49 @@ public class HeroSelectScene extends PixelScene {
 			super.onClick();
 
 			if( !cl.isUnlocked() ){
-				ShatteredPixelDungeon.scene().addToFront( new WndMessage(cl.unlockMsg()));
+				if (unlockAllClicks < UNLOCK_CLICKS_NEEDED) {
+					ShatteredPixelDungeon.scene().addToFront( new WndMessage(cl.unlockMsg()));
+					unlockAllClicks++;
+				} else {
+					ShatteredPixelDungeon.scene().addToFront( new WndOptions(
+							Icons.WARNING.get(),
+							Messages.get(HeroSelectScene.class, "unlock_title"),
+							Messages.get(HeroSelectScene.class, "unlock_message"),
+							Messages.get(HeroSelectScene.class, "unlock_yes"),
+							Messages.get(HeroSelectScene.class, "unlock_no")) {
+						private float elapsed = 0f;
+
+						@Override
+						public synchronized void update() {
+							super.update();
+							elapsed += Game.elapsed;
+						}
+
+						@Override
+						public void hide() {
+							if (elapsed > 0.2f) {
+								super.hide();
+							}
+						}
+
+						@Override
+						protected void onSelect(int index) {
+							if (elapsed > 0.2f) {
+								if (index == 0) {
+									Badges.unlock(Badges.Badge.SKIPPED_TUTORIAL);
+									HeroClass.unlockAll();
+								} else {
+									hide();
+								}
+							}
+						}
+
+						@Override
+						public void onBackPressed() {
+							//don't back out, read the message dammit!
+						}
+					});
+				}
 			} else if (GamesInProgress.selectedClass == cl) {
 				Window w = new WndHeroInfo(cl);
 				if (landscape()){
@@ -648,7 +694,8 @@ public class HeroSelectScene extends PixelScene {
 			StyledButton seedButton = new StyledButton(Chrome.Type.BLANK, Messages.get(HeroSelectScene.class, "custom_seed"), 6){
 				@Override
 				protected void onClick() {
-					if (!Badges.isUnlocked(Badges.Badge.VICTORY) && !DeviceCompat.isDebug()){
+					if (!Badges.isUnlocked(Badges.Badge.VICTORY) &&
+						!Badges.isUnlocked(Badges.Badge.SKIPPED_TUTORIAL) && !DeviceCompat.isDebug()){
 						ShatteredPixelDungeon.scene().addToFront( new WndTitledMessage(
 								Icons.get(Icons.SEED),
 								Messages.get(HeroSelectScene.class, "custom_seed"),
@@ -731,7 +778,8 @@ public class HeroSelectScene extends PixelScene {
 				protected void onClick() {
 					super.onClick();
 
-					if (!Badges.isUnlocked(Badges.Badge.VICTORY) && !DeviceCompat.isDebug()){
+					if (!Badges.isUnlocked(Badges.Badge.VICTORY) &&
+						!Badges.isUnlocked(Badges.Badge.SKIPPED_TUTORIAL) && !DeviceCompat.isDebug()){
 						ShatteredPixelDungeon.scene().addToFront( new WndTitledMessage(
 								Icons.get(Icons.CALENDAR),
 								Messages.get(HeroSelectScene.class, "daily"),
@@ -829,7 +877,8 @@ public class HeroSelectScene extends PixelScene {
 			challengeButton = new StyledButton(Chrome.Type.BLANK, Messages.get(WndChallenges.class, "title"), 6){
 				@Override
 				protected void onClick() {
-					if (!Badges.isUnlocked(Badges.Badge.VICTORY) && !DeviceCompat.isDebug()){
+					if (!Badges.isUnlocked(Badges.Badge.VICTORY) &&
+						!Badges.isUnlocked(Badges.Badge.SKIPPED_TUTORIAL) && !DeviceCompat.isDebug()){
 						ShatteredPixelDungeon.scene().addToFront( new WndTitledMessage(
 								Icons.get(Icons.CHALLENGE_GREY),
 								Messages.get(WndChallenges.class, "title"),
@@ -862,7 +911,8 @@ public class HeroSelectScene extends PixelScene {
 					@Override
 					protected void onClick() {
 
-						if (Badges.isUnlocked(Badges.Badge.VICTORY) || DeviceCompat.isDebug()){
+						if (Badges.isUnlocked(Badges.Badge.VICTORY) ||
+							Badges.isUnlocked(Badges.Badge.SKIPPED_TUTORIAL) || DeviceCompat.isDebug()){
 							ShatteredPixelDungeon.scene().addToFront(new WndRandomize());
 						} else {
 
