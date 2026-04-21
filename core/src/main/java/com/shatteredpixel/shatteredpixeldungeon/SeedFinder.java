@@ -299,59 +299,64 @@ public class SeedFinder {
 
 	private ArrayList<String> getRooms() {
 		ArrayList<String> rooms = new ArrayList<>();
-		for (int k = 0; k < roomList.size(); k++) {
-			Room room1 = roomList.get(k);
-			String roomstr = roomList.get(k).toString()
-					.replace("com.shatteredpixel.shatteredpixeldungeon.levels.rooms.", "");
+		for (Room room : roomList) {
+			String roomName = room.getClass().getName().replaceAll("^com.*?rooms\\.", "");
 
-			if (room1 instanceof MagicWellRoom || room1 instanceof SecretWellRoom) {
-				String wellstr;
-
-				//FIXME currently doesn't work
-				/*if (room1.generatedWellWater == WaterOfAwareness.class) {
-					wellstr = " (awareness)";
-				} else if (room1.generatedWellWater == WaterOfHealth.class) {
-					wellstr = " (health)";
-				} else*/ {
-					wellstr = " (?)";
-				}
-
-				roomstr += wellstr;
-			}
+			//camel case to normal text
+			roomName = Messages.lowerCase(roomName.replaceAll("([a-z])([A-Z])", "$1 $2"));
 
 			String roomType = "standard";
-
-			// remove Java object instance code
-			roomstr = roomstr.replaceAll("@[a-z0-9]{4,}", "");
-
-			// turn camel case to normal text
-			roomstr = roomstr.replaceAll("([a-z])([A-Z])", "$1 $2").toLowerCase();
-
-			if (roomstr.contains("special")) {
-				roomstr = roomstr.replace("special.", "");
+			if (roomName.contains("special")) {
+				roomName = roomName.replace("special.", "");
 				roomType = "special";
-			} else if (roomstr.contains("secret")) {
-				roomstr = roomstr.replace("secret.", "");
+			} else if (roomName.contains("secret")) {
+				roomName = roomName.replace("secret.", "");
 				roomType = "secret";
-			} else if (roomstr.contains("entrance")) {
-				roomstr = roomstr.replace("entrance.", "");
-				roomstr = roomstr.replace("standard.", "");
-				roomType = "entrance";
-			} else if (roomstr.contains("exit")) {
-				roomstr = roomstr.replace("exit.", "");
-				roomstr = roomstr.replace("standard.", "");
-				roomType = "exit";
-			} else if (roomstr.contains("standard")) {
-				roomstr = roomstr.replace("standard.", "");
-				roomType = "standard";
+			} else if (roomName.contains("entrance")) {
+				roomName = roomName.replaceAll("entrance[. ]", "");
+				roomType = "_entrance_";
+			} else if (roomName.contains("exit")) {
+				roomName = roomName.replaceAll("exit[. ]", "");
+				roomType = "_exit_";
+			} else if (roomName.contains("connection")) {
+				roomName = roomName.replace("connection.", "");
+				roomType = "connection";
+			} else if (room instanceof MagicWellRoom || room instanceof SecretWellRoom) {
+				int wellCell;
+				if (room instanceof MagicWellRoom) {
+					wellCell = room.center().x + Dungeon.level.width() * room.center().y;
+				} else {
+					Point door = ((SecretWellRoom) room).entrance();
+					Point well;
+					if (door.x == room.left) {
+						well = new Point(room.right-2, door.y);
+					} else if (door.x == room.right) {
+						well = new Point(room.left+2, door.y);
+					} else if (door.y == room.top) {
+						well = new Point(door.x, room.bottom-2);
+					} else {
+						well = new Point(door.x, room.top+2);
+					}
+					wellCell = well.x + Dungeon.level.width() * well.y;
+				}
+
+				WaterOfAwareness aware = (WaterOfAwareness) Dungeon.level.blobs.get(WaterOfAwareness.class);
+				WaterOfHealth health = (WaterOfHealth) Dungeon.level.blobs.get(WaterOfHealth.class);
+
+				if (aware != null && aware.cur[wellCell] != 0) {
+					roomType += "_awareness_";
+				} else if (health != null && health.cur[wellCell] != 0) {
+					roomType += "_health_";
+				} else {
+					roomType += "_?_";
+				}
 			}
 
-            String tabstring = String.valueOf(Options.spacingChar).repeat(Math.max(1,
-                    Options.infoSpacing - roomstr.length()));
+			if (roomName.contains("standard")) {
+				roomName = roomName.replace("standard.", "");
+			}
 
-			roomstr += tabstring + roomType;
-
-			rooms.add(roomstr);
+			rooms.add(Messages.format("%s (%s)", roomName, roomType));
 		}
 
 		Collections.sort(rooms);
@@ -422,7 +427,6 @@ public class SeedFinder {
 		Dungeon.init();
 
 		HashSet<String> itemsToFind = new HashSet<>(itemList);
-		boolean[] itemFound = new boolean[itemList.size()];
 
 		// check trinkets
 		if (Options.logTrinkets) {
@@ -441,7 +445,7 @@ public class SeedFinder {
 			if (Thread.currentThread().isInterrupted())
 				throw new InterruptedException();
 
-			Level l = Dungeon.newLevel();
+			Level l = Dungeon.level = Dungeon.newLevel();
 
             ArrayList<Heap> heaps = new ArrayList<>(l.heaps.valueList());
 			heaps.addAll(getMobDrops(l));
@@ -528,7 +532,7 @@ public class SeedFinder {
 		String[] roomLog = new String[floors];
 
         Arrays.fill(itemLog, "");
-        Arrays.fill(roomLog, "");
+		Arrays.fill(roomLog, "");
 
 		if (Options.searchForDaily) {
 			Dungeon.daily = true;
@@ -566,7 +570,7 @@ public class SeedFinder {
 
 		for (int i = 0; i < floors; i++) {
 
-			Level l = Dungeon.newLevel();
+			Level l = Dungeon.level = Dungeon.newLevel();
 			ArrayList<Heap> heaps = new ArrayList<>(l.heaps.valueList());
 			StringBuilder builder = new StringBuilder();
 			ArrayList<HeapItem> scrolls = new ArrayList<>();
