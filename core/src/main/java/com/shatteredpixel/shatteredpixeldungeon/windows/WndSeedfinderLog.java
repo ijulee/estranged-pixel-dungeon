@@ -25,34 +25,40 @@ import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
 import com.shatteredpixel.shatteredpixeldungeon.ui.IconButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Icons;
+import com.shatteredpixel.shatteredpixeldungeon.ui.RedButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RenderedTextBlock;
+import com.shatteredpixel.shatteredpixeldungeon.ui.ScrollPane;
 import com.watabou.noosa.Image;
 import com.watabou.noosa.PointerArea;
 
 import com.shatteredpixel.shatteredpixeldungeon.SeedFinder.SeedfinderLogResult;
 
-import java.util.ArrayList;
-
-public class WndSeedfinderLog extends WndTabbedCategories {
+public class WndSeedfinderLog extends WndTabbed {
 
 	protected static final int WIDTH_MIN = 120;
 	protected static final int WIDTH_MAX = 280;
 	protected static final int TTL_HEIGHT = 11;
+	protected static final int BTN_HEIGHT = 16;
+
 	protected static final int GAP = 2;
 	private final int fontSize = SPDSettings.seedfinderFontSize();
 
-	private ArrayList<RenderedTextBlock> itemsBlocks = new ArrayList<>();
-	private ArrayList<RenderedTextBlock> roomsBlocks = new ArrayList<>();
-
-	private enum Category {ITEMS, ROOMS}
-	private Category selectedCategory = Category.ITEMS;
+	private RenderedTextBlock text;
+	private ScrollPane scroll;
+	private int selectedCategory = 0;
+	private static final int ITEMS = 0;
+	private static final int ROOMS = 1;
 	private int selectedIndex = 0;
 
-	public WndSeedfinderLog(Image icon, String title, SeedfinderLogResult result) {
+	private final SeedfinderLogResult result;
 
+	public WndSeedfinderLog(Image icon, String title, SeedfinderLogResult result) {
 		super();
 
+		this.result = result;
+
 		int width = WIDTH_MIN;
+		int height = PixelScene.uiCamera.height - 20 - tabHeight();
 
 		PointerArea blocker = new PointerArea(0, 0, PixelScene.uiCamera.width, PixelScene.uiCamera.height);
 		//do not go back on screen click
@@ -60,7 +66,7 @@ public class WndSeedfinderLog extends WndTabbedCategories {
 		add(blocker);
 
 		IconTitle titlebar = new IconTitle(icon, title);
-		titlebar.setRect(0, 0, width - TTL_HEIGHT, TTL_HEIGHT);
+		titlebar.setRect(0, 0, width - TTL_HEIGHT, 0);
 		add(titlebar);
 
 		IconButton btnClose = new IconButton(Icons.CLOSE.get()) {
@@ -72,106 +78,76 @@ public class WndSeedfinderLog extends WndTabbedCategories {
 		btnClose.setRect(titlebar.right(), 0, TTL_HEIGHT, TTL_HEIGHT);
 		add( btnClose );
 
-		RenderedTextBlock largest = null;
-		for (int i = 0; i < result.main.length; i++) {
-			RenderedTextBlock textblock = PixelScene.renderTextBlock(fontSize);
-			textblock.text(result.main[i], width);
-			textblock.setPos(titlebar.left(), titlebar.bottom() + 2 * GAP);
-			add(textblock);
-			itemsBlocks.add(textblock);
-
-			RenderedTextBlock textblock_room = PixelScene.renderTextBlock(fontSize);
-			textblock_room.text(result.rooms[i], width);
-			textblock_room.setPos(titlebar.left(), titlebar.bottom() + 2 * GAP);
-			add(textblock_room);
-			roomsBlocks.add(textblock_room);
-
-			if (largest == null || textblock.height() > largest.height()) {
-				largest = textblock;
+		RedButton btnItems = new RedButton("Items") {
+			@Override
+			protected void onClick() {
+				selectedCategory = ITEMS;
+				updateText();
 			}
-			if (largest == null || textblock_room.height() > largest.height()) {
-				largest = textblock_room;
-			}
+		};
+		btnItems.setRect(0, titlebar.bottom() + GAP, (width-GAP)/2f, BTN_HEIGHT);
+		add( btnItems );
 
+		RedButton btnRooms = new RedButton("Rooms") {
+			@Override
+			protected void onClick() {
+				selectedCategory = ROOMS;
+				updateText();
+			}
+		};
+		btnRooms.setRect((width+GAP)/2f, titlebar.bottom() + GAP, (width-GAP)/2f, BTN_HEIGHT);
+		add( btnRooms );
+
+		text = PixelScene.renderTextBlock( fontSize );
+		text.text(result.main[selectedIndex]);
+		text.maxWidth( width );
+		text.setPos( titlebar.left(), btnItems.bottom() + 2*GAP );
+
+		while (PixelScene.landscape()
+				&& text.bottom() > (PixelScene.MIN_HEIGHT_L - 10)
+				&& width < WIDTH_MAX) {
+			width += 20;
+			titlebar.setRect(0, 0, width - TTL_HEIGHT, 0);
+			btnClose.setRect(titlebar.right(), 0, TTL_HEIGHT, TTL_HEIGHT);
+			btnItems.setRect(0, titlebar.bottom() + GAP, (width-GAP)/2f, BTN_HEIGHT);
+			btnRooms.setRect((width+GAP)/2f, titlebar.bottom() + GAP, (width-GAP)/2f, BTN_HEIGHT);
+
+			text.setPos( titlebar.left(), btnItems.bottom() + 2*GAP );
+			text.maxWidth(width);
+		}
+
+		scroll = new ScrollPane(text);
+		add( scroll );
+
+		bringToFront(titlebar);
+		resize( width, height );
+		scroll.setRect(0, btnItems.bottom() + 2*GAP,
+				width, height - (btnItems.bottom() + 2*GAP));
+
+		for (int i = 0; i < this.result.main.length; i++) {
 			final int finalI = i;
-			add(new LabeledTab(numToNumeral(finalI + 1)) {
+			add(new LabeledTab(Integer.toString(i)) {
 				@Override
 				protected void select(boolean value) {
 					super.select(value);
 					if(value) {
 						selectedIndex = finalI;
 					}
-					update_text_visibility();
+					updateText();
 				}
 			});
 		}
 
-		add_category(new LabeledTab("items") {
-			@Override
-			protected void select(boolean value) {
-				super.select(value);
-				if(value) {
-					selectedCategory = Category.ITEMS;
-				}
-				update_text_visibility();
-			}
-		});
-
-		add_category(new LabeledTab("rooms") {
-			@Override
-			protected void select(boolean value) {
-				super.select(value);
-				if(value) {
-					selectedCategory = Category.ROOMS;
-				}
-				update_text_visibility();
-			}
-		});
-
-		while (PixelScene.landscape()
-				&& largest.bottom() > (PixelScene.MIN_HEIGHT_L - 20)
-				&& width < WIDTH_MAX) {
-			width += 20;
-			titlebar.setRect(0, 0, width - TTL_HEIGHT, TTL_HEIGHT);
-			btnClose.setRect(titlebar.right(), 0, TTL_HEIGHT, TTL_HEIGHT);
-
-			largest = null;
-			for (RenderedTextBlock text : itemsBlocks) {
-				text.setPos(titlebar.left(), titlebar.bottom() + GAP);
-				text.maxWidth(width);
-				if (largest == null || text.height() > largest.height()) {
-					largest = text;
-				}
-			}
-		}
-
-		bringToFront(titlebar);
-
-		resize(width, (int) largest.bottom() + GAP);
-
 		layoutTabs();
 		select(0);
-
 	}
 
-	private void update_text_visibility() {
-		for (int i = 0; i < itemsBlocks.size(); i++) {
-			itemsBlocks.get(i).visible = false;
-			roomsBlocks.get(i).visible = false;
-		}
-
-		switch(selectedCategory) {
-			case ITEMS:
-				itemsBlocks.get(selectedIndex).visible = true;
-				break;
-			case ROOMS:
-				roomsBlocks.get(selectedIndex).visible = true;
-				break;
-		}
-	}
-
-	private String numToNumeral(int num) {
-		return Integer.toString(num);
-
+	private void updateText() {
+        if (selectedCategory == ITEMS) {
+            text.text(result.main[selectedIndex]);
+        } else if (selectedCategory == ROOMS) {
+            text.text(result.rooms[selectedIndex]);
+        }
+		scroll.scrollTo(0, 0);
 	}
 }
