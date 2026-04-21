@@ -988,11 +988,8 @@ public class SeedFinder {
 	}
 
 	public static SeedLog scoutDungeon(String seed) {
-		return scoutDungeon(seed, SPDSettings.seedfinderFloors());
-	}
-
-	public static SeedLog scoutDungeon(String seed, int maxDepth) {
 		loadConfig();
+
 		Dungeon.daily = Options.searchForDaily;
 		if (!Dungeon.daily) {
 			SPDSettings.customSeed(seed);
@@ -1002,7 +999,7 @@ public class SeedFinder {
 		GamesInProgress.selectedClass = HeroClass.WARRIOR;
 		Dungeon.init();
 
-		SeedLog log = new SeedLog(Dungeon.customSeedText, maxDepth);
+		SeedLog log = new SeedLog(Dungeon.customSeedText, Options.floors);
 
 		//check trinkets
 		if (Options.logTrinkets) {
@@ -1010,7 +1007,7 @@ public class SeedFinder {
 		}
 
 		//check each floor
-		for ( ;Dungeon.depth <= maxDepth; Dungeon.depth++) {
+		for ( ;Dungeon.depth <= Options.floors; Dungeon.depth++) {
 
 			Level level = Dungeon.level = Dungeon.newLevel();
 
