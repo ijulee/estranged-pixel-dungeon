@@ -44,7 +44,8 @@ public class BadgesGrid extends Component {
 
 		for (Badges.Badge badge : Badges.filterReplacedBadges( global )) {
 
-			if (badge.type == Badges.BadgeType.HIDDEN) {
+			if (badge.type == Badges.BadgeType.HIDDEN ||
+				(badge == Badges.Badge.SKIPPED_TUTORIAL && !Badges.isUnlocked(badge))) {
 				continue;
 			}
 
