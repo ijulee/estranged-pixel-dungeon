@@ -120,9 +120,11 @@ public class SeedFinder {
 
 	}
 
-	static List<Class<? extends Item>> blacklist = Arrays.asList(Gold.class, Dewdrop.class, IronKey.class, GoldenKey.class,
+	static final List<Class<? extends Item>> blacklist = Arrays.asList(
+			Gold.class, Dewdrop.class, IronKey.class, GoldenKey.class,
 			CrystalKey.class, EnergyCrystal.class, CorpseDust.class, Embers.class,
-			CeremonialCandle.class, Pickaxe.class, Guidebook.class);
+			CeremonialCandle.class, Pickaxe.class, Guidebook.class
+	);
 
 	ArrayList<String> itemList;
 
@@ -557,14 +559,6 @@ public class SeedFinder {
         GamesInProgress.selectedClass = HeroClass.WARRIOR;
         Dungeon.init();
 
-        if (Options.ignoreBlacklist) {
-            blacklist = List.of();
-        } else {
-			blacklist = Arrays.asList(Gold.class, Dewdrop.class, IronKey.class, GoldenKey.class,
-					CrystalKey.class, EnergyCrystal.class, CorpseDust.class, Embers.class,
-					CeremonialCandle.class, Pickaxe.class, Guidebook.class);
-		}
-
         if (Options.logTrinkets) {
 			ArrayList<HeapItem> trinkets = getTrinkets();
 			StringBuilder builder = new StringBuilder();
@@ -702,7 +696,7 @@ public class SeedFinder {
 
 					if (h.type == Type.FOR_SALE)
 						continue;
-					else if (blacklist.contains(item.getClass()))
+					else if (!Options.ignoreBlacklist && blacklist.contains(item.getClass()))
 						continue;
 					else if (item instanceof Scroll)
 						scrolls.add(new HeapItem(item, h));
