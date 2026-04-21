@@ -4,7 +4,6 @@ import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
 import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
-import com.shatteredpixel.shatteredpixeldungeon.ui.CheckBox;
 import com.shatteredpixel.shatteredpixeldungeon.ui.IconButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Icons;
 import com.shatteredpixel.shatteredpixeldungeon.ui.MiniCheckBox;
@@ -141,11 +140,10 @@ public class WndSeedfinderMenu extends Window {
     }
 
     public static class WndLoggingOpts extends Window {
-
+        private static final int TTL_HEIGHT = 16;
         private static final int BTN_HEIGHT = 11;
 
-        RenderedTextBlock logOptsDesc;
-        ColorBlock sep2;
+        RenderedTextBlock title;
 
         MiniCheckBox chkTrinkets;
         MiniCheckBox chkEquipment;
@@ -155,18 +153,20 @@ public class WndSeedfinderMenu extends Window {
         MiniCheckBox chkWands;
         MiniCheckBox chkArtifacts;
         MiniCheckBox chkMisc;
+
         ColorBlock sep3;
 
         MiniCheckBox chkRooms;
         MiniCheckBox chkBlacklist;
         MiniCheckBox chkShops;
+        IconButton infoRooms;
+        IconButton infoBlacklist;
+        IconButton infoShops;
 
         public WndLoggingOpts() {
-            logOptsDesc = PixelScene.renderTextBlock(Messages.get(this, "title"), 7);
-            add(logOptsDesc);
-
-            sep2 = new ColorBlock(1, 1, 0xFF000000);
-            add(sep2);
+            title = PixelScene.renderTextBlock(Messages.get(this, "title"), 12);
+            title.hardlight( TITLE_COLOR );
+            add(title);
 
             chkTrinkets = new MiniCheckBox(Messages.get(this, "trinkets")) {
                 @Override
@@ -261,6 +261,17 @@ public class WndSeedfinderMenu extends Window {
             chkRooms.checked(SPDSettings.useRooms());
             add(chkRooms);
 
+            infoRooms = new IconButton(Icons.MINI_INFO.get()) {
+                @Override
+                protected void onClick() {
+                    super.onClick();
+                    ShatteredPixelDungeon.scene().add(
+                            new WndMessage(Messages.get(WndLoggingOpts.class, "rooms_info"))
+                    );
+                }
+            };
+            add( infoRooms );
+
             chkBlacklist = new MiniCheckBox(Messages.get(this, "blacklist")) {
                 @Override
                 protected void onClick() {
@@ -270,6 +281,17 @@ public class WndSeedfinderMenu extends Window {
             };
             chkBlacklist.checked(SPDSettings.ignoreBlacklist());
             add(chkBlacklist);
+
+            infoBlacklist = new IconButton(Icons.MINI_INFO.get()) {
+                @Override
+                protected void onClick() {
+                    super.onClick();
+                    ShatteredPixelDungeon.scene().add(
+                            new WndMessage(Messages.get(WndLoggingOpts.class, "blacklist_info"))
+                    );
+                }
+            };
+            add( infoBlacklist );
 
             chkShops = new MiniCheckBox(Messages.get(this, "shops")) {
                 @Override
@@ -281,19 +303,27 @@ public class WndSeedfinderMenu extends Window {
             chkShops.checked(SPDSettings.checkShops());
             add(chkShops);
 
+            infoShops = new IconButton(Icons.MINI_INFO.get()) {
+                @Override
+                protected void onClick() {
+                    super.onClick();
+                    ShatteredPixelDungeon.scene().add(
+                            new WndMessage(Messages.get(WndLoggingOpts.class, "shops_info"))
+                    );
+                }
+            };
+            add( infoShops );
+
             layout();
         }
 
         public void layout() {
             int width = PixelScene.landscape() ? WIDTH_L : WIDTH_P;
 
-            logOptsDesc.setPos((width - logOptsDesc.width()) / 2f, GAP);
-            PixelScene.align(logOptsDesc);
+            title.setPos((width - title.width()) / 2f, (TTL_HEIGHT - title.height()) / 2);
+            PixelScene.align(title);
 
-            sep2.size(width, 1);
-            sep2.y = logOptsDesc.bottom() + GAP;
-
-            chkTrinkets.setRect(0, sep2.y + 1 + GAP, width, BTN_HEIGHT);
+            chkTrinkets.setRect(0, TTL_HEIGHT + GAP, width, BTN_HEIGHT);
             chkEquipment.setRect(0, chkTrinkets.bottom() + GAP, width, BTN_HEIGHT);
             chkScrolls.setRect(0, chkEquipment.bottom() + GAP, width, BTN_HEIGHT);
             chkPotions.setRect(0, chkScrolls.bottom() + GAP, width, BTN_HEIGHT);
@@ -305,9 +335,13 @@ public class WndSeedfinderMenu extends Window {
             sep3.size(width, 1);
             sep3.y = chkMisc.bottom() + GAP;
 
-            chkRooms.setRect(0, sep3.y + 1 + GAP, width, BTN_HEIGHT);
-            chkBlacklist.setRect(0, chkRooms.bottom() + GAP, width, BTN_HEIGHT);
-            chkShops.setRect(0, chkBlacklist.bottom() + GAP, width, BTN_HEIGHT);
+            chkRooms.setRect(0, sep3.y + 1 + GAP, width - BTN_HEIGHT, BTN_HEIGHT);
+            chkBlacklist.setRect(0, chkRooms.bottom() + GAP, width - BTN_HEIGHT, BTN_HEIGHT);
+            chkShops.setRect(0, chkBlacklist.bottom() + GAP, width - BTN_HEIGHT, BTN_HEIGHT);
+
+            infoRooms.setRect(chkRooms.right(), chkRooms.top(), BTN_HEIGHT, BTN_HEIGHT);
+            infoBlacklist.setRect(chkBlacklist.right(), chkBlacklist.top(), BTN_HEIGHT, BTN_HEIGHT);
+            infoShops.setRect(chkShops.right(), chkShops.top(), BTN_HEIGHT, BTN_HEIGHT);
 
             resize(width, (int)chkShops.bottom());
 
