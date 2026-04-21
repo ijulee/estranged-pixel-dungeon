@@ -844,7 +844,10 @@ public class SeedFinder {
 			String[] rooms = new String[maxDepth + 1];
 			Arrays.fill(rooms, "");
 
-			//put trinkets in 0th entry
+			//seed text in 0th entry
+			main[0] += Messages.format("Custom Seed Text: _%s_\n\n", seed);
+
+			//trinkets in 0th entry
 			if (Options.logTrinkets && rolledTrinkets != null) {
 				LinkedList<String> trinketStrings = new LinkedList<>();
 				for (Item trinket : rolledTrinkets) {
@@ -857,14 +860,12 @@ public class SeedFinder {
 				//depth and floor feeling
 				String depthFeeling;
 				if (depth % 5 == 0) {
-					depthFeeling = "boss";
+					depthFeeling = "boss floor";
 				} else {
 					Level.Feeling feeling = feelings.get(depth-1);
 					depthFeeling = feeling == Level.Feeling.NONE ? "no feeling": feeling.title();
 				}
-				String depthString = Messages.format("_%dF:_ (%s)\n", depth, depthFeeling);
-
-				main[depth] += depthString;
+				main[depth] += Messages.format("_%dF Items:_ (%s)\n", depth, depthFeeling);
 
 				//add shop items
                 if (Options.checkShops) {
@@ -931,7 +932,7 @@ public class SeedFinder {
 				}
 
 				//add rooms
-				rooms[depth] += depthString;
+				rooms[depth] += Messages.format("_%dF Rooms:_ (%s)\n", depth, depthFeeling);
 				rooms[depth] += "\n";
 
 				for (Room room : roomList.get(depth-1).keySet()) {
