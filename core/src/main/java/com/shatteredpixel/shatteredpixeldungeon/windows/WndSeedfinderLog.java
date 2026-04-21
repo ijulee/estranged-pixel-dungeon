@@ -33,11 +33,13 @@ import com.watabou.noosa.PointerArea;
 
 import com.shatteredpixel.shatteredpixeldungeon.SeedFinder.SeedfinderLogResult;
 
+import java.util.ArrayList;
+
 public class WndSeedfinderLog extends WndTabbed {
 
 	protected static final int WIDTH_MIN = 120;
 	protected static final int WIDTH_MAX = 280;
-	protected static final int BTNCLOSE_HEIGHT = 11;
+	protected static final int BTN_SIZE_SMALL = 11;
 	protected static final int BTN_HEIGHT = 16;
 
 	protected static final int GAP = 2;
@@ -49,6 +51,8 @@ public class WndSeedfinderLog extends WndTabbed {
 	private static final int ITEMS = 0;
 	private static final int ROOMS = 1;
 	private int selectedIndex = 0;
+	private int offset = 0;
+	private static final int MAX_VISIBLE_TABS = 6;
 
 	private final SeedfinderLogResult result;
 
@@ -56,9 +60,11 @@ public class WndSeedfinderLog extends WndTabbed {
 		super();
 
 		this.result = result;
+		int numTabs = result.main.length;
 
 		int width = WIDTH_MIN;
 		int height = PixelScene.uiCamera.height - 20 - tabHeight();
+		int btnNavHeight = (numTabs > MAX_VISIBLE_TABS) ? BTN_SIZE_SMALL + 2*GAP : 0;
 
 		PointerArea blocker = new PointerArea(0, 0, PixelScene.uiCamera.width, PixelScene.uiCamera.height);
 		//do not go back on screen click
@@ -66,7 +72,7 @@ public class WndSeedfinderLog extends WndTabbed {
 		add(blocker);
 
 		IconTitle titlebar = new IconTitle(icon, title);
-		titlebar.setRect(0, 0, width - BTNCLOSE_HEIGHT, 0);
+		titlebar.setRect(0, 0, width - BTN_SIZE_SMALL, 0);
 		add(titlebar);
 
 		IconButton btnClose = new IconButton(Icons.CLOSE.get()) {
@@ -75,7 +81,7 @@ public class WndSeedfinderLog extends WndTabbed {
 				WndSeedfinderLog.this.hide();
 			}
 		};
-		btnClose.setRect(titlebar.right(), (titlebar.height()-BTNCLOSE_HEIGHT)/2f, BTNCLOSE_HEIGHT, BTNCLOSE_HEIGHT);
+		btnClose.setRect(titlebar.right(), (titlebar.height()- BTN_SIZE_SMALL)/2f, BTN_SIZE_SMALL, BTN_SIZE_SMALL);
 		add( btnClose );
 
 		RedButton btnItems = new RedButton("Items") {
@@ -107,8 +113,8 @@ public class WndSeedfinderLog extends WndTabbed {
 				&& text.bottom() > (PixelScene.MIN_HEIGHT_L - 10)
 				&& width < WIDTH_MAX) {
 			width += 20;
-			titlebar.setRect(0, 0, width - BTNCLOSE_HEIGHT, 0);
-			btnClose.setRect(titlebar.right(), (titlebar.height()-BTNCLOSE_HEIGHT)/2f, BTNCLOSE_HEIGHT, BTNCLOSE_HEIGHT);
+			titlebar.setRect(0, 0, width - BTN_SIZE_SMALL, 0);
+			btnClose.setRect(titlebar.right(), (titlebar.height()- BTN_SIZE_SMALL)/2f, BTN_SIZE_SMALL, BTN_SIZE_SMALL);
 			btnItems.setRect(0, titlebar.bottom() + GAP, (width-GAP)/2f, BTN_HEIGHT);
 			btnRooms.setRect((width+GAP)/2f, titlebar.bottom() + GAP, (width-GAP)/2f, BTN_HEIGHT);
 
@@ -122,32 +128,111 @@ public class WndSeedfinderLog extends WndTabbed {
 		bringToFront(titlebar);
 		resize( width, height );
 		scroll.setRect(0, btnItems.bottom() + 2*GAP,
-				width, height - (btnItems.bottom() + 2*GAP));
+				width, height - (btnItems.bottom() + 2*GAP) - btnNavHeight);
 
-		for (int i = 0; i < this.result.main.length; i++) {
+        if (numTabs > MAX_VISIBLE_TABS) {
+			RedButton btnLeft = new RedButton("<", 7) {
+				@Override
+				protected void onClick() {
+					if (offset > 0) {
+						offset -= 1;
+					}
+					updateTabs();
+					updateText();
+				}
+			};
+			btnLeft.setRect(0, scroll.bottom() + 2*GAP, BTN_SIZE_SMALL, BTN_SIZE_SMALL);
+			add(btnLeft);
+
+			RedButton btnRight = new RedButton(">", 7) {
+				@Override
+				protected void onClick() {
+					if (offset + 1 <= numTabs - MAX_VISIBLE_TABS) {
+						offset += 1;
+					}
+					updateTabs();
+					updateText();
+				}
+			};
+			btnRight.setRect(width-BTN_SIZE_SMALL, scroll.bottom() + 2*GAP, BTN_SIZE_SMALL, BTN_SIZE_SMALL);
+			add(btnRight);
+
+            for (int i = 0; i < MAX_VISIBLE_TABS; i++) {
+                String tabLabel = ((i==0 && offset > 0)? "..." : "") + numToTabTitle(i) +
+						((i == MAX_VISIBLE_TABS -1 && (i+offset) < numTabs-1) ? "...":"");
+                final int finalI = i;
+                add(new LabeledTab(tabLabel) {
+                    @Override
+                    protected void select(boolean value) {
+                        super.select(value);
+                        if (value) {
+                            selectedIndex = finalI;
+                        }
+                        updateText();
+                    }
+                });
+            }
+        } else {
+            for (int i = 0; i < this.result.main.length; i++) {
+                final int finalI = i;
+                add(new LabeledTab(numToTabTitle(i)) {
+                    @Override
+                    protected void select(boolean value) {
+                        super.select(value);
+                        if (value) {
+                            selectedIndex = finalI;
+                        }
+                        updateText();
+                    }
+                });
+            }
+        }
+
+        layoutTabs();
+		select(0);
+	}
+
+	private void updateText() {
+        if (selectedCategory == ITEMS) {
+            text.text(result.main[selectedIndex+offset]);
+        } else if (selectedCategory == ROOMS) {
+            text.text(result.rooms[selectedIndex+offset]);
+        }
+		scroll.scrollTo(0, 0);
+	}
+
+	private void updateTabs() {
+        if (!tabs.isEmpty()) {
+            for (Tab tab : tabs) {
+                remove(tab);
+            }
+			tabs = new ArrayList<>();
+        }
+		int numTabs = result.main.length;
+		for (int i = 0; i < MAX_VISIBLE_TABS; i++) {
+			String tabLabel = ((i==0 && offset > 0)? "..." : "") + numToTabTitle(i) +
+					((i == MAX_VISIBLE_TABS -1 && (i+offset) < numTabs-1) ? "...":"");
 			final int finalI = i;
-			add(new LabeledTab(Integer.toString(i)) {
+			add(new LabeledTab(tabLabel) {
 				@Override
 				protected void select(boolean value) {
 					super.select(value);
-					if(value) {
+					if (value) {
 						selectedIndex = finalI;
 					}
 					updateText();
 				}
 			});
 		}
-
+		select(selectedIndex);
 		layoutTabs();
-		select(0);
-	}
+    }
 
-	private void updateText() {
-        if (selectedCategory == ITEMS) {
-            text.text(result.main[selectedIndex]);
-        } else if (selectedCategory == ROOMS) {
-            text.text(result.rooms[selectedIndex]);
-        }
-		scroll.scrollTo(0, 0);
+	private String numToTabTitle(int num) {
+		if (num + offset == 0) {
+			return "*";
+		} else {
+			return Integer.toString(num + offset);
+		}
 	}
 }
