@@ -37,7 +37,7 @@ public class WndSeedfinderLog extends WndTabbed {
 
 	protected static final int WIDTH_MIN = 120;
 	protected static final int WIDTH_MAX = 280;
-	protected static final int TTL_HEIGHT = 11;
+	protected static final int BTNCLOSE_HEIGHT = 11;
 	protected static final int BTN_HEIGHT = 16;
 
 	protected static final int GAP = 2;
@@ -66,7 +66,7 @@ public class WndSeedfinderLog extends WndTabbed {
 		add(blocker);
 
 		IconTitle titlebar = new IconTitle(icon, title);
-		titlebar.setRect(0, 0, width - TTL_HEIGHT, 0);
+		titlebar.setRect(0, 0, width - BTNCLOSE_HEIGHT, 0);
 		add(titlebar);
 
 		IconButton btnClose = new IconButton(Icons.CLOSE.get()) {
@@ -75,7 +75,7 @@ public class WndSeedfinderLog extends WndTabbed {
 				WndSeedfinderLog.this.hide();
 			}
 		};
-		btnClose.setRect(titlebar.right(), 0, TTL_HEIGHT, TTL_HEIGHT);
+		btnClose.setRect(titlebar.right(), (titlebar.height()-BTNCLOSE_HEIGHT)/2f, BTNCLOSE_HEIGHT, BTNCLOSE_HEIGHT);
 		add( btnClose );
 
 		RedButton btnItems = new RedButton("Items") {
@@ -107,8 +107,8 @@ public class WndSeedfinderLog extends WndTabbed {
 				&& text.bottom() > (PixelScene.MIN_HEIGHT_L - 10)
 				&& width < WIDTH_MAX) {
 			width += 20;
-			titlebar.setRect(0, 0, width - TTL_HEIGHT, 0);
-			btnClose.setRect(titlebar.right(), 0, TTL_HEIGHT, TTL_HEIGHT);
+			titlebar.setRect(0, 0, width - BTNCLOSE_HEIGHT, 0);
+			btnClose.setRect(titlebar.right(), (titlebar.height()-BTNCLOSE_HEIGHT)/2f, BTNCLOSE_HEIGHT, BTNCLOSE_HEIGHT);
 			btnItems.setRect(0, titlebar.bottom() + GAP, (width-GAP)/2f, BTN_HEIGHT);
 			btnRooms.setRect((width+GAP)/2f, titlebar.bottom() + GAP, (width-GAP)/2f, BTN_HEIGHT);
 
