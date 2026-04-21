@@ -641,6 +641,7 @@ public class HeroSelectScene extends PixelScene {
 								if (index == 0) {
 									Badges.unlock(Badges.Badge.SKIPPED_TUTORIAL);
 									HeroClass.unlockAll();
+									SPDSettings.intro(false);
 								} else {
 									hide();
 								}
