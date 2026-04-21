@@ -95,6 +95,7 @@ public class SeedFinder {
 		public static boolean logWands;
 		public static boolean logArtifacts;
 		public static boolean logOther;
+		public static boolean checkShops;
 
 		public static boolean trueRandom;
 		public static boolean sequentialMode;
@@ -146,6 +147,8 @@ public class SeedFinder {
 		Options.logWands = SPDSettings.logWands();
 		Options.logArtifacts = SPDSettings.logArtifacts();
 		Options.logOther = SPDSettings.logMisc();
+
+		Options.checkShops = SPDSettings.checkShops();
 
 		Options.ignoreBlacklist = SPDSettings.ignoreBlacklist();
 		Options.challenges = SPDSettings.challenges();
@@ -870,13 +873,13 @@ public class SeedFinder {
 				main[depth] += depthString;
 
 				//add shop items
-				switch (depth) {
-					case 6: case 11: case 16: case 20: case 26:
-						main[depth] += "\n";
-						main[depth] += objectsToString("Shop", forSale.get(depth/5-1));
-				}
-
-				main[depth] += "\n";
+                if (Options.checkShops) {
+                    switch (depth) {
+                        case 6: case 11: case 16: case 20: case 26:
+                            main[depth] += "\n";
+                            main[depth] += objectsToString("Shop", forSale.get(depth/5-1));
+                    }
+                }
 
 				//add floor items
 				main[depth] += "\n";
@@ -1022,7 +1025,7 @@ public class SeedFinder {
 			for (Heap heap : filterHeaps(heaps)) {
 				if (heap.type != Type.FOR_SALE) {
 					log.addEntry(Dungeon.depth, heap.type, heap.items);
-				} else {
+				} else if (Options.checkShops) {
 					forSale.addAll(heap.items);
 				}
 			}
@@ -1030,7 +1033,7 @@ public class SeedFinder {
 			//add shop items separately
 			switch (Dungeon.depth) {
 				case 6: case 11: case 16: case 20: case 26:
-					if (!forSale.isEmpty()) {
+					if (Options.checkShops && !forSale.isEmpty()) {
 						log.addForSale(forSale);
 					}
 			}

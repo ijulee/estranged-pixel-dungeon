@@ -24,7 +24,7 @@ public class WndSeedfinderMenu extends Window {
 
     private static final int SLIDER_HEIGHT	= 24;
     private static final int BTN_HEIGHT	    = 16;
-    private static final float GAP          = 1;
+    private static final float GAP          = 2;
 
     //a simple scene change callback that does nothing since we need to do this a few times
     private static Game.SceneChangeCallback CALLBACK = new Game.SceneChangeCallback() {
@@ -159,6 +159,7 @@ public class WndSeedfinderMenu extends Window {
 
         MiniCheckBox chkRooms;
         MiniCheckBox chkBlacklist;
+        MiniCheckBox chkShops;
 
         public WndLoggingOpts() {
             logOptsDesc = PixelScene.renderTextBlock(Messages.get(this, "title"), 7);
@@ -270,6 +271,16 @@ public class WndSeedfinderMenu extends Window {
             chkBlacklist.checked(SPDSettings.ignoreBlacklist());
             add(chkBlacklist);
 
+            chkShops = new MiniCheckBox(Messages.get(this, "shops")) {
+                @Override
+                protected void onClick() {
+                    super.onClick();
+                    SPDSettings.checkShops(checked());
+                }
+            };
+            chkShops.checked(SPDSettings.checkShops());
+            add(chkShops);
+
             layout();
         }
 
@@ -296,8 +307,9 @@ public class WndSeedfinderMenu extends Window {
 
             chkRooms.setRect(0, sep3.y + 1 + GAP, width, BTN_HEIGHT);
             chkBlacklist.setRect(0, chkRooms.bottom() + GAP, width, BTN_HEIGHT);
+            chkShops.setRect(0, chkBlacklist.bottom() + GAP, width, BTN_HEIGHT);
 
-            resize(width, (int)chkBlacklist.bottom());
+            resize(width, (int)chkShops.bottom());
 
         }
     }
