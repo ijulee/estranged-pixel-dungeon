@@ -189,7 +189,7 @@ public class SPDSettings extends GameSettings {
 	}
 
 	public static int seedfinderFontSize() {
-		return getInt( KEY_FONTSIZE, 4, 3, 6 );
+		return getInt( KEY_FONTSIZE, 7, 3, 9 );
 	}
 
 	//Display

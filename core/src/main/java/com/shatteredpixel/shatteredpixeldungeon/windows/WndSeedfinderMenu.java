@@ -104,7 +104,7 @@ public class WndSeedfinderMenu extends Window {
         add(btnMode);
 
         slideFontSize = new OptionSlider(Messages.get(this, "fontsize_title", SPDSettings.seedfinderFontSize()),
-                "tiny", "smaller", 3, 6) {
+                "tiny", "smaller", 3, 9) {
             @Override
             protected void onChange() {
                 SPDSettings.seedfinderFontSize(getSelectedValue());
