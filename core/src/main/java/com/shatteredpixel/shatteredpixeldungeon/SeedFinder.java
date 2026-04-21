@@ -13,8 +13,6 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 import com.badlogic.gdx.Gdx;
-import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
-import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.SacrificialFire;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.WaterOfAwareness;
 import com.shatteredpixel.shatteredpixeldungeon.actors.blobs.WaterOfHealth;
@@ -58,9 +56,12 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.Room;
+import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.connection.ConnectionRoom;
+import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.secret.SecretRoom;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.secret.SecretWellRoom;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special.MagicWellRoom;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special.SacrificeRoom;
+import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special.SpecialRoom;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.utils.DungeonSeed;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndMessage;
@@ -878,6 +879,7 @@ public class SeedFinder {
 				main[depth] += "\n";
 
 				//add floor items
+				main[depth] += "\n";
 				for (ItemLog entry : items.get(depth-1)) {
 					main[depth] += entry.toString();
 				}
@@ -981,7 +983,7 @@ public class SeedFinder {
 				}
 			}
 
-			return Messages.format("%s: %s", caption, String.join(", ", itemStrings));
+			return Messages.format("%s: %s\n", caption, String.join(", ", itemStrings));
         }
 	}
 
@@ -1041,12 +1043,14 @@ public class SeedFinder {
 				for (Room room : roomList) {
 					String caption = "";
 					if (room instanceof SacrificeRoom && Options.logEquipment) {
-						//bit of a special case
+						//special case
 						SacrificialFire fire = (SacrificialFire) level.blobs.get(SacrificialFire.class);
 						if (fire != null) {
 							log.addEntry(Dungeon.depth, fire, List.of(fire.getPrize()));
 						}
-					} else if (room instanceof MagicWellRoom || room instanceof SecretWellRoom) {
+					}
+
+					if (room instanceof MagicWellRoom || room instanceof SecretWellRoom) {
 						int wellPos;
                         if (room instanceof MagicWellRoom) {
                             Point c = room.center();
@@ -1073,13 +1077,16 @@ public class SeedFinder {
 							caption = "awareness";
 						}
 					} else {
-						/*Package roomType = room.getClass().getPackage();
-						if (roomType == EntranceRoom.class.getPackage()) {
-							caption = "_entrance_";
-						} else if (roomType == ExitRoom.class.getPackage()) {
-							caption = "_exit_";
-						}*/
+						Package roomType = room.getClass().getPackage();
+						if (roomType == SecretRoom.class.getPackage()) {
+							caption = "secret";
+						} else if (roomType == SpecialRoom.class.getPackage()) {
+							caption = "special";
+						} else if (roomType == ConnectionRoom.class.getPackage()) {
+							continue;
+						}
 					}
+
 					log.addRoom(Dungeon.depth, room, caption);
 				}
 			}
