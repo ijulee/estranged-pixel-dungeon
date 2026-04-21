@@ -75,7 +75,12 @@ public class SeedFindScene extends PixelScene {
 		align(title);
 		add(title);
 
-		ExitButton btnExit = new ExitButton();
+		ExitButton btnExit = new ExitButton() {
+			@Override
+			protected void onClick() {
+				ShatteredPixelDungeon.switchNoFade( HeroSelectScene.class );
+			}
+		};
 		btnExit.setPos( insets.left + w - btnExit.width(), insets.top );
 		add( btnExit );
 
@@ -168,43 +173,36 @@ public class SeedFindScene extends PixelScene {
 		btnSeedfinder.icon(Icons.get(Icons.MAGNIFY));
 		add(btnSeedfinder);
 
-		StyledButton btnScout = new StyledButton(GREY_TR, Messages.get(this, "scout_seed_button")) /*{
+		StyledButton btnScout = new StyledButton(GREY_TR, Messages.get(this, "scout_seed_button")) {
 			@Override
 			protected void onClick() {
-				ShatteredPixelDungeon.scene()
-						.addToFront(new WndSeedfinderSeedinput(Messages.get(TitleScene.class, "scout_custom_seed_title"),
-								Messages.get(TitleScene.class, "scout_info_text"),
-								SPDSettings.seedinputText(),
-								20,
-								false,
-								Messages.get(TitleScene.class, "scout_button_yes"),
-								Messages.get(TitleScene.class, "scout_button_no")) {
-							@Override
-							public void onSelect(boolean positive, String text) {
-								if (positive && text != null && !text.isEmpty()) {
-									SPDSettings.seedinputText(text);
+				SeedFindScene.this.addToFront( new WndTextInput(
+						Messages.get(SeedFindScene.class, "scout_custom_seed_title"),
+						Messages.get(SeedFindScene.class, "scout_info_text"),
+						SPDSettings.seedinputText(), 20, false,
+						Messages.get(SeedFindScene.class, "scout_button_yes"),
+						Messages.get(SeedFindScene.class, "scout_button_no")) {
+					@Override
+					public void onSelect(boolean positive, String text) {
+						if (positive && text != null && !text.isEmpty()) {
+							SPDSettings.seedinputText(text);
 
-									text = DungeonSeed.formatText(text);
-									long seed = DungeonSeed.convertFromText(text);
+							text = DungeonSeed.formatText(text);
+							long seed = DungeonSeed.convertFromText(text);
 
-									SeedfinderLogResult result = new SeedFinder().logSeedItemsSeededRun(seed);
+							SeedFinder.SeedfinderLogResult result = SeedFinder.scoutDungeon(text).toLogResult();
 
-									ShatteredPixelDungeon.scene().addToFront(
-											new WndSeedfinderLog(Icons.get(Icons.BACKPACK),
-													"Items for seed " + DungeonSeed.convertToCode(Dungeon.seed),
-													result));
-								} else {
-									SPDSettings.seedinputText("");
-								}
-							}
-
-							// @Override
-							// public void onTextChange(String text) {
-							// 	SPDSettings.seedinputText(text);
-							// }
-						});
+							ShatteredPixelDungeon.scene().addToFront(
+									new WndSeedfinderLog(Icons.get(Icons.BACKPACK),
+											"Results for Seed: " + text,
+											result));
+						} else {
+							SPDSettings.seedinputText("");
+						}
+					}
+				});
 			}
-		}*/;
+		};
 		btnScout.icon(Icons.get(Icons.ENTER));
 		add(btnScout);
 
@@ -251,7 +249,7 @@ public class SeedFindScene extends PixelScene {
 		btnSeedfinder.setRect(btnAreaLeft, insets.top + topRegion + GAP, buttonAreaWidth, BTN_HEIGHT);
 		align(btnSeedfinder);
 		btnScout.setRect(btnAreaLeft, btnSeedfinder.bottom() + GAP, buttonAreaWidth, BTN_HEIGHT);
-        btnScoutDaily.setRect(btnAreaLeft, btnScout.bottom() + GAP, buttonAreaWidth, BTN_HEIGHT);
+		btnScoutDaily.setRect(btnAreaLeft, btnScout.bottom() + GAP, buttonAreaWidth, BTN_HEIGHT);
 		btnOptions.setRect(btnAreaLeft, btnScoutDaily.bottom() + GAP, buttonAreaWidth, BTN_HEIGHT);
 		/*ShatteredPixelDungeon.scene().addToFront(new WndTextInput(Messages.get(this, "title"), Messages.get(this, "body"), Messages.get(this, "initial_value")+"\n", 1000, true, Messages.get(this, "find"), Messages.get(HeroSelectScene.class, "custom_seed_clear")) {
 			@Override

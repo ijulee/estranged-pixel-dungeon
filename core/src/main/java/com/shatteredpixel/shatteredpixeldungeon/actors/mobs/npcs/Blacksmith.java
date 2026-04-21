@@ -204,7 +204,7 @@ public class Blacksmith extends NPC {
 
 	public static class Quest {
 
-		private static int type = 0;
+		public static int type = 0;
 		public static final int CRYSTAL = 1;
 		public static final int GNOLL = 2;
 		public static final int FUNGI = 3; //The fungi quest is not implemented, only exists partially in code
