@@ -14,8 +14,8 @@ allprojects {
         appName = 'Estranged Pixel Dungeon'
         appPackageName = 'com.miaomix.estrangedpixeldungeon'
 
-        appVersionCode = 891 + 112 // Shattered v3.3.6
-        appVersionName = '0.0.7'
+        appVersionCode = 891 + 113 // Shattered v3.3.6
+        appVersionName = '0.0.8'
 
         appJavaCompatibility = JavaVersion.VERSION_11
 
