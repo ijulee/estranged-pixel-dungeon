@@ -193,9 +193,7 @@ public class SeedFindScene extends PixelScene {
 							SeedFinder.SeedfinderLogResult result = SeedFinder.scoutDungeon(text).toLogResult();
 
 							ShatteredPixelDungeon.scene().addToFront(
-									new WndSeedfinderLog(Icons.get(Icons.BACKPACK),
-											"Results for Seed: " + text,
-											result));
+								new WndSeedfinderLog(Icons.get(Icons.BACKPACK),"Search Results", result));
 						} else {
 							SPDSettings.seedinputText("");
 						}
