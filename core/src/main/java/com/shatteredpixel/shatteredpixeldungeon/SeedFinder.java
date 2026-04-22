@@ -465,6 +465,7 @@ public class SeedFinder {
 			//add shop items separately
 			switch (Dungeon.depth) {
 				case 6: case 11: case 16: case 20: case 26:
+					forSale = filterItems(forSale);
 					if (Options.checkShops && !forSale.isEmpty()) {
 						log.addForSale(forSale);
 					}
