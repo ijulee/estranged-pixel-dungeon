@@ -24,7 +24,6 @@ package com.shatteredpixel.shatteredpixeldungeon.scenes;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.Clipboard;
 import com.shatteredpixel.shatteredpixeldungeon.Chrome;
-import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
 import com.shatteredpixel.shatteredpixeldungeon.SeedFinder;
 import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
@@ -36,7 +35,6 @@ import com.shatteredpixel.shatteredpixeldungeon.ui.StyledButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.TitleBackground;
 import com.shatteredpixel.shatteredpixeldungeon.utils.DungeonSeed;
 import com.shatteredpixel.shatteredpixeldungeon.windows.IconTitle;
-import com.shatteredpixel.shatteredpixeldungeon.windows.WndMessage;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndOptions;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndSeedfinderLog;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndSeedfinderMenu;
@@ -48,8 +46,6 @@ import com.watabou.noosa.ui.Component;
 import com.watabou.utils.RectF;
 
 public class SeedFindScene extends PixelScene {
-
-	private Thread seedThread;
 
 	@Override
 	public void create() {
@@ -106,7 +102,8 @@ public class SeedFindScene extends PixelScene {
 
 									//run in new thread
 									searchThread[0] = new Thread(() -> {
-										final String foundSeed = new SeedFinder().find_seed(itemsPrompt);
+										SeedFinder.loadConfig();
+										final SeedFinder.SeedLog foundSeed = SeedFinder.findSeed();
 
 										//process results in rendering thread
 										Gdx.app.postRunnable(() -> {
@@ -117,25 +114,19 @@ public class SeedFindScene extends PixelScene {
 											progressWnd[0].hide();
 
                                             if (foundSeed == null) {
-                                                SeedFindScene.this.addToFront(new WndMessage("Error: seed not found."));
-                                                return;
-                                            } else if (foundSeed.startsWith("error")) {
-												SeedFindScene.this.addToFront(new WndMessage(foundSeed));
                                                 return;
                                             }
 
 											//copy seed to clipboard on success
 											Clipboard clipboard = Gdx.app.getClipboard();
-											clipboard.setContents(foundSeed);
-
-											long seed = DungeonSeed.convertFromText(foundSeed);
+											clipboard.setContents(foundSeed.seed);
 
 											//show log
-											SeedFinder.SeedfinderLogResult result = new SeedFinder().logSeedItemsSeededRun(seed);
+											SeedFinder.SeedfinderLogResult result = foundSeed.toLogResult();
 
 											ShatteredPixelDungeon.scene().addToFront(
 													new WndSeedfinderLog(Icons.get(Icons.BACKPACK),
-															"Found seed " + DungeonSeed.convertToCode(Dungeon.seed),
+															"Search Result",
 															result));
 										});
 									});
@@ -170,7 +161,7 @@ public class SeedFindScene extends PixelScene {
 						});
 			}
 		};
-		btnSeedfinder.icon(Icons.get(Icons.MAGNIFY));
+		btnSeedfinder.icon(Icons.MAGNIFY_GRAY.get());
 		add(btnSeedfinder);
 
 		StyledButton btnScout = new StyledButton(GREY_TR, Messages.get(this, "scout_seed_button")) {
@@ -179,21 +170,18 @@ public class SeedFindScene extends PixelScene {
 				SeedFindScene.this.addToFront( new WndTextInput(
 						Messages.get(SeedFindScene.class, "scout_custom_seed_title"),
 						Messages.get(SeedFindScene.class, "scout_info_text"),
-						SPDSettings.seedinputText(), 20, false,
+						SPDSettings.customSeed(), 20, false,
 						Messages.get(SeedFindScene.class, "scout_button_yes"),
 						Messages.get(SeedFindScene.class, "scout_button_no")) {
 					@Override
 					public void onSelect(boolean positive, String text) {
 						if (positive && text != null && !text.isEmpty()) {
-							SPDSettings.seedinputText(text);
-
 							text = DungeonSeed.formatText(text);
-							long seed = DungeonSeed.convertFromText(text);
 
-							SeedFinder.SeedfinderLogResult result = SeedFinder.scoutDungeon(text).toLogResult();
+							SeedFinder.SeedfinderLogResult result = SeedFinder.scoutSeed(text).toLogResult();
 
-							ShatteredPixelDungeon.scene().addToFront(
-								new WndSeedfinderLog(Icons.get(Icons.BACKPACK),"Search Results", result));
+							ShatteredPixelDungeon.scene().addToFront( new WndSeedfinderLog(
+										Icons.get(Icons.BACKPACK),"Search Result", result) );
 						} else {
 							SPDSettings.seedinputText("");
 						}
@@ -201,30 +189,21 @@ public class SeedFindScene extends PixelScene {
 				});
 			}
 		};
-		btnScout.icon(Icons.get(Icons.ENTER));
+		btnScout.icon(Icons.JOURNAL_GRAY.get());
 		add(btnScout);
 
-		StyledButton btnScoutDaily = new StyledButton(GREY_TR, Messages.get(this, "scout_daily")) /*{
+		StyledButton btnScoutDaily = new StyledButton(GREY_TR, Messages.get(this, "scout_daily")) {
 			@Override
 			protected void onClick() {
-				SeedfinderLogResult result = new SeedFinder().logSeedItemsDailyRunRun(0);
-
-				long DAY = 1000 * 60 * 60 * 24;
-				long currentDay = (long) Math.floor(Game.realTime / DAY) + SeedFinder.Options.DailyOffset;
-				SPDSettings.lastDaily(DAY * currentDay);
-				DateFormat format = new SimpleDateFormat("yyyy-MM-dd", Locale.ROOT);
-				format.setTimeZone(TimeZone.getTimeZone("UTC"));
-				String date = format.format(new Date(SPDSettings.lastDaily()));
+				SeedFinder.SeedLog result = SeedFinder.scoutDaily();
 
 				ShatteredPixelDungeon.scene().addToFront(
 						new WndSeedfinderLog(Icons.get(Icons.BACKPACK),
-								"Items for daily run " + date,
-								result));
+								"Search Result", result.toLogResult()));
 			}
-		}*/;
+		};
 		btnScoutDaily.icon(Icons.get(Icons.ENTER));
 		add(btnScoutDaily);
-		Dungeon.daily = Dungeon.dailyReplay = false;
 
 		StyledButton btnOptions = new StyledButton(GREY_TR, "Options") {
 			@Override
@@ -249,94 +228,6 @@ public class SeedFindScene extends PixelScene {
 		btnScout.setRect(btnAreaLeft, btnSeedfinder.bottom() + GAP, buttonAreaWidth, BTN_HEIGHT);
 		btnScoutDaily.setRect(btnAreaLeft, btnScout.bottom() + GAP, buttonAreaWidth, BTN_HEIGHT);
 		btnOptions.setRect(btnAreaLeft, btnScoutDaily.bottom() + GAP, buttonAreaWidth, BTN_HEIGHT);
-		/*ShatteredPixelDungeon.scene().addToFront(new WndTextInput(Messages.get(this, "title"), Messages.get(this, "body"), Messages.get(this, "initial_value")+"\n", 1000, true, Messages.get(this, "find"), Messages.get(HeroSelectScene.class, "custom_seed_clear")) {
-			@Override
-			public void onSelect(boolean positive, String text) {
-				int floor = 31;
-				boolean floorOption = false;
-				text = text.toLowerCase(); //대문자를 소문자로 변경
-				text = text.replaceAll(" ", ""); //공백 제거
-				String up_to_floor;
-				if (Messages.lang() == Languages.KOREAN) {
-					up_to_floor = "층까지";
-				} else {
-					up_to_floor = "floor end";
-				}
-				String strFloor;
-				if (Messages.lang() == Languages.KOREAN) {
-					strFloor = "층";
-				} else {
-					strFloor = "floor";
-				}
-				if (text.contains(up_to_floor)) {
-					floorOption = true;
-					String fl = text.split(strFloor)[0].trim();
-					try {
-						floor = Integer.parseInt(fl);
-					} catch (
-							NumberFormatException e) {
-					}
-				}
-				if (positive && text != "") {
-					String[] itemList = floorOption ? Arrays.copyOfRange(text.split("\n"), 1, text.split("\n").length) : text.split("\n");
-
-					Component content = list.content();
-					content.clear();
-
-					CreditsBlock alertMsg = new CreditsBlock(true,
-							Window.TITLE_COLOR,
-							Messages.get(SeedFinder.class, "seedfind_warning"));
-					alertMsg.setRect((Camera.main.width - colWidth)/2f, (Camera.main.height-12)/2f, colWidth, 0);
-					content.add(alertMsg);
-
-					if(!Objects.isNull(seedThread) && seedThread.isAlive()){
-						SeedFinder.stopFindSeed();
-						seedThread.interrupt();
-					}
-					int finalFloor = floor;
-					String finalText = text;
-					seedThread = new Thread(new Runnable() {
-						@Override
-						public void run() {
-							String resultContent;
-							try {
-								resultContent = new SeedFinder().findSeed(itemList, finalFloor);
-							} catch (NullPointerException e) {
-								//스택 트레이스를 문자열로 받음
-								StringWriter sw = new StringWriter();
-								PrintWriter pw = new PrintWriter(sw);
-								e.printStackTrace(pw);
-								String stackTrace = sw.toString();
-								//결과 문자열을 에러 메시지로 변경
-								resultContent = Messages.get(SeedFinder.class, "error", finalText, stackTrace);
-							}
-							String finalResultContent = resultContent;
-							Gdx.app.postRunnable(new Runnable() {
-								@Override
-								public void run() {
-									if(!(ShatteredPixelDungeon.scene() instanceof SeedFindScene)) return;
-									CreditsBlock txt = new CreditsBlock(true,
-											Window.TITLE_COLOR,
-											finalResultContent);
-									txt.setRect((Camera.main.width - colWidth)/2f, 12, colWidth, 0);
-									content.add(txt);
-									content.remove(alertMsg);
-									content.setSize( fullWidth, txt.bottom()+10 );
-								}
-							});
-						}
-					});
-					seedThread.start();
-
-					list.setRect( 0, 0, w, h );
-					list.scrollTo(0, 0);
-
-				} else {
-					SPDSettings.customSeed("");
-					ShatteredPixelDungeon.switchNoFade(HeroSelectScene.class);
-				}
-			}
-		});*/
 
 		addToBack( BG );
 
@@ -347,13 +238,6 @@ public class SeedFindScene extends PixelScene {
 	protected void onBackPressed() {
 		ShatteredPixelDungeon.switchScene(HeroSelectScene.class);
 	}
-
-	private void addLine(float y, Group content) {
-		ColorBlock line = new ColorBlock(Camera.main.width, 1, 0xFF333333);
-		line.y = y;
-		content.add(line);
-	}
-
 
 	public static class CreditsBlock extends Component {
 
