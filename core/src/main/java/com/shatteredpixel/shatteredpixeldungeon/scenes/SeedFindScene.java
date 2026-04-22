@@ -102,7 +102,6 @@ public class SeedFindScene extends PixelScene {
 
 									//run in new thread
 									searchThread[0] = new Thread(() -> {
-										SeedFinder.loadConfig();
 										final SeedFinder.SeedLog foundSeed = SeedFinder.findSeed();
 
 										//process results in rendering thread

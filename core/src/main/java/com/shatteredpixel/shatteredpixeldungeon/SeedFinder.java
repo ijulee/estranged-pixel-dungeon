@@ -221,10 +221,6 @@ public class SeedFinder {
 			this.feelings = new ArrayList<>();
 		}
 
-		public SeedLog() {
-			this("", 29);
-		}
-
 		public void addEntry(int depth, Object src, List<Item> content) {
 			this.items.get(depth-1).add(new ItemLog(src, content));
 		}
@@ -244,106 +240,79 @@ public class SeedFinder {
 			Arrays.fill(rooms, "");
 
 			//seed text in 0th entry
-			main[0] += Messages.format("_Custom Seed Text:_ %s\n\n", seed);
+			main[0] += Messages.get(this, "custom_seed", seed) + "\n\n";
 
 			//trinkets in 0th entry
 			if (Options.logTrinkets && rolledTrinkets != null) {
 				LinkedList<String> trinketStrings = new LinkedList<>();
 				for (Item trinket : rolledTrinkets) {
-					trinketStrings.add("**-** "+Messages.titleCase(trinket.title()));
+					trinketStrings.add(checkTarget(trinket.title()));
 				}
-				main[0] += "_Trinkets:_\n" + String.join("\n", trinketStrings);
+
+				main[0] += Messages.get(this, "trinkets", trinketStrings.toArray());
 			}
 
 			for (int depth = 1; depth <= maxDepth; depth++) {
 				//depth and floor feeling
 				String depthFeeling;
 				if (depth % 5 == 0) {
-					depthFeeling = "boss floor";
+					depthFeeling = Messages.get(this, "boss_floor");
 				} else {
 					Level.Feeling feeling = feelings.get(depth-1);
-					depthFeeling = feeling == Level.Feeling.NONE ? "no feeling": feeling.title();
+					depthFeeling = (feeling == Level.Feeling.NONE) ?
+							Messages.get(this, "none_floor") : feeling.title();
 				}
-				main[depth] += Messages.format("_%dF Items:_ (%s)\n", depth, depthFeeling);
+				main[depth] += Messages.get(this, "items_title", depth, depthFeeling);
 
 				//add shop items
                 if (Options.checkShops) {
                     switch (depth) {
                         case 6: case 11: case 16: case 20: case 26:
-                            main[depth] += "\n";
-                            main[depth] += objectsToString("Shop", forSale.get(depth/5-1));
-                    }
+                            main[depth] += "\n\n";
+                            main[depth] += itemsToString("Shop", forSale.get(depth/5-1));
+					}
                 }
 
 				//add floor items
-				main[depth] += "\n";
+				main[depth] += "\n\n";
 				for (ItemLog entry : items.get(depth-1)) {
 					main[depth] += entry.toString();
 				}
 
 				//handle quests
 				if (depth == ghostDepth) {
-					String questType = "?";
-					switch (depth) {
-						case 2:
-							questType = "fetid rat";
-							break;
-						case 3:
-							questType = "gnoll trickster";
-							break;
-						case 4:
-							questType = "great crab";
-							break;
-					}
-					main[depth] += Messages.format("\nGhost quest (%s): %s, %s",
-							questType, ghostWeapon.title(), ghostArmor.title());
+					String questType = Messages.get(this, "ghost_type_"+depth);
+					main[depth] += "\n";
+					main[depth] += Messages.get(this, "ghost", questType,
+							checkTarget(ghostWeapon.title()),
+							checkTarget(ghostArmor.title()));
 				} else if (depth == wandmakerDepth) {
-					String questType = "?";
-					switch (wandmakerType) {
-						case 1:
-							questType = "corpse dust";
-							break;
-						case 2:
-							questType = "elemental embers";
-							break;
-						case 3:
-							questType = "rotberry";
-							break;
-					}
-					main[depth] += Messages.format("\nWandmaker quest (%s): %s, %s",
-							questType, wandmakerWand1.title(), wandmakerWand2.title());
+					String questType = Messages.get(this, "wandmaker_type_"+wandmakerType);
+					main[depth] += "\n";
+					main[depth] += Messages.get(this, "wandmaker", questType,
+							checkTarget(wandmakerWand1.title()),
+							checkTarget(wandmakerWand2.title()));
 				} else if (depth == blacksmithDepth) {
-					String questType = "?";
-					switch (blacksmithType) {
-						case 1:
-							questType = "crystal spire";
-							break;
-						case 2:
-							questType = "gnoll geomancer";
-							break;
-					}
-					main[depth] += objectsToString(
-							Messages.format("\nBlacksmith quest (%s)", questType),
+					String questType = Messages.get(this, "blacksmith_type_"+blacksmithType);
+					main[depth] += "\n";
+					main[depth] += itemsToString(Messages.get(this, "blacksmith", questType),
 							blacksmithSmithRewards);
 				} else if (depth == impDepth) {
 					String questType = impType ? "monks" : "golems";
-					main[depth] += Messages.format("\nBlacksmith quest (%s): %s", questType, impReward.title());
+					main[depth] += "\n";
+					main[depth] += Messages.get(this, "imp", questType,
+							checkTarget(impReward.title()));
 				}
 
 				//add rooms
-				rooms[depth] += Messages.format("_%dF Rooms:_ (%s)\n", depth, depthFeeling);
-				rooms[depth] += "\n";
+				rooms[depth] += Messages.get(this, "rooms_title", depth, depthFeeling);
+				rooms[depth] += "\n\n";
 
 				for (Room room : roomList.get(depth-1).keySet()) {
 					String roomName = room.getClass().getSimpleName()
 							.replaceAll("([a-z])([A-Z])", "$1 $2").toLowerCase();
 					if (Options.useRooms) {
-						for (String target : targets.keySet()) {
-							if (roomName.contains(target)) {
-								targets.put(target, true);
-								roomName = Messages.format("_%s_", roomName);
-							}
-						}
+						roomName = checkTarget(roomName);
 					}
 
 					if (!roomList.get(depth-1).get(room).isEmpty()) {
@@ -379,20 +348,8 @@ public class SeedFinder {
 				caption = src.getClass().getSimpleName()
 						.replaceAll("([a-z])([A-Z])", "$1 $2").toLowerCase();
 			}
-			LinkedList<String> itemStrings = new LinkedList<>();
-			for (Item item : content) {
-				item.identify(false);
-				String itemName = item.title();
-				for (String target : targets.keySet()) {
-					if (itemName.contains(target)) {
-						targets.put(target, true);
-						itemName = Messages.format("_%s_", itemName);
-					}
-				}
-				itemStrings.add(itemName);
-			}
 
-			return Messages.format("%s: %s\n", caption, String.join(", ", itemStrings));
+			return itemsToString(caption, content);
         }
 	}
 
@@ -407,10 +364,11 @@ public class SeedFinder {
 
 	public static SeedLog findSeed() {
 		HashMap<String, Boolean> inputTargets = new HashMap<>();
-
 		for (String target : SPDSettings.seeditemsText().toLowerCase().split(System.lineSeparator())) {
 			inputTargets.put(target, false);
 		}
+
+		SeedFinder.loadConfig();
 
 		long start = Random.Long(DungeonSeed.TOTAL_SEEDS);
 		for (long i = start; i < DungeonSeed.TOTAL_SEEDS; i++) {
@@ -421,8 +379,8 @@ public class SeedFinder {
 			}
 
 			targets = new HashMap<>(inputTargets);
-
-			SeedLog log = scoutSeed(DungeonSeed.convertToCode(i));
+			SPDSettings.customSeed(DungeonSeed.convertToCode(i));
+			SeedLog log = scoutDungeon();
 			log.toLogResult();
 
 			if ((Options.condition == Condition.ALL && !targets.containsValue(false)) ||
@@ -435,6 +393,19 @@ public class SeedFinder {
 		}
 
 		return null;
+	}
+
+	public static String checkTarget(String title) {
+		boolean match = false;
+		for (String target : targets.keySet()) {
+			if (title.contains(target)) {
+				targets.put(target, true);
+				match = true;
+			}
+		}
+
+		if (match) return Messages.format("_%s_", title);
+		else	   return title;
 	}
 
 	private static final long SECOND = 1000;
@@ -504,60 +475,63 @@ public class SeedFinder {
 					}
 			}
 
-			//check rooms
-			if (Options.useRooms) {
-				for (Room room : roomList) {
-					String caption = "";
-					if (room instanceof SacrificeRoom && Options.logEquipment) {
-						//special case
-						SacrificialFire fire = (SacrificialFire) level.blobs.get(SacrificialFire.class);
-						if (fire != null) {
-							log.addEntry(Dungeon.depth, fire, List.of(fire.getPrize()));
-						}
-					}
-
-					if (room instanceof MagicWellRoom || room instanceof SecretWellRoom) {
-						int wellPos;
-                        if (room instanceof MagicWellRoom) {
-                            Point c = room.center();
-                            wellPos = c.x + level.width() * c.y;
-                        } else {
-							Point door = ((SecretWellRoom) room).entrance();
-							Point well;
-							if (door.x == room.left){
-								well = new Point(room.right-2, door.y);
-							} else if (door.x == room.right){
-								well = new Point(room.left+2, door.y);
-							} else if (door.y == room.top){
-								well = new Point(door.x, room.bottom-2);
-							} else {
-								well = new Point(door.x, room.top+2);
-							}
-							wellPos = well.x + level.width() * well.y;
-						}
-                        WaterOfHealth health = (WaterOfHealth) level.blobs.get(WaterOfHealth.class);
-						WaterOfAwareness aware = (WaterOfAwareness) level.blobs.get(WaterOfAwareness.class);
-						if (health != null && health.cur[wellPos] != 0) {
-							caption = "health";
-						} else if (aware != null && aware.cur[wellPos] != 0) {
-							caption = "awareness";
-						}
-					} else {
-						Package roomType = room.getClass().getPackage();
-						if (roomType == SecretRoom.class.getPackage()) {
-							caption = "secret";
-						} else if (roomType == SpecialRoom.class.getPackage()) {
-							caption = "special";
-						} else if (roomType == ConnectionRoom.class.getPackage()) {
-							continue;
-						}
-					}
-
-					log.addRoom(Dungeon.depth, room, caption);
-				}
+			//skip below for boss floors
+			if (Dungeon.depth % 5 == 0) {
+				continue;
 			}
 
-			//check quest NPC presence and grab quest info
+			//check rooms
+            for (Room room : roomList) {
+                String caption = "";
+                if (room instanceof SacrificeRoom && Options.logEquipment) {
+                    //special case
+                    SacrificialFire fire = (SacrificialFire) level.blobs.get(SacrificialFire.class);
+                    if (fire != null) {
+                        log.addEntry(Dungeon.depth, fire, List.of(fire.getPrize()));
+                    }
+                }
+
+                if (room instanceof MagicWellRoom || room instanceof SecretWellRoom) {
+                    int wellPos;
+					if (room instanceof MagicWellRoom) {
+						Point c = room.center();
+						wellPos = c.x + level.width() * c.y;
+					} else {
+                        Point door = ((SecretWellRoom) room).entrance();
+                        Point well;
+                        if (door.x == room.left){
+                            well = new Point(room.right-2, door.y);
+                        } else if (door.x == room.right){
+                            well = new Point(room.left+2, door.y);
+                        } else if (door.y == room.top){
+                            well = new Point(door.x, room.bottom-2);
+                        } else {
+                            well = new Point(door.x, room.top+2);
+                        }
+                        wellPos = well.x + level.width() * well.y;
+                    }
+					WaterOfHealth health = (WaterOfHealth) level.blobs.get(WaterOfHealth.class);
+                    WaterOfAwareness aware = (WaterOfAwareness) level.blobs.get(WaterOfAwareness.class);
+                    if (health != null && health.cur[wellPos] != 0) {
+                        caption = "health";
+                    } else if (aware != null && aware.cur[wellPos] != 0) {
+                        caption = "awareness";
+                    }
+                } else {
+                    Package roomType = room.getClass().getPackage();
+                    if (roomType == SecretRoom.class.getPackage()) {
+                        caption = "secret";
+                    } else if (roomType == SpecialRoom.class.getPackage()) {
+                        caption = "special";
+                    } else if (roomType == ConnectionRoom.class.getPackage()) {
+                        continue;
+                    }
+                }
+
+                log.addRoom(Dungeon.depth, room, caption);
+            }
+
+            //check quest NPC presence and grab quest info
 			for (Mob mob : level.mobs) {
 				if (mob instanceof Ghost && Ghost.Quest.armor != null) {
 					log.ghostDepth = Dungeon.depth;
@@ -629,16 +603,13 @@ public class SeedFinder {
 		return filtered;
 	}
 
-	private static String objectsToString(String caption, List<?> content) {
+	private static String itemsToString(String caption, List<Item> content) {
 		LinkedList<String> itemStrings = new LinkedList<>();
-		for (Object item: content) {
-            if (item instanceof Item) {
-                itemStrings.add(((Item) item).title());
-            } else {
-				itemStrings.add(Messages.lowerCase(item.getClass().getSimpleName().replaceAll("([a-z])([A-Z])", "$1 $2")));
-			}
+		for (Item item: content) {
+			item.identify(false);
+			itemStrings.add(checkTarget(item.title()));
         }
 
-		return Messages.format("%s: %s\n", caption, String.join(", ", itemStrings));
+		return Messages.format("%s: %s", caption, String.join(", ", itemStrings));
 	}
 }
