@@ -82,16 +82,16 @@ public class SeedFindScene extends PixelScene {
 
 		final Chrome.Type GREY_TR = Chrome.Type.GREY_BUTTON_TR;
 
-		StyledButton btnSeedfinder = new StyledButton(GREY_TR, Messages.get(this, "seedfinder_button")) {
+		StyledButton btnSeedfinder = new StyledButton(GREY_TR, Messages.get(this, "find_seed_button")) {
 			@Override
 			protected void onClick() {
 				SeedFindScene.this.addToFront(
 						new WndTextInput(
 								Messages.get(SeedFindScene.class, "seedfinder_title"),
-								Messages.get(SeedFindScene.class, "seedfinder_info_text"),
+								Messages.get(SeedFindScene.class, "seedfinder_info"),
 								SPDSettings.seeditemsText(), 1000, true,
-								Messages.get(SeedFindScene.class, "seedfinder_button_yes"),
-								Messages.get(SeedFindScene.class, "seedfinder_button_no")) {
+								Messages.get(SeedFindScene.class, "seedfinder_yes"),
+								Messages.get(SeedFindScene.class, "seedfinder_no")) {
 							@Override
 							public void onSelect(boolean positive, String itemsPrompt) {
 								if (positive) {
@@ -126,16 +126,16 @@ public class SeedFindScene extends PixelScene {
 
 											ShatteredPixelDungeon.scene().addToFront(
 													new WndSeedfinderLog(Icons.get(Icons.BACKPACK),
-															"Search Result",
+															Messages.get(SeedFindScene.class, "result_title"),
 															result));
 										});
 									});
 
 									progressWnd[0] = new WndOptions(
 											Icons.get(Icons.MAGNIFY),
-											Messages.get(SeedFindScene.class, "seedfinder_searching_title"),
-											Messages.get(SeedFindScene.class, "seedfinder_searching_text"),
-											Messages.get(SeedFindScene.class, "seedfinder_searching_cancel") ) {
+											Messages.get(SeedFindScene.class, "searching_title"),
+											Messages.get(SeedFindScene.class, "searching_text"),
+											Messages.get(SeedFindScene.class, "searching_cancel") ) {
 										@Override
 										protected void onSelect(int index) {
 											if (index == 0) {
@@ -168,20 +168,23 @@ public class SeedFindScene extends PixelScene {
 			@Override
 			protected void onClick() {
 				SeedFindScene.this.addToFront( new WndTextInput(
-						Messages.get(SeedFindScene.class, "scout_custom_seed_title"),
-						Messages.get(SeedFindScene.class, "scout_info_text"),
+						Messages.get(SeedFindScene.class, "scout_title"),
+						Messages.get(SeedFindScene.class, "scout_info"),
 						SPDSettings.customSeed(), 20, false,
-						Messages.get(SeedFindScene.class, "scout_button_yes"),
-						Messages.get(SeedFindScene.class, "scout_button_no")) {
+						Messages.get(SeedFindScene.class, "scout_yes"),
+						Messages.get(SeedFindScene.class, "scout_no")) {
 					@Override
 					public void onSelect(boolean positive, String text) {
 						if (positive && text != null && !text.isEmpty()) {
 							text = DungeonSeed.formatText(text);
 
-							SeedFinder.SeedfinderLogResult result = SeedFinder.scoutSeed(text).toLogResult();
+							SeedFinder.SeedLog result = SeedFinder.scoutSeed(text);
 
-							ShatteredPixelDungeon.scene().addToFront( new WndSeedfinderLog(
-										Icons.get(Icons.BACKPACK),"Search Result", result) );
+							ShatteredPixelDungeon.scene().addToFront(
+									new WndSeedfinderLog(
+											Icons.get(Icons.BACKPACK),
+											Messages.get(SeedFindScene.class, "result_title"),
+											result.toLogResult()) );
 						} else {
 							SPDSettings.seedinputText("");
 						}
@@ -192,26 +195,28 @@ public class SeedFindScene extends PixelScene {
 		btnScout.icon(Icons.JOURNAL_GRAY.get());
 		add(btnScout);
 
-		StyledButton btnScoutDaily = new StyledButton(GREY_TR, Messages.get(this, "scout_daily")) {
+		StyledButton btnScoutDaily = new StyledButton(GREY_TR, Messages.get(this, "scout_daily_button")) {
 			@Override
 			protected void onClick() {
 				SeedFinder.SeedLog result = SeedFinder.scoutDaily();
 
 				ShatteredPixelDungeon.scene().addToFront(
-						new WndSeedfinderLog(Icons.get(Icons.BACKPACK),
-								"Search Result", result.toLogResult()));
+						new WndSeedfinderLog(
+								Icons.get(Icons.BACKPACK),
+								Messages.get(SeedFindScene.class, "result_title"),
+								result.toLogResult()));
 			}
 		};
-		btnScoutDaily.icon(Icons.get(Icons.ENTER));
+		btnScoutDaily.icon(Icons.CALENDAR.get());
 		add(btnScoutDaily);
 
-		StyledButton btnOptions = new StyledButton(GREY_TR, "Options") {
+		StyledButton btnOptions = new StyledButton(GREY_TR, Messages.get(SeedFindScene.class, "options_button")) {
 			@Override
 			protected void onClick() {
 				SeedFindScene.this.addToFront(new WndSeedfinderMenu());
 			}
 		};
-		btnOptions.icon(Icons.get(Icons.ENTER));
+		btnOptions.icon(Icons.PREFS.get());
 		add(btnOptions);
 
 		float topRegion = Math.max(title.height() - 6, h*0.45f);
