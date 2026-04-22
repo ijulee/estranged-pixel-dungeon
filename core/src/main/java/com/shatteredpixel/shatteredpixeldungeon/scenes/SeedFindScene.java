@@ -185,7 +185,7 @@ public class SeedFindScene extends PixelScene {
 											Messages.get(SeedFindScene.class, "result_title"),
 											result.toLogResult()) );
 						} else {
-							SPDSettings.seedinputText("");
+							SPDSettings.customSeed("");
 						}
 					}
 				});

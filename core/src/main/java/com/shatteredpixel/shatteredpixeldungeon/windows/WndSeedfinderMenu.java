@@ -104,7 +104,7 @@ public class WndSeedfinderMenu extends Window {
         add(btnMode);
 
         slideFontSize = new OptionSlider(Messages.get(this, "fontsize_title", SPDSettings.seedfinderFontSize()),
-                "tiny", "smaller", 3, 9) {
+                "small", "large", 3, 9) {
             @Override
             protected void onChange() {
                 SPDSettings.seedfinderFontSize(getSelectedValue());
@@ -164,7 +164,7 @@ public class WndSeedfinderMenu extends Window {
         IconButton infoShops;
 
         public WndLoggingOpts() {
-            title = PixelScene.renderTextBlock(Messages.get(this, "title"), 12);
+            title = PixelScene.renderTextBlock(Messages.get(this, "title"), 9);
             title.hardlight( TITLE_COLOR );
             add(title);
 

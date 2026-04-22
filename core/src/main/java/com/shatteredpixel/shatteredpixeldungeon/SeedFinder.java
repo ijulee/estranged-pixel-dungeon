@@ -110,8 +110,6 @@ public class SeedFinder {
 
 		Options.searchForDaily = false;
 
-		// TODO: retire useRooms option
-		// the option still controls matching of rooms when finding seeds, even though rooms are always displayed
 		Options.useRooms = SPDSettings.useRooms();
 
 		Options.logTrinkets = SPDSettings.logTrinkets();
@@ -265,7 +263,7 @@ public class SeedFinder {
 				main[depth] += Messages.get(this, "items_title", depth, depthFeeling);
 
 				//add shop items
-                if (Options.checkShops) {
+				if (Options.checkShops) {
                     switch (depth) {
                         case 6: case 11: case 16: case 20: case 26:
                             main[depth] += "\n\n";
