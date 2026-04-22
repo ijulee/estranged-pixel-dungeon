@@ -53,20 +53,18 @@ public class SPDSettings extends GameSettings {
 	public static final String KEY_USEROOMS	= "use_rooms";
 	public static final String KEY_IGNOREBLACKLIST	= "ignore_blacklist";
 
-	public static final String KEY_LOGTRINKETS	= "logging_option_trinkets";
-	public static final String KEY_LOGEQUIPMENT	= "logging_option_equipment";
-	public static final String KEY_LOGSCROLLS	= "logging_option_scrolls";
-	public static final String KEY_LOGPOTIONS= "logging_option_potions";
-	public static final String KEY_LOGRINGS	= "logging_option_rings";
-	public static final String KEY_LOGWANDS= "logging_option_wands";
-	public static final String KEY_LOGARTIFACTS	= "logging_option_artifacts";
-	public static final String KEY_LOGMISC= "logging_option_other";
-	public static final String KEY_CHECKSHOPS= "check_shops";
+	public static final String KEY_LOG_TRINKETS = "logging_option_trinkets";
+	public static final String KEY_LOG_EQUIP = "logging_option_equipment";
+	public static final String KEY_LOG_SCROLLS = "logging_option_scrolls";
+	public static final String KEY_LOG_POTIONS = "logging_option_potions";
+	public static final String KEY_LOG_RINGS = "logging_option_rings";
+	public static final String KEY_LOG_WANDS = "logging_option_wands";
+	public static final String KEY_LOG_ARTI = "logging_option_artifacts";
+	public static final String KEY_LOG_MISC = "logging_option_other";
+	public static final String KEY_CHECK_SHOPS = "check_shops";
 
-	public static final String KEY_SEEDITEMS_TEXT= "remember_seeditems_text";
-	public static final String KEY_SEEDINPUT_TEXT= "remember_seedinput_text";
+	public static final String KEY_SEEDFINDER_PROMPT = "seedfinder_prompt";
 	public static final String KEY_CONDITION= "seedfinder_condition";
-
 	public static final String KEY_FONTSIZE= "seedfinder_fontsize";
 
 	public static void seedfinderFloors( int value ) {
@@ -77,20 +75,12 @@ public class SPDSettings extends GameSettings {
 		return getInt( KEY_FLOORS, 9, 1, 29 );
 	}
 
-	public static void seeditemsText(String value) {
-		put(KEY_SEEDITEMS_TEXT, value);
+	public static void seedfinderPrompt(String value) {
+		put(KEY_SEEDFINDER_PROMPT, value);
 	}
 
-	public static String seeditemsText() {
-		return getString(KEY_SEEDITEMS_TEXT, "");
-	}
-
-	public static void seedinputText(String value) {
-		put(KEY_SEEDINPUT_TEXT, value);
-	}
-
-	public static String seedinputText() {
-		return getString(KEY_SEEDINPUT_TEXT, "");
+	public static String seedfinderPrompt() {
+		return getString(KEY_SEEDFINDER_PROMPT, "");
 	}
 
 	public static void seedfinderConditionANY(boolean value) {
@@ -98,7 +88,7 @@ public class SPDSettings extends GameSettings {
 	}
 
 	public static boolean seedfinderConditionANY() {
-		return getBoolean(KEY_CONDITION, false);
+		return getBoolean(KEY_CONDITION, true);
 	}
 
 	public static void useRooms( boolean value ) {
@@ -118,70 +108,70 @@ public class SPDSettings extends GameSettings {
 	}
 
 	public static void logTrinkets( boolean value ) {
-		put( KEY_LOGTRINKETS, value );
+		put(KEY_LOG_TRINKETS, value );
 	}
 
 	public static boolean logTrinkets() {
-		return getBoolean( KEY_LOGTRINKETS, true );
+		return getBoolean(KEY_LOG_TRINKETS, true );
 	}
 
 	public static void logEquipment( boolean value ) {
-		put( KEY_LOGEQUIPMENT, value );
+		put(KEY_LOG_EQUIP, value );
 	}
 
 	public static boolean logEquipment() {
-		return getBoolean( KEY_LOGEQUIPMENT, true );
+		return getBoolean(KEY_LOG_EQUIP, true );
 	}
 
 	public static void logScrolls( boolean value ) {
-		put( KEY_LOGSCROLLS, value );
+		put(KEY_LOG_SCROLLS, value );
 	}
 
 	public static boolean logScrolls() {
-		return getBoolean( KEY_LOGSCROLLS, true );
+		return getBoolean(KEY_LOG_SCROLLS, true );
 	}
 	public static void logPotions( boolean value ) {
-		put( KEY_LOGPOTIONS, value );
+		put(KEY_LOG_POTIONS, value );
 	}
 
 	public static boolean logPotions() {
-		return getBoolean( KEY_LOGPOTIONS, true );
+		return getBoolean(KEY_LOG_POTIONS, true );
 	}
 	public static void logRings( boolean value ) {
-		put( KEY_LOGRINGS, value );
+		put(KEY_LOG_RINGS, value );
 	}
 
 	public static boolean logRings() {
-		return getBoolean( KEY_LOGRINGS, true );
+		return getBoolean(KEY_LOG_RINGS, true );
 	}
 	public static void logWands( boolean value ) {
-		put( KEY_LOGWANDS, value );
+		put(KEY_LOG_WANDS, value );
 	}
 
 	public static boolean logWands() {
-		return getBoolean( KEY_LOGWANDS, true );
+		return getBoolean(KEY_LOG_WANDS, true );
 	}
 	public static void logArtifacts( boolean value ) {
-		put( KEY_LOGARTIFACTS, value );
+		put(KEY_LOG_ARTI, value );
 	}
 
 	public static boolean logArtifacts() {
-		return getBoolean( KEY_LOGARTIFACTS, true );
+		return getBoolean(KEY_LOG_ARTI, true );
 	}
 	public static void logMisc( boolean value ) {
-		put( KEY_LOGMISC, value );
+		put(KEY_LOG_MISC, value );
 	}
 
 	public static boolean logMisc() {
-		return getBoolean( KEY_LOGMISC, false );
+		return getBoolean(KEY_LOG_MISC, false );
 	}
 
 	public static void checkShops( boolean value ) {
-		put( KEY_CHECKSHOPS, value );
+		put(KEY_CHECK_SHOPS, value );
 	}
 
 	public static boolean checkShops() {
-		return getBoolean( KEY_CHECKSHOPS, false );
+		return getBoolean(KEY_CHECK_SHOPS, false );
 	}
 
 	public static void seedfinderFontSize( int value ) {

@@ -61,13 +61,12 @@ import com.watabou.utils.Point;
 import com.watabou.utils.Random;
 
 public class SeedFinder {
-	public enum Condition {
-		ANY, ALL
-	}
+	public static final boolean CONDITION_ANY = true;
+	public static final boolean CONDITION_ALL = false;
 
 	public static class Options {
 		public static int floors;
-		public static Condition condition;
+		public static boolean condition;
 		public static long seed;
 
 		public static boolean searchForDaily;
@@ -106,7 +105,7 @@ public class SeedFinder {
 	public static void loadConfig() {
 		// pull options from SPDSettings
 		Options.floors = SPDSettings.seedfinderFloors();
-		Options.condition = SPDSettings.seedfinderConditionANY() ? Condition.ANY : Condition.ALL;
+		Options.condition = SPDSettings.seedfinderConditionANY();
 
 		Options.searchForDaily = false;
 
@@ -360,7 +359,7 @@ public class SeedFinder {
 
 	public static SeedLog findSeed() {
 		HashMap<String, Boolean> inputTargets = new HashMap<>();
-		for (String target : SPDSettings.seeditemsText().toLowerCase().split(System.lineSeparator())) {
+		for (String target : SPDSettings.seedfinderPrompt().toLowerCase().split(System.lineSeparator())) {
 			inputTargets.put(target, false);
 		}
 
@@ -379,8 +378,8 @@ public class SeedFinder {
 			SeedLog log = scoutDungeon();
 			log.toLogResult();
 
-			if ((Options.condition == Condition.ALL && !targets.containsValue(false)) ||
-				(Options.condition == Condition.ANY && targets.containsValue(true))) {
+			if ((Options.condition == CONDITION_ALL && !targets.containsValue(false)) ||
+				(Options.condition == CONDITION_ANY && targets.containsValue(true))) {
 					long count = i - start + 1;
 					Gdx.app.postRunnable(() -> ShatteredPixelDungeon.scene()
 							.addToFront(new WndMessage("Searched through _" + count + "_ seeds.")));

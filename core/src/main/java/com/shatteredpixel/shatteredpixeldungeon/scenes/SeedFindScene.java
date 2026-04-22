@@ -40,8 +40,6 @@ import com.shatteredpixel.shatteredpixeldungeon.windows.WndSeedfinderLog;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndSeedfinderMenu;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndTextInput;
 import com.watabou.noosa.Camera;
-import com.watabou.noosa.ColorBlock;
-import com.watabou.noosa.Group;
 import com.watabou.noosa.ui.Component;
 import com.watabou.utils.RectF;
 
@@ -89,13 +87,13 @@ public class SeedFindScene extends PixelScene {
 						new WndTextInput(
 								Messages.get(SeedFindScene.class, "seedfinder_title"),
 								Messages.get(SeedFindScene.class, "seedfinder_info"),
-								SPDSettings.seeditemsText(), 1000, true,
+								SPDSettings.seedfinderPrompt(), 1000, true,
 								Messages.get(SeedFindScene.class, "seedfinder_yes"),
 								Messages.get(SeedFindScene.class, "seedfinder_no")) {
 							@Override
 							public void onSelect(boolean positive, String itemsPrompt) {
 								if (positive) {
-									SPDSettings.seeditemsText(itemsPrompt);
+									SPDSettings.seedfinderPrompt(itemsPrompt);
 
 									final Thread[] searchThread = new Thread[1];
 									final WndOptions[] progressWnd = new WndOptions[1];
@@ -154,7 +152,7 @@ public class SeedFindScene extends PixelScene {
 									SeedFindScene.this.addToFront(progressWnd[0]);
 									searchThread[0].start();
 								} else {
-									SPDSettings.seeditemsText("");
+									SPDSettings.seedfinderPrompt("");
 								}
 							}
 						});
