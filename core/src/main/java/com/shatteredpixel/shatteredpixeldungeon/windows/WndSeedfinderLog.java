@@ -21,6 +21,8 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.windows;
 
+import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
+import com.shatteredpixel.shatteredpixeldungeon.scenes.HeroSelectScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
 import com.shatteredpixel.shatteredpixeldungeon.ui.IconButton;
@@ -64,7 +66,7 @@ public class WndSeedfinderLog extends WndTabbed {
 
 		int width = WIDTH_MIN;
 		int height = PixelScene.uiCamera.height - 20 - tabHeight();
-		int btnNavHeight = (numTabs > MAX_VISIBLE_TABS) ? BTN_SIZE_SMALL + 2*GAP : 0;
+		int bottomPadding = BTN_SIZE_SMALL + 2*GAP;
 
 		PointerArea blocker = new PointerArea(0, 0, PixelScene.uiCamera.width, PixelScene.uiCamera.height);
 		//do not go back on screen click
@@ -128,7 +130,7 @@ public class WndSeedfinderLog extends WndTabbed {
 		bringToFront(titlebar);
 		resize( width, height );
 		scroll.setRect(0, btnItems.bottom() + 2*GAP,
-				width, height - (btnItems.bottom() + 2*GAP) - btnNavHeight);
+				width, height - (btnItems.bottom() + 2*GAP) - bottomPadding);
 
         if (numTabs > MAX_VISIBLE_TABS) {
 			RedButton btnLeft = new RedButton("<", 7) {
@@ -187,6 +189,16 @@ public class WndSeedfinderLog extends WndTabbed {
                 });
             }
         }
+
+		RedButton btnUse = new RedButton("Use Seed", 7) {
+			@Override
+			protected void onClick() {
+				ShatteredPixelDungeon.switchNoFade( HeroSelectScene.class );
+			}
+		};
+		btnUse.setRect(BTN_SIZE_SMALL + GAP, scroll.bottom() + 2*GAP,
+				width - 2*(BTN_SIZE_SMALL+GAP), BTN_SIZE_SMALL);
+		add(btnUse);
 
         layoutTabs();
 		select(0);

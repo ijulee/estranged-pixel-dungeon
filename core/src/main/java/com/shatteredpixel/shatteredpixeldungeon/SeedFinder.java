@@ -277,29 +277,27 @@ public class SeedFinder {
 				main[depth] += "\n\n";
 				for (ItemLog entry : items.get(depth-1)) {
 					main[depth] += entry.toString();
+					main[depth] += "\n";
 				}
+				main[depth] += "\n";
 
 				//handle quests
 				if (depth == ghostDepth) {
 					String questType = Messages.get(this, "ghost_type_"+depth);
-					main[depth] += "\n";
 					main[depth] += Messages.get(this, "ghost", questType,
 							checkTarget(ghostWeapon.title()),
 							checkTarget(ghostArmor.title()));
 				} else if (depth == wandmakerDepth) {
 					String questType = Messages.get(this, "wandmaker_type_"+wandmakerType);
-					main[depth] += "\n";
 					main[depth] += Messages.get(this, "wandmaker", questType,
 							checkTarget(wandmakerWand1.title()),
 							checkTarget(wandmakerWand2.title()));
 				} else if (depth == blacksmithDepth) {
 					String questType = Messages.get(this, "blacksmith_type_"+blacksmithType);
-					main[depth] += "\n";
 					main[depth] += itemsToString(Messages.get(this, "blacksmith", questType),
 							blacksmithSmithRewards);
 				} else if (depth == impDepth) {
 					String questType = impType ? "monks" : "golems";
-					main[depth] += "\n";
 					main[depth] += Messages.get(this, "imp", questType,
 							checkTarget(impReward.title()));
 				}
