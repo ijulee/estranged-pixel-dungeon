@@ -228,22 +228,26 @@ public class SwordAura extends TargetingAction {
         public int proc(Char attacker, Char defender, int damage) {
             damage = super.proc(attacker, defender, damage);
 
-            if (Dungeon.hero.hasTalent(Talent.WIND_BLAST) &&
-                Dungeon.hero.buff(Sheath.Sheathing.class) != null) {
-                damage += 5 * Dungeon.hero.pointsInTalent(Talent.WIND_BLAST);
+            if (Dungeon.hero.buff(Sheath.Sheathing.class) != null) {
+                if (Dungeon.hero.hasTalent(Talent.WIND_BLAST)) {
+                    damage += 5 * Dungeon.hero.pointsInTalent(Talent.WIND_BLAST);
+                }
+                if (Random.Int(3) < Dungeon.hero.pointsInTalent(Talent.ENERGY_SAVING)) {
+                    Buff.affect(defender, Cripple.class, 3f);
+                }
             }
 
-            Weapon wep = (Weapon) Dungeon.hero.belongings.weapon();
-            if (wep.enchantment != null &&
-                (2 <= Dungeon.hero.pointsInTalent(Talent.ARCANE_POWER) ||
-                Random.Int(2) < Dungeon.hero.pointsInTalent(Talent.ARCANE_POWER))) {
-                damage = wep.enchantment.proc(wep, attacker, defender, damage);
-            }
+            if (defender.alignment != Char.Alignment.ALLY) {
+                Weapon wep = (Weapon) Dungeon.hero.belongings.weapon();
+                if (wep.enchantment != null &&
+                    Random.Int(2) < Dungeon.hero.pointsInTalent(Talent.ARCANE_POWER)) {
+                    damage = wep.enchantment.proc(wep, attacker, defender, damage);
+                }
 
-            if (Dungeon.hero.hasTalent(Talent.ENERGY_COLLECT) &&
-                defender.alignment != Char.Alignment.ALLY) {
-                recovered += Math.round(damage *
-                        (0.05f + 0.15f * Dungeon.hero.pointsInTalent(Talent.ENERGY_COLLECT)));
+                if (Dungeon.hero.hasTalent(Talent.ENERGY_COLLECT)) {
+                    recovered += Math.round( damage *
+                            (0.05f + 0.15f * Dungeon.hero.pointsInTalent(Talent.ENERGY_COLLECT)) );
+                }
             }
 
             return damage;
