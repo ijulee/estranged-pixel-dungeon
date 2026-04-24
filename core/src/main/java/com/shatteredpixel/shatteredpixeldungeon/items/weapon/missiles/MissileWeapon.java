@@ -202,17 +202,6 @@ abstract public class MissileWeapon extends Weapon {
 	
 	@Override
 	public int throwPos(Hero user, int dst) {
-		//FIXME move into respective subclass methods
-		if (this instanceof LG.LGBullet) {
-			Ballistica beam = new Ballistica(user.pos, dst, Ballistica.WONT_STOP);
-			return beam.path.get(Math.min(beam.dist, ((LG.LGBullet) this).maxDist()));
-        }
-
-		if (this instanceof FT.FTBullet) {
-			Ballistica beam = new Ballistica(user.pos, dst, Ballistica.DASH | Ballistica.IGNORE_SOFT_SOLID);
-			return beam.path.get(Math.min(beam.dist, ((FT.FTBullet) this).maxDist()));
-		}
-
 		int projecting = 0;
 		if (hasEnchant(Projecting.class, user)){
 			projecting += 4;

@@ -4,6 +4,7 @@ import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Beam;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.particles.LaserParticle;
@@ -47,6 +48,12 @@ public class LG extends Gun {
 
         public int maxDist() {
             return 2 * (tier() + 1);
+        }
+
+        @Override
+        public int throwPos(Hero user, int dst) {
+            Ballistica beam = new Ballistica(user.pos, dst, Ballistica.WONT_STOP);
+            return beam.path.get(Math.min(beam.dist, this.maxDist()));
         }
 
         @Override
