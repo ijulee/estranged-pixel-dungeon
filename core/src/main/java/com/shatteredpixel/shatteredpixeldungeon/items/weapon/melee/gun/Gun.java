@@ -773,6 +773,7 @@ public abstract class Gun extends GunWeapon {
 
 		@Override
 		protected void onThrow( int cell ) {
+			if (cell == curUser.pos) return;
 
 			ArrayList<Char> targets = new ArrayList<>();
 			if (!explode) {
