@@ -227,6 +227,7 @@ public class GammaRayGun extends Item {
                 }
                 //add to cooldown count
                 Buff.prolong(curUser, GammaRayCooldown.class, getCooldown());
+                updateQuickslot();
 
                 curUser.spendAndNext(Actor.TICK);
             }
