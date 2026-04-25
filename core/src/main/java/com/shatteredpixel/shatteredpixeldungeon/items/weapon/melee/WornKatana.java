@@ -42,7 +42,7 @@ public class WornKatana extends MeleeWeapon {
         bones = false;
     }
 
-    public static final float BASE_CRIT = 0.25f;
+    public static final float BASE_CRIT = 0.20f;
 
     @Override
     public boolean doPickUp( Hero hero, int pos ) {

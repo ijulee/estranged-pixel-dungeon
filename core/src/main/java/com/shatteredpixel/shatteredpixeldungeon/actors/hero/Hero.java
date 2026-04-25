@@ -1911,13 +1911,13 @@ public class Hero extends Char {
 		float chance = 0;
 
 		if (KATANA_CLASSES.contains(wep.getClass())) {
-			//25%/23%/20%/18%/15%/13% crit rate
-			chance += WornKatana.BASE_CRIT*( 1.1f - 0.1f*((MeleeWeapon) wep).tier );
+			//20%/16%/12%/10% base crit rate
+			chance += WornKatana.BASE_CRIT - 0.02f*(((MeleeWeapon) wep).tier-1);
 		}
 
 		if (wep instanceof SR.SRBullet) {
-			//20%/15%/13% crit rate, not affected by tier mod
-			chance += WornKatana.BASE_CRIT*( 1.1f - 0.1f*((SR.SRBullet) wep).tier );
+			//20/16/14% base crit rate, affected by tier mod (-/+2%)
+			chance += WornKatana.BASE_CRIT - 0.02f*(((SR.SRBullet) wep).tier-3);
 		}
 
 		if (hasTalent(Talent.BASIC_PRACTICE)) {

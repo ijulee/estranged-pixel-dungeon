@@ -128,7 +128,7 @@ public abstract class GunWeapon extends MeleeWeapon {
         }
 
         public GunMissile() {
-            super();
+            tier = GunWeapon.this.tier();
             augment = GunWeapon.this.augment;
             enchantment = GunWeapon.this.enchantment;
             identify(false); // prevents "curse discovery" message
