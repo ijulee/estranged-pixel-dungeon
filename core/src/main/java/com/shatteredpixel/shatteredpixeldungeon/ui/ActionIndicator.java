@@ -140,7 +140,6 @@ public class ActionIndicator extends Tag {
 	protected void onClick() {
 		super.onClick();
 		if (action != null && Dungeon.hero.ready) {
-			QuickSlotButton.cancel();
 			action.doAction();
 		}
 	}
