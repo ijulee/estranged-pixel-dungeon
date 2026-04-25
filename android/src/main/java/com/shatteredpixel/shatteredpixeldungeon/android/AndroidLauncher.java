@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2025 Evan Debenham
+ * Copyright (C) 2014-2026 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,6 +43,7 @@ import com.badlogic.gdx.backends.android.AsynchronousAndroidAudio;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeType;
 import com.badlogic.gdx.utils.GdxNativesLoader;
+import com.jorexdeveloper.eh.EH;
 import com.google.android.gms.games.GamesSignInClient;
 import com.google.android.gms.games.PlayGames;
 import com.google.android.gms.games.PlayGamesSdk;
@@ -94,6 +95,9 @@ public class AndroidLauncher extends AndroidApplication implements GooglePlayGam
 		try {
 			GdxNativesLoader.load();
 			FreeType.initFreeType();
+			new EH.Builder (this)
+					.addEmailAddresses ("trashbox.bobylev@gmail.com")
+					.init ();
 		} catch (Exception e){
 			GdxNativesLoader.disableNativesLoading = true;
 			AndroidMissingNativesHandler.error = e;
@@ -142,11 +146,18 @@ public class AndroidLauncher extends AndroidApplication implements GooglePlayGam
 		//Shattered still overrides the back gesture behaviour, but we need to do it in a new way
 		// (API added in Android 13, functionality enforced in Android 16)
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-			getOnBackInvokedDispatcher().registerOnBackInvokedCallback(OnBackInvokedDispatcher.PRIORITY_DEFAULT, new OnBackInvokedCallback() {
+			//we post this to a runnable so that it's delayed and overrides
+			// default GDX back handling, which only sends a key down event
+			runnables.add(new Runnable() {
 				@Override
-				public void onBackInvoked() {
-					KeyEvent.addKeyEvent(new KeyEvent(Input.Keys.BACK, true));
-					KeyEvent.addKeyEvent(new KeyEvent(Input.Keys.BACK, false));
+				public void run() {
+					getOnBackInvokedDispatcher().registerOnBackInvokedCallback(OnBackInvokedDispatcher.PRIORITY_DEFAULT, new OnBackInvokedCallback() {
+						@Override
+						public void onBackInvoked() {
+							KeyEvent.addKeyEvent(new KeyEvent(Input.Keys.BACK, true));
+							KeyEvent.addKeyEvent(new KeyEvent(Input.Keys.BACK, false));
+						}
+					});
 				}
 			});
 		}
@@ -167,7 +178,7 @@ public class AndroidLauncher extends AndroidApplication implements GooglePlayGam
 
 		Button.longClick = ViewConfiguration.getLongPressTimeout()/1000f;
 		
-		initialize(new ShatteredPixelDungeon(support, this), config);
+		initialize(new ShatteredPixelDungeon(support), config);
 		
 	}
 
@@ -185,6 +196,7 @@ public class AndroidLauncher extends AndroidApplication implements GooglePlayGam
 		super.onResume();
 	}
 
+	@SuppressLint("GestureBackNavigation")
 	@Override
 	public void onBackPressed() {
 		//do nothing, game should catch all back presses
