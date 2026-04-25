@@ -97,7 +97,12 @@ public class SwordAura extends TargetingAction {
     public void restoreFromBundle(Bundle bundle) {
         super.restoreFromBundle(bundle);
         energy = bundle.getInt( DAMAGE );
-        refresh();
+        if (energy <= 0) {
+            ActionIndicator.clearAction(this);
+        } else {
+            ActionIndicator.setAction(this);
+        }
+        ActionIndicator.refresh();
     }
 
     @Override
