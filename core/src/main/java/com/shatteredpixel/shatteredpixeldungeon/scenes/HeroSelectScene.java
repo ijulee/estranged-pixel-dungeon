@@ -746,27 +746,16 @@ public class HeroSelectScene extends PixelScene {
 			buttons.add(seedButton);
 			add(seedButton);
 
-			StyledButton btnSeedTest = new StyledButton(Chrome.Type.BLANK, Messages.get(HeroSelectScene.class, "seed_find"), 6){
+			StyledButton seedfinderButton = new StyledButton(Chrome.Type.BLANK, Messages.get(HeroSelectScene.class, "seedfinder"), 6){
 				@Override
 				protected void onClick() {
 					ShatteredPixelDungeon.switchScene( SeedFindScene.class );
 				}
 			};
-			btnSeedTest.icon(Icons.get(Icons.MAGNIFY_GRAY));
-			//TODO: Activate when fixing Seedfinder
-			add(btnSeedTest);
-			buttons.add(btnSeedTest);
-
-			StyledButton btnSeedAnalysis = new StyledButton(Chrome.Type.BLANK, Messages.get(HeroSelectScene.class, "seed_analysis"), 6){
-				@Override
-				protected void onClick() {
-					ShatteredPixelDungeon.switchScene( SeedAnalysisScene.class );
-				}
-			};
-			btnSeedAnalysis.icon(Icons.get(Icons.JOURNAL_GRAY));
-			//TODO: Activate when fixing Seedfinder
-			add(btnSeedAnalysis);
-			buttons.add(btnSeedAnalysis);
+			seedfinderButton.leftJustify = true;
+			seedfinderButton.icon(Icons.get(Icons.MAGNIFY_GRAY));
+			add(seedfinderButton);
+			buttons.add(seedfinderButton);
 
 			StyledButton dailyButton = new StyledButton(Chrome.Type.BLANK, Messages.get(HeroSelectScene.class, "daily"), 6){
 
