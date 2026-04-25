@@ -1673,6 +1673,12 @@ public class GameScene extends PixelScene {
 
 		return label;
 	}
+
+	public static void clearCellLabels() {
+		if (scene != null) {
+			scene.selectorLabels.clear();
+		}
+	}
 	
 	public static WndBag selectItem( WndBag.ItemSelector listener ) {
 		cancel();
@@ -1747,9 +1753,7 @@ public class GameScene extends PixelScene {
 		QuickSlotButton.cancel();
 		InventoryPane.cancelTargeting();
 		TargetingAction.removeCross();
-		if (scene != null) {
-			scene.selectorLabels.clear();
-		}
+		clearCellLabels();
 		if (scene != null && scene.toolbar != null) scene.toolbar.examining = false;
 		if (tagDisappeared) {
 			tagDisappeared = false;

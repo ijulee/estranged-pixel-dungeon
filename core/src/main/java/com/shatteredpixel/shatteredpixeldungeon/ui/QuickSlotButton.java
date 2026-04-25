@@ -415,6 +415,7 @@ public class QuickSlotButton extends Button {
 				btn.crossM.remove();
 				targetingSlot = -1;
 			}
+			GameScene.clearCellLabels();
 		}
 	}
 }
