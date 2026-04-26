@@ -749,6 +749,16 @@ public class HeroSelectScene extends PixelScene {
 			StyledButton seedfinderButton = new StyledButton(Chrome.Type.BLANK, Messages.get(HeroSelectScene.class, "seedfinder"), 6){
 				@Override
 				protected void onClick() {
+					if (!Badges.isUnlocked(Badges.Badge.VICTORY) &&
+							!Badges.isUnlocked(Badges.Badge.SKIPPED_TUTORIAL) && !DeviceCompat.isDebug()){
+						ShatteredPixelDungeon.scene().addToFront( new WndTitledMessage(
+								Icons.get(Icons.SEED),
+								Messages.get(HeroSelectScene.class, "seedfinder"),
+								Messages.get(HeroSelectScene.class, "seedfinder_nowin"))
+						);
+						return;
+					}
+
 					ShatteredPixelDungeon.switchScene( SeedFindScene.class );
 				}
 			};
