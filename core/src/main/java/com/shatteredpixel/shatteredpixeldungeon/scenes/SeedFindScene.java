@@ -39,7 +39,9 @@ import com.shatteredpixel.shatteredpixeldungeon.windows.WndOptions;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndSeedfinderLog;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndSeedfinderMenu;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndTextInput;
+import com.shatteredpixel.shatteredpixeldungeon.windows.WndTitledMessage;
 import com.watabou.noosa.Camera;
+import com.watabou.noosa.Image;
 import com.watabou.noosa.ui.Component;
 import com.watabou.utils.RectF;
 
@@ -60,13 +62,12 @@ public class SeedFindScene extends PixelScene {
 		w -= insets.left + insets.right;
 		h -= insets.top + insets.bottom;
 
-		IconTitle title = new IconTitle(Icons.CHANGES.get(), Messages.get(this, "title"));
+		IconTitle title = new IconTitle();
+		Image titleIcon = Icons.SEED.get();
+		titleIcon.hardlight(1f, 1.5f, 0.67f);
+		title.icon(titleIcon);
+		title.label(Messages.get(this, "title"));
 		title.setSize(200, 0);
-		title.setPos(
-				insets.left + (w - title.reqWidth()) / 2f,
-				insets.top + (20 - title.height()) / 2f
-		);
-		align(title);
 		add(title);
 
 		ExitButton btnExit = new ExitButton() {
@@ -192,7 +193,7 @@ public class SeedFindScene extends PixelScene {
 		btnScout.icon(Icons.JOURNAL_GRAY.get());
 		add(btnScout);
 
-		StyledButton btnScoutDaily = new StyledButton(GREY_TR, Messages.get(this, "scout_daily_button")) {
+		StyledButton btnDaily = new StyledButton(GREY_TR, Messages.get(this, "scout_daily_button")) {
 			@Override
 			protected void onClick() {
 				SeedFinder.SeedLog result = SeedFinder.scoutDaily();
@@ -204,8 +205,20 @@ public class SeedFindScene extends PixelScene {
 								result.toLogResult()));
 			}
 		};
-		btnScoutDaily.icon(Icons.CALENDAR.get());
-		add(btnScoutDaily);
+		btnDaily.icon(Icons.CALENDAR.get());
+		add(btnDaily);
+
+		StyledButton btnInfo = new StyledButton(GREY_TR, Messages.get(this, "info_button")) {
+			@Override
+			protected void onClick() {
+				ShatteredPixelDungeon.scene().addToFront(
+						new WndTitledMessage(Icons.SEED.get(),
+								Messages.get(SeedFindScene.class, "info_title"),
+								Messages.get(SeedFindScene.class, "info_body")));
+			}
+		};
+		btnInfo.icon(Icons.SEED.get());
+		add(btnInfo);
 
 		StyledButton btnOptions = new StyledButton(GREY_TR, Messages.get(SeedFindScene.class, "options_button")) {
 			@Override
@@ -216,24 +229,23 @@ public class SeedFindScene extends PixelScene {
 		btnOptions.icon(Icons.PREFS.get());
 		add(btnOptions);
 
-		float topRegion = Math.max(title.height() - 6, h*0.45f);
 		final int BTN_HEIGHT = 20;
-		int GAP = (int)(h - topRegion - (landscape() ? 3 : 4)*BTN_HEIGHT)/3;
-		GAP /= landscape() ? 3 : 5;
-		GAP = Math.max(GAP, 2);
+		final int GAP = 4;
+		float titleTop = (h - title.height() - (BTN_HEIGHT+GAP) * 5)/2;
+
+		title.setPos(insets.left + (w - title.reqWidth()) / 2f, titleTop);
+		align(title);
 
 		float buttonAreaWidth = landscape() ? PixelScene.MIN_WIDTH_L-6 : PixelScene.MIN_WIDTH_P-2;
 		float btnAreaLeft = insets.left + (w - buttonAreaWidth) / 2f;
 
-		btnSeedfinder.setRect(btnAreaLeft, insets.top + topRegion + GAP, buttonAreaWidth, BTN_HEIGHT);
-		align(btnSeedfinder);
+		btnSeedfinder.setRect(btnAreaLeft, title.bottom() + GAP, buttonAreaWidth, BTN_HEIGHT);
 		btnScout.setRect(btnAreaLeft, btnSeedfinder.bottom() + GAP, buttonAreaWidth, BTN_HEIGHT);
-		btnScoutDaily.setRect(btnAreaLeft, btnScout.bottom() + GAP, buttonAreaWidth, BTN_HEIGHT);
-		btnOptions.setRect(btnAreaLeft, btnScoutDaily.bottom() + GAP, buttonAreaWidth, BTN_HEIGHT);
+		btnDaily.setRect(btnAreaLeft, btnScout.bottom() + GAP, buttonAreaWidth, BTN_HEIGHT);
+		btnInfo.setRect(btnAreaLeft, btnDaily.bottom() + GAP, buttonAreaWidth, BTN_HEIGHT);
+		btnOptions.setRect(btnAreaLeft, btnInfo.bottom() + GAP, buttonAreaWidth, BTN_HEIGHT);
 
 		addToBack( BG );
-
-		//fadeIn();
 	}
 
 	@Override
