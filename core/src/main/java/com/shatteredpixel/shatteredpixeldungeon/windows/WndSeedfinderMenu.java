@@ -23,6 +23,7 @@ public class WndSeedfinderMenu extends Window {
 
     private static final int SLIDER_HEIGHT	= 24;
     private static final int BTN_HEIGHT	    = 16;
+    private static final int INFO_SIZE = 14;
     private static final float GAP          = 2;
 
     //a simple scene change callback that does nothing since we need to do this a few times
@@ -34,25 +35,22 @@ public class WndSeedfinderMenu extends Window {
         public void afterCreate() {}
     };
 
-    RenderedTextBlock title;
+    IconTitle title;
 
-    ColorBlock sep1;
     OptionSlider slideFloors;
-    RenderedTextBlock infoFloors;
+    IconButton infoFloors;
+    OptionSlider slideFontSize;
+    IconButton infoFontSize;
+    RedButton btnMode;
+    IconButton infoMode;
     RedButton btnLoggingSettings;
     RedButton btnChallenges;
-    RedButton btnMode;
-    OptionSlider slideFontSize;
-    
+
     public WndSeedfinderMenu() {
         super();
 
-        title = PixelScene.renderTextBlock(Messages.get(this, "title"), 9);
-        title.hardlight(TITLE_COLOR);
+        title = new IconTitle(Icons.PREFS.get(), Messages.get(this, "title"));
         add(title);
-
-        sep1 = new ColorBlock(1, 1, 0xFF000000);
-        add(sep1);
 
         slideFloors = new OptionSlider(Messages.get(this, "floors_title", SPDSettings.seedfinderFloors()),
                 "1", "29", 1, 29) {
@@ -66,8 +64,55 @@ public class WndSeedfinderMenu extends Window {
         slideFloors.setSelectedValue(SPDSettings.seedfinderFloors());
         add(slideFloors);
 
-        infoFloors = PixelScene.renderTextBlock(Messages.get(this, "floors_info"), 7);
+        infoFloors = new IconButton(Icons.INFO.get()) {
+            @Override
+            protected void onClick() {
+                ShatteredPixelDungeon.scene().addToFront(
+                        new WndMessage(Messages.get(WndSeedfinderMenu.class, "floors_info")) );
+            }
+        };
         add(infoFloors);
+
+        slideFontSize = new OptionSlider(Messages.get(this, "fontsize_title", SPDSettings.seedfinderFontSize()),
+                "small", "large", 3, 9) {
+            @Override
+            protected void onChange() {
+                SPDSettings.seedfinderFontSize(getSelectedValue());
+
+                ShatteredPixelDungeon.seamlessResetScene(CALLBACK);
+            }
+        };
+        slideFontSize.setSelectedValue(SPDSettings.seedfinderFontSize());
+        add(slideFontSize);
+
+        infoFontSize = new IconButton(Icons.INFO.get()) {
+            @Override
+            protected void onClick() {
+                ShatteredPixelDungeon.scene().addToFront(
+                        new WndMessage(Messages.get(WndSeedfinderMenu.class, "fontsize_info")) );
+            }
+        };
+        add(infoFontSize);
+
+        String modeBtnDescKey = SPDSettings.seedfinderConditionANY() ? "mode_any" : "mode_all";
+        btnMode = new RedButton(Messages.get(this, modeBtnDescKey)) {
+            @Override
+            protected void onClick() {
+                SPDSettings.seedfinderConditionANY(!SPDSettings.seedfinderConditionANY());
+
+                ShatteredPixelDungeon.seamlessResetScene(CALLBACK);
+            }
+        };
+        add(btnMode);
+
+        infoMode = new IconButton(Icons.INFO.get()) {
+            @Override
+            protected void onClick() {
+                ShatteredPixelDungeon.scene().addToFront(
+                        new WndMessage(Messages.get(WndSeedfinderMenu.class, "mode_info")) );
+            }
+        };
+        add(infoMode);
 
         btnLoggingSettings = new RedButton(Messages.get(this, "logoptions_button"), 9) {
             @Override
@@ -92,51 +137,28 @@ public class WndSeedfinderMenu extends Window {
         btnChallenges.textColor(SPDSettings.challenges() == 0 ? WHITE : TITLE_COLOR);
         add(btnChallenges);
 
-        String modeBtnDescKey = SPDSettings.seedfinderConditionANY() ? "mode_any" : "mode_all";
-        btnMode = new RedButton(Messages.get(this, modeBtnDescKey)) {
-            @Override
-            protected void onClick() {
-                SPDSettings.seedfinderConditionANY(!SPDSettings.seedfinderConditionANY());
-
-                ShatteredPixelDungeon.seamlessResetScene(CALLBACK);
-            }
-        };
-        add(btnMode);
-
-        slideFontSize = new OptionSlider(Messages.get(this, "fontsize_title", SPDSettings.seedfinderFontSize()),
-                "small", "large", 3, 9) {
-            @Override
-            protected void onChange() {
-                SPDSettings.seedfinderFontSize(getSelectedValue());
-
-                ShatteredPixelDungeon.seamlessResetScene(CALLBACK);
-            }
-        };
-        slideFontSize.setSelectedValue(SPDSettings.seedfinderFontSize());
-        add(slideFontSize);
-
         layout();
     }
 
     private void layout() {
         int width = PixelScene.landscape() ? WIDTH_L : WIDTH_P;
 
-        title.setPos((width - title.width())/2, GAP);
+        title.setSize(width, 0);
+        title.setPos((width - title.reqWidth())/2, 0);
 
-        sep1.size(width, 1);
-        sep1.y = title.bottom() + 3*GAP;
+        slideFloors.setRect(0, title.bottom() + GAP, width - INFO_SIZE - GAP, SLIDER_HEIGHT);
+        infoFloors.setRect(slideFloors.right() + GAP, slideFloors.centerY() - INFO_SIZE/2f, INFO_SIZE, INFO_SIZE);
 
-        slideFloors.setRect(0, sep1.y + GAP, width, SLIDER_HEIGHT);
-        infoFloors.maxWidth(width);
-        infoFloors.setPos(0, slideFloors.bottom() + GAP);
+        slideFontSize.setRect(0, slideFloors.bottom() + GAP, width - INFO_SIZE - GAP, SLIDER_HEIGHT);
+        infoFontSize.setRect(slideFontSize.right() + GAP, slideFontSize.centerY() - INFO_SIZE/2f, INFO_SIZE, INFO_SIZE);
 
-        btnLoggingSettings.setRect(0, infoFloors.bottom() + GAP, width, BTN_HEIGHT);
+        btnMode.setRect(0, slideFontSize.bottom() + GAP, width - INFO_SIZE - GAP, BTN_HEIGHT);
+        infoMode.setRect(btnMode.right() + GAP, btnMode.centerY() - INFO_SIZE/2f, INFO_SIZE, INFO_SIZE);
 
-        btnChallenges.setRect(0, btnLoggingSettings.bottom() + GAP, width / 2, BTN_HEIGHT);
-        btnMode.setRect(width / 2 + GAP, btnLoggingSettings.bottom() + GAP, width / 2 - GAP, BTN_HEIGHT);
-        slideFontSize.setRect(0, btnMode.bottom() + GAP, width, SLIDER_HEIGHT);
+        btnLoggingSettings.setRect(0, btnMode.bottom() + GAP, width, BTN_HEIGHT);
+        btnChallenges.setRect(0, btnLoggingSettings.bottom() + GAP, width, BTN_HEIGHT);
 
-        resize(width, (int) slideFontSize.bottom());
+        resize(width, (int) btnChallenges.bottom());
     }
 
     public static class WndLoggingOpts extends Window {
