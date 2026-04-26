@@ -36,7 +36,43 @@ public class EPD_v0_X_Changes {
     }
 
     private static void add_v0_0_Changes(ArrayList<ChangeInfo> changeInfos) {
-        ChangeInfo changes = new ChangeInfo("v0.0.7", true, "");
+        ChangeInfo changes = new ChangeInfo("v0.0.8", true, "");
+        changes.hardlight(Window.TITLE_COLOR);
+        changeInfos.add(changes);
+
+        changes = new ChangeInfo(Messages.get(ChangesScene.class, "new"), false, null);
+        changes.hardlight(Window.TITLE_COLOR);
+        changeInfos.add(changes);
+
+        changes.addButton(new ChangeButton(Icons.ESTRANGED.get(), "Dev Commentary",
+                Messages.get(EPD_v0_X_Changes.class, "v0_0_8_comments")));
+
+        changes.addButton(new ChangeButton(HeroSprite.avatar(HeroClass.SAMURAI, 3), "Samurai Rework",
+                Messages.get(EPD_v0_X_Changes.class, "v0_0_8_samurai_1"),
+                Messages.get(EPD_v0_X_Changes.class, "v0_0_8_samurai_2"),
+                Messages.get(EPD_v0_X_Changes.class, "v0_0_8_samurai_3"),
+                Messages.get(EPD_v0_X_Changes.class, "v0_0_8_samurai_4")));
+
+        changes.addButton(new ChangeButton(new HeroIcon(HeroSubClass.SLASHER), "Auraslasher Rework",
+                Messages.get(EPD_v0_X_Changes.class, "v0_0_8_slasher_1"),
+                Messages.get(EPD_v0_X_Changes.class, "v0_0_8_slasher_2")));
+
+        changes.addButton(new ChangeButton(Icons.MAGNIFY_GRAY.get(), "Seedfinder is Back!",
+                Messages.get(EPD_v0_X_Changes.class, "v0_0_8_seedfinder")));
+
+        changes = new ChangeInfo(Messages.get(ChangesScene.class, "changes"), false, null);
+        changes.hardlight(CharSprite.WARNING);
+        changeInfos.add(changes);
+
+        changes.addButton(new ChangeButton(
+                Icons.PREFS.get(), Messages.get(ChangesScene.class, "misc"),
+                Messages.get(EPD_v0_X_Changes.class, "v0_0_8_misc")));
+
+        changes.addButton(new ChangeButton(
+                new Image(bugfix), Messages.get(ChangesScene.class, "bugfixes"),
+                Messages.get(EPD_v0_X_Changes.class, "v0_0_8_bugfixes")));
+
+        changes = new ChangeInfo("v0.0.7", true, "");
         changes.hardlight(Window.TITLE_COLOR);
         changeInfos.add(changes);
 
