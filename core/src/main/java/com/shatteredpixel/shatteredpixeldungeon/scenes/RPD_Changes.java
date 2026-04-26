@@ -49,8 +49,7 @@ public class RPD_Changes {
 
         String link = "https://github.com/Hoto-Mocha/Re-ARranged-Pixel-Dungeon/releases/tag/v3.2.0_based_v3.40.0-FINAL";
         ChangeButton rpdGHLink = new ChangeButton(Icons.GITHUB.get(), "RPD GitHub Link",
-                "The GitHub icon should lead to the RPD repository. URL:\n" +
-                link){
+                "The GitHub icon should lead to the RPD repository."){
             @Override
             protected void onClick() {
                 super.onClick();
