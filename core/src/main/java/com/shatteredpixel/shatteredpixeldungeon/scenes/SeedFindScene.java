@@ -84,78 +84,73 @@ public class SeedFindScene extends PixelScene {
 		StyledButton btnSeedfinder = new StyledButton(GREY_TR, Messages.get(this, "find_seed_button")) {
 			@Override
 			protected void onClick() {
-				SeedFindScene.this.addToFront(
-						new WndTextInput(
-								Messages.get(SeedFindScene.class, "seedfinder_title"),
-								Messages.get(SeedFindScene.class, "seedfinder_info"),
-								SPDSettings.seedfinderPrompt(), 1000, true,
-								Messages.get(SeedFindScene.class, "seedfinder_yes"),
-								Messages.get(SeedFindScene.class, "seedfinder_no")) {
-							@Override
-							public void onSelect(boolean positive, String itemsPrompt) {
-								if (positive) {
-									SPDSettings.seedfinderPrompt(itemsPrompt);
+				SeedFindScene.this.addToFront( new WndTextInput(
+						Messages.get(SeedFindScene.class, "seedfinder_title"),
+						Messages.get(SeedFindScene.class, "seedfinder_info"),
+						SPDSettings.seedfinderPrompt(), 1000, true,
+						Messages.get(SeedFindScene.class, "seedfinder_yes"),
+						Messages.get(SeedFindScene.class, "seedfinder_no")) {
+					@Override
+					public void onSelect(boolean positive, String itemsPrompt) {
+						if (positive) {
+							SPDSettings.seedfinderPrompt(itemsPrompt);
 
-									final Thread[] searchThread = new Thread[1];
-									final WndOptions[] progressWnd = new WndOptions[1];
+							final Thread[] searchThread = new Thread[1];
+							final WndOptions[] progressWnd = new WndOptions[1];
 
-									//run in new thread
-									searchThread[0] = new Thread(() -> {
-										final SeedFinder.SeedLog foundSeed = SeedFinder.findSeed();
+							//run in new thread
+							searchThread[0] = new Thread(() -> {
+								final SeedFinder.SeedLog foundSeed = SeedFinder.findSeed();
 
-										//process results in rendering thread
-										Gdx.app.postRunnable(() -> {
-											if (progressWnd[0].parent == null) {
-												//search cancelled
-												return;
-											}
-											progressWnd[0].hide();
+								//process results in rendering thread
+								Gdx.app.postRunnable(() -> {
+									//search cancelled
+									if (progressWnd[0].parent == null) return;
 
-                                            if (foundSeed == null) {
-                                                return;
-                                            }
+									progressWnd[0].hide();
 
-											//copy seed to clipboard on success
-											Clipboard clipboard = Gdx.app.getClipboard();
-											clipboard.setContents(foundSeed.seed);
+									if (foundSeed == null) return;
 
-											//show log
-											SeedFinder.SeedfinderLogResult result = foundSeed.toLogResult();
+									//copy seed to clipboard on success
+									Clipboard clipboard = Gdx.app.getClipboard();
+									clipboard.setContents(foundSeed.seed);
 
-											ShatteredPixelDungeon.scene().addToFront(
-													new WndSeedfinderLog(Icons.get(Icons.BACKPACK),
-															Messages.get(SeedFindScene.class, "result_title"),
-															result));
-										});
-									});
+									//show log
+									SeedFinder.SeedfinderLogResult result = foundSeed.toLogResult();
 
-									progressWnd[0] = new WndOptions(
-											Icons.get(Icons.MAGNIFY),
-											Messages.get(SeedFindScene.class, "searching_title"),
-											Messages.get(SeedFindScene.class, "searching_text"),
-											Messages.get(SeedFindScene.class, "searching_cancel") ) {
-										@Override
-										protected void onSelect(int index) {
-											if (index == 0) {
-                                                if (searchThread[0] != null && searchThread[0].isAlive()) {
-                                                    searchThread[0].interrupt();
-                                                }
-                                                hide();
-											}
+									SeedFindScene.this.addToFront( new WndSeedfinderLog(
+											Icons.get(Icons.BACKPACK),
+											Messages.get(SeedFindScene.class, "result_title"),
+											result) );
+								});
+							});
+
+							progressWnd[0] = new WndOptions( Icons.get(Icons.MAGNIFY),
+									Messages.get(SeedFindScene.class, "searching_title"),
+									Messages.get(SeedFindScene.class, "searching_text"),
+									Messages.get(SeedFindScene.class, "searching_cancel") ) {
+								@Override
+								protected void onSelect(int index) {
+									if (index == 0) {
+										if (searchThread[0] != null && searchThread[0].isAlive()) {
+											searchThread[0].interrupt();
 										}
-
-										@Override
-										public void onBackPressed() {
-											// do nothing to prevent accidental cancellation
-										}
-									};
-
-									SeedFindScene.this.addToFront(progressWnd[0]);
-									searchThread[0].start();
-								} else {
-									SPDSettings.seedfinderPrompt("");
+										hide();
+									}
 								}
-							}
+
+								@Override
+								public void onBackPressed() {
+									// do nothing to prevent accidental cancellation
+								}
+							};
+
+							SeedFindScene.this.addToFront( progressWnd[0] );
+							searchThread[0].start();
+						} else {
+							SPDSettings.seedfinderPrompt("");
+						}
+					}
 						});
 			}
 		};
@@ -178,7 +173,7 @@ public class SeedFindScene extends PixelScene {
 
 							SeedFinder.SeedLog result = SeedFinder.scoutSeed(text);
 
-							ShatteredPixelDungeon.scene().addToFront(
+							SeedFindScene.this.addToFront(
 									new WndSeedfinderLog(
 											Icons.get(Icons.BACKPACK),
 											Messages.get(SeedFindScene.class, "result_title"),
@@ -196,13 +191,23 @@ public class SeedFindScene extends PixelScene {
 		StyledButton btnDaily = new StyledButton(GREY_TR, Messages.get(this, "scout_daily_button")) {
 			@Override
 			protected void onClick() {
-				SeedFinder.SeedLog result = SeedFinder.scoutDaily();
+				SeedFindScene.this.addToFront( new WndOptions(Icons.CALENDAR.get(),
+						Messages.get(SeedFindScene.class, "scout_daily_title"),
+						Messages.get(SeedFindScene.class, "scout_daily_body"),
+						Messages.get(SeedFindScene.class, "scout_daily_yes"),
+						Messages.get(SeedFindScene.class, "scout_daily_no") ) {
+					@Override
+					protected void onSelect(int index) {
+						if (index == 0) {
+							SeedFinder.SeedLog result = SeedFinder.scoutDaily();
 
-				ShatteredPixelDungeon.scene().addToFront(
-						new WndSeedfinderLog(
-								Icons.get(Icons.BACKPACK),
-								Messages.get(SeedFindScene.class, "result_title"),
-								result.toLogResult()));
+							SeedFindScene.this.addToFront( new WndSeedfinderLog(
+									Icons.get(Icons.BACKPACK),
+									Messages.get(SeedFindScene.class, "result_title"),
+									result.toLogResult()) );
+						}
+					}
+				});
 			}
 		};
 		btnDaily.icon(Icons.CALENDAR.get());
@@ -211,10 +216,10 @@ public class SeedFindScene extends PixelScene {
 		StyledButton btnInfo = new StyledButton(GREY_TR, Messages.get(this, "info_button")) {
 			@Override
 			protected void onClick() {
-				ShatteredPixelDungeon.scene().addToFront(
-						new WndTitledMessage(Icons.SEED.get(),
-								Messages.get(SeedFindScene.class, "info_title"),
-								Messages.get(SeedFindScene.class, "info_body")));
+				SeedFindScene.this.addToFront( new WndTitledMessage( Icons.SEED.get(),
+						Messages.get(SeedFindScene.class, "info_title"),
+						Messages.get(SeedFindScene.class, "info_body") )
+				);
 			}
 		};
 		btnInfo.icon(Icons.SEED.get());
