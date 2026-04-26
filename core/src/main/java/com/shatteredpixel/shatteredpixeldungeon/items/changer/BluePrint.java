@@ -168,7 +168,7 @@ public class BluePrint extends Item {
         if (newWeapon == null) {
             return super.name();
         } else {
-            return Messages.get(this, "crafted_name", newWeapon.name());
+            return Messages.get(this, "crafted_name", newWeapon.trueName());
         }
     }
 
