@@ -30,7 +30,6 @@ import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.ui.ExitButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Icons;
-import com.shatteredpixel.shatteredpixeldungeon.ui.RenderedTextBlock;
 import com.shatteredpixel.shatteredpixeldungeon.ui.StyledButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.TitleBackground;
 import com.shatteredpixel.shatteredpixeldungeon.utils.DungeonSeed;
@@ -42,7 +41,6 @@ import com.shatteredpixel.shatteredpixeldungeon.windows.WndTextInput;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndTitledMessage;
 import com.watabou.noosa.Camera;
 import com.watabou.noosa.Image;
-import com.watabou.noosa.ui.Component;
 import com.watabou.utils.RectF;
 
 public class SeedFindScene extends PixelScene {
@@ -258,43 +256,4 @@ public class SeedFindScene extends PixelScene {
 		ShatteredPixelDungeon.switchScene(HeroSelectScene.class);
 	}
 
-	public static class CreditsBlock extends Component {
-
-		boolean large;
-
-		RenderedTextBlock body;
-
-		public CreditsBlock(boolean large, int highlight, String body) {
-			super();
-
-			this.large = large;
-
-			this.body = PixelScene.renderTextBlock(body, 6);
-			if (highlight != -1)
-				this.body.setHightlighting(true, highlight);
-			if (large)
-				this.body.align(RenderedTextBlock.CENTER_ALIGN);
-			add(this.body);
-		}
-
-		@Override
-		protected void layout() {
-			super.layout();
-
-			float topY = top();
-
-			if (large){
-				body.maxWidth((int)width());
-				body.setPos( x + (width() - body.width())/2f, topY);
-			} else {
-				topY += 1;
-				body.maxWidth((int)width());
-				body.setPos( x, topY);
-			}
-
-			topY += body.height();
-
-			height = Math.max(height, topY - top());
-		}
-	}
 }
