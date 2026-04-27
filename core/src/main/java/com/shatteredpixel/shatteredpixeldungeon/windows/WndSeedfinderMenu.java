@@ -12,7 +12,6 @@ import com.shatteredpixel.shatteredpixeldungeon.ui.RedButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RenderedTextBlock;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Window;
 import com.watabou.noosa.ColorBlock;
-import com.watabou.noosa.Game;
 
 public class WndSeedfinderMenu extends Window {
 
@@ -23,17 +22,8 @@ public class WndSeedfinderMenu extends Window {
 
     private static final int SLIDER_HEIGHT	= 24;
     private static final int BTN_HEIGHT	    = 16;
-    private static final int INFO_SIZE = 14;
+    private static final int INFO_SIZE      = 14;
     private static final float GAP          = 2;
-
-    //a simple scene change callback that does nothing since we need to do this a few times
-    private static Game.SceneChangeCallback CALLBACK = new Game.SceneChangeCallback() {
-        @Override
-        public void beforeCreate() {}
-
-        @Override
-        public void afterCreate() {}
-    };
 
     IconTitle title;
 
@@ -58,7 +48,7 @@ public class WndSeedfinderMenu extends Window {
             protected void onChange() {
                 SPDSettings.seedfinderFloors(getSelectedValue());
 
-                ShatteredPixelDungeon.seamlessResetScene(CALLBACK);
+                ShatteredPixelDungeon.seamlessResetScene();
             }
         };
         slideFloors.setSelectedValue(SPDSettings.seedfinderFloors());
@@ -79,7 +69,7 @@ public class WndSeedfinderMenu extends Window {
             protected void onChange() {
                 SPDSettings.seedfinderFontSize(getSelectedValue());
 
-                ShatteredPixelDungeon.seamlessResetScene(CALLBACK);
+                ShatteredPixelDungeon.seamlessResetScene();
             }
         };
         slideFontSize.setSelectedValue(SPDSettings.seedfinderFontSize());
@@ -100,7 +90,7 @@ public class WndSeedfinderMenu extends Window {
             protected void onClick() {
                 SPDSettings.seedfinderConditionANY(!SPDSettings.seedfinderConditionANY());
 
-                ShatteredPixelDungeon.seamlessResetScene(CALLBACK);
+                ShatteredPixelDungeon.seamlessResetScene();
             }
         };
         add(btnMode);
@@ -129,7 +119,7 @@ public class WndSeedfinderMenu extends Window {
                     public void onBackPressed() {
                         super.onBackPressed();
 
-                        ShatteredPixelDungeon.seamlessResetScene(CALLBACK);
+                        ShatteredPixelDungeon.seamlessResetScene();
                     }
                 });
             }
