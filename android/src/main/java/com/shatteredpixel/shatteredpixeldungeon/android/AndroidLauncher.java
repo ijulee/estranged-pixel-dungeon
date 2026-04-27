@@ -96,7 +96,7 @@ public class AndroidLauncher extends AndroidApplication implements GooglePlayGam
 			GdxNativesLoader.load();
 			FreeType.initFreeType();
 			new EH.Builder (this)
-					.addEmailAddresses ("trashbox.bobylev@gmail.com")
+					.addEmailAddresses ("thisismyothercar+epd@gmail.com")
 					.init ();
 		} catch (Exception e){
 			GdxNativesLoader.disableNativesLoading = true;
