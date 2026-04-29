@@ -457,7 +457,7 @@ public class Sheath extends Item {
 
         @Override
         public float iconFadePercent() {
-            return Math.max(0, visualcooldown() / DURATION);
+            return Math.max(0, 1 - visualcooldown() / DURATION);
         }
 
         private static final String MULTI = "dmgMulti";
@@ -479,13 +479,8 @@ public class Sheath extends Item {
         }
 
         @Override
-        public String toString() {
-            return Messages.get(this, "name");
-        }
-
-        @Override
         public String desc() {
-            return Messages.get(this, "desc", Messages.decimalFormat("#", dmgMulti*100));
+            return Messages.get(this, "desc", Messages.decimalFormat("#", dmgMulti*100), dispTurns());
         }
     }
 }
