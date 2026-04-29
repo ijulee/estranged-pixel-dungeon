@@ -79,13 +79,13 @@ import java.util.Collections;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class AndroidLauncher extends AndroidApplication implements GooglePlayGames {
+public class AndroidLauncher extends AndroidApplication /*implements GooglePlayGames*/ {
 	
 	public static AndroidApplication instance;
 	
 	private static AndroidPlatformSupport support;
 
-	private final ExecutorService backgroundExecutor = Executors.newSingleThreadExecutor();
+	/*private final ExecutorService backgroundExecutor = Executors.newSingleThreadExecutor();*/
 	
 	@SuppressLint("SetTextI18n")
 	@Override
@@ -216,7 +216,7 @@ public class AndroidLauncher extends AndroidApplication implements GooglePlayGam
 
 	/* --- Google Play Games --- */
 
-	@Override
+	/*@Override
 	protected void onDestroy() {
 		super.onDestroy();
 		if (backgroundExecutor != null && !backgroundExecutor.isShutdown()) {
@@ -533,5 +533,5 @@ public class AndroidLauncher extends AndroidApplication implements GooglePlayGam
 
 	private static FileHandle getSaveFile(String fileName) {
         return FileUtils.getFileHandle(fileName);
-	}
+	}*/
 }

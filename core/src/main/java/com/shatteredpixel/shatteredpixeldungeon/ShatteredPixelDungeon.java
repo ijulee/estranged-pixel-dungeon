@@ -55,14 +55,14 @@ public class ShatteredPixelDungeon extends Game {
         return false;
     }
 
-	public static GooglePlayGames playServices;
+	/*public static GooglePlayGames playServices;
 
 	public ShatteredPixelDungeon( PlatformSupport platform, GooglePlayGames playServices) {
 		this(platform);
 		if (playServices != null) {
 			ShatteredPixelDungeon.playServices = playServices;
 		}
-	}
+	}*/
 
 	public ShatteredPixelDungeon( PlatformSupport platform ) {
 		super( sceneClass == null ? WelcomeScene.class : sceneClass, platform );
