@@ -737,8 +737,9 @@ public class DriedRose extends Artifact {
 
 			//same accuracy as the hero.
 			int acc = Dungeon.hero.lvl + 9;
-
-			acc *= attackingWeapon().accuracyFactor(this, target);
+			if (attackingWeapon() != null) {
+                acc *= attackingWeapon().accuracyFactor(this, target);
+            }
 
 			return acc;
 		}
@@ -746,8 +747,9 @@ public class DriedRose extends Artifact {
 		@Override
 		public float attackDelay() {
 			float delay = super.attackDelay();
-
-			delay *= attackingWeapon().delayFactor(this);
+			if (attackingWeapon() != null) {
+                delay *= attackingWeapon().delayFactor(this);
+            }
 
 			return delay;
 		}
