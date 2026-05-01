@@ -250,6 +250,8 @@ public class SeedFinder {
 
 				main[0] += Messages.get(this, "trinkets", trinketStrings.toArray());
 			}
+			//copy entry just so that content will always change when clicking entry 0/*
+			rooms[0] = main[0];
 
 			for (int depth = 1; depth <= maxDepth; depth++) {
 				//depth and floor feeling
@@ -268,13 +270,15 @@ public class SeedFinder {
                     switch (depth) {
                         case 6: case 11: case 16: case 20: case 26:
                             main[depth] += "\n\n";
-                            main[depth] += itemsToString("Shop", forSale.get(depth/5-1));
+                            main[depth] += itemsToString("shop", forSale.get(depth/5-1));
 					}
                 }
 
 				//add floor items
-				main[depth] += "\n\n";
-				for (ItemLog entry : items.get(depth-1)) {
+                if (!items.get(depth-1).isEmpty()) {
+                    main[depth] += "\n\n";
+                }
+                for (ItemLog entry : items.get(depth-1)) {
 					main[depth] += entry.toString();
 					main[depth] += "\n";
 				}
@@ -351,13 +355,14 @@ public class SeedFinder {
 	}
 
 	public static HashMap<String, Boolean> targets = new HashMap<>();
-	public static final HashMap<String, Boolean> DEFAULT_TARGETS = new HashMap<>();
-	static {
-		DEFAULT_TARGETS.put("upgrade", false);
-		DEFAULT_TARGETS.put("strength", false);
-		DEFAULT_TARGETS.put("entrance", false);
-		DEFAULT_TARGETS.put("exit", false);
-	}
+	public static final HashMap<String, Boolean> DEFAULT_TARGETS = new HashMap<>() {
+        {
+            put("upgrade", false);
+            put("strength", false);
+            put("entrance", false);
+            put("exit", false);
+        }
+    };
 
 	public static SeedLog findSeed() {
 		HashMap<String, Boolean> inputTargets = new HashMap<>();
@@ -531,7 +536,7 @@ public class SeedFinder {
 			}
 
 			//check rooms
-            for (Room room : roomList) {
+			for (Room room : roomList) {
                 String caption = "";
                 if (room instanceof SacrificeRoom && Options.logEquipment) {
                     //special case
