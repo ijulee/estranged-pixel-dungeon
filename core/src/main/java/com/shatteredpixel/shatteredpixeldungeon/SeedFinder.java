@@ -287,22 +287,22 @@ public class SeedFinder {
 				//handle quests
 				if (depth == ghostDepth) {
 					String questType = Messages.get(this, "ghost_type_"+depth);
-					main[depth] += Messages.get(this, "ghost", questType,
-							checkTarget(ghostWeapon.title()),
-							checkTarget(ghostArmor.title()));
+					String wepString = (Options.logEquipment) ? checkTarget(ghostWeapon.identify(false).title()) : "";
+					String amrString = (Options.logEquipment) ? checkTarget(ghostArmor.identify(false).title()) : "";
+					main[depth] += Messages.get(this, "ghost", questType, wepString, amrString);
 				} else if (depth == wandmakerDepth) {
 					String questType = Messages.get(this, "wandmaker_type_"+wandmakerType);
-					main[depth] += Messages.get(this, "wandmaker", questType,
-							checkTarget(wandmakerWand1.title()),
-							checkTarget(wandmakerWand2.title()));
+					String wand1String = (Options.logWands) ? checkTarget(wandmakerWand1.identify(false).title()) : "";
+					String wand2String = (Options.logWands) ? checkTarget(wandmakerWand2.identify(false).title()) : "";
+					main[depth] += Messages.get(this, "wandmaker", questType, wand1String, wand2String);
 				} else if (depth == blacksmithDepth) {
 					String questType = Messages.get(this, "blacksmith_type_"+blacksmithType);
 					main[depth] += itemsToString(Messages.get(this, "blacksmith", questType),
-							blacksmithSmithRewards);
+							(Options.logEquipment) ? blacksmithSmithRewards : List.of());
 				} else if (depth == impDepth) {
 					String questType = impType ? "monks" : "golems";
-					main[depth] += Messages.get(this, "imp", questType,
-							checkTarget(impReward.title()));
+					String ringString = (Options.logRings) ? checkTarget(impReward.identify(false).title()) : "";
+					main[depth] += Messages.get(this, "imp", questType, ringString);
 				}
 
 				//add rooms
