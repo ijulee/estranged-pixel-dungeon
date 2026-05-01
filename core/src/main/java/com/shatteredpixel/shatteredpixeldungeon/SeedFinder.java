@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -54,6 +55,7 @@ import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special.MagicWellRo
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special.SacrificeRoom;
 import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.special.SpecialRoom;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.utils.DungeonSeed;
 import com.shatteredpixel.shatteredpixeldungeon.windows.WndMessage;
 import com.watabou.noosa.Game;
@@ -390,6 +392,58 @@ public class SeedFinder {
 		return null;
 	}
 
+	private static final LinkedHashMap<Integer, String> scroll2rune = new LinkedHashMap<>() {
+		{
+			put(ItemSpriteSheet.SCROLL_KAUNAN, "KAUNAN");
+			put(ItemSpriteSheet.SCROLL_SOWILO, "SOWILO");
+			put(ItemSpriteSheet.SCROLL_LAGUZ, "LAGUZ");
+			put(ItemSpriteSheet.SCROLL_YNGVI, "YNGVI");
+			put(ItemSpriteSheet.SCROLL_GYFU, "GYFU");
+			put(ItemSpriteSheet.SCROLL_RAIDO, "RAIDO");
+			put(ItemSpriteSheet.SCROLL_ISAZ, "ISAZ");
+			put(ItemSpriteSheet.SCROLL_MANNAZ, "MANNAZ");
+			put(ItemSpriteSheet.SCROLL_NAUDIZ, "NAUDIZ");
+			put(ItemSpriteSheet.SCROLL_BERKANAN, "BERKANAN");
+			put(ItemSpriteSheet.SCROLL_ODAL, "ODAL");
+			put(ItemSpriteSheet.SCROLL_TIWAZ, "TIWAZ");
+		}
+	};
+
+	private static final LinkedHashMap<Integer, String> pot2color = new LinkedHashMap<>() {
+        {
+            put(ItemSpriteSheet.POTION_CRIMSON, "crimson");
+            put(ItemSpriteSheet.POTION_AMBER, "amber");
+            put(ItemSpriteSheet.POTION_GOLDEN, "golden");
+            put(ItemSpriteSheet.POTION_JADE, "jade");
+            put(ItemSpriteSheet.POTION_TURQUOISE, "turquoise");
+            put(ItemSpriteSheet.POTION_AZURE, "azure");
+            put(ItemSpriteSheet.POTION_INDIGO, "indigo");
+            put(ItemSpriteSheet.POTION_MAGENTA, "magenta");
+            put(ItemSpriteSheet.POTION_BISTRE, "bistre");
+            put(ItemSpriteSheet.POTION_CHARCOAL, "charcoal");
+            put(ItemSpriteSheet.POTION_SILVER, "silver");
+            put(ItemSpriteSheet.POTION_IVORY, "ivory");
+        }
+    };
+
+	private static final LinkedHashMap<Integer, String> ring2gem = new LinkedHashMap<>() {
+        {
+            put(ItemSpriteSheet.RING_GARNET, "garnet");
+            put(ItemSpriteSheet.RING_RUBY, "ruby");
+            put(ItemSpriteSheet.RING_TOPAZ, "topaz");
+            put(ItemSpriteSheet.RING_EMERALD, "emerald");
+            put(ItemSpriteSheet.RING_ONYX, "onyx");
+            put(ItemSpriteSheet.RING_OPAL, "opal");
+            put(ItemSpriteSheet.RING_TOURMALINE, "tourmaline");
+            put(ItemSpriteSheet.RING_SAPPHIRE, "sapphire");
+            put(ItemSpriteSheet.RING_AMETHYST, "amethyst");
+            put(ItemSpriteSheet.RING_QUARTZ, "quartz");
+            put(ItemSpriteSheet.RING_AGATE, "agate");
+            put(ItemSpriteSheet.RING_DIAMOND, "diamond");
+        }
+    };
+
+
 	public static String checkTarget(String title) {
 		boolean match = false;
 		for (String target : targets.keySet()) {
@@ -602,8 +656,15 @@ public class SeedFinder {
 	private static String itemsToString(String caption, List<Item> content) {
 		LinkedList<String> itemStrings = new LinkedList<>();
 		for (Item item: content) {
-			item.identify(false);
-			itemStrings.add(checkTarget(item.title()));
+			String result = checkTarget(item.identify(false).title());
+			if (item instanceof Scroll) {
+				result = Messages.format("%s (%s)", result, scroll2rune.get(item.image()));
+			} else if (item instanceof Potion) {
+				result = Messages.format("%s (%s)", result, pot2color.get(item.image()));
+			} else if (item instanceof Ring) {
+				result = Messages.format("%s (%s)", result, ring2gem.get(item.image()));
+			}
+			itemStrings.add(result);
         }
 
 		return Messages.format("%s: %s", caption, String.join(", ", itemStrings));
