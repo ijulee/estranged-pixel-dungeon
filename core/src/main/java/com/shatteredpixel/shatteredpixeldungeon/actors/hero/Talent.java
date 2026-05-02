@@ -1256,7 +1256,26 @@ public enum Talent {
 		}
 	}
 
-	public static class LethalFocusTracker extends FlavourBuff {}
+	public static class LethalFocusTracker extends FlavourBuff {
+		{
+			announced = true;
+		}
+
+		@Override
+		public int icon() {
+			return BuffIndicator.TIME;
+		}
+
+		@Override
+		public void tintIcon(Image icon) {
+			icon.hardlight(0xC21313);
+		}
+
+		@Override
+		public float iconFadePercent() {
+			return 1-visualcooldown()/(5*Dungeon.hero.pointsInTalent(Talent.QUICK_SHEATHING));
+		}
+	}
 
 	//Knight 1-1
 	public static class ArmorEmpower extends Buff {
