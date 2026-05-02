@@ -254,7 +254,15 @@ public class BluePrint extends Item {
 
     @Override
     public int value() {
-        return -1;
+        if (newWeapon == null) return -1;
+
+        int price = 30 * newWeapon.tier;
+
+        if (level() > 0) {
+            price *= level() + 1;
+        }
+
+        return price;
     }
 
     protected WndBag.ItemSelector itemSelector = new WndBag.ItemSelector() {
