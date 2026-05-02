@@ -34,6 +34,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.Honeypot;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.Stylus;
 import com.shatteredpixel.shatteredpixeldungeon.items.Torch;
+import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.LeatherArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.MailArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.PlateArmor;
@@ -257,8 +258,17 @@ public class ShopRoom extends SpecialRoom {
 		case 26:
 			w = (MeleeWeapon) Generator.random(Generator.wepTiers[4]);
 			m = (MissileWeapon) Generator.random(Generator.misTiers[4]);
-			itemsToSpawn.add( Generator.random(Generator.misTiers[4]).quantity(2).identify(false) );
-			itemsToSpawn.add( new PlateArmor().upgrade(1).identify(false) );
+			MissileWeapon m2 = (MissileWeapon) Generator.random(Generator.misTiers[4]).random();
+			if (m2.hasCurseEnchant()) {
+				m2.enchant(null).cursed = false;
+            }
+			itemsToSpawn.add( m2.upgrade(1).identify(false) );
+			Armor a = (Armor) new PlateArmor().random();
+			if (a.hasCurseGlyph()) {
+				a.inscribe(null).cursed = false;
+			}
+			itemsToSpawn.add( a.upgrade(1).identify(false) );
+			itemsToSpawn.add( Generator.randomBlueprint().upgrade(1) );
 			break;
 		}
 		w.enchant(null);
@@ -331,7 +341,7 @@ public class ShopRoom extends SpecialRoom {
 					bags = (int)Math.ceil(( 5-hourglass.sandBags) * 0.80f ); break;
 				case 26:
 					//FIXME adjust this?
-					bags = (int)Math.ceil(( 5-hourglass.sandBags) * 0.80f ); break;
+					bags = (int)Math.ceil(( 5-hourglass.sandBags) * 1.00f ); break;
 			}
 
 			for(int i = 1; i <= bags; i++){
