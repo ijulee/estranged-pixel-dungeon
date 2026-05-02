@@ -44,6 +44,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.BodyForm;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.HolyWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.Smite;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.samurai.ShadowBlade;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Statue;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.MirrorImage;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.KindOfWeapon;
@@ -88,6 +89,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWea
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.TrueRunicBlade;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.gun.Gun;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Catalog;
+import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.standard.entrance.StatueLineEntranceRoom;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
@@ -628,18 +630,24 @@ abstract public class Weapon extends KindOfWeapon {
 				multi = rage.enchantFactor(multi);
 			}
 
-            if (attacker instanceof DriedRose.GhostHero) {
+			if (attacker instanceof DriedRose.GhostHero) {
 				Weapon wep = ((DriedRose.GhostHero) attacker).attackingWeapon();
                 if (wep instanceof Gun.Bullet) {
                     multi *= ((Gun.Bullet) wep).enchantMod().enchantFactor();
                 }
+				if (wep instanceof TrueRunicBlade) {
+					multi += 3f;
+				}
             }
 
-            if (attacker instanceof Hero) {
+			if (attacker instanceof Hero) {
 				KindOfWeapon wep = Dungeon.hero.belongings.attackingWeapon();
 				if (wep instanceof Gun.Bullet) {
 					multi *= ((Gun.Bullet) wep).enchantMod().enchantFactor();
                 }
+				if (wep instanceof TrueRunicBlade) {
+					multi += 3f;
+				}
             }
 
 			if (attacker.buff(RunicBlade.RunicSlashTracker.class) != null){
@@ -649,11 +657,6 @@ abstract public class Weapon extends KindOfWeapon {
 
 			if (attacker.buff(Smite.SmiteTracker.class) != null){
 				multi += 3f;
-			}
-
-			if (attacker.buff(TrueRunicBlade.TrueRunicBladeTracker.class) != null){
-				multi += 3f;
-				attacker.buff(TrueRunicBlade.TrueRunicBladeTracker.class).detach();
 			}
 
 			if (attacker.buff(MagicalBow.MagicalArrowTracker.class) != null){
@@ -670,6 +673,7 @@ abstract public class Weapon extends KindOfWeapon {
 					&& ((Hero)attacker).pointsInTalent(Talent.SPIRIT_BLADES) == 4){
 				multi += 0.1f;
 			}
+
 			if (attacker.buff(Talent.StrikingWaveTracker.class) != null
 					&& ((Hero)attacker).pointsInTalent(Talent.STRIKING_WAVE) == 4){
 				multi += 0.2f;

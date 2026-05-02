@@ -34,12 +34,6 @@ public class TrueRunicBlade extends MeleeWeapon implements AlchemyWeapon {
     }
 
     @Override
-    public int proc(Char attacker, Char defender, int damage) {
-        Buff.affect(attacker, TrueRunicBladeTracker.class);
-        return super.proc(attacker, defender, damage);
-    }
-
-    @Override
     public String targetingPrompt() {
         return Messages.get(this, "prompt");
     }
@@ -95,9 +89,6 @@ public class TrueRunicBlade extends MeleeWeapon implements AlchemyWeapon {
             return Messages.get(this, "typical_ability_desc", 200);
         }
     }
-
-    //tracks the base melee attack enchant boost
-    public static class TrueRunicBladeTracker extends FlavourBuff{}
 
     @Override
     public String discoverHint() {
