@@ -338,7 +338,7 @@ public class BowWeapon extends GunWeapon {
         protected void rangedHit(Char enemy, int cell) {
             super.rangedHit(enemy, cell);
 
-            if (enemy.isAlive()) {
+            if (enemy.isAlive() && Dungeon.level.mobs.contains(enemy)) {
                 doAttach(enemy);
             } else {
                 doDrop(cell);
