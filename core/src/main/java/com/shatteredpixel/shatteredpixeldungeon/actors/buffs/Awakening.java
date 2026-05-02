@@ -157,7 +157,7 @@ public class Awakening extends Buff implements ActionIndicator.Action {
         if (state == State.OFF) {
             if (hero.buff(AwakeningCooldown.class) == null) {
                 state = State.ON;
-                hero.sprite.showStatus( CharSprite.NEUTRAL, Messages.get(this, "name") );
+                hero.sprite.showStatus( CharSprite.NEUTRAL, Messages.titleCase(Messages.get(this, "name")) );
                 BuffIndicator.refreshHero();
                 ActionIndicator.refresh();
                 Sample.INSTANCE.play( Assets.Sounds.CHALLENGE );
