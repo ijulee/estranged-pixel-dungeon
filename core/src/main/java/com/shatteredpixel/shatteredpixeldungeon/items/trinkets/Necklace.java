@@ -3,6 +3,7 @@ package com.shatteredpixel.shatteredpixeldungeon.items.trinkets;
 import com.shatteredpixel.shatteredpixeldungeon.Assets;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.Actor;
+import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Belongings;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
@@ -128,13 +129,13 @@ public class Necklace extends Trinket {
     }
 
     public void setRing(Ring newRing) {
-        if (ring!=null) ring.deactivate();
+        deactivate();
 
         ring = newRing;
         if (ring != null) {
             ring.level(buffedLvl());
             if (Dungeon.hero.belongings.contains(this)) {
-                ring.activate( Dungeon.hero );
+                activate( Dungeon.hero );
             }
             image = gems.get(ring.image());
         } else {
@@ -165,17 +166,30 @@ public class Necklace extends Trinket {
 
     @Override
     public boolean collect(Bag container) {
-        if (Dungeon.hero != null && ring != null) {
-            ring.activate(Dungeon.hero);
+        if (Dungeon.hero != null && super.collect(container)) {
+            activate(Dungeon.hero);
             Dungeon.hero.updateHT(false);
+            return true;
         }
-        return super.collect(container);
+        return false;
+    }
+
+    public void activate (Char ch) {
+        if (ring != null) {
+            ring.activate(ch);
+        }
+    }
+
+    public void deactivate () {
+        if (ring != null) {
+            ring.deactivate();
+        }
     }
 
     @Override
     protected void onDetach() {
-        if (Dungeon.hero != null && ring != null) {
-            ring.deactivate();
+        if (Dungeon.hero != null) {
+            deactivate();
             if (Dungeon.hero.buff(RingOfForce.BrawlersStance.class) != null &&
                     Dungeon.hero.buff(RingOfForce.Force.class) == null) {
                 //clear brawler's stance if no ring of force is equipped
