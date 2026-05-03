@@ -95,108 +95,85 @@ public class LiquidMetal extends Item {
 		}
 
 		if (action.equals(AC_MAKE)) {
-			int baseCost = 25 + 25 * (1+Dungeon.depth/5);
-			Game.runOnRenderThread(new Callback() {
+			int baseCost = 50 + 25 * Dungeon.depth / 5;
+			GameScene.show( new WndOptions(
+					new ItemSprite(LiquidMetal.this),
+					Messages.get(LiquidMetal.class, "make_title"),
+					Messages.get(LiquidMetal.class, "make_desc", quantity, baseCost),
+					Messages.get(LiquidMetal.class, "make_no_boost"),
+					Messages.get(LiquidMetal.class, "make_boost"),
+					Messages.get(LiquidMetal.class, "make_cancel") ) {
 				@Override
-				public void call() {
-					GameScene.show(
-							new WndOptions( new ItemSprite(LiquidMetal.this),
-									Messages.get(LiquidMetal.class, "make_title"),
-									Messages.get(LiquidMetal.class, "make_desc", quantity, baseCost),
-									Messages.get(LiquidMetal.class, "make_no_boost"),
-									Messages.get(LiquidMetal.class, "make_boost"),
-									Messages.get(LiquidMetal.class, "make_cancel") ) {
+				protected void onSelect( int index ) {
+					if (index < 2) {
+						int craftCost = (index == 0) ? baseCost : 2 * baseCost;
 
-								private float elapsed = 0f;
+						// detach and collect since qty changes don't update backpack
+						detachAll(Dungeon.hero.belongings.backpack);
+						quantity(quantity - craftCost);
+						if (!collect()) {
+							Dungeon.level.drop( LiquidMetal.this, hero.pos ).sprite.drop();
+						}
 
-								@Override
-								public synchronized void update() {
-									super.update();
-									elapsed += Game.elapsed;
-								}
+						MeleeWeapon wep;
 
-								@Override
-								public void hide() {
-									if (elapsed > 0.2f){
-										super.hide();
-									}
-								}
+						if (index == 0) {
+							do {
+								wep = Generator.randomWeapon(true);
+							} while (!(wep instanceof Gun));
 
-								@Override
-								protected void onSelect( int opt ) {
-									if (elapsed > 0.2f && opt != 2) {
-										int craftCost = (opt == 0) ? baseCost : 2 * baseCost;
-										// detach and collect since qty changes don't update backpack
-										detachAll(Dungeon.hero.belongings.backpack);
-										quantity(quantity-craftCost);
-										if (!collect()) {
-											Dungeon.level.drop( LiquidMetal.this, hero.pos ).sprite.drop();
-										}
+							new Flare(6, 20).color(0x00FF00, true).show(hero.sprite, 3f);
+						} else {
+							do {
+								wep = Generator.randomWeapon(Dungeon.depth / 5 + 1, true);
+							} while (!(wep instanceof Gun) || wep.cursed);
 
-										MeleeWeapon wep = null;
-
-										while (!(wep instanceof Gun)) {
-                                            if (opt == 0) {
-                                                wep = Generator.randomWeapon();
-                                            } else {
-                                                wep = Generator.randomWeapon(Dungeon.depth / 5 + 1);
-                                                if (wep.cursed) {
-                                                    wep = null;
-                                                }
-                                            }
-                                        }
-
-                                        if (opt == 0) {
-											new Flare(6, 20).color(0x00FF00, true).show(hero.sprite, 3f);
-                                        } else {
-											wep.cursedKnown = true;
-											if (Random.Int(3) < 1) {
-                                                wep.upgrade(true);
-                                            }
-											new Flare(6, 28).color(0xAA00FF, true).show(hero.sprite, 3.67f);
-										}
-
-                                        if (wep.doPickUp(hero)) {
-											hero.spend(-wep.pickupDelay());
-											GLog.i(Messages.capitalize(Messages.get(hero, "you_now_have", wep.name())));
-                                        } else {
-                                            Dungeon.level.drop( wep, hero.pos ).sprite.drop();
-                                        }
-
-										hero.busy();
-										hero.sprite.operate(hero.pos);
-										Sample.INSTANCE.play(Assets.Sounds.EVOKE);
-										CellEmitter.center( hero.pos ).burst( Speck.factory( Speck.STAR ), 7);
-										hero.spendAndNext(1);
-									}
-								}
-
-								@Override
-								protected boolean hasInfo(int index) {
-									return index < 2;
-								}
-
-								@Override
-								protected void onInfo( int index ) {
-									GameScene.show(new WndTitledMessage(
-											Icons.get(Icons.INFO),
-											Messages.titleCase(Messages.get(LiquidMetal.class, "make_info_title_" + (index+1))),
-											Messages.get(LiquidMetal.class, "make_info_desc_" + (index+1))));
-								}
-
-								@Override
-								protected boolean enabled( int index ){
-									switch (index) {
-										case 0:
-											return quantity >= baseCost;
-										case 1:
-											return quantity >= 2*baseCost;
-										case 2: default:
-											return true;
-									}
-								}
+							wep.cursedKnown = true;
+							if (Random.Int(3) < 1) {
+								wep.upgrade( true );
 							}
-					);
+
+							new Flare(6, 28).color(0xAA00FF, true).show(hero.sprite, 3.67f);
+						}
+
+						if (wep.doPickUp(hero)) {
+							hero.spend(-wep.pickupDelay());
+							GLog.i(Messages.capitalize(Messages.get(hero, "you_now_have", wep.name())));
+						} else {
+							Dungeon.level.drop( wep, hero.pos ).sprite.drop();
+						}
+
+						hero.busy();
+						hero.sprite.operate(hero.pos);
+						Sample.INSTANCE.play(Assets.Sounds.EVOKE);
+						CellEmitter.center( hero.pos ).burst( Speck.factory( Speck.STAR ), 7);
+						hero.spendAndNext(1);
+					}
+				}
+
+				@Override
+				protected boolean hasInfo( int index ) {
+					return index < 2;
+				}
+
+				@Override
+				protected void onInfo( int index ) {
+					GameScene.show( new WndTitledMessage(
+							Icons.get(Icons.INFO),
+                            Messages.get(LiquidMetal.class, "make_info_title_" + (index+1)),
+							Messages.get(LiquidMetal.class, "make_info_desc_" + (index+1))) );
+				}
+
+				@Override
+				protected boolean enabled( int index ) {
+					switch ( index ) {
+						case 0:
+							return quantity >= baseCost;
+						case 1:
+							return quantity >= 2*baseCost;
+						case 2: default:
+							return true;
+					}
 				}
 			});
 		}
