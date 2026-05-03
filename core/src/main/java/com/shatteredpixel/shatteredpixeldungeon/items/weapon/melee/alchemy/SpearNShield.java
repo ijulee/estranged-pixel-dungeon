@@ -52,8 +52,6 @@ public class SpearNShield extends MeleeWeapon implements AlchemyWeapon {
 
         tier = 3;
         RCH = 2;
-
-        defaultAction = AC_CHANGE;
     }
 
     @Override
@@ -86,24 +84,10 @@ public class SpearNShield extends MeleeWeapon implements AlchemyWeapon {
     }
 
     @Override
-    protected float baseDelay( Char owner ){
-        float delay = augment.delayFactor(this.DLY);
-        if (owner.buff(SpearTracker.class) != null) {
-            delay *= 1.5f;
-        }
-        return delay;
-    }
-
-    public static class SpearTracker extends FlavourBuff {}
-
-    @Override
     public int proc(Char attacker, Char defender, int damage) {
         damage = super.proc(attacker, defender, damage);
 
-        if (attacker.buff(SpearTracker.class) != null ||
-            Dungeon.level.distance(attacker.pos, defender.pos) > 1) {
-            Buff.affect(attacker, SpearTracker.class, 0);
-        } else {
+        if (Dungeon.level.distance(attacker.pos, defender.pos) <= 1) {
             damage = Math.round(damage/2f);
         }
 
