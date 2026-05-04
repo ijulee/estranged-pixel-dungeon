@@ -230,7 +230,7 @@ public class SeedFinder {
 			Arrays.fill(rooms, "");
 
 			//seed text in 0th entry
-			main[0] += Messages.get(this, "custom_seed", seed) + "\n\n";
+			main[0] += Messages.get(this, "custom_seed", seed);
 
 			//trinkets in 0th entry
 			if (Options.logTrinkets && rolledTrinkets != null) {
@@ -239,6 +239,7 @@ public class SeedFinder {
 					trinketStrings.add(checkTarget(trinket.title()));
 				}
 
+				main[0] +=  "\n\n";
 				main[0] += Messages.get(this, "trinkets", trinketStrings.toArray());
 			}
 			//copy entry just so that content will always change when clicking entry 0/*
@@ -391,9 +392,10 @@ public class SeedFinder {
 
 			if ((Options.condition == CONDITION_ALL && !targetMatches.contains(false)) ||
 				(Options.condition == CONDITION_ANY && targetMatches.contains(true))) {
-					Gdx.app.postRunnable(() -> ShatteredPixelDungeon.scene().addToFront(
-							new WndMessage("Searched through _" + count + "_ seeds.")));
-					return log;
+				log.result.main[0] += "\n\n";
+				log.result.main[0] += "Searched through _" + count + "_ seeds.";
+				log.result.rooms[0] = log.result.main[0];
+				return log;
 			}
 		}
 
@@ -492,7 +494,7 @@ public class SeedFinder {
 
             if (title.contains(target)) {
 				int level = targetLevels.get(i);
-                if (level != -1) {
+				if (level != -1) {
                     int titleLevel = title.contains("+") ? Integer.parseInt(title.split(" ?\\+")[1]) : 0;
                     if ((Options.exactLevels && titleLevel != level) || titleLevel < level) continue;
                 }

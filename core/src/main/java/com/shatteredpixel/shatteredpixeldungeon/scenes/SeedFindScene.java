@@ -93,56 +93,7 @@ public class SeedFindScene extends PixelScene {
 						if (positive) {
 							SPDSettings.seedfinderPrompt(itemsPrompt);
 
-							final Thread[] searchThread = new Thread[1];
-							final WndOptions[] progressWnd = new WndOptions[1];
-
-							//run in new thread
-							searchThread[0] = new Thread(() -> {
-								final SeedFinder.SeedLog foundSeed = SeedFinder.findSeed();
-
-								//process results in rendering thread
-								Gdx.app.postRunnable(() -> {
-									//search cancelled
-									if (progressWnd[0].parent == null) return;
-
-									progressWnd[0].hide();
-
-									if (foundSeed == null) return;
-
-									//copy seed to clipboard on success
-									Clipboard clipboard = Gdx.app.getClipboard();
-									clipboard.setContents(foundSeed.seed);
-
-									//show log
-									SeedFindScene.this.addToFront( new WndSeedfinderLog(
-											Icons.get(Icons.BACKPACK),
-											Messages.get(SeedFindScene.class, "result_title"),
-											foundSeed.result) );
-								});
-							});
-
-							progressWnd[0] = new WndOptions( Icons.get(Icons.MAGNIFY),
-									Messages.get(SeedFindScene.class, "searching_title"),
-									Messages.get(SeedFindScene.class, "searching_text"),
-									Messages.get(SeedFindScene.class, "searching_cancel") ) {
-								@Override
-								protected void onSelect(int index) {
-									if (index == 0) {
-										if (searchThread[0] != null && searchThread[0].isAlive()) {
-											searchThread[0].interrupt();
-										}
-										hide();
-									}
-								}
-
-								@Override
-								public void onBackPressed() {
-									// do nothing to prevent accidental cancellation
-								}
-							};
-
-							SeedFindScene.this.addToFront( progressWnd[0] );
-							searchThread[0].start();
+							runSeedfinder();
 						} else {
 							SPDSettings.seedfinderPrompt("");
 						}
@@ -254,4 +205,56 @@ public class SeedFindScene extends PixelScene {
 		ShatteredPixelDungeon.switchScene(HeroSelectScene.class);
 	}
 
+	public static void runSeedfinder() {
+		final Thread[] searchThread = new Thread[1];
+		final WndOptions[] progressWnd = new WndOptions[1];
+
+		//run in new thread
+		searchThread[0] = new Thread(() -> {
+			final SeedFinder.SeedLog foundSeed = SeedFinder.findSeed();
+
+			//process results in rendering thread
+			Gdx.app.postRunnable(() -> {
+				//search cancelled
+				if (progressWnd[0].parent == null) return;
+
+				progressWnd[0].hide();
+
+				if (foundSeed == null) return;
+
+				//copy seed to clipboard on success
+				Clipboard clipboard = Gdx.app.getClipboard();
+				clipboard.setContents(foundSeed.seed);
+
+				//show log
+				ShatteredPixelDungeon.scene().addToFront( new WndSeedfinderLog(
+						Icons.get(Icons.BACKPACK),
+						Messages.get(SeedFindScene.class, "result_title"),
+						foundSeed.result) );
+			});
+		});
+
+		progressWnd[0] = new WndOptions( Icons.get(Icons.MAGNIFY),
+				Messages.get(SeedFindScene.class, "searching_title"),
+				Messages.get(SeedFindScene.class, "searching_text"),
+				Messages.get(SeedFindScene.class, "searching_cancel") ) {
+			@Override
+			protected void onSelect(int index) {
+				if (index == 0) {
+					if (searchThread[0] != null && searchThread[0].isAlive()) {
+						searchThread[0].interrupt();
+					}
+					hide();
+				}
+			}
+
+			@Override
+			public void onBackPressed() {
+				// do nothing to prevent accidental cancellation
+			}
+		};
+
+		ShatteredPixelDungeon.scene().addToFront( progressWnd[0] );
+		searchThread[0].start();
+	}
 }

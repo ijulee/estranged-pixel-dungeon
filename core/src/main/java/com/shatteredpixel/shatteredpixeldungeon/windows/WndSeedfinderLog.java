@@ -25,6 +25,7 @@ import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.HeroSelectScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
+import com.shatteredpixel.shatteredpixeldungeon.scenes.SeedFindScene;
 import com.shatteredpixel.shatteredpixeldungeon.ui.IconButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Icons;
 import com.shatteredpixel.shatteredpixeldungeon.ui.RedButton;
@@ -45,9 +46,8 @@ public class WndSeedfinderLog extends WndTabbed {
 	protected static final int BTN_HEIGHT = 16;
 
 	protected static final int GAP = 2;
-	private final int fontSize = SPDSettings.seedfinderFontSize();
 
-	private RenderedTextBlock text;
+    private RenderedTextBlock text;
 	private ScrollPane scroll;
 	private int selectedCategory = 0;
 	private static final int ITEMS = 0;
@@ -66,7 +66,7 @@ public class WndSeedfinderLog extends WndTabbed {
 
 		int width = WIDTH_MIN;
 		int height = PixelScene.uiCamera.height - 20 - tabHeight();
-		int bottomPadding = BTN_SIZE_SMALL + 2*GAP;
+		int bottomPadding = 2*BTN_SIZE_SMALL + 3*GAP;
 
 		PointerArea blocker = new PointerArea(0, 0, PixelScene.uiCamera.width, PixelScene.uiCamera.height);
 		//do not go back on screen click
@@ -106,7 +106,7 @@ public class WndSeedfinderLog extends WndTabbed {
 		btnRooms.setRect((width+GAP)/2f, titlebar.bottom() + GAP, (width-GAP)/2f, BTN_HEIGHT);
 		add( btnRooms );
 
-		text = PixelScene.renderTextBlock( fontSize );
+        text = PixelScene.renderTextBlock( SPDSettings.seedfinderFontSize() );
 		text.text(result.main[selectedIndex]);
 		text.maxWidth( width );
 		text.setPos( titlebar.left(), btnItems.bottom() + 2*GAP );
@@ -200,11 +200,26 @@ public class WndSeedfinderLog extends WndTabbed {
 				ShatteredPixelDungeon.switchNoFade( HeroSelectScene.class );
 			}
 		};
-		btnUse.setRect(BTN_SIZE_SMALL + GAP, scroll.bottom() + 2*GAP,
-				width - 2*(BTN_SIZE_SMALL+GAP), BTN_SIZE_SMALL);
-		add(btnUse);
+        if (numTabs > MAX_VISIBLE_TABS) {
+            btnUse.setRect(BTN_SIZE_SMALL + GAP, scroll.bottom() + 2*GAP,
+                    width - 2*(BTN_SIZE_SMALL+GAP), BTN_SIZE_SMALL);
+        } else {
+			btnUse.setRect(0, scroll.bottom() + 2*GAP, width, BTN_SIZE_SMALL);
+		}
+        add(btnUse);
 
-        layoutTabs();
+		RedButton btnRetry = new RedButton("Retry", 7) {
+			@Override
+			protected void onClick() {
+				WndSeedfinderLog.this.hide();
+
+				SeedFindScene.runSeedfinder();
+			}
+		};
+		btnRetry.setRect(0, btnUse.bottom() + GAP, width, BTN_SIZE_SMALL);
+		add(btnRetry);
+
+		layoutTabs();
 		select(0);
 	}
 
