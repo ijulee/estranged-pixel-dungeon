@@ -107,7 +107,7 @@ public class SwordAura extends TargetingAction {
 
     @Override
     public int icon() {
-        return BuffIndicator.AURA;
+        return (energy > 0) ? BuffIndicator.AURA : BuffIndicator.NONE;
     }
 
     @Override
