@@ -2,9 +2,12 @@ package com.shatteredpixel.shatteredpixeldungeon.items;
 
 import static com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfMagicMapping.discover;
 
+import com.badlogic.gdx.utils.reflect.ClassReflection;
+import com.badlogic.gdx.utils.reflect.Constructor;
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.effects.SpellSprite;
+import com.shatteredpixel.shatteredpixeldungeon.items.keys.Key;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.Potion;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfExperience;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Catalog;
@@ -207,7 +210,19 @@ public class Teleporter extends Item {
                                 return;
                             }
 
-                            Item item = (Item) Reflection.newInstance(finalItemClass);
+                            Item item;
+                            if (Key.class.isAssignableFrom(itemClass)) {
+                                try {
+                                    Constructor keyConstructor = ClassReflection.getConstructor(itemClass, int.class, int.class);
+                                    item = (Item) keyConstructor.newInstance(Dungeon.depth, Dungeon.branch);
+                                } catch (Exception e) {
+                                    Game.reportException(e);
+                                    item = null;
+                                }
+                            } else {
+                                item = (Item) Reflection.newInstance(itemClass);
+                            }
+
                             if (item == null) {
                                 GLog.w(Messages.get(Teleporter.class, "wrong_itemname_2"));
                                 hide();
