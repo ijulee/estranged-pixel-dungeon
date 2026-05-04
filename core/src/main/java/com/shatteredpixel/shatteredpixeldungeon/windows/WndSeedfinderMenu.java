@@ -3,6 +3,7 @@ package com.shatteredpixel.shatteredpixeldungeon.windows;
 import com.shatteredpixel.shatteredpixeldungeon.SPDSettings;
 import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
+import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
 import com.shatteredpixel.shatteredpixeldungeon.ui.IconButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Icons;
@@ -21,6 +22,7 @@ public class WndSeedfinderMenu extends Window {
     protected static final int MARGIN 		= 2;
 
     private static final int SLIDER_HEIGHT	= 24;
+    private static final int FLOORS_HEIGHT	= 20;
     private static final int BTN_HEIGHT	    = 16;
     private static final int INFO_SIZE      = 14;
     private static final float GAP          = 2;
@@ -28,6 +30,9 @@ public class WndSeedfinderMenu extends Window {
     IconTitle title;
 
     OptionSlider slideFloors;
+    RedButton btnFloorsMinus;
+    RenderedTextBlock textFloors;
+    RedButton btnFloorsPlus;
     IconButton infoFloors;
     OptionSlider slideFontSize;
     IconButton infoFontSize;
@@ -42,17 +47,37 @@ public class WndSeedfinderMenu extends Window {
         title = new IconTitle(Icons.PREFS.get(), Messages.get(this, "title"));
         add(title);
 
-        slideFloors = new OptionSlider(Messages.get(this, "floors_title", SPDSettings.seedfinderFloors()),
-                "1", "29", 1, 29) {
+        slideFloors = new OptionSlider("", "1F", "29F", 1, 29) {
             @Override
             protected void onChange() {
                 SPDSettings.seedfinderFloors(getSelectedValue());
-
                 ShatteredPixelDungeon.seamlessResetScene();
             }
         };
         slideFloors.setSelectedValue(SPDSettings.seedfinderFloors());
         add(slideFloors);
+
+        btnFloorsMinus = new RedButton("-") {
+            @Override
+            protected void onClick() {
+                SPDSettings.seedfinderFloors(SPDSettings.seedfinderFloors()-1);
+                ShatteredPixelDungeon.seamlessResetScene();
+            }
+        };
+        add(btnFloorsMinus);
+
+        textFloors = GameScene.renderTextBlock(
+                Messages.get(this, "floors_title", SPDSettings.seedfinderFloors()), 9);
+        add(textFloors);
+
+        btnFloorsPlus = new RedButton("+") {
+            @Override
+            protected void onClick() {
+                SPDSettings.seedfinderFloors(SPDSettings.seedfinderFloors()+1);
+                ShatteredPixelDungeon.seamlessResetScene();
+            }
+        };
+        add(btnFloorsPlus);
 
         infoFloors = new IconButton(Icons.INFO.get()) {
             @Override
@@ -136,8 +161,13 @@ public class WndSeedfinderMenu extends Window {
         title.setSize(width, 0);
         title.setPos((width - title.reqWidth())/2, 0);
 
-        slideFloors.setRect(0, title.bottom() + GAP, width - INFO_SIZE - GAP, SLIDER_HEIGHT);
-        infoFloors.setRect(slideFloors.right() + GAP, slideFloors.centerY() - INFO_SIZE/2f, INFO_SIZE, INFO_SIZE);
+        btnFloorsMinus.setRect(0, title.bottom() + GAP, INFO_SIZE, INFO_SIZE);
+        textFloors.setPos((width - textFloors.width() - INFO_SIZE - GAP)/2,
+                btnFloorsMinus.top() + (INFO_SIZE - textFloors.height())/2);
+        btnFloorsPlus.setRect(width - 2*INFO_SIZE - GAP, title.bottom() + GAP, INFO_SIZE, INFO_SIZE);
+        infoFloors.setRect(btnFloorsPlus.right() + GAP, title.bottom() + GAP, INFO_SIZE, INFO_SIZE);
+
+        slideFloors.setRect(0, btnFloorsMinus.bottom() + GAP, width, FLOORS_HEIGHT);
 
         slideFontSize.setRect(0, slideFloors.bottom() + GAP, width - INFO_SIZE - GAP, SLIDER_HEIGHT);
         infoFontSize.setRect(slideFontSize.right() + GAP, slideFontSize.centerY() - INFO_SIZE/2f, INFO_SIZE, INFO_SIZE);
