@@ -394,10 +394,10 @@ public class WndSeedfinderMenu extends Window {
                 @Override
                 protected void onClick() {
                     super.onClick();
-                    //FIXME Add and change the option here.
+                    SPDSettings.seedfinderMultirange(checked());
                 }
             };
-            chkMulti.checked(/*FIXME Add and change the option here.*/);
+            chkMulti.checked(SPDSettings.seedfinderMultirange());
             add( chkMulti );
 
             infoMulti = new IconButton(Icons.INFO.get()) {
@@ -415,10 +415,10 @@ public class WndSeedfinderMenu extends Window {
                 @Override
                 protected void onClick() {
                     super.onClick();
-                    //FIXME Add and change the option here.
+                    SPDSettings.seedfinderExact(checked());
                 }
             };
-            chkExact.checked(/*FIXME Add and change the option here.*/);
+            chkExact.checked(SPDSettings.seedfinderExact());
             add( chkExact );
 
             infoExact = new IconButton(Icons.INFO.get()) {

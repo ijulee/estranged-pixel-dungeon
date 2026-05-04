@@ -64,7 +64,9 @@ public class SPDSettings extends GameSettings {
 	public static final String KEY_CHECK_SHOPS = "check_shops";
 
 	public static final String KEY_SEEDFINDER_PROMPT = "seedfinder_prompt";
-	public static final String KEY_CONDITION= "seedfinder_condition";
+	public static final String KEY_CONDITION = "seedfinder_condition";
+	public static final String KEY_MULTIRANGE = "seedfinder_multirange";
+	public static final String KEY_EXACT = "seedfinder_exact";
 	public static final String KEY_FONTSIZE= "seedfinder_fontsize";
 
 	public static void seedfinderFloors( int value ) {
@@ -89,6 +91,22 @@ public class SPDSettings extends GameSettings {
 
 	public static boolean seedfinderConditionANY() {
 		return getBoolean(KEY_CONDITION, true);
+	}
+
+	public static void seedfinderMultirange(boolean value) {
+		put(KEY_MULTIRANGE, value);
+	}
+
+	public static boolean seedfinderMultirange() {
+		return getBoolean(KEY_MULTIRANGE, true);
+	}
+
+	public static void seedfinderExact(boolean value) {
+		put(KEY_EXACT, value);
+	}
+
+	public static boolean seedfinderExact() {
+		return getBoolean(KEY_EXACT, true);
 	}
 
 	public static void useRooms( boolean value ) {

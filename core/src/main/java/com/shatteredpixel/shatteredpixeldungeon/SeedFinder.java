@@ -119,8 +119,8 @@ public class SeedFinder {
 
 		Options.checkShops = SPDSettings.checkShops();
 
-		Options.exactLevels = false;
-		Options.multirange = false;
+		Options.exactLevels = SPDSettings.seedfinderExact();
+		Options.multirange = SPDSettings.seedfinderMultirange();
 
 		Options.ignoreBlacklist = SPDSettings.ignoreBlacklist();
 		Options.challenges = SPDSettings.challenges();
