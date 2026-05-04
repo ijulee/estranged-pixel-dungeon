@@ -3,7 +3,6 @@ package com.shatteredpixel.shatteredpixeldungeon.items;
 import static com.shatteredpixel.shatteredpixeldungeon.items.scrolls.ScrollOfMagicMapping.discover;
 
 import com.shatteredpixel.shatteredpixeldungeon.Dungeon;
-import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.effects.SpellSprite;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.Potion;
@@ -32,7 +31,6 @@ import com.watabou.noosa.Game;
 import com.watabou.utils.Reflection;
 
 import java.util.ArrayList;
-import java.util.Objects;
 //This is from Elemental PD
 
 public class Teleporter extends Item {
@@ -122,20 +120,19 @@ public class Teleporter extends Item {
             hero.next();
         }
         if (action.equals(AC_GETITEM)) {
-
-            ShatteredPixelDungeon.scene().addToFront(new WndTextInput(Messages.get(Teleporter.class, "getitem_title"),
+            GameScene.show(new WndTextInput(
+                    Messages.get(Teleporter.class, "getitem_title"),
                     Messages.get(Teleporter.class, "getitem_desc"),
-                    Messages.get(Teleporter.class, "getitem_default_item")+"\n"+
-                            Messages.get(Teleporter.class, "getitem_amount")+" \n"+
-                            Messages.get(Teleporter.class, "getitem_upgrade")+" \n"+
-                            Messages.get(Teleporter.class, "getitem_identify")+" ",
-                    100,
-                    true,
+                    Messages.get(Teleporter.class, "getitem_default_item") + "\n" +
+                    Messages.get(Teleporter.class, "getitem_amount") + " \n" +
+                    Messages.get(Teleporter.class, "getitem_upgrade") + " \n" +
+                    Messages.get(Teleporter.class, "getitem_identify") + " ",
+                    100, true,
                     Messages.get(Teleporter.class, "getitem_yes"),
-                    Messages.get(Teleporter.class, "getitem_no")){
+                    Messages.get(Teleporter.class, "getitem_no")) {
                 @Override
                 public void onSelect(boolean positive, String text) {
-                    if (positive && !Objects.equals(text, "")) {
+                    if (positive && !text.isEmpty()) {
                         if (text.trim().equals("help")) {
                             GameScene.show(new WndTitledMessage(
                                     Icons.get(Icons.INFO),
@@ -157,7 +154,6 @@ public class Teleporter extends Item {
                                     add(titlebar);
 
                                     RenderedTextBlock text = PixelScene.renderTextBlock( 6 );
-                                    text.setHightlighting(false);
                                     text.text( itemList.toString(), width );
                                     text.setPos( titlebar.left(), titlebar.bottom() + 4 );
 
@@ -180,7 +176,6 @@ public class Teleporter extends Item {
                                 }
                             });
                         } else {
-                            //받은 문장을 엔터 단위로 끊는다.
                             String[] strInput = text.split("\n");
                             if (strInput.length < 4) {
                                 GLog.w(Messages.get(Teleporter.class, "too_short"));
@@ -188,17 +183,17 @@ public class Teleporter extends Item {
                                 return;
                             }
 
-                            //아이템 이름 결정 메커니즘
-                            String itemName = strInput[0]; //1번째 줄에 들어가는 문장(아이템 이름)을 저장
+                            String itemName = strInput[0];
 
-                            Class finalItemClass = null;
-                            for (Class classes : itemClass) {
+                            Class<?> itemClass = null;
+                            for (Class<?> classes : Teleporter.itemClass) {
                                 if (itemName.equalsIgnoreCase(Messages.get(classes, "name"))) {
-                                    finalItemClass = classes;
+                                    itemClass = classes;
                                     break;
                                 }
                             }
-                            if (finalItemClass == null) { //null check
+
+                            if (itemClass == null) {
                                 GLog.w(Messages.get(Teleporter.class, "wrong_itemname_1", itemName));
                                 hide();
                                 return;
@@ -211,10 +206,9 @@ public class Teleporter extends Item {
                                 return;
                             }
 
-                            //아이템 수량 결정 메커니즘
-                            String amount = strInput[1].replaceAll(Messages.get(Teleporter.class, "getitem_amount"), "").replaceAll(" ", ""); //기본 문장과 공백을 제거
+                            String amount = strInput[1].replaceAll(Messages.get(Teleporter.class, "getitem_amount"), "").replaceAll(" ", "");
                             int itemAmount = 1;
-                            if (!amount.equals("")) {
+                            if (!amount.isEmpty()) {
                                 try {
                                     itemAmount = Integer.parseInt(amount);
                                 } catch (NumberFormatException e) {
@@ -226,7 +220,6 @@ public class Teleporter extends Item {
                                 itemAmount = 1;
                             }
 
-                            //아이템 강화수치 결정 메커니즘
                             String upgrade = strInput[2].replaceAll(Messages.get(Teleporter.class, "getitem_upgrade"), "").replaceAll(" ", ""); //기본 문장과 공백을 제거
                             int itemUpgrade = 0;
                             if (!upgrade.equals("")) {
@@ -241,15 +234,12 @@ public class Teleporter extends Item {
                                 itemUpgrade = 0;
                             }
 
-                            //아이템 감정 여부 결정 메커니즘
                             String identify = strInput[3].replaceAll(Messages.get(Teleporter.class, "getitem_identify"), "").replaceAll(" ", ""); //기본 문장과 공백을 제거
-                            System.out.println(Messages.get(Teleporter.class, "true"));
                             if (identify.equals(Messages.get(Teleporter.class, "true"))) {
                                 identify = "true";
                             }
                             boolean isIdentified = Boolean.parseBoolean(identify);
 
-                            //최종 아이템 지급
                             if (isIdentified) {
                                 item.quantity(itemAmount).upgrade(itemUpgrade).identify();
                             } else {
