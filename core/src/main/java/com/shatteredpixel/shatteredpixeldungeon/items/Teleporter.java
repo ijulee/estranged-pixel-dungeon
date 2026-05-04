@@ -140,8 +140,16 @@ public class Teleporter extends Item {
                                     Messages.get(Teleporter.class, "help_desc")));
                         } else if (text.trim().equals("list")) {
                             StringBuilder itemList = new StringBuilder();
-                            for (Class classes : itemClass) {
-                                itemList.append(Messages.get(classes, "name")).append(", ");
+                            for (Catalog cat : Catalog.values()) {
+                                if (cat != Catalog.ENCHANTMENTS && cat != Catalog.GLYPHS) {
+                                    itemList.append(Messages.format("_%s_:\n",
+                                            Messages.get(Catalog.class, cat.name()+".title").toUpperCase()));
+
+                                    for (Class<?> itemClass : cat.items()) {
+                                        itemList.append(Messages.get(itemClass, "name").toLowerCase()).append(", ");
+                                    }
+                                    itemList.delete(itemList.length()-2, itemList.length()).append("\n\n");
+                                }
                             }
                             GameScene.show(new Window() {
                                 {
