@@ -114,12 +114,10 @@ public class SeedFindScene extends PixelScene {
 									clipboard.setContents(foundSeed.seed);
 
 									//show log
-									SeedFinder.SeedfinderLogResult result = foundSeed.toLogResult();
-
 									SeedFindScene.this.addToFront( new WndSeedfinderLog(
 											Icons.get(Icons.BACKPACK),
 											Messages.get(SeedFindScene.class, "result_title"),
-											result) );
+											foundSeed.result) );
 								});
 							});
 

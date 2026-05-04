@@ -72,10 +72,8 @@ public class SeedFinder {
 		public static long seed;
 
 		public static boolean searchForDaily;
-		public static int DailyOffset;
 
 		public static boolean ignoreBlacklist;
-		public static boolean useChallenges;
 		public static int challenges;
 
 		public static boolean useRooms;
@@ -89,11 +87,8 @@ public class SeedFinder {
 		public static boolean logOther;
 		public static boolean checkShops;
 
-		public static boolean trueRandom;
-		public static boolean sequentialMode;
-		public static long startingSeed;
-		public static int infoSpacing;
-		public static String spacingChar;
+		public static boolean exactLevels;
+		public static boolean multirange;
 	}
 
 	static final List<Class<? extends Item>> blacklist = Arrays.asList(
@@ -124,16 +119,11 @@ public class SeedFinder {
 
 		Options.checkShops = SPDSettings.checkShops();
 
+		Options.exactLevels = false;
+		Options.multirange = false;
+
 		Options.ignoreBlacklist = SPDSettings.ignoreBlacklist();
 		Options.challenges = SPDSettings.challenges();
-
-		// defaults, only adjustable in CLI seedfinder
-		Options.useChallenges = true;
-		Options.trueRandom = false;
-		Options.sequentialMode = false;
-		Options.startingSeed = 0;
-		Options.infoSpacing = 1;
-		Options.spacingChar = " ";
 	}
 
 	private static ArrayList<Heap> getMobDrops(Level l) {
@@ -143,19 +133,15 @@ public class SeedFinder {
 			if (m instanceof Statue && Options.logEquipment) {
 				Heap h = new Heap();
 				h.items = new LinkedList<>();
-				h.items.add(((Statue) m).weapon.identify(false));
+				h.items.add(((Statue) m).weapon);
 				if (m instanceof ArmoredStatue) {
-					h.items.add(((ArmoredStatue) m).armor.identify(false));
+					h.items.add(((ArmoredStatue) m).armor);
 				}
 				h.type = Type.STATUE;
 				heaps.add(h);
 			} else if (m instanceof Mimic) {
 				Heap h = new Heap();
-				h.items = new LinkedList<>();
-
-				for (Item item : ((Mimic) m).items) {
-					h.items.add(item.identify(false));
-				}
+				h.items = new LinkedList<>(((Mimic) m).items);
 
 				if (m instanceof GoldenMimic) {
 					h.type = Type.GOLDEN_MIMIC;
@@ -177,6 +163,8 @@ public class SeedFinder {
 	}
 
 	public static class SeedLog {
+		public static int logDepth;
+
 		public String seed;
 
 		public int maxDepth;
@@ -189,13 +177,13 @@ public class SeedFinder {
 		public List<Level.Feeling> feelings;
 
 		public int ghostDepth = -1;
-		public Weapon ghostWeapon;
-		public Armor ghostArmor;
+		public Item ghostWeapon;
+		public Item ghostArmor;
 
 		public int wandmakerDepth = -1;
 		public int wandmakerType = -1;
-		public Wand wandmakerWand1;
-		public Wand wandmakerWand2;
+		public Item wandmakerWand1;
+		public Item wandmakerWand2;
 
 		public int blacksmithDepth = -1;
 		public int blacksmithType = -1;
@@ -203,8 +191,9 @@ public class SeedFinder {
 
 		public int impDepth = -1;
 		public Boolean impType;
-		public Ring impReward;
+		public Item impReward;
 
+		public SeedfinderLogResult result;
 
 		public SeedLog(String seed, int maxDepth) {
 			this.seed = seed;
@@ -233,6 +222,8 @@ public class SeedFinder {
 		}
 
         public SeedfinderLogResult toLogResult() {
+			if (result != null) return result;
+
 			String[] main = new String[maxDepth + 1];
 			Arrays.fill(main, "");
 			String[] rooms = new String[maxDepth + 1];
@@ -253,78 +244,96 @@ public class SeedFinder {
 			//copy entry just so that content will always change when clicking entry 0/*
 			rooms[0] = main[0];
 
-			for (int depth = 1; depth <= maxDepth; depth++) {
+			for (logDepth = 1; logDepth <= maxDepth; logDepth++) {
 				//depth and floor feeling
 				String depthFeeling;
-				if (depth % 5 == 0) {
+				if (logDepth % 5 == 0) {
 					depthFeeling = Messages.get(this, "boss_floor");
 				} else {
-					Level.Feeling feeling = feelings.get(depth-1);
+					Level.Feeling feeling = feelings.get(logDepth-1);
 					depthFeeling = (feeling == Level.Feeling.NONE) ?
 							Messages.get(this, "none_floor") : feeling.title();
 				}
-				main[depth] += Messages.get(this, "items_title", depth, depthFeeling);
+				main[logDepth] += Messages.get(this, "items_title", logDepth, depthFeeling);
 
 				//add shop items
 				if (Options.checkShops) {
-                    switch (depth) {
+                    switch (logDepth) {
                         case 6: case 11: case 16: case 20: case 26:
-                            main[depth] += "\n\n";
-                            main[depth] += itemsToString("shop", forSale.get(depth/5-1));
+                            main[logDepth] += "\n\n";
+                            main[logDepth] += itemsToString("shop", forSale.get(logDepth/5-1));
 					}
                 }
 
 				//add floor items
-                if (!items.get(depth-1).isEmpty()) {
-                    main[depth] += "\n\n";
+                if (!items.get(logDepth-1).isEmpty()) {
+                    main[logDepth] += "\n\n";
                 }
-                for (ItemLog entry : items.get(depth-1)) {
-					main[depth] += entry.toString();
-					main[depth] += "\n";
+				for (ItemLog entry : items.get(logDepth-1)) {
+					main[logDepth] += entry.toString();
+					main[logDepth] += "\n";
 				}
-				main[depth] += "\n";
 
 				//handle quests
-				if (depth == ghostDepth) {
-					String questType = Messages.get(this, "ghost_type_"+depth);
-					String wepString = (Options.logEquipment) ? checkTarget(ghostWeapon.identify(false).title()) : "";
-					String amrString = (Options.logEquipment) ? checkTarget(ghostArmor.identify(false).title()) : "";
-					main[depth] += Messages.get(this, "ghost", questType, wepString, amrString);
-				} else if (depth == wandmakerDepth) {
+				if (logDepth == ghostDepth) {
+					String questType = Messages.get(this, "ghost_type_"+logDepth);
+					main[logDepth] += "\n\n";
+                    if (Options.logEquipment) {
+                        main[logDepth] += Messages.get(this, "ghost", questType,
+								checkTarget(ghostWeapon.title()), checkTarget(ghostArmor.title()));
+                    } else {
+						main[logDepth] += Messages.get(this, "ghost_filtered", questType);
+					}
+                } else if (logDepth == wandmakerDepth) {
 					String questType = Messages.get(this, "wandmaker_type_"+wandmakerType);
-					String wand1String = (Options.logWands) ? checkTarget(wandmakerWand1.identify(false).title()) : "";
-					String wand2String = (Options.logWands) ? checkTarget(wandmakerWand2.identify(false).title()) : "";
-					main[depth] += Messages.get(this, "wandmaker", questType, wand1String, wand2String);
-				} else if (depth == blacksmithDepth) {
+					main[logDepth] += "\n\n";
+                    if (Options.logWands) {
+                        main[logDepth] += Messages.get(this, "wandmaker", questType,
+								checkTarget(wandmakerWand1.title()), checkTarget(wandmakerWand2.title()));
+                    } else {
+						main[logDepth] += Messages.get(this, "wandmaker_filtered", questType);
+					}
+                } else if (logDepth == blacksmithDepth) {
 					String questType = Messages.get(this, "blacksmith_type_"+blacksmithType);
-					main[depth] += itemsToString(Messages.get(this, "blacksmith", questType),
-							(Options.logEquipment) ? blacksmithSmithRewards : List.of());
-				} else if (depth == impDepth) {
+					main[logDepth] += "\n\n";
+                    if (Options.logEquipment) {
+                        main[logDepth] += itemsToString(
+								Messages.get(this, "blacksmith", questType),
+								blacksmithSmithRewards);
+                    } else {
+						main[logDepth] += Messages.get(this, "blacksmith_filtered", questType);
+					}
+                } else if (logDepth == impDepth) {
 					String questType = impType ? "monks" : "golems";
-					String ringString = (Options.logRings) ? checkTarget(impReward.identify(false).title()) : "";
-					main[depth] += Messages.get(this, "imp", questType, ringString);
-				}
+					main[logDepth] += "\n\n";
+                    if (Options.logRings) {
+                        main[logDepth] += Messages.get(this, "imp", questType,
+								checkTarget(impReward.title()));
+                    } else {
+						main[logDepth] += Messages.get(this, "imp_filtered", questType);
+					}
+                }
 
 				//add rooms
-				rooms[depth] += Messages.get(this, "rooms_title", depth, depthFeeling);
-				rooms[depth] += "\n\n";
+				rooms[logDepth] += Messages.get(this, "rooms_title", logDepth, depthFeeling);
+				rooms[logDepth] += "\n\n";
 
-				for (Room room : roomList.get(depth-1).keySet()) {
+				for (Room room : roomList.get(logDepth-1).keySet()) {
 					String roomName = room.getClass().getSimpleName()
 							.replaceAll("([a-z])([A-Z])", "$1 $2").toLowerCase();
 					if (Options.useRooms) {
 						roomName = checkTarget(roomName);
 					}
 
-					if (!roomList.get(depth-1).get(room).isEmpty()) {
-						rooms[depth] += Messages.format("**-** %s (%s)\n", roomName, roomList.get(depth-1).get(room));
+					if (!roomList.get(logDepth-1).get(room).isEmpty()) {
+						rooms[logDepth] += Messages.format("**-** %s (%s)\n", roomName, roomList.get(logDepth-1).get(room));
 					} else {
-						rooms[depth] += Messages.format("**-** %s\n", roomName);
+						rooms[logDepth] += Messages.format("**-** %s\n", roomName);
 					}
 				}
 			}
 
-			SeedfinderLogResult result = new SeedfinderLogResult();
+			result = new SeedfinderLogResult();
 			result.main = main;
 			result.rooms = rooms;
 			return result;
@@ -354,47 +363,73 @@ public class SeedFinder {
         }
 	}
 
-	public static HashMap<String, Boolean> targets = new HashMap<>();
-	public static final HashMap<String, Boolean> DEFAULT_TARGETS = new HashMap<>() {
-        {
-            put("upgrade", false);
-            put("strength", false);
-            put("entrance", false);
-            put("exit", false);
-        }
-    };
+	public static ArrayList<String> targets;
+	public static ArrayList<Integer> targetDepths;
+	public static ArrayList<Integer> targetLevels;
+	public static ArrayList<Boolean> targetMatches;
+	public static final ArrayList<String> DEFAULT_TARGETS = new ArrayList<>(
+			List.of("upgrade", "strength", "entrance", "exit")
+	);
 
 	public static SeedLog findSeed() {
-		HashMap<String, Boolean> inputTargets = new HashMap<>();
-		for (String target : SPDSettings.seedfinderPrompt().toLowerCase().split(System.lineSeparator())) {
-			inputTargets.put(target, false);
-		}
-
 		SeedFinder.loadConfig();
+		parsePrompt();
 
 		long start = Random.Long(DungeonSeed.TOTAL_SEEDS);
 		for (long i = start; i < DungeonSeed.TOTAL_SEEDS; i++) {
+			final long count = i - start + 1;
 			if (Thread.currentThread().isInterrupted()) {
-				Gdx.app.postRunnable(() -> ShatteredPixelDungeon.scene()
-						.addToFront(new WndMessage("Searched interrupted.")));
+				Gdx.app.postRunnable(() -> ShatteredPixelDungeon.scene().addToFront(
+						new WndMessage("Searched interrupted after _" + count + "_ seeds.")));
 				return null;
 			}
 
-			targets = new HashMap<>(inputTargets);
+			resetMatches();
 			SPDSettings.customSeed(DungeonSeed.convertToCode(i));
 			SeedLog log = scoutDungeon();
 			log.toLogResult();
 
-			if ((Options.condition == CONDITION_ALL && !targets.containsValue(false)) ||
-				(Options.condition == CONDITION_ANY && targets.containsValue(true))) {
-					long count = i - start + 1;
-					Gdx.app.postRunnable(() -> ShatteredPixelDungeon.scene()
-							.addToFront(new WndMessage("Searched through _" + count + "_ seeds.")));
+			if ((Options.condition == CONDITION_ALL && !targetMatches.contains(false)) ||
+				(Options.condition == CONDITION_ANY && targetMatches.contains(true))) {
+					Gdx.app.postRunnable(() -> ShatteredPixelDungeon.scene().addToFront(
+							new WndMessage("Searched through _" + count + "_ seeds.")));
 					return log;
 			}
 		}
 
 		return null;
+	}
+
+	private static void parsePrompt() {
+		int maxDepth = Options.floors;
+		targets = new ArrayList<>();
+		targetDepths = new ArrayList<>();
+		targetLevels = new ArrayList<>();
+
+		for (String line : SPDSettings.seedfinderPrompt().toLowerCase().split("\n")) {
+			String[] splitLine = line.split(", ?");
+			String[] targetTitle = splitLine[0].split(" ?\\+");
+			String targetName = targetTitle[0].strip();
+			if (targetName.isEmpty()) continue;
+
+			targets.add(targetName);
+
+			//ignore range specifier if multirange flag not set
+            if (Options.multirange) {
+                int depth = (splitLine.length == 2) ? Integer.parseInt(splitLine[1]) : maxDepth;
+                targetDepths.add(depth);
+            }
+
+            int level = (targetTitle.length == 2) ? Integer.parseInt(targetTitle[1]) : -1;
+			targetLevels.add(level);
+		}
+	}
+
+	private static void resetMatches() {
+		targetMatches = new ArrayList<>();
+		for (String item : targets) {
+			targetMatches.add(false);
+		}
 	}
 
 	private static final LinkedHashMap<Integer, String> scroll2rune = new LinkedHashMap<>() {
@@ -448,15 +483,26 @@ public class SeedFinder {
         }
     };
 
-
 	public static String checkTarget(String title) {
 		boolean match = false;
-		for (String target : targets.keySet()) {
-			if (title.contains(target)) {
-				targets.put(target, true);
+		for (int i = 0, targetsSize = targets.size(); i < targetsSize; i++) {
+			if (Options.multirange && SeedLog.logDepth > targetDepths.get(i)) continue;
+
+			String target = targets.get(i);
+
+            if (title.contains(target)) {
+				int level = targetLevels.get(i);
+                if (level != -1) {
+                    int titleLevel = title.contains("+") ? Integer.parseInt(title.split(" ?\\+")[1]) : 0;
+                    if ((Options.exactLevels && titleLevel != level) || titleLevel < level) continue;
+                }
 				match = true;
-			}
-		}
+                if (!targetMatches.get(i)) {
+                    targetMatches.set(i, true);
+                    break;
+                }
+            }
+        }
 
 		if (match) return Messages.format("_%s_", title);
 		else	   return title;
@@ -474,7 +520,13 @@ public class SeedFinder {
 		time = Math.max(time, 20_148 * DAY);
 		SPDSettings.lastDaily(time);
 		Dungeon.daily = Options.searchForDaily = true;
-		targets = new HashMap<>(DEFAULT_TARGETS);
+		targets = DEFAULT_TARGETS;
+		targetDepths = new ArrayList<>();
+		targetMatches = new ArrayList<>();
+		for (String item : DEFAULT_TARGETS) {
+			targetDepths.add(Options.floors);
+			targetMatches.add(false);
+		}
 		SeedLog log = scoutDungeon();
 		Dungeon.daily = Options.searchForDaily = false;
 		SPDSettings.lastDaily(lastDaily);
@@ -483,7 +535,13 @@ public class SeedFinder {
 
 	public static SeedLog scoutSeed(String seed) {
 		SeedFinder.loadConfig();
-		targets = new HashMap<>(DEFAULT_TARGETS);
+		targets = DEFAULT_TARGETS;
+		targetDepths = new ArrayList<>();
+		targetMatches = new ArrayList<>();
+		for (String item : DEFAULT_TARGETS) {
+			targetDepths.add(Options.floors);
+			targetMatches.add(false);
+		}
 		SPDSettings.customSeed(seed);
 		return scoutDungeon();
 	}
@@ -542,7 +600,7 @@ public class SeedFinder {
                     //special case
                     SacrificialFire fire = (SacrificialFire) level.blobs.get(SacrificialFire.class);
                     if (fire != null) {
-                        log.addEntry(Dungeon.depth, fire, List.of(fire.getPrize()));
+                        log.addEntry(Dungeon.depth, fire, List.of(fire.getPrize().identify(false)));
                     }
                 }
 
@@ -590,21 +648,22 @@ public class SeedFinder {
 			for (Mob mob : level.mobs) {
 				if (mob instanceof Ghost && Ghost.Quest.armor != null) {
 					log.ghostDepth = Dungeon.depth;
-					log.ghostWeapon = Ghost.Quest.weapon.enchant(Ghost.Quest.enchant);
-					log.ghostArmor = Ghost.Quest.armor.inscribe(Ghost.Quest.glyph);
+					log.ghostWeapon = Ghost.Quest.weapon.enchant(Ghost.Quest.enchant).identify(false);
+					log.ghostArmor = Ghost.Quest.armor.inscribe(Ghost.Quest.glyph).identify(false);
 				} else if (mob instanceof Wandmaker && Wandmaker.Quest.wand1 != null) {
 					log.wandmakerDepth = Dungeon.depth;
 					log.wandmakerType = Wandmaker.Quest.type;
-					log.wandmakerWand1 = Wandmaker.Quest.wand1;
-					log.wandmakerWand2 = Wandmaker.Quest.wand2;
+					log.wandmakerWand1 = Wandmaker.Quest.wand1.identify(false);
+					log.wandmakerWand2 = Wandmaker.Quest.wand2 .identify(false);
 				} else if (mob instanceof Blacksmith && !Blacksmith.Quest.smithRewards.isEmpty()) {
 					log.blacksmithDepth = Dungeon.depth;
 					log.blacksmithType = Blacksmith.Quest.type;
 					log.blacksmithSmithRewards = new ArrayList<>(Blacksmith.Quest.smithRewards);
+					for (Item i : log.blacksmithSmithRewards) i.identify(false);
 				} else if (mob instanceof Imp && Imp.Quest.reward != null) {
 					log.impDepth = Dungeon.depth;
 					log.impType = Imp.Quest.alternative;
-					log.impReward = Imp.Quest.reward;
+					log.impReward = Imp.Quest.reward.identify(false);
 				}
 			}
 		}
@@ -639,6 +698,7 @@ public class SeedFinder {
 	private static LinkedList<Item> filterItems(LinkedList<Item> items) {
 		LinkedList<Item> filtered = new LinkedList<>();
 		for (Item i : items) {
+			i.identify(false);
             if (Options.logArtifacts && i instanceof Artifact) {
 				filtered.add(i);
 			} else if (Options.logRings && i instanceof Ring) {
@@ -661,13 +721,14 @@ public class SeedFinder {
 	private static String itemsToString(String caption, List<Item> content) {
 		LinkedList<String> itemStrings = new LinkedList<>();
 		for (Item item: content) {
-			String result = checkTarget(item.identify(false).title());
+			String result = checkTarget(item.title());
 			if (item instanceof Scroll) {
 				result = Messages.format("%s (%s)", result, scroll2rune.get(item.image()));
 			} else if (item instanceof Potion) {
 				result = Messages.format("%s (%s)", result, pot2color.get(item.image()));
 			} else if (item instanceof Ring) {
 				result = Messages.format("%s (%s)", result, ring2gem.get(item.image()));
+				if (item.cursed) result = "cursed " + result;
 			}
 			itemStrings.add(result);
         }
