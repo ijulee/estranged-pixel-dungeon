@@ -5,6 +5,7 @@ import com.shatteredpixel.shatteredpixeldungeon.ShatteredPixelDungeon;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.GameScene;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.PixelScene;
+import com.shatteredpixel.shatteredpixeldungeon.ui.CheckBox;
 import com.shatteredpixel.shatteredpixeldungeon.ui.IconButton;
 import com.shatteredpixel.shatteredpixeldungeon.ui.Icons;
 import com.shatteredpixel.shatteredpixeldungeon.ui.MiniCheckBox;
@@ -19,8 +20,7 @@ public class WndSeedfinderMenu extends Window {
     private static final int WIDTH_P	    = 122;
     private static final int WIDTH_L	    = 223;
 
-    protected static final int MARGIN 		= 2;
-
+    private static final int TTL_HEIGHT = 16;
     private static final int SLIDER_HEIGHT	= 24;
     private static final int FLOORS_HEIGHT	= 20;
     private static final int BTN_HEIGHT	    = 16;
@@ -36,8 +36,7 @@ public class WndSeedfinderMenu extends Window {
     IconButton infoFloors;
     OptionSlider slideFontSize;
     IconButton infoFontSize;
-    RedButton btnMode;
-    IconButton infoMode;
+    RedButton btnSearchOpts;
     RedButton btnLoggingSettings;
     RedButton btnChallenges;
 
@@ -109,27 +108,15 @@ public class WndSeedfinderMenu extends Window {
         };
         add(infoFontSize);
 
-        String modeBtnDescKey = SPDSettings.seedfinderConditionANY() ? "mode_any" : "mode_all";
-        btnMode = new RedButton(Messages.get(this, modeBtnDescKey)) {
+        btnSearchOpts = new RedButton(Messages.get(WndSearchOpts.class, "title")) {
             @Override
             protected void onClick() {
-                SPDSettings.seedfinderConditionANY(!SPDSettings.seedfinderConditionANY());
-
-                ShatteredPixelDungeon.seamlessResetScene();
+                ShatteredPixelDungeon.scene().addToFront(new WndSearchOpts());
             }
         };
-        add(btnMode);
+        add(btnSearchOpts);
 
-        infoMode = new IconButton(Icons.INFO.get()) {
-            @Override
-            protected void onClick() {
-                ShatteredPixelDungeon.scene().addToFront(
-                        new WndMessage(Messages.get(WndSeedfinderMenu.class, "mode_info")) );
-            }
-        };
-        add(infoMode);
-
-        btnLoggingSettings = new RedButton(Messages.get(this, "logoptions_button"), 9) {
+        btnLoggingSettings = new RedButton(Messages.get(WndLoggingOpts.class, "title"), 9) {
             @Override
             protected void onClick() {
                 ShatteredPixelDungeon.scene().addToFront(new WndLoggingOpts());
@@ -172,10 +159,9 @@ public class WndSeedfinderMenu extends Window {
         slideFontSize.setRect(0, slideFloors.bottom() + GAP, width - INFO_SIZE - GAP, SLIDER_HEIGHT);
         infoFontSize.setRect(slideFontSize.right() + GAP, slideFontSize.centerY() - INFO_SIZE/2f, INFO_SIZE, INFO_SIZE);
 
-        btnMode.setRect(0, slideFontSize.bottom() + GAP, width - INFO_SIZE - GAP, BTN_HEIGHT);
-        infoMode.setRect(btnMode.right() + GAP, btnMode.centerY() - INFO_SIZE/2f, INFO_SIZE, INFO_SIZE);
+        btnSearchOpts.setRect(0, slideFontSize.bottom() + GAP, width, BTN_HEIGHT);
 
-        btnLoggingSettings.setRect(0, btnMode.bottom() + GAP, width, BTN_HEIGHT);
+        btnLoggingSettings.setRect(0, btnSearchOpts.bottom() + GAP, width, BTN_HEIGHT);
         btnChallenges.setRect(0, btnLoggingSettings.bottom() + GAP, width, BTN_HEIGHT);
 
         resize(width, (int) btnChallenges.bottom());
@@ -198,10 +184,8 @@ public class WndSeedfinderMenu extends Window {
 
         ColorBlock sep3;
 
-        MiniCheckBox chkRooms;
         MiniCheckBox chkBlacklist;
         MiniCheckBox chkShops;
-        IconButton infoRooms;
         IconButton infoBlacklist;
         IconButton infoShops;
 
@@ -293,27 +277,6 @@ public class WndSeedfinderMenu extends Window {
             sep3 = new ColorBlock(1, 1, 0xFF000000);
             add(sep3);
 
-            chkRooms = new MiniCheckBox(Messages.get(this, "use_rooms")) {
-                @Override
-                protected void onClick() {
-                    super.onClick();
-                    SPDSettings.useRooms(checked());
-                }
-            };
-            chkRooms.checked(SPDSettings.useRooms());
-            add(chkRooms);
-
-            infoRooms = new IconButton(Icons.MINI_INFO.get()) {
-                @Override
-                protected void onClick() {
-                    super.onClick();
-                    ShatteredPixelDungeon.scene().add(
-                            new WndMessage(Messages.get(WndLoggingOpts.class, "rooms_info"))
-                    );
-                }
-            };
-            add( infoRooms );
-
             chkBlacklist = new MiniCheckBox(Messages.get(this, "blacklist")) {
                 @Override
                 protected void onClick() {
@@ -377,16 +340,141 @@ public class WndSeedfinderMenu extends Window {
             sep3.size(width, 1);
             sep3.y = chkMisc.bottom() + GAP;
 
-            chkRooms.setRect(0, sep3.y + 1 + GAP, width - BTN_HEIGHT, BTN_HEIGHT);
-            chkBlacklist.setRect(0, chkRooms.bottom() + GAP, width - BTN_HEIGHT, BTN_HEIGHT);
+            chkBlacklist.setRect(0, sep3.y + 1 + GAP, width - BTN_HEIGHT, BTN_HEIGHT);
             chkShops.setRect(0, chkBlacklist.bottom() + GAP, width - BTN_HEIGHT, BTN_HEIGHT);
 
-            infoRooms.setRect(chkRooms.right(), chkRooms.top(), BTN_HEIGHT, BTN_HEIGHT);
             infoBlacklist.setRect(chkBlacklist.right(), chkBlacklist.top(), BTN_HEIGHT, BTN_HEIGHT);
             infoShops.setRect(chkShops.right(), chkShops.top(), BTN_HEIGHT, BTN_HEIGHT);
 
             resize(width, (int)chkShops.bottom());
 
+        }
+    }
+
+    public static class WndSearchOpts extends Window {
+        RenderedTextBlock title;
+
+        CheckBox chkMode;
+        IconButton infoMode;
+        CheckBox chkMulti;
+        IconButton infoMulti;
+        CheckBox chkExact;
+        IconButton infoExact;
+        CheckBox chkRooms;
+        IconButton infoRooms;
+
+
+        public WndSearchOpts() {
+            title = PixelScene.renderTextBlock(Messages.get(this, "title"), 9);
+            title.hardlight( TITLE_COLOR );
+            add(title);
+
+            String modeBtnDescKey = SPDSettings.seedfinderConditionANY() ? "mode_any" : "mode_all";
+            chkMode = new CheckBox(Messages.get(WndSeedfinderMenu.class, modeBtnDescKey)) {
+                @Override
+                protected void onClick() {
+                    super.onClick();
+                    SPDSettings.seedfinderConditionANY(checked());
+                    ShatteredPixelDungeon.seamlessResetScene();
+                }
+            };
+            chkMode.checked(SPDSettings.seedfinderConditionANY());
+            add( chkMode );
+
+            infoMode = new IconButton(Icons.INFO.get()) {
+                @Override
+                protected void onClick() {
+                    ShatteredPixelDungeon.scene().addToFront(
+                            new WndMessage(Messages.get(WndSeedfinderMenu.class, "mode_info")) );
+                }
+            };
+            add( infoMode );
+
+            chkMulti = new CheckBox(Messages.get(WndSearchOpts.class, "multi")) {
+                @Override
+                protected void onClick() {
+                    super.onClick();
+                    //FIXME Add and change the option here.
+                }
+            };
+            chkMulti.checked(/*FIXME Add and change the option here.*/);
+            add( chkMulti );
+
+            infoMulti = new IconButton(Icons.INFO.get()) {
+                @Override
+                protected void onClick() {
+                    super.onClick();
+                    ShatteredPixelDungeon.scene().addToFront(
+                            new WndMessage(Messages.get(WndSearchOpts.class, "multi_info"))
+                    );
+                }
+            };
+            add( infoMulti );
+
+            chkExact = new CheckBox(Messages.get(WndSearchOpts.class, "exact")) {
+                @Override
+                protected void onClick() {
+                    super.onClick();
+                    //FIXME Add and change the option here.
+                }
+            };
+            chkExact.checked(/*FIXME Add and change the option here.*/);
+            add( chkExact );
+
+            infoExact = new IconButton(Icons.INFO.get()) {
+                @Override
+                protected void onClick() {
+                    super.onClick();
+                    ShatteredPixelDungeon.scene().addToFront(
+                            new WndMessage(Messages.get(WndSearchOpts.class, "exact_info"))
+                    );
+                }
+            };
+            add( infoExact );
+
+            chkRooms = new CheckBox(Messages.get(WndSearchOpts.class, "use_rooms")) {
+                @Override
+                protected void onClick() {
+                    super.onClick();
+                    SPDSettings.useRooms(checked());
+                }
+            };
+            chkRooms.checked(SPDSettings.useRooms());
+            add(chkRooms);
+
+            infoRooms = new IconButton(Icons.INFO.get()) {
+                @Override
+                protected void onClick() {
+                    super.onClick();
+                    ShatteredPixelDungeon.scene().addToFront(
+                            new WndMessage(Messages.get(WndSearchOpts.class, "rooms_info"))
+                    );
+                }
+            };
+            add( infoRooms );
+
+            layout();
+        }
+
+        public void layout() {
+            int width = PixelScene.landscape() ? WIDTH_L : WIDTH_P;
+
+            title.setPos((width - title.width()) / 2f, (TTL_HEIGHT - title.height()) / 2);
+            PixelScene.align(title);
+
+            chkMode.setRect(0, title.bottom() + 2*GAP, width - INFO_SIZE - GAP, BTN_HEIGHT);
+            infoMode.setRect(chkMode.right() + GAP, chkMode.centerY() - INFO_SIZE/2f, INFO_SIZE, INFO_SIZE);
+
+            chkMulti.setRect(0, chkMode.bottom() + GAP, width - INFO_SIZE - GAP, BTN_HEIGHT);
+            infoMulti.setRect(chkMulti.right() + GAP, chkMulti.centerY() - INFO_SIZE/2f, INFO_SIZE, INFO_SIZE);
+
+            chkExact.setRect(0, chkMulti.bottom() + GAP, width - INFO_SIZE - GAP, BTN_HEIGHT);
+            infoExact.setRect(chkExact.right() + GAP, chkExact.centerY() - INFO_SIZE/2f, INFO_SIZE, INFO_SIZE);
+
+            chkRooms.setRect(0, chkExact.bottom() + GAP, width - INFO_SIZE - GAP, BTN_HEIGHT);
+            infoRooms.setRect(chkRooms.right() + GAP, chkRooms.centerY() - INFO_SIZE/2f, INFO_SIZE, INFO_SIZE);
+
+            resize(width, (int)chkRooms.bottom());
         }
     }
 }
