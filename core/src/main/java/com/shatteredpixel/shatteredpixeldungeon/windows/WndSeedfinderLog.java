@@ -136,7 +136,9 @@ public class WndSeedfinderLog extends WndTabbed {
 			RedButton btnLeft = new RedButton("<", 7) {
 				@Override
 				protected void onClick() {
-					if (offset > 0) {
+					if (selectedIndex > 0) {
+						selectedIndex -= 1;
+					} else if (offset > 0) {
 						offset -= 1;
 					}
 					updateTabs();
@@ -149,7 +151,9 @@ public class WndSeedfinderLog extends WndTabbed {
 			RedButton btnRight = new RedButton(">", 7) {
 				@Override
 				protected void onClick() {
-					if (offset + 1 <= numTabs - MAX_VISIBLE_TABS) {
+					if (selectedIndex < MAX_VISIBLE_TABS - 1) {
+						selectedIndex += 1;
+					} else if (offset + 1 <= numTabs - MAX_VISIBLE_TABS) {
 						offset += 1;
 					}
 					updateTabs();
