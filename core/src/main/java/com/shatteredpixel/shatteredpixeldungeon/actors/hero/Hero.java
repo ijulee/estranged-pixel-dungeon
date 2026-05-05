@@ -1988,7 +1988,8 @@ public class Hero extends Char {
 	}
 
 	public int critDamage(int damage, Weapon wep, float critChance) {
-		int max = wep.max() + ((wep instanceof GunWeapon.GunMissile)? 0 : wepSTRExcess(wep));
+		int max = wep.augment.damageFactor( wep.max() );
+		max += wep instanceof GunWeapon.GunMissile ? 0 : wepSTRExcess( wep );
 		float critDmg = max * 0.75f + damage * 0.25f;
 		float multi = Math.max(1, critChance);
 
