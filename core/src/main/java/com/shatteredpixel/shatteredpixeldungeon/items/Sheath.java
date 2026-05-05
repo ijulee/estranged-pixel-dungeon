@@ -70,6 +70,9 @@ public class Sheath extends Item {
                     } else {
                         hero.spendAndNext(Actor.TICK);
                     }
+                    Dungeon.observe();
+                    GameScene.updateFog();
+                    hero.checkVisibleMobs();
                 } else {
                     hero.buff(Sheathing.class).detach();
                     hero.spendAndNext(Actor.TICK);
