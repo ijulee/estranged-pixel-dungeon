@@ -244,9 +244,8 @@ public class SwordAura extends TargetingAction {
 
             if (defender.alignment != Char.Alignment.ALLY) {
                 Weapon wep = (Weapon) Dungeon.hero.belongings.weapon();
-                if (wep.enchantment != null &&
-                    Random.Int(2) < Dungeon.hero.pointsInTalent(Talent.ARCANE_POWER)) {
-                    damage = wep.enchantment.proc(wep, attacker, defender, damage);
+                if (Random.Int(2) < Dungeon.hero.pointsInTalent(Talent.ARCANE_POWER)) {
+                    damage = wep.proc(attacker, defender, damage);
                 }
 
                 if (Dungeon.hero.hasTalent(Talent.ENERGY_COLLECT)) {

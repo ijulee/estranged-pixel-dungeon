@@ -687,7 +687,7 @@ abstract public class Weapon extends KindOfWeapon {
 			if (attacker instanceof Hero &&
 					Dungeon.hero.belongings.attackingWeapon() instanceof SwordAura.Aura &&
 					Dungeon.hero.pointsInTalent(Talent.ARCANE_POWER) == 3) {
-				multi += 0.2f;
+				multi += 0.5f;
 			}
 
 			return multi;
