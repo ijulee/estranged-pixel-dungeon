@@ -323,7 +323,7 @@ public class Hero extends Char {
 	public Hero() {
 		super();
 
-		HP = HT = (Dungeon.isChallenged(Challenges.SUPERMAN)) ? 10 : 20;
+		HP = HT = (Dungeon.isChallenged(Challenges.SUPERMAN)) ? 8 : 20;
 		STR = STARTING_STR;
 		
 		belongings = new Belongings( this );
@@ -334,10 +334,19 @@ public class Hero extends Char {
 	public void updateHT( boolean boostHP ){
 		int curHT = HT;
 
-		HT = (Dungeon.isChallenged(Challenges.SUPERMAN)) ? 10 : 20 + 5 * (lvl-1) + HTBoost;
-		if (this.hasTalent(Talent.MAX_HEALTH)) {
-			HT += 5*this.pointsInTalent(Talent.MAX_HEALTH);
+		boolean isSuperman = Dungeon.isChallenged(Challenges.SUPERMAN);
+        if (isSuperman) {
+			HT = 8 + 1 * (lvl - 1);
+			if (this.hasTalent(Talent.MAX_HEALTH)) {
+				HT += 2*this.pointsInTalent(Talent.MAX_HEALTH);
+			}
+		} else {
+			HT = 20 + 5 * (lvl - 1) + HTBoost;
+			if (this.hasTalent(Talent.MAX_HEALTH)) {
+				HT += 5*this.pointsInTalent(Talent.MAX_HEALTH);
+			}
 		}
+
 		float multiplier = RingOfMight.HTMultiplier(this);
 		HT = Math.round(multiplier * HT);
 		

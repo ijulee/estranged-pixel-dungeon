@@ -76,7 +76,11 @@ public class DeathSword extends MeleeWeapon {
         private int stack = 0;
 
         public void kill() {
-            stack = Math.min(stack+1, Dungeon.isChallenged(Challenges.SUPERMAN) ? 10 : 15+Dungeon.hero.lvl*5);
+            if (Dungeon.isChallenged(Challenges.SUPERMAN)) {
+                stack = Math.min(stack + 1, 10);
+            } else {
+                stack = Math.min(stack + 1, 15 + Dungeon.hero.lvl * 5);
+            }
             Dungeon.hero.updateHT(false);
         }
 
