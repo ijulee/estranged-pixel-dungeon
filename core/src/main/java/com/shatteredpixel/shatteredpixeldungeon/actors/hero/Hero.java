@@ -3378,7 +3378,7 @@ public class Hero extends Char {
 
 		spend( attackDelay() );
 
-		boolean isCritical = buff(Sheath.CriticalAttack.class) != null;
+		Buff crit = buff(Sheath.CriticalAttack.class);
 
 		if (hit && subClass == HeroSubClass.GLADIATOR && wasEnemy){
 			Buff.affect( this, Combo.class ).hit(attackTarget);
@@ -3400,30 +3400,26 @@ public class Hero extends Char {
 			Buff.prolong(this, EvasiveMove.class, EvasiveMove.DURATION);
 		}
 
-        if (heroClass == HeroClass.SAMURAI) {
-			if (buff(Sheath.Sheathing.class) != null) {
-				buff(Sheath.Sheathing.class).detach();
-				if (hasTalent(Talent.PARRYING)) {
-					Buff.affect(this, Talent.ScabbardBlockTracker.class, 1f);
-				}
+		if (buff(Sheath.Sheathing.class) != null) {
+			buff(Sheath.Sheathing.class).detach();
+			if (hasTalent(Talent.PARRYING)) {
+				Buff.affect(this, Talent.ScabbardBlockTracker.class, 1f);
 			}
+		}
 
-            if (hit && subClass == HeroSubClass.MASTER) {
-                if (buff(Sheath.QuickDrawTracker.class) != null) {
-					buff(Sheath.QuickDrawTracker.class).detach();
-                    if (!isCritical) {
-                        Buff.prolong(this, Sheath.QuickDrawCooldown.class, (30 - 5 * pointsInTalent(Talent.STATIC_PREPARATION)));
-                    }
-                }
+		if (buff(Sheath.QuickDrawTracker.class) != null) {
+			buff(Sheath.QuickDrawTracker.class).detach();
+			if (crit == null) {
+				Buff.prolong(this, Sheath.QuickDrawCooldown.class, (30 - 5 * pointsInTalent(Talent.STATIC_PREPARATION)));
+			}
+		}
 
-                if (buff(Sheath.DashDrawTracker.class) != null) {
-                    buff(Sheath.DashDrawTracker.class).detach();
-                }
-            }
-        }
+		if (buff(Sheath.DashDrawTracker.class) != null) {
+			buff(Sheath.DashDrawTracker.class).detach();
+		}
 
-		if (isCritical) {
-			buff(Sheath.CriticalAttack.class).detach();
+		if (crit != null) {
+			crit.detach();
 		}
 
 		if (buff(ShadowBlade.ArmorPenetration.class) != null) {
