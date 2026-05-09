@@ -28,4 +28,14 @@ public class PillOfVitamin extends Pill {
         }
         Buff.affect(appliedCh, PotionOfCleansing.Cleanse.class, 10f);
     }
+
+    @Override
+    public int value() {
+        return 25 * quantity;
+    }
+
+    @Override
+    public int energyVal() {
+        return 5 * quantity;
+    }
 }
