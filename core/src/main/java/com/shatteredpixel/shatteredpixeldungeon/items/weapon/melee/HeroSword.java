@@ -189,10 +189,12 @@ public class HeroSword extends MeleeWeapon {
 
     @Override
     public int proc(Char attacker, Char defender, int damage) {
-        if (enchantment.getClass() == baseWep.enchantment.getClass()) {
+        if (enchantment != null && baseWep.enchantment != null &&
+                enchantment.getClass() == baseWep.enchantment.getClass()) {
+            Enchantment ench = baseWep.enchantment;
             baseWep.enchantment = null;
             damage = baseWep.proc( attacker, defender, damage );
-            baseWep.enchantment = enchantment;
+            baseWep.enchantment = ench;
         } else {
             damage = baseWep.proc( attacker, defender, damage );
         }
