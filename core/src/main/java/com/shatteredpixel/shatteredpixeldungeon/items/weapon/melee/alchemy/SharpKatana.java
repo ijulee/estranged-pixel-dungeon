@@ -49,15 +49,12 @@ public class SharpKatana extends MeleeWeapon implements AlchemyWeapon {
         return super.doPickUp(hero, pos);
     }
 
-    @Override
-    public int min(int lvl) {
-        return 1;
-    }
+    // no more low min damage
 
     @Override
     public int max(int lvl) {
-        return  4 * (tier + 2) +
-                lvl * (tier + 2);
+        return  6 * (tier + 1) +    // 42 base, up from 35
+                lvl * (tier + 1);   // +7 level scaling
     }
 
     @Override

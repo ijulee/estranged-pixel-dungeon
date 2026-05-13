@@ -51,15 +51,12 @@ public class WornKatana extends MeleeWeapon {
         return super.doPickUp(hero, pos);
     }
 
-    @Override
-    public int min(int lvl) {
-        return 1;
-    }
+    // no more low min damage
 
     @Override
     public int max(int lvl) {
-        return  4 * (tier + 2) +
-                lvl * (tier + 2);
+        return  6 * (tier + 1) +    // 12 base, up from 10
+                lvl * (tier + 1);   // +2 level scaling
     }
 
     @Override
