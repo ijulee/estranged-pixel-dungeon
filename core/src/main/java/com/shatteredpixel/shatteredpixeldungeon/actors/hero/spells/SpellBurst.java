@@ -36,14 +36,6 @@ public class SpellBurst extends TargetedClericSpell implements Hero.Doom {
     private int maxDamage() {
         return 10+Dungeon.hero.lvl;
     }
-//
-//    private int minDamage() {
-//        return 2+Dungeon.hero.lvl/5;
-//    }
-//
-//    private int maxDamage() {
-//        return 4+Dungeon.hero.lvl/2;
-//    }
 
     @Override
     public int targetingFlags() {
@@ -88,8 +80,7 @@ public class SpellBurst extends TargetedClericSpell implements Hero.Doom {
                     Badges.validateDeathFromFriendlyMagic();
                 }
             } else {
-                ch.damage(Random.NormalIntRange(minDamage(), maxDamage()), INSTANCE);
-                if (!ch.isAlive()) tome.directCharge(2);
+                ch.damage(Hero.heroDamageIntRange(minDamage(), maxDamage()), INSTANCE);
             }
         }
 
@@ -102,6 +93,8 @@ public class SpellBurst extends TargetedClericSpell implements Hero.Doom {
         hero.sprite.zap(target);
 
         onSpellCast(tome, hero);
+
+        if (!ch.isAlive()) tome.directCharge(chargeUse(hero));
     }
 
     @Override
