@@ -213,11 +213,10 @@ abstract public class MissileWeapon extends Weapon {
 			}
 		}
 
-		if ((projecting > 0
-				&& Dungeon.level.distance(user.pos, dst) <= Math.round(projecting * Enchantment.genericProcChanceMultiplier(user)))
-			|| (this instanceof Gun.Bullet
-				&& Dungeon.level.distance(user.pos, dst) <= 1+Dungeon.hero.pointsInTalent(Talent.STREET_BATTLE))
-			&& (Dungeon.level.passable[dst] || Dungeon.level.avoid[dst] || Actor.findChar(dst) != null)) {
+		if ((
+				(projecting > 0 && Dungeon.level.distance(user.pos, dst) <= Math.round(projecting * Enchantment.genericProcChanceMultiplier(user))) ||
+				(this instanceof Gun.Bullet && Dungeon.level.distance(user.pos, dst) <= 1+Dungeon.hero.pointsInTalent(Talent.STREET_BATTLE))
+			) && (Dungeon.level.passable[dst] || Dungeon.level.avoid[dst] || Actor.findChar(dst) != null)) {
 			return dst;
 		} else {
 			return super.throwPos(user, dst);
