@@ -101,9 +101,11 @@ import com.shatteredpixel.shatteredpixeldungeon.items.pills.Pill;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.Potion;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfExperience;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.PotionOfStrength;
+import com.shatteredpixel.shatteredpixeldungeon.items.potions.brews.Brew;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.elixirs.Elixir;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.elixirs.ElixirOfTalent;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic.ExoticPotion;
+import com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic.PotionOfMastery;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.Ring;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfForce;
 import com.shatteredpixel.shatteredpixeldungeon.items.scrolls.Scroll;
@@ -1999,19 +2001,22 @@ public enum Talent {
 		return factor;
 	}
 
-	public static void onPotionUsed( Hero hero, int cell, float factor, Potion potion ){
+	public static void onPotionUsed(Hero hero, int cell, float factor, Potion potion) {
 		onPotionUsed(hero, cell, factor);
 
-		if (hero.hasTalent(Talent.RECYCLING) && !(potion instanceof PotionOfStrength || potion instanceof ExoticPotion || potion instanceof Elixir)) {
-			Class<?extends Pill> potionClass = Potion.PotionToPill.pills.get(potion.getClass());
-			Pill pill = Reflection.newInstance(potionClass);
-			if (pill != null) {
-				int amount = Random.IntRange(hero.pointsInTalent(Talent.RECYCLING)-1, hero.pointsInTalent(Talent.RECYCLING)); // +1: 0-1, +2: 1-2
+		if (hero.hasTalent(Talent.RECYCLING) && !(potion instanceof PotionOfStrength || potion instanceof PotionOfMastery || potion instanceof Elixir || potion instanceof Brew)) {
+			Class<? extends Potion> potClass = (potion instanceof ExoticPotion) ?
+					ExoticPotion.exoToReg.get(potion.getClass()) : potion.getClass();
+			Class<? extends Pill> pillClass = Potion.PotionToPill.pills.get(potClass);
+			int amount = hero.pointsInTalent(Talent.RECYCLING) + Random.NormalIntRange(-1, 0); // +1: 0-1, +2: 1-2
+			Pill pill = Reflection.newInstance(pillClass);
+			if (pill != null && amount > 0) {
 				pill.quantity(amount);
 				if (pill.doPickUp( Dungeon.hero )) {
-					GLog.i( Messages.get(Dungeon.hero, "you_now_have", pill.name() ));
-					hero.spend(-1);
+					GLog.i(Messages.capitalize(Messages.get(Dungeon.hero, "you_now_have", pill.name())));
+					hero.spend(-pill.pickupDelay());
 				} else {
+					GLog.n(Messages.capitalize(Messages.get(Dungeon.hero, "you_cant_have", pill.name())));
 					level.drop( pill, Dungeon.hero.pos ).sprite.drop();
 				}
 			}

@@ -204,7 +204,7 @@ public class PotionOfDragonsBreath extends ExoticPotion {
 										if (!anonymous) {
 											Catalog.countUse(PotionOfDragonsBreath.class);
 											if (Random.Float() < talentChance) {
-												Talent.onPotionUsed(curUser, curUser.pos, talentFactor);
+												Talent.onPotionUsed(curUser, curUser.pos, talentFactor, PotionOfDragonsBreath.this);
 											}
 										}
 									}
