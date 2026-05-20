@@ -302,7 +302,7 @@ public class SeedFinder {
 								Messages.get(this, "blacksmith", questType),
 								blacksmithSmithRewards);
                     } else {
-						main[logDepth] += Messages.get(this, "blacksmith_filtered", questType);
+						main[logDepth] += Messages.get(this, "blacksmith", questType);
 					}
                 } else if (logDepth == impDepth) {
 					String questType = impType ? "monks" : "golems";
@@ -427,6 +427,18 @@ public class SeedFinder {
 		}
 	}
 
+	private static void setDefaultTargets() {
+		targets = DEFAULT_TARGETS;
+		targetDepths = new ArrayList<>();
+		targetLevels = new ArrayList<>();
+		targetMatches = new ArrayList<>();
+		for (String item : DEFAULT_TARGETS) {
+			targetDepths.add(Options.floors);
+			targetLevels.add(-1);
+			targetMatches.add(false);
+		}
+	}
+
 	private static void resetMatches() {
 		targetMatches = new ArrayList<>();
 		for (String item : targets) {
@@ -522,13 +534,7 @@ public class SeedFinder {
 		time = Math.max(time, 20_148 * DAY);
 		SPDSettings.lastDaily(time);
 		Dungeon.daily = Options.searchForDaily = true;
-		targets = DEFAULT_TARGETS;
-		targetDepths = new ArrayList<>();
-		targetMatches = new ArrayList<>();
-		for (String item : DEFAULT_TARGETS) {
-			targetDepths.add(Options.floors);
-			targetMatches.add(false);
-		}
+		setDefaultTargets();
 		SeedLog log = scoutDungeon();
 		Dungeon.daily = Options.searchForDaily = false;
 		SPDSettings.lastDaily(lastDaily);
@@ -537,13 +543,7 @@ public class SeedFinder {
 
 	public static SeedLog scoutSeed(String seed) {
 		SeedFinder.loadConfig();
-		targets = DEFAULT_TARGETS;
-		targetDepths = new ArrayList<>();
-		targetMatches = new ArrayList<>();
-		for (String item : DEFAULT_TARGETS) {
-			targetDepths.add(Options.floors);
-			targetMatches.add(false);
-		}
+		setDefaultTargets();
 		SPDSettings.customSeed(seed);
 		return scoutDungeon();
 	}
@@ -585,7 +585,7 @@ public class SeedFinder {
 			switch (Dungeon.depth) {
 				case 6: case 11: case 16: case 20: case 26:
 					forSale = filterItems(forSale);
-					if (Options.checkShops && !forSale.isEmpty()) {
+					if (Options.checkShops) {
 						log.addForSale(forSale);
 					}
 			}
