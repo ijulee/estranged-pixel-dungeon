@@ -3,7 +3,7 @@
  * Copyright (C) 2012-2015 Oleg Dolya
  *
  * Shattered Pixel Dungeon
- * Copyright (C) 2014-2025 Evan Debenham
+ * Copyright (C) 2014-2026 Evan Debenham
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,6 +39,7 @@ import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.ClassArmor;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.Artifact;
 import com.shatteredpixel.shatteredpixeldungeon.items.changer.BluePrint;
+import com.shatteredpixel.shatteredpixeldungeon.items.keys.WornKey;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.Potion;
 import com.shatteredpixel.shatteredpixeldungeon.items.potions.exotic.ExoticPotion;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.Ring;
@@ -109,10 +110,12 @@ public class WndJournal extends WndTabbed {
 	private static WndJournal INSTANCE = null;
 
 
-	private static final HashSet<Class<? extends Item>> catalogShoppingRestrictedItems = new HashSet<>();
-	static {
-		catalogShoppingRestrictedItems.add(BluePrint.class);
-	}
+	private static final HashSet<Class<? extends Item>> catalogBlacklist = new HashSet<>() {
+		{
+			add(BluePrint.class);
+			add(WornKey.class);
+		}
+	};
 	
 	public WndJournal(){
 
@@ -864,17 +867,13 @@ public class WndJournal extends WndTabbed {
 						Image sprite = new ItemSprite();
 						sprite.copy(icon);
 						if (ShatteredPixelDungeon.scene() instanceof GameScene){
-							GameScene.show(new WndJournalItem(sprite, finalTitle, finalDesc));
 							if (Dungeon.hero != null
 									&& (DeviceCompat.isDebug() || Dungeon.customSeedText.contains("test"))
 									&& Item.class.isAssignableFrom(itemClass)
-									&& !catalogShoppingRestrictedItems.contains(itemClass)) {
-								Item item = (Item) Reflection.newInstance(itemClass);
-								if (item != null) {
-									if (!item.identify().doPickUp(Dungeon.hero)) {
-										Dungeon.level.drop(item, Dungeon.hero.pos).sprite.drop();
-									}
-								}
+									&& !catalogBlacklist.contains(itemClass)) {
+								GameScene.show(new WndJournalItem(sprite, finalTitle, finalDesc, (Class<Item>) itemClass));
+                            } else {
+								GameScene.show(new WndJournalItem(sprite, finalTitle, finalDesc));
 							}
 						} else {
 							ShatteredPixelDungeon.scene().addToFront(new WndJournalItem(sprite, finalTitle, finalDesc));
