@@ -124,7 +124,7 @@ public class SeedFindScene extends PixelScene {
 									new WndSeedfinderLog(
 											Icons.get(Icons.BACKPACK),
 											Messages.get(SeedFindScene.class, "result_title"),
-											result.toLogResult()) );
+											result.toLogResult(), false) );
 						} else {
 							SPDSettings.customSeed("");
 						}
@@ -151,7 +151,7 @@ public class SeedFindScene extends PixelScene {
 							SeedFindScene.this.addToFront( new WndSeedfinderLog(
 									Icons.get(Icons.BACKPACK),
 									Messages.get(SeedFindScene.class, "result_title"),
-									result.toLogResult()) );
+									result.toLogResult(), false) );
 						}
 					}
 				});
@@ -230,7 +230,7 @@ public class SeedFindScene extends PixelScene {
 				ShatteredPixelDungeon.scene().addToFront( new WndSeedfinderLog(
 						Icons.get(Icons.BACKPACK),
 						Messages.get(SeedFindScene.class, "result_title"),
-						foundSeed.result) );
+						foundSeed.result, true) );
 			});
 		});
 

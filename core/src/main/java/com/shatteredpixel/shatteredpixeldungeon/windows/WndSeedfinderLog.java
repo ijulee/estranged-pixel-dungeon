@@ -58,7 +58,7 @@ public class WndSeedfinderLog extends WndTabbed {
 
 	private final SeedfinderLogResult result;
 
-	public WndSeedfinderLog(Image icon, String title, SeedfinderLogResult result) {
+	public WndSeedfinderLog(Image icon, String title, SeedfinderLogResult result, boolean showRetry) {
 		super();
 
 		this.result = result;
@@ -106,7 +106,7 @@ public class WndSeedfinderLog extends WndTabbed {
 		btnRooms.setRect((width+GAP)/2f, titlebar.bottom() + GAP, (width-GAP)/2f, BTN_HEIGHT);
 		add( btnRooms );
 
-        text = PixelScene.renderTextBlock( SPDSettings.seedfinderFontSize() );
+		text = PixelScene.renderTextBlock( SPDSettings.seedfinderFontSize() );
 		text.text(result.main[selectedIndex]);
 		text.maxWidth( width );
 		text.setPos( titlebar.left(), btnItems.bottom() + 2*GAP );
@@ -217,7 +217,7 @@ public class WndSeedfinderLog extends WndTabbed {
 			}
 		};
 		btnRetry.setRect(0, btnUse.bottom() + GAP, width, BTN_SIZE_SMALL);
-		add(btnRetry);
+		if (showRetry) add(btnRetry);
 
 		layoutTabs();
 		select(0);
