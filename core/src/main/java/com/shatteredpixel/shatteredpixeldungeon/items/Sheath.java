@@ -340,6 +340,7 @@ public class Sheath extends Item {
                             if (Dungeon.hero.buff(DashDrawAccel.class) != null) {
                                 Dungeon.hero.buff(DashDrawAccel.class).detach();
                             }
+                            removeCross();
                             ActionIndicator.clearAction(Sheathing.this);
 
                             Dungeon.hero.spendAndNext( Dungeon.hero.attackDelay() );
