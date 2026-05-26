@@ -621,8 +621,7 @@ public class Hero extends Char {
 	public int attackSkill( Char target ) {
 		KindOfWeapon wep = belongings.attackingWeapon();
 
-		if (Sheath.isQuickDraw() ||
-			buff(UnholyBible.Demon.class) != null ||
+		if (buff(UnholyBible.Demon.class) != null ||
 			buff(MeleeWeapon.DashAttack.class) != null ||
 			(buff(BowWeapon.PenetrationShotBuff.class) != null && wep instanceof BowWeapon.Arrow)) {
 			return INFINITE_ACCURACY;
@@ -689,8 +688,16 @@ public class Hero extends Char {
 		}
 
 		if (buff(Sheath.Sheathing.class) != null && wep instanceof MeleeWeapon) {
-			accuracy *= 1.5f;
-		}
+            if (subClass == HeroSubClass.MASTER) {
+                if (pointsInTalent(Talent.ENHANCED_CRIT) >= 1 && Sheath.isSpecialDraw()) {
+                	accuracy *= 5f;
+				} else {
+                    accuracy *= 2f;
+                }
+            } else {
+                accuracy *= 1.5f;
+            }
+        }
 
 		if (!RingOfForce.fightingUnarmed(this)) {
 			return Math.max(1, Math.round(attackSkill * accuracy * wep.accuracyFactor( this, target )));
@@ -1971,9 +1978,13 @@ public class Hero extends Char {
 
 			if (buff(Sheath.Sheathing.class) != null &&
 					(wep instanceof MeleeWeapon || wep instanceof SwordAura.Aura)) {
-				if (buff(Sheath.QuickDrawTracker.class) != null || testQuickDraw) {
-					chance *= 1.4f + 0.2f * pointsInTalent(Talent.ENHANCED_CRIT);
-				} else {
+				if (subClass == HeroSubClass.MASTER) {
+                    if (pointsInTalent(Talent.ENHANCED_CRIT) >= 2 && Sheath.isSpecialDraw()) {
+						chance *= 1.75f;
+                    } else {
+                        chance *= 1.5f;
+                    }
+                } else {
 					chance *= 1.2f;
 				}
 				chance += 0.05f + 0.1f * pointsInTalent(Talent.UNEXPECTED_SLASH);
@@ -2008,8 +2019,9 @@ public class Hero extends Char {
 			multi += 0.1f * pointsInTalent(Talent.POWERFUL_CRIT);
 		}
 
-		if (buff(Sheath.QuickDrawTracker.class) != null) {
-			multi += 0.15f * pointsInTalent(Talent.POWERFUL_SLASH);
+		if (Sheath.isSpecialDraw()) {
+			//TODO Swordmaster talent increase special draw damage
+			//multi += 0.15f * pointsInTalent(Talent.POWERFUL_SLASH);
 		}
 
 		return Math.round(critDmg * multi);
@@ -2241,6 +2253,16 @@ public class Hero extends Char {
 					}
 				}
 				break;
+
+			case MASTER:
+				if (buff(Sheath.QuickDrawTracker.class) != null) {
+					damage = Math.round(damage * 0.6f);
+				}
+				if (pointsInTalent(Talent.ENHANCED_CRIT) > 2 && Sheath.isSpecialDraw()) {
+					Buff.affect(this, GreaterHaste.class).set(2);
+				}
+				break;
+
 			case SLAYER:
 				if (Awakening.isAwakened(this)) {
 					if (hasTalent(Talent.STABLE_BARRIER)) {
@@ -3378,6 +3400,7 @@ public class Hero extends Char {
 				|| (attackTarget instanceof Mimic && attackTarget.alignment == Alignment.NEUTRAL);
 
 		if (Sheath.isQuickDraw()) {
+			sprite.showStatus( CharSprite.NEUTRAL, Messages.titleCase(Messages.get(Sheath.Sheathing.class, "quick_draw_name")) );
 			Buff.affect(this, Sheath.QuickDrawTracker.class);
 		}
 
@@ -3419,7 +3442,7 @@ public class Hero extends Char {
 		if (buff(Sheath.QuickDrawTracker.class) != null) {
 			buff(Sheath.QuickDrawTracker.class).detach();
 			if (crit == null) {
-				Buff.prolong(this, Sheath.QuickDrawCooldown.class, (30 - 5 * pointsInTalent(Talent.STATIC_PREPARATION)));
+				Buff.prolong(this, Sheath.QuickDrawCooldown.class, Sheath.QuickDrawCooldown.DURATION);
 			}
 		}
 
