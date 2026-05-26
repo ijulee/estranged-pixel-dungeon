@@ -265,7 +265,7 @@ public enum Catalog {
 
 		TRINKETS.addItems(Generator.Category.TRINKET.classes);
 
-		MISC_EQUIPMENT.addItems(BrokenSeal.class, KnightsShield.class, DeathSword.class, Saddle.class, Rosary.class,
+		MISC_EQUIPMENT.addItems(BrokenSeal.class, KnightsShield.class, Saddle.class, Rosary.class,
 				SpiritBow.class, WindBow.class, TacticalBow.class, GoldenBow.class, NaturesBow.class, CorrosiveBow.class, ElectricBow.class, MagicalBow.class, PhaseBow.class,
 				Sheath.class, GammaRayGun.class,
 				Waterskin.class, VelvetPouch.class, PotionBandolier.class, ScrollHolder.class, MagicalHolster.class,
