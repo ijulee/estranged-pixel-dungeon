@@ -536,21 +536,21 @@ public enum Talent {
 	//Samurai T3
 	QUICK_SHEATHING				(11, 7, 3),
 	LETHAL_POWER				(12, 7, 3),
-	//Slasher T3
+	//Auraslasher T3
 	MIND_FOCUSING				(13, 7, 3),
 	STORED_POWER				(14, 7, 3),
 	ARCANE_POWER				(15, 7, 3),
 	ENERGY_COLLECT				(16, 7, 3),
 	ENERGY_SAVING				(17, 7, 3),
 	WIND_BLAST					(18, 7, 3),
-	//Master T3
+	//Swordaster T3
 	ENHANCED_CRIT				(19, 7, 3),
 	POWERFUL_SLASH				(20, 7, 3),
 	STATIC_PREPARATION			(21, 7, 3),
 	ACCELERATION				(22, 7, 3),
 	INNER_EYE					(23, 7, 3),
 	DYNAMIC_PREPARATION			(24, 7, 3),
-	//Slayer T3
+	//Demonslayer T3
 	FASTER_THAN_LIGHT			(25, 7, 3),
 	AFTERIMAGE					(26, 7, 3),
 	QUICK_RECOVER				(27, 7, 3),
