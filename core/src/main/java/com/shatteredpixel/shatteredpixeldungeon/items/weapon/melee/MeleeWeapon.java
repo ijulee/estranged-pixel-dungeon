@@ -40,6 +40,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.HolyWeapon;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Blacksmith;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.FloatingText;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
@@ -58,7 +59,6 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.bow.SpiritBow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.bow.BowWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.gun.Gun;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWeapon;
-import com.shatteredpixel.shatteredpixeldungeon.levels.Level;
 import com.shatteredpixel.shatteredpixeldungeon.levels.Terrain;
 import com.shatteredpixel.shatteredpixeldungeon.levels.features.Door;
 import com.shatteredpixel.shatteredpixeldungeon.mechanics.Ballistica;
@@ -118,10 +118,15 @@ public class MeleeWeapon extends Weapon {
 		if (isEquipped(hero) && hero.heroClass == HeroClass.DUELIST){
 			actions.add(AC_ABILITY);
 		}
-		if (!isEquipped(hero) && (hero.heroClass == HeroClass.GUNNER || hero.heroClass == HeroClass.ARCHER) && !(this instanceof Pickaxe)) {
+		if (!isEquipped(hero) && canScrap(this, hero)) {
 			actions.add(AC_SCRAP);
 		}
 		return actions;
+	}
+
+	private static boolean canScrap(MeleeWeapon weapon, Hero hero) {
+		return (hero.heroClass == HeroClass.GUNNER || hero.heroClass == HeroClass.ARCHER) &&
+				!((weapon instanceof Pickaxe && Blacksmith.Quest.completed()) || weapon instanceof MagesStaff || weapon instanceof Machete || weapon instanceof Shovel || weapon instanceof DeathSword);
 	}
 
 	@Override
