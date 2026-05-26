@@ -106,6 +106,11 @@ public class Sheath extends Item {
                 Dungeon.hero.buff(DashDrawTracker.class) == null;
     }
 
+    public static boolean isSpecialDraw() {
+        return Dungeon.hero.buff(QuickDrawTracker.class) != null ||
+                Dungeon.hero.buff(DashDrawTracker.class) != null;
+    }
+
     public static class Sheathing extends TargetingAction {
         {
             type = buffType.POSITIVE;
@@ -249,8 +254,8 @@ public class Sheath extends Item {
             return Messages.get(this, "name");
         }
 
-        public int blinkDistance(){
-            return 500;
+        public int blinkDistance() {
+            return 4; //TODO increase dist with talent
         }
 
         private final CellSelector.Listener attack = new CellSelector.Listener() {
@@ -335,8 +340,7 @@ public class Sheath extends Item {
                             Sample.INSTANCE.play( Assets.Sounds.MISS );
 
                             GLog.w(Messages.get(Sheathing.class, "no_target"));
-                            Buff.prolong(Dungeon.hero, DashDrawCooldown.class,
-                                    (100 - 10 * Dungeon.hero.pointsInTalent(Talent.DYNAMIC_PREPARATION)));
+                            Buff.prolong(Dungeon.hero, DashDrawCooldown.class, DashDrawCooldown.DURATION);
                             if (Dungeon.hero.buff(DashDrawAccel.class) != null) {
                                 Dungeon.hero.buff(DashDrawAccel.class).detach();
                             }
@@ -418,15 +422,17 @@ public class Sheath extends Item {
     public static class QuickDrawTracker extends Buff {}
 
     public static class QuickDrawCooldown extends FlavourBuff{
+        public static final float DURATION = 30f;
         public int icon() { return BuffIndicator.TIME; }
         public void tintIcon(Image icon) { icon.hardlight(0x586EDB); }
-        public float iconFadePercent() { return Math.max(0, visualcooldown() / 30); }
+        public float iconFadePercent() { return Math.max(0, 1 - visualcooldown() / DURATION); }
     }
 
-    public static class DashDrawCooldown extends FlavourBuff{
+    public static class DashDrawCooldown extends FlavourBuff {
+        public static final float DURATION = 80f;
         public int icon() { return BuffIndicator.TIME; }
         public void tintIcon(Image icon) { icon.hardlight(0xFF7F00); }
-        public float iconFadePercent() { return Math.max(0, visualcooldown() / 100); }
+        public float iconFadePercent() { return Math.max(0, 1 - visualcooldown() / DURATION); }
     }
 
     public static class DashDrawTracker extends Buff {}
