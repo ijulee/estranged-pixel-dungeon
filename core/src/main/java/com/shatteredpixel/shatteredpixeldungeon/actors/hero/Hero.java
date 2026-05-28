@@ -2258,9 +2258,12 @@ public class Hero extends Char {
 				if (buff(Sheath.QuickDrawTracker.class) != null) {
 					damage = Math.round(damage * 0.6f);
 				}
-				if (pointsInTalent(Talent.ENHANCED_CRIT) > 2 && Sheath.isSpecialDraw()) {
-					Buff.affect(this, GreaterHaste.class).set(2);
+                if (Sheath.isSpecialDraw()) {
+					if (hasTalent(Talent.POWERFUL_SLASH)) {
+						damage = Math.round(damage * (1+pointsInTalent(Talent.POWERFUL_SLASH)/6f));
+					}
 				}
+
 				break;
 
 			case SLAYER:

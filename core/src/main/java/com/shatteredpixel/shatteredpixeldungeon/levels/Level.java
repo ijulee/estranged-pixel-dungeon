@@ -1523,8 +1523,8 @@ public abstract class Level implements Bundlable {
 					mindVisRange = Math.max(mindVisRange, 1 + ((Hero) c).pointsInTalent(Talent.TACTICAL_SIGHT));
 				}
 
-				if (((Hero) c).hasTalent(Talent.INNER_EYE) && c.buff(Sheath.DashDrawVision.class) != null) {
-					mindVisRange = Math.max(mindVisRange, 3 * ((Hero) c).pointsInTalent(Talent.INNER_EYE));
+				if (((Hero) c).hasTalent(Talent.ACCELERATION) && c.buff(Talent.DashDrawVision.class) != null) {
+					mindVisRange = Math.max(mindVisRange, 4 + 2 * ((Hero) c).pointsInTalent(Talent.ACCELERATION));
 				}
 
 				mindVisRange = Math.max(mindVisRange, EyeOfNewt.mindVisionRange());

@@ -48,6 +48,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Statue;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.MirrorImage;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.KindOfWeapon;
+import com.shatteredpixel.shatteredpixeldungeon.items.Sheath;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.DriedRose;
 import com.shatteredpixel.shatteredpixeldungeon.items.bags.Bag;
 import com.shatteredpixel.shatteredpixeldungeon.items.rings.RingOfArcana;
@@ -632,7 +633,7 @@ abstract public class Weapon extends KindOfWeapon {
 
 			if (attacker instanceof DriedRose.GhostHero) {
 				Weapon wep = ((DriedRose.GhostHero) attacker).attackingWeapon();
-                if (wep instanceof Gun.Bullet) {
+				if (wep instanceof Gun.Bullet) {
                     multi *= ((Gun.Bullet) wep).enchantMod().enchantFactor();
                 }
 				if (wep instanceof TrueRunicBlade) {
@@ -688,6 +689,11 @@ abstract public class Weapon extends KindOfWeapon {
 					Dungeon.hero.belongings.attackingWeapon() instanceof SwordAura.Aura &&
 					Dungeon.hero.pointsInTalent(Talent.ARCANE_POWER) == 3) {
 				multi += 0.5f;
+			}
+
+			if (attacker.buff(Sheath.QuickDrawTracker.class) != null &&
+				Dungeon.hero.hasTalent(Talent.STATIC_PREPARATION)) {
+				multi += 0.5f * Dungeon.hero.pointsInTalent(Talent.STATIC_PREPARATION);
 			}
 
 			return multi;

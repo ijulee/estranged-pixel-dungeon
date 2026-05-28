@@ -63,8 +63,12 @@ public class Sheath extends Item {
             if (hero.belongings.weapon() instanceof MeleeWeapon) {
                 if (hero.buff(Sheathing.class) == null) {
                     Buff.affect(hero, Sheathing.class);
+                    Talent.DrawingMasteryTracker mastery;
                     if (hero.buff(Talent.LethalFocusTracker.class) != null) {
                         hero.buff(Talent.LethalFocusTracker.class).detach();
+                    } else if ((mastery = hero.buff(Talent.DrawingMasteryTracker.class)) != null &&
+                        mastery.ready()) {
+                        mastery.resetCooldown();
                     } else if (hero.buff(Talent.PreparedMealTracker.class) != null) {
                         hero.buff(Talent.PreparedMealTracker.class).use();
                     } else {
@@ -255,7 +259,8 @@ public class Sheath extends Item {
         }
 
         public int blinkDistance() {
-            return 4; //TODO increase dist with talent
+            //4/6/8/10 tiles
+            return 4+2*Dungeon.hero.pointsInTalent(Talent.ACCELERATION);
         }
 
         private final CellSelector.Listener attack = new CellSelector.Listener() {
@@ -329,9 +334,6 @@ public class Sheath extends Item {
                             Sample.INSTANCE.play( Assets.Sounds.PUFF );
 
                             Buff.affect(Dungeon.hero, DashDrawTracker.class);
-                            if (Dungeon.hero.hasTalent(Talent.INNER_EYE)) {
-                                Buff.affect(Dungeon.hero, DashDrawVision.class, 2f);
-                            }
 
                             Dungeon.hero.curAction = new HeroAction.Attack(enemy);
                             Dungeon.hero.next();
@@ -436,15 +438,6 @@ public class Sheath extends Item {
     }
 
     public static class DashDrawTracker extends Buff {}
-
-    public static class DashDrawVision extends FlavourBuff {
-        @Override
-        public void detach() {
-            super.detach();
-            Dungeon.observe();
-            GameScene.updateFog();
-        }
-    }
 
     public static class DashDrawAccel extends FlavourBuff {
         {

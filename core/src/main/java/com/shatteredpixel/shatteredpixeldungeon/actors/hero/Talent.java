@@ -1281,6 +1281,53 @@ public enum Talent {
 		}
 	}
 
+	//Swordmaster
+	public static class DashDrawVision extends FlavourBuff {
+		public static final float DURATION = 3f;
+
+		@Override
+		public void detach() {
+			super.detach();
+			Dungeon.observe();
+			GameScene.updateFog();
+		}
+	}
+
+	public static class DrawingMasteryTracker extends Buff {
+		{
+			actPriority = HERO_PRIO;
+			announced = true;
+		}
+		public static final float MAX_COOLDOWN = 100f;
+
+		@Override
+		public int icon() {
+            if (ready()) {
+                return BuffIndicator.TIME;
+            } else {
+				return BuffIndicator.NONE;
+			}
+        }
+
+		@Override
+		public void tintIcon(Image icon) {
+			icon.hardlight(0xC21313);
+		}
+
+		public boolean ready() {
+			return cooldown() > MAX_COOLDOWN;
+		}
+
+		public void resetCooldown() {
+			timeToNow();
+			postpone(maxCooldown());
+		}
+
+		static public float maxCooldown() {
+			return MAX_COOLDOWN - 20f * Dungeon.hero.pointsInTalent(INNER_EYE);
+		}
+	}
+
 	//Knight 1-1
 	public static class ArmorEmpower extends Buff {
 
@@ -1683,6 +1730,11 @@ public enum Talent {
         if (talent == MASTERS_INTUITION && hero.belongings.weapon() instanceof MeleeWeapon && !(hero.belongings.weapon() instanceof Gun) &&
 				!ShardOfOblivion.passiveIDDisabled()) {
             hero.belongings.weapon().identify();
+        }
+
+		if (talent == INNER_EYE) {
+			DrawingMasteryTracker mastery = Buff.affect(hero, DrawingMasteryTracker.class);
+			if (!mastery.ready()) mastery.resetCooldown();
 		}
 
 		//knight
@@ -2345,6 +2397,14 @@ public enum Talent {
             }
             Buff.affect(enemy, DrawEnhanceMetaTracker.class);
         }
+
+		//swordmaster
+		if (hero.pointsInTalent(ENHANCED_CRIT) > 2 && Sheath.isSpecialDraw()) {
+			Buff.affect(hero, GreaterHaste.class).set(2);
+		}
+
+		if (hero.hasTalent(ACCELERATION) && hero.buff(Sheath.DashDrawTracker.class) != null) {
+			Buff.prolong(hero, DashDrawVision.class, DashDrawVision.DURATION);
 		}
 
 		//huntress
@@ -2562,13 +2622,6 @@ public enum Talent {
             Buff.affect(enemy, RadioactiveMutation.class).set(6 - hero.pointsInTalent(RADIATION));
         }
 
-		if (hero.buff(Sheath.DashDrawTracker.class) != null) {
-			if (hero.hasTalent(Talent.ACCELERATION)) {
-				Sheath.DashDrawAccel buff = Buff.prolong(hero, Sheath.DashDrawAccel.class, Sheath.DashDrawAccel.DURATION);
-				dmg = Math.round(dmg*buff.getDmgMulti());
-				buff.hit();
-			}
-			// detach after attack delay in onAttackComplete()
 		//medic armor
 		HealingGenerator.RegenBuff regenBuff = hero.buff(HealingGenerator.RegenBuff.class);
 		if (regenBuff != null) {
