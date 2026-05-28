@@ -75,6 +75,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.medic.Heal
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.DivineSense;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.PowerOfLife;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.RecallInscription;
+import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mimic;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Mob;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.building.WatchTower;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
@@ -1171,6 +1172,7 @@ public enum Talent {
 		public String toString() { return Messages.get(this, "name"); }
 		public String desc() { return Messages.get(this, "desc", dispTurns(visualcooldown())); }
 	};
+
 	//1-5
 	public static class KineticAttackTracker extends FlavourBuff {
 		{ type = buffType.POSITIVE; }
@@ -1275,7 +1277,7 @@ public enum Talent {
 
 		@Override
 		public float iconFadePercent() {
-			return 1-visualcooldown()/(5*Dungeon.hero.pointsInTalent(Talent.QUICK_SHEATHING));
+			return 1-visualcooldown()/(5*Dungeon.hero.pointsInTalent(QUICK_SHEATHING));
 		}
 	}
 
@@ -1298,7 +1300,7 @@ public enum Talent {
 
 		@Override
 		public float iconFadePercent() {
-			float max = 1 + hero.pointsInTalent(Talent.TOUGH_MEAL);
+			float max = 1 + hero.pointsInTalent(TOUGH_MEAL);
 			return Math.max(0, (max-left) / max);
 		}
 
@@ -1570,7 +1572,7 @@ public enum Talent {
 
 	public static void onTalentUpgraded( Hero hero, Talent talent ){
 		//universal
-		if (talent == BETTER_CHOICE){
+		if (talent == BETTER_CHOICE) {
 			redeemBetterChoice(hero);
 		}
 
@@ -1639,8 +1641,9 @@ public enum Talent {
 			Dungeon.observe();
 		}
 
-		if (talent == TWIN_UPGRADES || talent == DESPERATE_POWER
-				|| talent == STRONGMAN || talent == DURABLE_PROJECTILES || talent == ACCUMULATION){
+		if (talent == TWIN_UPGRADES || talent == DESPERATE_POWER ||
+				talent == STRONGMAN || talent == DURABLE_PROJECTILES ||
+				talent == ACCUMULATION || talent == LARGER_MAGAZINE) {
 			Item.updateQuickslot();
 		}
 
@@ -1671,19 +1674,15 @@ public enum Talent {
 		}
 
 		//gunner
-		if ((talent == GUNNERS_INTUITION && hero.belongings.weapon instanceof Gun) && !ShardOfOblivion.passiveIDDisabled()){
-			hero.belongings.weapon.identify();
-		}
-
-		if (talent == LARGER_MAGAZINE) {
-			Item.updateQuickslot();
+		if (talent == GUNNERS_INTUITION && hero.belongings.weapon() instanceof Gun &&
+				!ShardOfOblivion.passiveIDDisabled()){
+			hero.belongings.weapon().identify();
 		}
 
 		//samurai
-		if (talent == MASTERS_INTUITION) {
-			if (hero.belongings.weapon instanceof MeleeWeapon && !(hero.belongings.weapon instanceof Gun) && !ShardOfOblivion.passiveIDDisabled()) {
-				hero.belongings.weapon.identify();
-			}
+        if (talent == MASTERS_INTUITION && hero.belongings.weapon() instanceof MeleeWeapon && !(hero.belongings.weapon() instanceof Gun) &&
+				!ShardOfOblivion.passiveIDDisabled()) {
+            hero.belongings.weapon().identify();
 		}
 
 		//knight
@@ -1714,7 +1713,7 @@ public enum Talent {
 		//archer
 		if (talent == MAKESHIFT_BOW && hero.heroClass == HeroClass.ARCHER) {
 			BowWeapon bow = null;
-			switch (hero.pointsInTalent(Talent.MAKESHIFT_BOW)) {
+			switch (hero.pointsInTalent(MAKESHIFT_BOW)) {
 				case 0: default:
 					break;
 				case 1:
@@ -1731,7 +1730,7 @@ public enum Talent {
 				bow.identify();
 				if (bow.doPickUp(Dungeon.hero)) {
 					GLog.i(Messages.get(Dungeon.hero, "you_now_have", bow.name()));
-					hero.spend(-1);
+					hero.spend(-bow.pickupDelay());
 				} else {
 					level.drop(bow, Dungeon.hero.pos).sprite.drop();
 				}
@@ -1743,7 +1742,7 @@ public enum Talent {
 			bow.identify();
 			if (bow.doPickUp(Dungeon.hero)) {
 				GLog.i(Messages.get(Dungeon.hero, "you_now_have", bow.name()));
-				hero.spend(-1);
+				hero.spend(-bow.pickupDelay());
 			} else {
 				level.drop(bow, Dungeon.hero.pos).sprite.drop();
 			}
@@ -1891,11 +1890,11 @@ public enum Talent {
 			SpellSprite.show(hero, SpellSprite.CHARGE, 0, 1, 1);
 		}
 
-		if (hero.hasTalent(Talent.RELOADING_MEAL)) {
+		if (hero.hasTalent(RELOADING_MEAL)) {
 			KindOfWeapon wep = hero.belongings.weapon();
 			if (wep instanceof Gun) {
 				((Gun) wep).quickReload();
-				if (hero.pointsInTalent(Talent.RELOADING_MEAL) > 1) {
+				if (hero.pointsInTalent(RELOADING_MEAL) > 1) {
 					((Gun) wep).manualReload(1, true);
 				}
 			}
@@ -1903,26 +1902,26 @@ public enum Talent {
 			KindOfWeapon wep2 = hero.belongings.secondWep();
 			if (wep2 instanceof Gun) {
 				((Gun) wep2).quickReload();
-				if (hero.pointsInTalent(Talent.RELOADING_MEAL) > 1) {
+				if (hero.pointsInTalent(RELOADING_MEAL) > 1) {
 					((Gun) wep2).manualReload(1, true);
 				}
 			}
 		}
 
-		if (hero.hasTalent(Talent.INFINITE_BULLET_MEAL)) {
-			Buff.affect(hero, InfiniteBullet.class, 1+hero.pointsInTalent(Talent.INFINITE_BULLET_MEAL));
+		if (hero.hasTalent(INFINITE_BULLET_MEAL)) {
+			Buff.affect(hero, InfiniteBullet.class, 1+hero.pointsInTalent(INFINITE_BULLET_MEAL));
 		}
 
 		if (hero.hasTalent(PREPARED_MEAL)) {
 			Buff.affect(hero, PreparedMealTracker.class).set(1+hero.pointsInTalent(PREPARED_MEAL));
 		}
 
-		if (hero.hasTalent(Talent.CRITICAL_MEAL)) {
-			Buff.affect(hero, Sheath.CertainCrit.class).set(1+hero.pointsInTalent(Talent.CRITICAL_MEAL));
+		if (hero.hasTalent(CRITICAL_MEAL)) {
+			Buff.affect(hero, Sheath.CertainCrit.class).set(1+hero.pointsInTalent(CRITICAL_MEAL));
 		}
 
-		if (hero.hasTalent(Talent.NATURES_MEAL)) {
-			int[] cells = (hero.pointsInTalent(Talent.NATURES_MEAL) == 1) ? PathFinder.NEIGHBOURS4 : PathFinder.NEIGHBOURS8;
+		if (hero.hasTalent(NATURES_MEAL)) {
+			int[] cells = (hero.pointsInTalent(NATURES_MEAL) == 1) ? PathFinder.NEIGHBOURS4 : PathFinder.NEIGHBOURS8;
 			for (int i : cells) {
 				int c = level.map[hero.pos + i];
 				if (c == Terrain.EMPTY || c == Terrain.EMPTY_DECO
@@ -1934,15 +1933,15 @@ public enum Talent {
 			}
 		}
 
-		if (hero.hasTalent(Talent.TOUGH_MEAL)) {
-			Buff.affect(hero, ArmorEmpower.class).set(3, 1+hero.pointsInTalent(Talent.TOUGH_MEAL));
+		if (hero.hasTalent(TOUGH_MEAL)) {
+			Buff.affect(hero, ArmorEmpower.class).set(3, 1+hero.pointsInTalent(TOUGH_MEAL));
 		}
 
-		if (hero.hasTalent(Talent.IMPREGNABLE_MEAL)) {
-			Buff.affect(hero, ArmorEnhance.class).set(hero.pointsInTalent(Talent.IMPREGNABLE_MEAL), 3);
+		if (hero.hasTalent(IMPREGNABLE_MEAL)) {
+			Buff.affect(hero, ArmorEnhance.class).set(hero.pointsInTalent(IMPREGNABLE_MEAL), 3);
 		}
 
-		if (hero.hasTalent(Talent.HEALING_MEAL)) {
+		if (hero.hasTalent(HEALING_MEAL)) {
 			if (hero.isHeroDebuffed()) {
 				boolean removed = false;
 				for (Buff b : hero.buffs()) {
@@ -1954,18 +1953,18 @@ public enum Talent {
 				if (removed)
 					new Flare( 6, 32 ).color(0xFF4CD2, true).show( hero.sprite, 2f );
 			} else {
-				if (hero.pointsInTalent(Talent.HEALING_MEAL) > 1) {
+				if (hero.pointsInTalent(HEALING_MEAL) > 1) {
 					hero.heal(3);
 				}
 			}
 		}
 
-		if (hero.hasTalent(Talent.FORCE_SAVING)) {
+		if (hero.hasTalent(FORCE_SAVING)) {
 			Buff.affect(hero, ForceSavingTracker.class);
 		}
 
-		if (hero.hasTalent(Talent.FIGHTING_MEAL)) {
-			Buff.affect(hero, Adrenaline.class, 1+hero.pointsInTalent(Talent.FIGHTING_MEAL));
+		if (hero.hasTalent(FIGHTING_MEAL)) {
+			Buff.affect(hero, Adrenaline.class, 1+hero.pointsInTalent(FIGHTING_MEAL));
 		}
 	}
 
@@ -2004,11 +2003,11 @@ public enum Talent {
 	public static void onPotionUsed(Hero hero, int cell, float factor, Potion potion) {
 		onPotionUsed(hero, cell, factor);
 
-		if (hero.hasTalent(Talent.RECYCLING) && !(potion instanceof PotionOfStrength || potion instanceof PotionOfMastery || potion instanceof Elixir || potion instanceof Brew)) {
+		if (hero.hasTalent(RECYCLING) && !(potion instanceof PotionOfStrength || potion instanceof PotionOfMastery || potion instanceof Elixir || potion instanceof Brew)) {
 			Class<? extends Potion> potClass = (potion instanceof ExoticPotion) ?
 					ExoticPotion.exoToReg.get(potion.getClass()) : potion.getClass();
 			Class<? extends Pill> pillClass = Potion.PotionToPill.pills.get(potClass);
-			int amount = hero.pointsInTalent(Talent.RECYCLING) + Random.NormalIntRange(-1, 0); // +1: 0-1, +2: 1-2
+			int amount = hero.pointsInTalent(RECYCLING) + Random.NormalIntRange(-1, 0); // +1: 0-1, +2: 1-2
 			Pill pill = Reflection.newInstance(pillClass);
 			if (pill != null && amount > 0) {
 				pill.quantity(amount);
@@ -2094,27 +2093,32 @@ public enum Talent {
 			Buff.affect(hero, Invisibility.class, factor * (1 + 2*hero.pointsInTalent(INSCRIBED_STEALTH)));
 			Sample.INSTANCE.play( Assets.Sounds.MELD );
 		}
-		if (hero.hasTalent(Talent.MAGIC_RUSH)) {
+
+		if (hero.hasTalent(MAGIC_RUSH)) {
 			MagesStaff staff = hero.belongings.getItem(MagesStaff.class);
 			if (staff != null) {
-				staff.gainCharge(factor * hero.pointsInTalent(Talent.MAGIC_RUSH), false);
+				staff.gainCharge(factor * hero.pointsInTalent(MAGIC_RUSH), false);
 				ScrollOfRecharging.charge(hero);
 			}
 		}
-		if (hero.hasTalent(Talent.INSCRIBED_BULLET)) {
+
+		if (hero.hasTalent(INSCRIBED_BULLET)) {
 			//collects 5/10 bullet
 			BulletItem bulletItem = new BulletItem();
-			bulletItem.quantity((int)(factor * 5 * hero.pointsInTalent(Talent.INSCRIBED_BULLET)));
+			bulletItem.quantity((int)(factor * 5 * hero.pointsInTalent(INSCRIBED_BULLET)));
 			bulletItem.doPickUp(hero);
 		}
-		if (hero.hasTalent(Talent.INSCRIBED_LETHALITY)) {
+
+		if (hero.hasTalent(INSCRIBED_LETHALITY)) {
 			Buff.affect(hero, Sheath.CertainCrit.class).set(
-					(int) (factor * (1+hero.pointsInTalent(Talent.INSCRIBED_LETHALITY))));
+					(int) (factor * (1+hero.pointsInTalent(INSCRIBED_LETHALITY))));
 		}
-		if (hero.hasTalent(Talent.SMITHING_SPELL)) {
-			Buff.affect(hero, WeaponEnhance.class).set(hero.pointsInTalent(Talent.SMITHING_SPELL), Math.round(10*factor));
-			Buff.affect(hero, ArmorEnhance.class).set(hero.pointsInTalent(Talent.SMITHING_SPELL), Math.round(10*factor));
+
+		if (hero.hasTalent(SMITHING_SPELL)) {
+			Buff.affect(hero, WeaponEnhance.class).set(hero.pointsInTalent(SMITHING_SPELL), Math.round(10*factor));
+			Buff.affect(hero, ArmorEnhance.class).set(hero.pointsInTalent(SMITHING_SPELL), Math.round(10*factor));
 		}
+
 		if (hero.hasTalent(RECALL_INSCRIPTION) && Scroll.class.isAssignableFrom(cls) && cls != ScrollOfUpgrade.class){
 			if (hero.heroClass == HeroClass.CLERIC){
 				Buff.prolong(hero, RecallInscription.UsedItemTracker.class, hero.pointsInTalent(RECALL_INSCRIPTION) == 2 ? 300 : 10).item = cls;
@@ -2260,6 +2264,7 @@ public enum Talent {
 			wep = hero.belongings.attackingWeapon();
 		}
 
+		//FIXME move to Hero.attackProc()
 		if (hero.buff(MeleeWeapon.DashAttack.class) != null) {
 			dmg = Math.round(dmg * hero.buff(MeleeWeapon.DashAttack.class).getDmgMulti());
 			hero.buff(MeleeWeapon.DashAttack.class).detach();
@@ -2323,113 +2328,136 @@ public enum Talent {
 			}
 		}
 
+		//archer
 		if (hero.hasTalent(FOLLOWUP_SHOOT) && enemy.alignment == Char.Alignment.ENEMY) {
-			if (!(hero.belongings.attackingWeapon() instanceof MissileWeapon)) {
+			if (!(wep instanceof MissileWeapon)) {
 				Buff.prolong(hero, FollowupShootTracker.class, 5f).object = enemy.id();
-			} else if (hero.buff(FollowupShootTracker.class) != null
-					&& hero.buff(FollowupShootTracker.class).object == enemy.id()){
+			} else if (hero.buff(FollowupShootTracker.class) != null &&
+					hero.buff(FollowupShootTracker.class).object == enemy.id()){
 				dmg = Math.round(dmg * (1.0f + .1f*hero.pointsInTalent(FOLLOWUP_SHOOT)));
 			}
 		}
 
-		if (hero.buff(Sheath.Sheathing.class) != null && hero.hasTalent(DRAWING_ENHANCE)) {
-			dmg += 1+hero.pointsInTalent(DRAWING_ENHANCE);
+		//samurai
+        if (hero.hasTalent(DRAWING_ENHANCE) && enemy.buff(DrawEnhanceMetaTracker.class) == null) {
+            if (hero.heroClass == HeroClass.SAMURAI) {
+                if (hero.buff(Sheath.Sheathing.class) != null) {
+                    dmg += 1 + hero.pointsInTalent(DRAWING_ENHANCE);
+                }
+            } else {
+                dmg += Random.IntRange(hero.pointsInTalent(DRAWING_ENHANCE), 2);
+            }
+            Buff.affect(enemy, DrawEnhanceMetaTracker.class);
+        }
 		}
 
-		if (hero.heroClass != HeroClass.SAMURAI && hero.hasTalent(DRAWING_ENHANCE) && enemy.buff(DrawEnhanceMetaTracker.class) == null ) {
-			dmg += Hero.heroDamageIntRange(hero.pointsInTalent(Talent.DRAWING_ENHANCE), 2);
-			Buff.affect(enemy, DrawEnhanceMetaTracker.class);
-		}
-
-		if (hero.hasTalent(Talent.WATER_FRIENDLY) && level.map[hero.pos] == Terrain.WATER) {
-			dmg += Hero.heroDamageIntRange(1, hero.pointsInTalent(Talent.WATER_FRIENDLY));
+		//huntress
+		if (hero.hasTalent(WATER_FRIENDLY) && level.map[hero.pos] == Terrain.WATER) {
+			dmg += Random.IntRange(1, hero.pointsInTalent(WATER_FRIENDLY));
 			Sample.INSTANCE.play(Assets.Sounds.HIT_STRONG);
 		}
 
+		//duelist
 		if (hero.buff(SkilledHandTracker.class) != null) {
-			dmg += 1+hero.pointsInTalent(Talent.SKILLED_HAND);
+			dmg += 1+hero.pointsInTalent(SKILLED_HAND);
 			hero.buff(SkilledHandTracker.class).detach();
 			Sample.INSTANCE.play(Assets.Sounds.HIT_STRONG);
 		}
 
-		if (hero.hasTalent(Talent.SKILLED_HAND) && hero.heroClass != HeroClass.DUELIST) {
-            dmg += Random.NormalIntRange(0, 1+hero.pointsInTalent(Talent.SKILLED_HAND));
+		if (hero.hasTalent(SKILLED_HAND) && hero.heroClass != HeroClass.DUELIST) {
+            dmg += Random.NormalIntRange(0, 1+hero.pointsInTalent(SKILLED_HAND));
 		}
 
-		if (hero.buff(KineticBattle.class) != null) {
-            dmg = hero.buff(KineticBattle.class).proc(dmg);
+		//adventurer
+		if (hero.hasTalent(PROTECTIVE_SLASH)
+				&& hero.buff(ProtectiveSlashCooldown.class) == null
+				&& !level.adjacent(hero.pos, enemy.pos)) {
+			Buff.affect(hero, Barrier.class).setShield(1+2*Dungeon.hero.pointsInTalent(PROTECTIVE_SLASH));
+			Buff.affect(hero, ProtectiveSlashCooldown.class, 10);
 		}
 
-		if (hero.hasTalent(Talent.TACKLE) && level.adjacent(enemy.pos, hero. pos) && hero.belongings.armor != null && (hero.belongings.attackingWeapon() instanceof MeleeWeapon || (hero.belongings.attackingWeapon() == null))) {
-            dmg += Math.round(hero.belongings.armor.DRMax()*0.05f*hero.pointsInTalent(Talent.TACKLE));
+		if (hero.buff(KineticAttackTracker.class) != null) {
+			dmg += Hero.heroDamageIntRange(hero.pointsInTalent(KINETIC_ATTACK), 2); //1~2 at +1, 2 at +2
+			Sample.INSTANCE.play(Assets.Sounds.HIT_STRONG);
+			hero.buff(KineticAttackTracker.class).detach();
 		}
 
-		//attacking procs
-		if (hero.hasTalent(SPEEDY_MOVE) && enemy instanceof Mob && enemy.buff(SpeedyMoveTracker.class) == null){
-			Buff.affect(enemy, SpeedyMoveTracker.class);
-			Buff.affect(hero, GreaterHaste.class).set(2 + hero.pointsInTalent(SPEEDY_MOVE));
-		}
-
-		if (enemy instanceof Mob && ((Mob) enemy).surprisedBy(hero)) {
-			if (hero.hasTalent(Talent.POISONOUS_BLADE)) {
-				Buff.affect(enemy, Poison.class).set(2+hero.pointsInTalent(Talent.POISONOUS_BLADE));
-			}
-			if (hero.hasTalent(Talent.SOUL_COLLECT) && dmg >= enemy.HP) {
-				int healAmt = 3*hero.pointsInTalent(Talent.SOUL_COLLECT);
-				healAmt = Math.min( healAmt, hero.HT - hero.HP );
-				if (healAmt > 0 && hero.isAlive()) {
-					hero.HP += healAmt;
-					hero.sprite.emitter().start( Speck.factory( Speck.HEALING ), 0.4f, 2 );
-					hero.sprite.showStatus( CharSprite.POSITIVE, Integer.toString( healAmt ) );
-				}
-			}
-			if (hero.hasTalent(Talent.TRAIL_TRACKING) && dmg >= enemy.HP) {
-				Buff.affect(hero, MindVision.class, hero.pointsInTalent(Talent.TRAIL_TRACKING));
-			}
-
-			if (hero.pointsInTalent(Talent.MASTER_OF_CLOAKING) == 3) {
-				if (hero.buff(ChaseCooldown.class) != null) {
-					hero.buff(ChaseCooldown.class).spendTime();
-				}
-				if (hero.buff(ChainCooldown.class) != null) {
-					hero.buff(ChainCooldown.class).spendTime();
-				}
-				if (hero.buff(LethalCooldown.class) != null) {
-					hero.buff(LethalCooldown.class).spendTime();
-				}
-			}
-		}
-
-		if (hero.hasTalent(Talent.WAR_CRY) && enemy.buff(WarCryTracker.class) == null) {
-			Buff.affect(enemy, WarCryTracker.class);
-			Buff.prolong(hero, Adrenaline.class, hero.pointsInTalent(Talent.WAR_CRY));
-		}
-
-		if (hero.hasTalent(Talent.BLOOMING_WEAPON)
-				&& Random.Float() < 0.05f*hero.pointsInTalent(Talent.BLOOMING_WEAPON)) {
-			boolean secondPlant = Random.Float() <= 0.33f;
-			ArrayList<Integer> positions = new ArrayList<>();
+		if (hero.hasTalent(BLOOMING_WEAPON) &&
+				Random.Int(20) < hero.pointsInTalent(BLOOMING_WEAPON)) {
+			//mostly a copy of Blooming.proc()
 			Blooming blooming = new Blooming();
-			for (int i : PathFinder.NEIGHBOURS8){
-				positions.add(i);
+			int plants = (Random.Int(3) < 1) ? 2 : 1;
+
+			if (blooming.plantGrass(enemy.pos)) {
+				plants--;
 			}
-			Random.shuffle( positions );
-			for (int i : positions){
-				if (blooming.plantGrass(enemy.pos + i)) {
-					if (secondPlant) secondPlant = false;
-					else break;
+
+			if (plants > 0) {
+				ArrayList<Integer> positions = new ArrayList<>();
+				for (int i : PathFinder.NEIGHBOURS8) {
+					if (enemy.pos + i != hero.pos) {
+						positions.add(enemy.pos + i);
+					}
+				}
+				Random.shuffle( positions );
+
+				//The attacker's position is always lowest priority
+				if (Dungeon.level.adjacent(hero.pos, enemy.pos)) {
+					positions.add(hero.pos);
+				}
+
+				for (int i : positions) {
+					if (blooming.plantGrass(i)) {
+						plants--;
+						if (plants <= 0) break;
+					}
 				}
 			}
 		}
 
-		if (hero.hasTalent(Talent.ANTI_DEMON) &&
-				hero.buff(Bless.class) != null &&
-				(Char.hasProp(enemy, Char.Property.DEMONIC) || Char.hasProp(enemy, Char.Property.UNDEAD))) {
-            dmg = Math.round(dmg * 1f+hero.pointsInTalent(Talent.ANTI_DEMON)/3f);
+		//adventurer 3-2 meta
+		if (hero.hasTalent(LONG_MACHETE) && hero.heroClass != HeroClass.ADVENTURER &&
+				wep instanceof MeleeWeapon) {
+			int dist = level.distance(hero.pos, enemy.pos)-1;
+			dist = Math.min(dist, hero.pointsInTalent(LONG_MACHETE));
+			dmg = (int)Math.round(dmg * Math.pow(0.8f, dist));
 		}
 
-		if (hero.hasTalent(Talent.ARMY_OF_DEATH)) {
-			float procChance = 0.1f * hero.pointsInTalent(Talent.ARMY_OF_DEATH);
+		//knight
+		KineticBattle battle;
+		if ((battle = hero.buff(KineticBattle.class)) != null) {
+			dmg = battle.proc(dmg);
+		}
+
+		if (hero.hasTalent(WAR_CRY) && enemy.buff(WarCryTracker.class) == null) {
+			Buff.affect(enemy, WarCryTracker.class);
+			Buff.prolong(hero, Adrenaline.class, hero.pointsInTalent(WAR_CRY));
+		}
+
+		//TODO rework to 10%/20%/30% of drRoll(), like Gladiator's Slam?
+		if (hero.hasTalent(TACKLE) && level.adjacent(enemy.pos, hero.pos) && hero.belongings.armor() != null &&
+				(wep instanceof MeleeWeapon || wep == null)) {
+            dmg += Math.round(hero.belongings.armor().DRMax()*0.05f*hero.pointsInTalent(TACKLE));
+		}
+
+		//researcher
+		if (hero.hasTalent(BIOLOGY_PROJECT) &&
+				!(enemy.properties().contains(Char.Property.INORGANIC) || enemy.properties().contains(Char.Property.UNDEAD))) {
+			enemy.sprite.emitter().start(ShadowParticle.UP, 0.05f, 3);
+			Sample.INSTANCE.play(Assets.Sounds.BURNING);
+
+			dmg = Math.round(dmg * (float) Math.pow(1.1f, hero.pointsInTalent(BIOLOGY_PROJECT)));
+		}
+
+		//crusader
+		if (hero.hasTalent(ANTI_DEMON) && hero.buff(Bless.class) != null &&
+				(Char.hasProp(enemy, Char.Property.DEMONIC) || Char.hasProp(enemy, Char.Property.UNDEAD))) {
+			dmg = Math.round(dmg * 1f+hero.pointsInTalent(ANTI_DEMON)/3f);
+		}
+
+		//deathknight
+		if (hero.hasTalent(ARMY_OF_DEATH)) {
+			float procChance = 0.1f * hero.pointsInTalent(ARMY_OF_DEATH);
 			if (dmg >= enemy.HP
 					&& Random.Float() < procChance
 					&& !enemy.isImmune(Corruption.class)
@@ -2438,45 +2466,104 @@ public enum Talent {
 					&& enemy.isAlive()){
 				Corruption.corruptionHeal(enemy);
 				AllyBuff.affectAndLoot((Mob) enemy, hero, Corruption.class);
-                dmg = 0;
+				dmg = 0;
 			}
 
+		}
+
+		//adventurer armor
+		if (hero.buff(TreasureMap.GoldTracker.class) != null) {
+			dmg = Math.round(1 + 0.1f * hero.pointsInTalent(GOLD_HUNTER));
+			hero.buff(TreasureMap.GoldTracker.class).detach();
+		}
+
+		if (hero.buff(TreasureMap.LuckTracker.class) != null && enemy.HP <= dmg) {
+			Buff.affect(enemy, Lucky.LuckProc.class);
+		}
+
+		//gunner
+		if (hero.hasTalent(SPEEDY_MOVE) && enemy.buff(SpeedyMoveTracker.class) == null &&
+				(enemy.alignment == Char.Alignment.ENEMY || (enemy instanceof Mimic && enemy.alignment == Char.Alignment.NEUTRAL))) {
+			Buff.affect(enemy, SpeedyMoveTracker.class);
+			Buff.affect(hero, GreaterHaste.class).set(2 + hero.pointsInTalent(SPEEDY_MOVE));
+		}
+
+		if (hero.hasTalent(BULLET_COLLECT) && wep instanceof Gun) {
+			if (Random.Float() < 0.05f * hero.pointsInTalent(BULLET_COLLECT)) {
+				((Gun)wep).manualReload(1, true);
+			}
+		}
+
+		//chaser
+		if (enemy instanceof Mob && ((Mob) enemy).surprisedBy(hero) &&
+				(enemy.alignment == Char.Alignment.ENEMY || (enemy instanceof Mimic && enemy.alignment == Char.Alignment.NEUTRAL))) {
+			if (hero.hasTalent(POISONOUS_BLADE)) {
+				Buff.affect(enemy, Poison.class).set(2+hero.pointsInTalent(POISONOUS_BLADE));
+			}
+
+			if (hero.hasTalent(SOUL_COLLECT) && dmg >= enemy.HP) {
+				int healAmt = 3*hero.pointsInTalent(SOUL_COLLECT);
+				healAmt = Math.min( healAmt, hero.HT - hero.HP );
+				if (healAmt > 0 && hero.isAlive()) {
+					hero.HP += healAmt;
+					hero.sprite.emitter().start( Speck.factory( Speck.HEALING ), 0.4f, 2 );
+					hero.sprite.showStatus( CharSprite.POSITIVE, Integer.toString( healAmt ) );
+				}
+			}
+
+			if (hero.hasTalent(TRAIL_TRACKING) && dmg >= enemy.HP) {
+				Buff.affect(hero, MindVision.class, hero.pointsInTalent(TRAIL_TRACKING));
+			}
+
+			if (hero.pointsInTalent(MASTER_OF_CLOAKING) == 3) {
+				if (hero.buff(ChaseCooldown.class) != null) {
+					hero.buff(ChaseCooldown.class).spendTime();
+				}
+
+				if (hero.buff(ChainCooldown.class) != null) {
+					hero.buff(ChainCooldown.class).spendTime();
+				}
+
+				if (hero.buff(LethalCooldown.class) != null) {
+					hero.buff(LethalCooldown.class).spendTime();
+				}
+			}
 		}
 
 		if (hero.hasTalent(Talent.SCAR_ATTACK)) {
 			int debuffs = enemy.buffs().size();
 			if (debuffs > 0) {
                 dmg += debuffs * Random.NormalIntRange(1, hero.pointsInTalent(Talent.SCAR_ATTACK));
+		//medic
 			}
 		}
 
-		if (hero.hasTalent(Talent.FINISH_ATTACK) && enemy.HP <= enemy.HT*0.25f) {
-            dmg += 1+hero.pointsInTalent(Talent.FINISH_ATTACK);
+		if (hero.hasTalent(FINISH_ATTACK) && enemy.HP <= enemy.HT*0.25f) {
+            dmg += 1+hero.pointsInTalent(FINISH_ATTACK);
 			Sample.INSTANCE.play(Assets.Sounds.HIT_STRONG);
 		}
 
-		if (hero.hasTalent(Talent.STRONG_NEXUS)) {
-			for (Mob mob : level.mobs.toArray( new Mob[0] )) {
-				if (mob.alignment == Char.Alignment.ALLY && level.heroFOV[mob.pos]) { // 아군이 영웅의 시야 내에 있을 때
-					int healAmt = 3 * hero.pointsInTalent(Talent.STRONG_NEXUS) - level.distance(hero.pos, mob.pos) + 1;
-					if (healAmt > 0) {
-						mob.heal(healAmt);
-					}
+		if (hero.hasTalent(STRONG_NEXUS)) {
+			for (Mob mob : level.mobs) {
+				if (mob.alignment == Char.Alignment.ALLY && level.heroFOV[mob.pos]) {
+					int healAmt = 3 * hero.pointsInTalent(STRONG_NEXUS) - level.distance(hero.pos, mob.pos) + 1;
+					if (healAmt > 0) mob.heal(healAmt);
 				}
-			} //heals nearby enemies and herself per every attack
+			}
 		}
 
-		if (hero.hasTalent(Talent.TARGET_SET) && wep instanceof MissileWeapon) {
-			int duration = hero.pointsInTalent(Talent.TARGET_SET);
+		if (hero.hasTalent(TARGET_SET) && wep instanceof MissileWeapon) {
+			int duration = hero.pointsInTalent(TARGET_SET);
 			if (enemy.alignment != Char.Alignment.ENEMY) duration *= 5;
 			Buff.prolong(enemy, StoneOfAggression.Aggression.class, duration);
 		}
 
-		if (hero.hasTalent(Talent.RADIATION) && hero.heroClass != HeroClass.MEDIC && enemy.buff(RadioactiveMutation.class) == null) {
-			if (Random.Float() < 0.03f) {
-				Buff.affect(enemy, RadioactiveMutation.class).set(6-hero.pointsInTalent(Talent.RADIATION));
-			}
-		}
+		//medic 2-4 meta
+		//TODO rework into wand/artifact proc?
+        if (hero.hasTalent(RADIATION) && hero.heroClass != HeroClass.MEDIC &&
+                enemy.buff(RadioactiveMutation.class) == null && Random.Float() < 0.03f) {
+            Buff.affect(enemy, RadioactiveMutation.class).set(6 - hero.pointsInTalent(RADIATION));
+        }
 
 		if (hero.buff(Sheath.DashDrawTracker.class) != null) {
 			if (hero.hasTalent(Talent.ACCELERATION)) {
@@ -2485,15 +2572,21 @@ public enum Talent {
 				buff.hit();
 			}
 			// detach after attack delay in onAttackComplete()
+		//medic armor
+		HealingGenerator.RegenBuff regenBuff = hero.buff(HealingGenerator.RegenBuff.class);
+		if (regenBuff != null) {
+			regenBuff.attackProc();
 		}
 
-		if (Random.Float() < hero.pointsInTalent(Talent.MADNESS)/10f) {
+		//warlock
+		if (Random.Int(10) < hero.pointsInTalent(MADNESS)) {
 			Buff.prolong(enemy, Amok.class, 3f);
 		}
 
+		//wizard
 		SpellBook.SpellBookCoolDown spellBookCoolDown = hero.buff(SpellBook.SpellBookCoolDown.class);
-		if (hero.hasTalent(Talent.BRIG_BOOST) && spellBookCoolDown != null) {
-			spellBookCoolDown.hit(hero.pointsInTalent(Talent.BRIG_BOOST));
+		if (hero.hasTalent(BRIG_BOOST) && spellBookCoolDown != null) {
+			spellBookCoolDown.hit(hero.pointsInTalent(BRIG_BOOST));
 		}
 
 		//FIXME move to Hero.attackProc()
@@ -2516,35 +2609,10 @@ public enum Talent {
 			}
 		}
 
-		if (hero.hasTalent(Talent.BIOLOGY_PROJECT)) {
-			if (!(enemy.properties().contains(Char.Property.INORGANIC) || enemy.properties().contains(Char.Property.UNDEAD))){
-				enemy.sprite.emitter().start( ShadowParticle.UP, 0.05f, 3 );
-				Sample.INSTANCE.play(Assets.Sounds.BURNING);
-
-                dmg = dmg * (int)Math.pow(1.1f, hero.pointsInTalent(Talent.BIOLOGY_PROJECT));
-			}
-		}
-
-		if (hero.belongings.attackingWeapon() instanceof MeleeWeapon && hero.heroClass != HeroClass.ADVENTURER && hero.hasTalent(Talent.LONG_MACHETE)) {
-			int dist = level.distance(hero.pos, enemy.pos)-1;
-			dist = Math.min(dist, hero.pointsInTalent(Talent.LONG_MACHETE));
-            dmg = (int)Math.round(dmg * Math.pow(0.8f, dist));
-		}
-
-		if (hero.buff(TreasureMap.GoldTracker.class) != null) {
-            dmg = Math.round(1 + 0.1f * hero.pointsInTalent(Talent.GOLD_HUNTER));
-			hero.buff(TreasureMap.GoldTracker.class).detach();
-		}
-
-		//attacking procs
-		HealingGenerator.RegenBuff regenBuff = hero.buff(HealingGenerator.RegenBuff.class);
-		if (regenBuff != null) {
-			regenBuff.attackProc();
-		}
-
-		if (hero.hasTalent(Talent.BAYONET) && hero.buff(ReinforcedArmor.ReinforcedArmorTracker.class) != null){
+		//gunner armor
+		if (hero.hasTalent(BAYONET) && hero.buff(ReinforcedArmor.ReinforcedArmorTracker.class) != null){
 			if (hero.belongings.attackingWeapon() instanceof Gun) {
-				Buff.affect( enemy, Bleeding.class ).set( 4 + hero.pointsInTalent(Talent.BAYONET));
+				Buff.affect( enemy, Bleeding.class ).set( 4 + hero.pointsInTalent(BAYONET));
 			}
 		}
 
@@ -2556,12 +2624,7 @@ public enum Talent {
 
 		//FIXME move to Hero.attackProc()
 		if (hero.subClass == HeroSubClass.RESEARCHER && Random.Float() < 0.2f) {
-			Buff.affect(enemy, Ooze.class).set(Ooze.DURATION/4f * (1+0.5f*hero.pointsInTalent(Talent.POWERFUL_ACID)));
-		}
-
-		if (hero.buff(TreasureMap.LuckTracker.class) != null
-				&& enemy.HP <= dmg) {
-			Buff.affect(enemy, Lucky.LuckProc.class);
+			Buff.affect(enemy, Ooze.class).set(Ooze.DURATION/4f * (1+0.5f*hero.pointsInTalent(POWERFUL_ACID)));
 		}
 
 		//FIXME move to Hero.attackProc()
@@ -2569,12 +2632,12 @@ public enum Talent {
 			int healAmt = Math.round(dmg*0.4f);
 			int excessHeal = healAmt - (hero.HT - hero.HP);
 			hero.heal(healAmt);
-			if (hero.hasTalent(Talent.HOLY_SHIELD) && excessHeal > 0) {
-				int maxShield = Math.round(hero.HT*0.2f*hero.pointsInTalent(Talent.HOLY_SHIELD));
+			if (hero.hasTalent(HOLY_SHIELD) && excessHeal > 0) {
+				int maxShield = Math.round(hero.HT*0.2f*hero.pointsInTalent(HOLY_SHIELD));
 				Barrier barrier = hero.buff(Barrier.class);
 				if (barrier != null) {
 					if (barrier.shielding()+excessHeal > maxShield) {
-						excessHeal = maxShield - barrier.shielding(); //방어막을 얻을 때 최대치를 넘길 경우 얻을 방어막의 양을 감소시킴
+						excessHeal = maxShield - barrier.shielding();
 						Buff.affect(hero, Barrier.class).setShield(excessHeal);
 					} else {
 						Buff.affect(hero, Barrier.class).setShield(excessHeal);
@@ -2585,69 +2648,44 @@ public enum Talent {
 			}
 		}
 
+		//FIXME move to Hero.attackProc()
 		if (hero.buff(Pray.Punishment.class) != null) {
 			hero.buff(Pray.Punishment.class).hit(enemy, dmg);
-		}
-
-		if (wep instanceof Gun && hero.hasTalent(Talent.BULLET_COLLECT)) {
-			if (Random.Float() < 0.05f * hero.pointsInTalent(Talent.BULLET_COLLECT)) {
-				((Gun)wep).manualReload(1, true);
-			}
 		}
 
 		if (hero.buff(WeaponEnhance.class) != null) {
 			hero.buff(WeaponEnhance.class).attackProc();
 		}
 
+		//cleric
 		if (hero.buff(PowerOfLife.PowerOfLifeBarrier.class) != null) {
 			hero.buff(PowerOfLife.PowerOfLifeBarrier.class).proc(dmg);
 		}
 
-		if (hero.hasTalent(Talent.PROTECTIVE_SLASH)
-				&& hero.buff(ProtectiveSlashCooldown.class) == null
-				&& !level.adjacent(hero.pos, enemy.pos)) {
-			Buff.affect(hero, Barrier.class).setShield(1+2*Dungeon.hero.pointsInTalent(Talent.PROTECTIVE_SLASH));
-			Buff.affect(hero, ProtectiveSlashCooldown.class, 10);
+		//cleric 2-6 meta
+		if (hero.hasTalent(DIVINE_BLAST) && hero.heroClass != HeroClass.CLERIC &&
+				enemy.alignment != Char.Alignment.ALLY &&
+				Random.Int(5) < 1) {
+			Elastic.pushEnemy(wep, hero, enemy, hero.pointsInTalent(DIVINE_BLAST));
 		}
 
-		if (hero.buff(KineticAttackTracker.class) != null) {
-            dmg += Random.IntRange(hero.pointsInTalent(Talent.KINETIC_ATTACK), 2); //1~2 at +1, 2 at +2
-			Sample.INSTANCE.play(Assets.Sounds.HIT_STRONG);
-			hero.buff(KineticAttackTracker.class).detach();
-		}
-
-		if (enemy.alignment != Char.Alignment.ALLY
-				&& hero.heroClass != HeroClass.CLERIC
-				&& hero.hasTalent(Talent.DIVINE_BLAST)
-				&& Random.Float() < 0.2f * hero.pointsInTalent(Talent.DIVINE_BLAST)){
-			Elastic.pushEnemy(wep, hero, enemy, 1);
-		}
-
+		//archer
 		if (hero.buff(ForceSavingTracker.class) != null) {
-			Elastic.pushEnemy(wep, hero, enemy, 1+hero.pointsInTalent(Talent.FORCE_SAVING));
+			Elastic.pushEnemy(wep, hero, enemy, 1+hero.pointsInTalent(FORCE_SAVING));
 			hero.buff(ForceSavingTracker.class).detach();
 		}
 
-		if (enemy instanceof Mob && enemy.buff(SurprisePanicTracker.class) == null && hero.hasTalent(Talent.LEG_SWEEP) && !enemy.flying) {
+		if (hero.hasTalent(LEG_SWEEP) && enemy instanceof Mob && enemy.buff(SurprisePanicTracker.class) == null && !enemy.flying) {
 			if (((Mob)enemy).surprisedBy(hero)) {
-				new FlavourBuff() {
-					{
-						actPriority = VFX_PRIO;
-					}
-
-					public boolean act() {
-						Buff.affect(target, Cripple.class, 1+hero.pointsInTalent(Talent.LEG_SWEEP));
-						return super.act();
-					}
-				}.attachTo(enemy);
+				Buff.affect(enemy, Cripple.class, 1+hero.pointsInTalent(LEG_SWEEP));
 			}
 			Buff.affect(enemy, SurprisePanicTracker.class);
 		}
 
-		if (hero.hasTalent(Talent.PUSHBACK) && !(wep instanceof BowWeapon)) {
+		if (hero.hasTalent(PUSHBACK) && wep instanceof MeleeWeapon && !(wep instanceof BowWeapon)) {
 			if (level.adjacent(hero.pos, enemy.pos)
 					&& ((enemy instanceof Mob && ((Mob) enemy).surprisedBy(hero)) || Random.Float() < 0.4f)) {
-				BowWeapon.pushEnemy(wep, hero, enemy, hero.pointsInTalent(Talent.PUSHBACK));
+				BowWeapon.pushEnemy(wep, hero, enemy, hero.pointsInTalent(PUSHBACK));
 			}
 		}
 
@@ -2655,7 +2693,7 @@ public enum Talent {
 	}
 
 	public static int onDefenseProc(Hero hero, Char enemy, int damage) {
-		if (hero.hasTalent(Talent.FIRST_AID_TREAT) && hero.buff(FirstAidTreatCooldown.class) == null && damage > (11-3*hero.pointsInTalent(Talent.FIRST_AID_TREAT))) {
+		if (hero.hasTalent(FIRST_AID_TREAT) && hero.buff(FirstAidTreatCooldown.class) == null && damage > (11-3*hero.pointsInTalent(FIRST_AID_TREAT))) {
 			hero.heal(3);
 			Buff.affect(hero, FirstAidTreatCooldown.class, 50f);
 		}
@@ -2664,11 +2702,11 @@ public enum Talent {
 	}
 
 	public static void onLevelUp() {
-		if (hero.hasTalent(Talent.FLAG_OF_CONQUEST)) { //deals 50/75% of enemies' maximum health who are in hero's sight
+		if (hero.hasTalent(FLAG_OF_CONQUEST)) { //deals 50/75% of enemies' maximum health who are in hero's sight
 			for (Char ch : Actor.chars()) {
 				if (level.heroFOV[ch.pos] && ch.alignment == Char.Alignment.ENEMY && !ch.properties().contains(Char.Property.BOSS) && !ch.properties().contains(Char.Property.MINIBOSS)){
 					ch.sprite.emitter().burst(ShadowParticle.UP, 10);
-					ch.damage(Math.round(0.25f*(1+hero.pointsInTalent(Talent.FLAG_OF_CONQUEST))*ch.HT), hero);
+					ch.damage(Math.round(0.25f*(1+hero.pointsInTalent(FLAG_OF_CONQUEST))*ch.HT), hero);
 					GameScene.flash(0x30FFFF40);
 					Sample.INSTANCE.play(Assets.Sounds.BLAST);
 				}
@@ -2684,7 +2722,7 @@ public enum Talent {
 	public static class ParryCooldown extends Buff{
 		float cooldown;
 		public void set() {
-			cooldown = 90-20*hero.pointsInTalent(Talent.PARRY)+1;
+			cooldown = 90-20*hero.pointsInTalent(PARRY)+1;
 		}
 		@Override
 		public boolean act() {
@@ -2693,7 +2731,7 @@ public enum Talent {
 				Buff.affect(target, ParryTracker.class);
 				detach();
 			}
-			if (!hero.hasTalent(Talent.PARRY)) {
+			if (!hero.hasTalent(PARRY)) {
 				detach();
 			}
 			spend(Actor.TICK);
@@ -2716,7 +2754,7 @@ public enum Talent {
 
 		@Override
 		public boolean act() {
-			if (!hero.hasTalent(Talent.PARRY)) {
+			if (!hero.hasTalent(PARRY)) {
 				detach();
 			}
 			spend(Actor.TICK);
@@ -3193,7 +3231,7 @@ public enum Talent {
 		}
 
 		if (left == 0) {
-			GameScene.show(new WndIdentify(IDed, Talent.DOCTORS_INTUITION));
+			GameScene.show(new WndIdentify(IDed, DOCTORS_INTUITION));
 		}
 	}
 
