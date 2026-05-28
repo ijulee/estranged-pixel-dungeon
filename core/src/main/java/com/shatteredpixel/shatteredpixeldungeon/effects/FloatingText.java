@@ -35,6 +35,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Momentum;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.SwordAura;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroClass;
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroSubClass;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Talent;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.GuidingLight;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.ArmoredStatue;
@@ -415,15 +416,23 @@ public class FloatingText extends RenderedTextBlock {
 			if (((Hero) attacker).hasTalent(Talent.ACC_ENHANCE)) {
 				hitReasons.put(HIT_ACC, 1 + 0.05f * ((Hero) attacker).pointsInTalent(Talent.ACC_ENHANCE));
 			}
+
 			if (attacker.buff(Sheath.Sheathing.class) != null && wep instanceof MeleeWeapon) {
-				hitReasons.put(HIT_SAM, 1.5f);
-			}
-			if (Sheath.isQuickDraw()) {
-				return HIT_SAM;
-			}
+                if (((Hero) attacker).subClass == HeroSubClass.MASTER) {
+					if (((Hero) attacker).pointsInTalent(Talent.ENHANCED_CRIT) >= 1 && Sheath.isSpecialDraw()) {
+						hitReasons.put(HIT_SAM, 5f);
+					} else {
+						hitReasons.put(HIT_SAM, 2f);
+					}
+				} else {
+                    hitReasons.put(HIT_SAM, 1.5f);
+                }
+            }
+
 			if (wep instanceof SwordAura.Aura) {
 				return HIT_SAM;
 			}
+
 			if (attacker.buff(BowWeapon.PenetrationShotBuff.class) != null && wep instanceof BowWeapon.Arrow) {
 				return HIT_DANCE;
 			}
