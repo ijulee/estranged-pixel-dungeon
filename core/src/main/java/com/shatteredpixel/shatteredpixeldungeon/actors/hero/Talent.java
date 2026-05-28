@@ -2075,11 +2075,7 @@ public enum Talent {
 			hero.heal(Math.round(factor*(2+3*hero.pointsInTalent(PHARMACEUTICS))));
 		}
 		if (hero.hasTalent(FULLY_POTION) && cell == hero.pos) {
-			for (Buff b : hero.buffs()){
-				if (b instanceof Hunger){
-					((Hunger) b).satisfy(factor * (10+20*hero.pointsInTalent(Talent.FULLY_POTION)));
-				}
-			}
+			hero.buff(Hunger.class).satisfy(factor * (10+20*hero.pointsInTalent(FULLY_POTION)));
 		}
 	}
 
