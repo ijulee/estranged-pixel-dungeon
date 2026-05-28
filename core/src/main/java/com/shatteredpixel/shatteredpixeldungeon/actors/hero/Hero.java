@@ -1979,7 +1979,7 @@ public class Hero extends Char {
 			if (buff(Sheath.Sheathing.class) != null &&
 					(wep instanceof MeleeWeapon || wep instanceof SwordAura.Aura)) {
 				if (subClass == HeroSubClass.MASTER) {
-                    if (pointsInTalent(Talent.ENHANCED_CRIT) >= 2 && Sheath.isSpecialDraw()) {
+                    if (pointsInTalent(Talent.ENHANCED_CRIT) >= 2 && (Sheath.isSpecialDraw() || testQuickDraw)) {
 						chance *= 1.75f;
                     } else {
                         chance *= 1.5f;
@@ -3403,7 +3403,7 @@ public class Hero extends Char {
 				|| (attackTarget instanceof Mimic && attackTarget.alignment == Alignment.NEUTRAL);
 
 		if (Sheath.isQuickDraw()) {
-			sprite.showStatus( CharSprite.NEUTRAL, Messages.titleCase(Messages.get(Sheath.Sheathing.class, "quick_draw_name")) );
+			sprite.showStatus( CharSprite.NEUTRAL, Messages.titleCase(Messages.get(Sheath.Sheathing.class, "quick_draw")) );
 			Buff.affect(this, Sheath.QuickDrawTracker.class);
 		}
 

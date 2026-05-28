@@ -1291,6 +1291,16 @@ public enum Talent {
 			Dungeon.observe();
 			GameScene.updateFog();
 		}
+
+		@Override
+		public int icon() {
+			return BuffIndicator.MIND_VISION;
+		}
+
+		@Override
+		public float iconFadePercent() {
+			return 1-visualcooldown()/DURATION;
+		}
 	}
 
 	public static class DrawingMasteryTracker extends Buff {

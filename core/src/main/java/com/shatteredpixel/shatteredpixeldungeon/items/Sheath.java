@@ -176,13 +176,14 @@ public class Sheath extends Item {
 
         @Override
         public String desc() {
-            String desc = super.desc();
-            if (Dungeon.hero.subClass == HeroSubClass.MASTER &&
-                Dungeon.hero.buff(QuickDrawCooldown.class) == null) {
+            String desc;
+            if (Dungeon.hero.subClass == HeroSubClass.MASTER) {
                 Hero.testQuickDraw = true;
-                float quickCritChance = Dungeon.hero.critChance((Weapon) Dungeon.hero.belongings.weapon());
+                float specialDrawCrit = Dungeon.hero.critChance((Weapon) Dungeon.hero.belongings.weapon());
                 Hero.testQuickDraw = false;
-                desc += "\n\n" + Messages.get(this, "quick_draw", 100f * quickCritChance);
+                desc = Messages.get(this, "desc_master", 100f * specialDrawCrit);
+            } else {
+                desc = super.desc();
             }
             return desc;
         }
