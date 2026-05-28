@@ -2530,11 +2530,12 @@ public enum Talent {
 			}
 		}
 
-		if (hero.hasTalent(Talent.SCAR_ATTACK)) {
-			int debuffs = enemy.buffs().size();
-			if (debuffs > 0) {
-                dmg += debuffs * Random.NormalIntRange(1, hero.pointsInTalent(Talent.SCAR_ATTACK));
 		//medic
+		if (hero.hasTalent(SCAR_ATTACK)) {
+			for (Buff b : enemy.buffs()) {
+				if (b.type == Buff.buffType.NEGATIVE) {
+					dmg += Random.IntRange(1, hero.pointsInTalent(SCAR_ATTACK));
+				}
 			}
 		}
 
