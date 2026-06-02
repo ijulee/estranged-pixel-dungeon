@@ -9,6 +9,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.Char;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Buff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Charm;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.FlavourBuff;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Preparation;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.TargetingAction;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.HeroAction;
@@ -18,7 +19,6 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.NPC;
 import com.shatteredpixel.shatteredpixeldungeon.effects.CellEmitter;
 import com.shatteredpixel.shatteredpixeldungeon.effects.Speck;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.Weapon;
-import com.shatteredpixel.shatteredpixeldungeon.items.weapon.bow.SpiritBow;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.MeleeWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.scenes.CellSelector;
@@ -111,8 +111,7 @@ public class Sheath extends Item {
     }
 
     public static boolean isSpecialDraw() {
-        return Dungeon.hero.buff(QuickDrawTracker.class) != null ||
-                Dungeon.hero.buff(DashDrawTracker.class) != null;
+        return Dungeon.hero.buff(SpecialDrawTracker.class) != null;
     }
 
     public static class Sheathing extends TargetingAction {
@@ -210,10 +209,10 @@ public class Sheath extends Item {
                 detach();
             }
 
-            if (!GameScene.isCellSelecterActive( attack )) {
+            if (!GameScene.isCellSelecterActive( dashDraw )) {
                 showCross();
 
-                GameScene.selectCell( attack );
+                GameScene.selectCell( dashDraw );
             } else {
                 if (canAutoAim(lastTarget)) {
                     GameScene.handleCell(lastTarget.pos);
@@ -264,7 +263,7 @@ public class Sheath extends Item {
             return 4+2*Dungeon.hero.pointsInTalent(Talent.ACCELERATION);
         }
 
-        private final CellSelector.Listener attack = new CellSelector.Listener() {
+        private final CellSelector.Listener dashDraw = new CellSelector.Listener() {
             @Override
             public void onSelect( Integer cell ) {
                 if (cell != null) {
@@ -293,14 +292,19 @@ public class Sheath extends Item {
                     int dest = -1;
 
                     if (canBlink) {
-                        PathFinder.buildDistanceMap(Dungeon.hero.pos, BArray.or(Dungeon.level.passable, Dungeon.level.avoid, null), blinkDistance());
+                        PathFinder.buildDistanceMap(Dungeon.hero.pos, BArray.or(Dungeon.level.passable, Dungeon.level.avoid, null), Integer.MAX_VALUE);
 
                         if (enemy != null ||
                             (!Dungeon.level.passable[cell] && (!Dungeon.hero.flying || !Dungeon.level.avoid[cell]))) {
                             for (int i : PathFinder.NEIGHBOURS8) {
                                 //cannot blink into a cell that's occupied or impassable, only over them
-                                if (Actor.findChar(cell + i) != null) continue;
+                                if (Actor.findChar(cell + i) != null) {
+                                    continue;
+                                }
                                 if (!Dungeon.level.passable[cell + i] && !(target.flying && Dungeon.level.avoid[cell + i])) {
+                                    continue;
+                                }
+                                if (Dungeon.level.trueDistance(Dungeon.hero.pos, dest) > blinkDistance()) {
                                     continue;
                                 }
 
@@ -362,7 +366,7 @@ public class Sheath extends Item {
 
             @Override
             public String prompt() {
-                return Messages.get(SpiritBow.class, "prompt");
+                return Messages.get(Preparation.class, "prompt", blinkDistance());
             }
         };
 
@@ -422,7 +426,11 @@ public class Sheath extends Item {
         }
     }
 
-    public static class QuickDrawTracker extends Buff {}
+    public static class SpecialDrawTracker extends Buff {}
+
+    public static class QuickDrawTracker extends SpecialDrawTracker {}
+
+    public static class DashDrawTracker extends SpecialDrawTracker {}
 
     public static class QuickDrawCooldown extends FlavourBuff{
         public static final float DURATION = 30f;
@@ -437,8 +445,6 @@ public class Sheath extends Item {
         public void tintIcon(Image icon) { icon.hardlight(0xFF7F00); }
         public float iconFadePercent() { return Math.max(0, 1 - visualcooldown() / DURATION); }
     }
-
-    public static class DashDrawTracker extends Buff {}
 
     public static class DashDrawAccel extends FlavourBuff {
         {
