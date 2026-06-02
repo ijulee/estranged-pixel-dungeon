@@ -432,8 +432,8 @@ public class Sheath extends Item {
 
     public static class DashDrawTracker extends SpecialDrawTracker {}
 
-    public static class QuickDrawCooldown extends FlavourBuff{
-        public static final float DURATION = 30f;
+    public static class QuickDrawCooldown extends FlavourBuff {
+        public static final float DURATION = 20f;
         public int icon() { return BuffIndicator.TIME; }
         public void tintIcon(Image icon) { icon.hardlight(0x586EDB); }
         public float iconFadePercent() { return Math.max(0, 1 - visualcooldown() / DURATION); }
