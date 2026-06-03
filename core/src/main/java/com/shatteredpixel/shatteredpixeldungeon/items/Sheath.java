@@ -301,10 +301,10 @@ public class Sheath extends Item {
                                 if (Actor.findChar(cell + i) != null) {
                                     continue;
                                 }
-                                if (!Dungeon.level.passable[cell + i] && !(target.flying && Dungeon.level.avoid[cell + i])) {
+                                if (!Dungeon.level.passable[cell + i] && !(Dungeon.hero.flying && Dungeon.level.avoid[cell + i])) {
                                     continue;
                                 }
-                                if (Dungeon.level.trueDistance(Dungeon.hero.pos, dest) > blinkDistance()) {
+                                if (Dungeon.level.trueDistance(Dungeon.hero.pos, cell + i) > blinkDistance()) {
                                     continue;
                                 }
 
@@ -348,9 +348,7 @@ public class Sheath extends Item {
 
                             GLog.w(Messages.get(Sheathing.class, "no_target"));
                             Buff.prolong(Dungeon.hero, DashDrawCooldown.class, DashDrawCooldown.DURATION);
-                            if (Dungeon.hero.buff(DashDrawAccel.class) != null) {
-                                Dungeon.hero.buff(DashDrawAccel.class).detach();
-                            }
+
                             removeCross();
                             ActionIndicator.clearAction(Sheathing.this);
 
@@ -446,51 +444,4 @@ public class Sheath extends Item {
         public float iconFadePercent() { return Math.max(0, 1 - visualcooldown() / DURATION); }
     }
 
-    public static class DashDrawAccel extends FlavourBuff {
-        {
-            type = buffType.POSITIVE;
-            announced = false;
-        }
-
-        public static final float DURATION = 10f;
-
-        float dmgMulti = 1;
-
-        public void hit() {
-            dmgMulti += 0.05f;
-            dmgMulti = Math.min(dmgMulti, 1+0.25f*Dungeon.hero.pointsInTalent(Talent.ACCELERATION));
-        }
-
-        public float getDmgMulti() {
-            return dmgMulti;
-        }
-
-        @Override
-        public float iconFadePercent() {
-            return Math.max(0, 1 - visualcooldown() / DURATION);
-        }
-
-        private static final String MULTI = "dmgMulti";
-        @Override
-        public void storeInBundle(Bundle bundle) {
-            super.storeInBundle(bundle);
-            bundle.put( MULTI, dmgMulti );
-        }
-
-        @Override
-        public void restoreFromBundle(Bundle bundle) {
-            super.restoreFromBundle(bundle);
-            dmgMulti = bundle.getFloat( MULTI );
-        }
-
-        @Override
-        public int icon() {
-            return BuffIndicator.CRITICAL;
-        }
-
-        @Override
-        public String desc() {
-            return Messages.get(this, "desc", Messages.decimalFormat("#", dmgMulti*100), dispTurns());
-        }
-    }
 }

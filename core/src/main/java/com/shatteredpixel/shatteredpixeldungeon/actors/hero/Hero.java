@@ -689,7 +689,7 @@ public class Hero extends Char {
 
 		if (buff(Sheath.Sheathing.class) != null && wep instanceof MeleeWeapon) {
             if (subClass == HeroSubClass.MASTER) {
-                if (pointsInTalent(Talent.ENHANCED_CRIT) >= 1 && Sheath.isSpecialDraw()) {
+                if (pointsInTalent(Talent.DRAWING_TECHNIQUE) >= 1 && Sheath.isSpecialDraw()) {
                 	accuracy *= 5f;
 				} else {
                     accuracy *= 2f;
@@ -1979,7 +1979,7 @@ public class Hero extends Char {
 			if (buff(Sheath.Sheathing.class) != null &&
 					(wep instanceof MeleeWeapon || wep instanceof SwordAura.Aura)) {
 				if (subClass == HeroSubClass.MASTER) {
-                    if (pointsInTalent(Talent.ENHANCED_CRIT) >= 2 && (Sheath.isSpecialDraw() || testQuickDraw)) {
+                    if (pointsInTalent(Talent.DRAWING_TECHNIQUE) >= 2 && (Sheath.isSpecialDraw() || testQuickDraw)) {
 						chance *= 1.75f;
                     } else {
                         chance *= 1.5f;
@@ -2259,8 +2259,8 @@ public class Hero extends Char {
 					damage = Math.round(damage * 0.6f);
 				}
                 if (Sheath.isSpecialDraw()) {
-					if (hasTalent(Talent.POWERFUL_SLASH)) {
-						damage = Math.round(damage * (1+pointsInTalent(Talent.POWERFUL_SLASH)/6f));
+					if (hasTalent(Talent.EXPLOSIVE_POWER)) {
+						damage = Math.round(damage * (1+pointsInTalent(Talent.EXPLOSIVE_POWER)/6f));
 					}
 				}
 

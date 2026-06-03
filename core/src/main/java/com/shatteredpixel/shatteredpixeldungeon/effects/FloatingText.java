@@ -419,7 +419,7 @@ public class FloatingText extends RenderedTextBlock {
 
 			if (attacker.buff(Sheath.Sheathing.class) != null && wep instanceof MeleeWeapon) {
                 if (((Hero) attacker).subClass == HeroSubClass.MASTER) {
-					if (((Hero) attacker).pointsInTalent(Talent.ENHANCED_CRIT) >= 1 && Sheath.isSpecialDraw()) {
+					if (((Hero) attacker).pointsInTalent(Talent.DRAWING_TECHNIQUE) >= 1 && Sheath.isSpecialDraw()) {
 						hitReasons.put(HIT_SAM, 5f);
 					} else {
 						hitReasons.put(HIT_SAM, 2f);

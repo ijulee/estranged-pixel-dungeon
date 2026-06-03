@@ -44,7 +44,6 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.BodyForm;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.HolyWeapon;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.spells.Smite;
 import com.shatteredpixel.shatteredpixeldungeon.actors.hero.abilities.samurai.ShadowBlade;
-import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Statue;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.MirrorImage;
 import com.shatteredpixel.shatteredpixeldungeon.items.Item;
 import com.shatteredpixel.shatteredpixeldungeon.items.KindOfWeapon;
@@ -90,7 +89,6 @@ import com.shatteredpixel.shatteredpixeldungeon.items.weapon.missiles.MissileWea
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.alchemy.TrueRunicBlade;
 import com.shatteredpixel.shatteredpixeldungeon.items.weapon.melee.gun.Gun;
 import com.shatteredpixel.shatteredpixeldungeon.journal.Catalog;
-import com.shatteredpixel.shatteredpixeldungeon.levels.rooms.standard.entrance.StatueLineEntranceRoom;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSprite;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
@@ -692,8 +690,8 @@ abstract public class Weapon extends KindOfWeapon {
 			}
 
 			if (attacker.buff(Sheath.QuickDrawTracker.class) != null &&
-				Dungeon.hero.hasTalent(Talent.STATIC_PREPARATION)) {
-				multi += 0.5f * Dungeon.hero.pointsInTalent(Talent.STATIC_PREPARATION);
+				Dungeon.hero.hasTalent(Talent.FLASH_PRECISION)) {
+				multi += 0.5f * Dungeon.hero.pointsInTalent(Talent.FLASH_PRECISION);
 			}
 
 			return multi;

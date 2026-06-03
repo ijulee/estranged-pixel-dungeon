@@ -545,12 +545,12 @@ public enum Talent {
 	ENERGY_SAVING				(17, 7, 3),
 	WIND_BLAST					(18, 7, 3),
 	//Swordaster T3
-	ENHANCED_CRIT				(19, 7, 3),
-	POWERFUL_SLASH				(20, 7, 3),
-	STATIC_PREPARATION			(21, 7, 3),
+	DRAWING_TECHNIQUE			(19, 7, 3),
+	EXPLOSIVE_POWER				(20, 7, 3),
+	FLASH_PRECISION				(21, 7, 3),
 	ACCELERATION				(22, 7, 3),
-	INNER_EYE					(23, 7, 3),
-	DYNAMIC_PREPARATION			(24, 7, 3),
+	SCABBARD_MASTERY			(23, 7, 3),
+	FOCUS_MAINTENANCE(24, 7, 3),
 	//Demonslayer T3
 	FASTER_THAN_LIGHT			(25, 7, 3),
 	AFTERIMAGE					(26, 7, 3),
@@ -1334,7 +1334,7 @@ public enum Talent {
 		}
 
 		static public float maxCooldown() {
-			return MAX_COOLDOWN - 20f * Dungeon.hero.pointsInTalent(INNER_EYE);
+			return MAX_COOLDOWN - 20f * Dungeon.hero.pointsInTalent(SCABBARD_MASTERY);
 		}
 	}
 
@@ -1737,12 +1737,12 @@ public enum Talent {
 		}
 
 		//samurai
-        if (talent == MASTERS_INTUITION && hero.belongings.weapon() instanceof MeleeWeapon && !(hero.belongings.weapon() instanceof Gun) &&
+		if (talent == MASTERS_INTUITION && hero.belongings.weapon() instanceof MeleeWeapon && !(hero.belongings.weapon() instanceof Gun) &&
 				!ShardOfOblivion.passiveIDDisabled()) {
             hero.belongings.weapon().identify();
         }
 
-		if (talent == INNER_EYE) {
+		if (talent == SCABBARD_MASTERY) {
 			DrawingMasteryTracker mastery = Buff.affect(hero, DrawingMasteryTracker.class);
 			if (!mastery.ready()) mastery.resetCooldown();
 		}
@@ -2409,8 +2409,9 @@ public enum Talent {
         }
 
 		//swordmaster
-		if (hero.pointsInTalent(ENHANCED_CRIT) > 2 && Sheath.isSpecialDraw()) {
-			Buff.affect(hero, GreaterHaste.class).set(2);
+		Buff special = hero.buff(Sheath.SpecialDrawTracker.class);
+		if (hero.pointsInTalent(DRAWING_TECHNIQUE) >= 3 && special != null) {
+			Buff.affect(hero, GreaterHaste.class).set((special instanceof Sheath.DashDrawTracker) ? 3 : 2);
 		}
 
 		if (hero.hasTalent(ACCELERATION) && hero.buff(Sheath.DashDrawTracker.class) != null) {
@@ -3128,7 +3129,7 @@ public enum Talent {
 				Collections.addAll(tierTalents, MIND_FOCUSING, STORED_POWER, ARCANE_POWER, ENERGY_COLLECT, ENERGY_SAVING, WIND_BLAST );
 				break;
 			case MASTER:
-				Collections.addAll(tierTalents, ENHANCED_CRIT, POWERFUL_SLASH, STATIC_PREPARATION, ACCELERATION, INNER_EYE, DYNAMIC_PREPARATION );
+				Collections.addAll(tierTalents, DRAWING_TECHNIQUE, EXPLOSIVE_POWER, FLASH_PRECISION, ACCELERATION, SCABBARD_MASTERY, FOCUS_MAINTENANCE);
 				break;
 			case SLAYER:
 				Collections.addAll(tierTalents, AFTERIMAGE, FASTER_THAN_LIGHT, QUICK_RECOVER, HASTE_EVASION, ACCELERATED_LETHALITY, STABLE_BARRIER );
@@ -3221,6 +3222,11 @@ public enum Talent {
 	private static final HashSet<String> removedTalents = new HashSet<>();
 	static{
 		removedTalents.add("ADRENALINE_SURGE");
+		removedTalents.add("ENHANCED_CRIT");
+		removedTalents.add("POWERFUL_SLASH");
+		removedTalents.add("STATIC_PREPARATION");
+		removedTalents.add("INNER_EYE");
+		removedTalents.add("DYNAMIC_PREPARATION");
 	}
 
 	private static final HashMap<String, String> renamedTalents = new HashMap<>();
