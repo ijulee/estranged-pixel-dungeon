@@ -22,6 +22,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Ghost;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Imp;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.npcs.Wandmaker;
 import com.shatteredpixel.shatteredpixeldungeon.actors.mobs.Statue;
+import com.shatteredpixel.shatteredpixeldungeon.items.EquipableItem;
 import com.shatteredpixel.shatteredpixeldungeon.items.armor.Armor;
 import com.shatteredpixel.shatteredpixeldungeon.items.artifacts.Artifact;
 import com.shatteredpixel.shatteredpixeldungeon.items.Dewdrop;
@@ -242,8 +243,6 @@ public class SeedFinder {
 				main[0] +=  "\n\n";
 				main[0] += Messages.get(this, "trinkets", trinketStrings.toArray());
 			}
-			//copy entry just so that content will always change when clicking entry 0/*
-			rooms[0] = main[0];
 
 			for (logDepth = 1; logDepth <= maxDepth; logDepth++) {
 				//depth and floor feeling
@@ -267,7 +266,7 @@ public class SeedFinder {
                 }
 
 				//add floor items
-                if (!items.get(logDepth-1).isEmpty()) {
+				if (!items.get(logDepth-1).isEmpty()) {
                     main[logDepth] += "\n\n";
                 }
 				for (ItemLog entry : items.get(logDepth-1)) {
@@ -334,6 +333,27 @@ public class SeedFinder {
 				}
 			}
 
+			//add item match depths to entry 0
+			main[0] += "\n";
+            for (int i = 0; i < targets.size(); i++) {
+				String target = targets.get(i);
+                ArrayList<Integer> matchDepths = targetMatchDepths.get(i);
+				main[0] += "\n";
+				if (matchDepths.isEmpty()) {
+					main[0] += Messages.get(this, "not_found", target);
+				} else {
+					StringBuilder depthStr = new StringBuilder();
+					for (Integer depth : matchDepths) {
+						depthStr.append(depth).append("F, ");
+					}
+					depthStr.delete(depthStr.length()-2, depthStr.length());
+					main[0] += Messages.get(this, "found_depth", target, depthStr.toString());
+				}
+            }
+
+			//copy entry just so that content will always change when clicking entry 0/*
+			rooms[0] = main[0];
+
 			result = new SeedfinderLogResult();
 			result.main = main;
 			result.rooms = rooms;
@@ -354,7 +374,7 @@ public class SeedFinder {
 		public String toString() {
 			String caption;
 			if (src instanceof Heap.Type) {
-				caption = ((Type) src).name().replaceAll("_", " ").toLowerCase();
+				caption = ((Type) src).name().replace("_", " ").toLowerCase();
 			} else {
 				caption = src.getClass().getSimpleName()
 						.replaceAll("([a-z])([A-Z])", "$1 $2").toLowerCase();
@@ -365,9 +385,10 @@ public class SeedFinder {
 	}
 
 	public static ArrayList<String> targets;
-	public static ArrayList<Integer> targetDepths;
+	public static ArrayList<Integer> targetMaxDepths;
 	public static ArrayList<Integer> targetLevels;
 	public static ArrayList<Boolean> targetMatches;
+	public static ArrayList<ArrayList<Integer>> targetMatchDepths;
 	public static final ArrayList<String> DEFAULT_TARGETS = new ArrayList<>(
 			List.of("upgrade", "strength", "entrance", "exit")
 	);
@@ -405,7 +426,7 @@ public class SeedFinder {
 	private static void parsePrompt() {
 		int maxDepth = Options.floors;
 		targets = new ArrayList<>();
-		targetDepths = new ArrayList<>();
+		targetMaxDepths = new ArrayList<>();
 		targetLevels = new ArrayList<>();
 
 		for (String line : SPDSettings.seedfinderPrompt().toLowerCase().split("\n")) {
@@ -419,7 +440,7 @@ public class SeedFinder {
 			//ignore range specifier if multirange flag not set
             if (Options.multirange) {
                 int depth = (splitLine.length == 2) ? Integer.parseInt(splitLine[1]) : maxDepth;
-                targetDepths.add(depth);
+                targetMaxDepths.add(depth);
             }
 
             int level = (targetTitle.length == 2) ? Integer.parseInt(targetTitle[1]) : -1;
@@ -429,20 +450,24 @@ public class SeedFinder {
 
 	private static void setDefaultTargets() {
 		targets = DEFAULT_TARGETS;
-		targetDepths = new ArrayList<>();
+		targetMaxDepths = new ArrayList<>();
 		targetLevels = new ArrayList<>();
 		targetMatches = new ArrayList<>();
+		targetMatchDepths = new ArrayList<>();
 		for (String item : DEFAULT_TARGETS) {
-			targetDepths.add(Options.floors);
+			targetMaxDepths.add(Options.floors);
 			targetLevels.add(-1);
 			targetMatches.add(false);
+			targetMatchDepths.add(new ArrayList<>());
 		}
 	}
 
 	private static void resetMatches() {
 		targetMatches = new ArrayList<>();
+		targetMatchDepths = new ArrayList<>();
 		for (String item : targets) {
 			targetMatches.add(false);
+			targetMatchDepths.add(new ArrayList<>());
 		}
 	}
 
@@ -500,7 +525,7 @@ public class SeedFinder {
 	public static String checkTarget(String title) {
 		boolean match = false;
 		for (int i = 0, targetsSize = targets.size(); i < targetsSize; i++) {
-			if (Options.multirange && SeedLog.logDepth > targetDepths.get(i)) continue;
+			if (Options.multirange && SeedLog.logDepth > targetMaxDepths.get(i)) continue;
 
 			String target = targets.get(i);
 
@@ -511,11 +536,12 @@ public class SeedFinder {
                     if ((Options.exactLevels && titleLevel != level) || titleLevel < level) continue;
                 }
 				match = true;
-                if (!targetMatches.get(i)) {
-                    targetMatches.set(i, true);
-                    break;
-                }
-            }
+				targetMatchDepths.get(i).add(SeedLog.logDepth);
+				if (!targetMatches.get(i)) {
+					targetMatches.set(i, true);
+					break;
+				}
+			}
         }
 
 		if (match) return Messages.format("_%s_", title);
@@ -730,8 +756,12 @@ public class SeedFinder {
 				result = Messages.format("%s (%s)", result, pot2color.get(item.image()));
 			} else if (item instanceof Ring) {
 				result = Messages.format("%s (%s)", result, ring2gem.get(item.image()));
-				if (item.cursed) result = "cursed " + result;
 			}
+
+			if (item instanceof EquipableItem && item.cursed) {
+				result = "cursed " + result;
+			}
+
 			itemStrings.add(result);
         }
 
