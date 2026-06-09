@@ -199,7 +199,7 @@ public class Sheath extends Item {
 
         @Override
         public int indicatorColor() {
-            return 0x88CCFF;
+            return 0x2364BC;
         }
 
         @Override
