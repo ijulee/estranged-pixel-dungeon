@@ -550,7 +550,7 @@ public enum Talent {
 	FLASH_PRECISION				(21, 7, 3),
 	ACCELERATION				(22, 7, 3),
 	SCABBARD_MASTERY			(23, 7, 3),
-	FOCUS_MAINTENANCE(24, 7, 3),
+	FOCUS_MAINTENANCE			(24, 7, 3),
 	//Demonslayer T3
 	FASTER_THAN_LIGHT			(25, 7, 3),
 	AFTERIMAGE					(26, 7, 3),
@@ -2409,13 +2409,17 @@ public enum Talent {
         }
 
 		//swordmaster
-		Buff special = hero.buff(Sheath.SpecialDrawTracker.class);
+		Buff special = Sheath.getSpecialDraw();
 		if (hero.pointsInTalent(DRAWING_TECHNIQUE) >= 3 && special != null) {
 			Buff.affect(hero, GreaterHaste.class).set((special instanceof Sheath.DashDrawTracker) ? 3 : 2);
 		}
 
-		if (hero.hasTalent(ACCELERATION) && hero.buff(Sheath.DashDrawTracker.class) != null) {
+		if (hero.hasTalent(ACCELERATION) && special instanceof Sheath.DashDrawTracker) {
 			Buff.prolong(hero, DashDrawVision.class, DashDrawVision.DURATION);
+		}
+
+		if (hero.hasTalent(FOCUS_MAINTENANCE) && special != null) {
+
 		}
 
 		//huntress

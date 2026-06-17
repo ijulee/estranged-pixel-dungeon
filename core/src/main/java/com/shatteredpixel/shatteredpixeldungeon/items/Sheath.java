@@ -111,7 +111,14 @@ public class Sheath extends Item {
     }
 
     public static boolean isSpecialDraw() {
-        return Dungeon.hero.buff(SpecialDrawTracker.class) != null;
+        return !Dungeon.hero.buffs(SpecialDrawTracker.class).isEmpty();
+    }
+
+    public static Buff getSpecialDraw() {
+        for (Buff b : Dungeon.hero.buffs(SpecialDrawTracker.class)) {
+            return b;
+        }
+        return null;
     }
 
     public static class Sheathing extends TargetingAction {
