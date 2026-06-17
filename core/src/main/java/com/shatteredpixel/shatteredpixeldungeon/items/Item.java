@@ -687,7 +687,7 @@ public class Item implements Bundlable {
 							}
 
                             if (Item.this instanceof MissileWeapon) {
-                                if (critTracker != null) {
+								if (critTracker != null) {
                                     critTracker.detach();
                                 }
 

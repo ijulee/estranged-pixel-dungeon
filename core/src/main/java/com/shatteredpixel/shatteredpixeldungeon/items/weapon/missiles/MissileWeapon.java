@@ -439,6 +439,10 @@ abstract public class MissileWeapon extends Weapon {
 			if (user.buff(Juggling.JugglingTracker.class) != null) {
 				//handled inside Juggling shooter
 				return 0;
+			} else if (user instanceof Hero &&
+					hero.subClass == HeroSubClass.GUNSLINGER &&
+					((Hero) user).justMoved) {
+				return 0;
 			} else {
 				return delayFactor( user );
             }

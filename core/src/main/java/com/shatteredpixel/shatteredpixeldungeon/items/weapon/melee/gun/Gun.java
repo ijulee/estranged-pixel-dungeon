@@ -731,9 +731,10 @@ public abstract class Gun extends GunWeapon {
 
 		@Override
 		public float castDelay(Char user, int dst) {
-			if (Dungeon.hero.subClass == HeroSubClass.GUNSLINGER) {
-				if (user instanceof Hero && ((Hero) user).justMoved)  return 0;
-				else                                                  return delayFactor( user );
+			if (user instanceof Hero &&
+					Dungeon.hero.subClass == HeroSubClass.GUNSLINGER &&
+					Dungeon.hero.justMoved) {
+				return 0;
 			} else {
 				return delayFactor(user);
 			}
