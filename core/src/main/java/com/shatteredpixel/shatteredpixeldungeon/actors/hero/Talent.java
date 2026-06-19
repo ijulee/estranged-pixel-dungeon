@@ -64,6 +64,7 @@ import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Recharging;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.RevealedArea;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.Roots;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ScrollEmpower;
+import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.ShieldBuff;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.SwordAura;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.WandEmpower;
 import com.shatteredpixel.shatteredpixeldungeon.actors.buffs.WeaponEnhance;
@@ -2418,8 +2419,16 @@ public enum Talent {
 			Buff.prolong(hero, DashDrawVision.class, DashDrawVision.DURATION);
 		}
 
-		if (hero.hasTalent(FOCUS_MAINTENANCE) && special != null) {
-
+		if (hero.hasTalent(FOCUS_MAINTENANCE) && special != null && dmg > 0) {
+			Barrier barrier = Buff.affect(hero, Barrier.class);
+			int shield = Math.round(dmg * 0.1f * hero.pointsInTalent(FOCUS_MAINTENANCE));
+			int maxShield = Math.round(hero.HT * 0.4f);
+			int curShield = barrier.shielding();
+			shield = Math.min(shield, maxShield - curShield);
+			if (shield > 0) {
+				barrier.incShield(shield);
+				hero.sprite.showStatusWithIcon( CharSprite.POSITIVE, Integer.toString(shield), FloatingText.SHIELDING );
+			}
 		}
 
 		//huntress
