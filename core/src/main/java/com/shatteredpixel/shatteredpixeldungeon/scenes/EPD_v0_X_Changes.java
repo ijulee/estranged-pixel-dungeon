@@ -29,6 +29,7 @@ import java.util.ArrayList;
 
 public class EPD_v0_X_Changes {
     public static Image bugfix = new Image(Assets.Sprites.SPINNER, 144, 0, 16, 16);
+    public static Image shop = new Image(Assets.Sprites.KEEPER, 0, 0, 14, 16);
     public static Image bookshelf = new Image(Assets.Environment.TILES_CITY, 240, 96, 16, 16);
 
     public static void addAllChanges( ArrayList<ChangeInfo> changeInfos ) {
@@ -36,7 +37,49 @@ public class EPD_v0_X_Changes {
     }
 
     private static void add_v0_0_Changes(ArrayList<ChangeInfo> changeInfos) {
-        ChangeInfo changes = new ChangeInfo("v0.0.8", true, "");
+        ChangeInfo changes = new ChangeInfo("v0.0.9", true, "");
+        changes.hardlight(Window.TITLE_COLOR);
+        changeInfos.add(changes);
+
+        changes = new ChangeInfo(Messages.get(ChangesScene.class, "new"), false, null);
+        changes.hardlight(Window.TITLE_COLOR);
+        changeInfos.add(changes);
+
+        changes.addButton(new ChangeButton(Icons.ESTRANGED.get(), "Dev Commentary",
+                Messages.get(EPD_v0_X_Changes.class, "v0_0_9_comments")));
+
+        changes.addButton(new ChangeButton(new HeroIcon(HeroSubClass.MASTER), "Swordmaster Rework",
+                Messages.get(EPD_v0_X_Changes.class, "v0_0_9_swordmaster_1"),
+                Messages.get(EPD_v0_X_Changes.class, "v0_0_9_swordmaster_2"),
+                Messages.get(EPD_v0_X_Changes.class, "v0_0_9_swordmaster_3")));
+
+        changes.addButton(new ChangeButton(Icons.MAGNIFY_GRAY.get(), "Seedfinder Updates",
+                Messages.get(EPD_v0_X_Changes.class, "v0_0_9_seedfinder_1"),
+                Messages.get(EPD_v0_X_Changes.class, "v0_0_9_seedfinder_2")));
+
+        changes = new ChangeInfo(Messages.get(ChangesScene.class, "changes"), false, null);
+        changes.hardlight(CharSprite.WARNING);
+        changeInfos.add(changes);
+
+        changes.addButton(new ChangeButton(new ItemSprite(ItemSpriteSheet.TELEPORTER), "Debug Mode Changes",
+                Messages.get(EPD_v0_X_Changes.class, "v0_0_9_teleporter")));
+
+        changes.addButton(new ChangeButton(new Image(shop), "Lab Region Shop",
+                Messages.get(EPD_v0_X_Changes.class, "v0_0_9_lab_shop")));
+
+        changes.addButton(new ChangeButton(
+                Icons.PREFS.get(), Messages.get(ChangesScene.class, "misc"),
+                Messages.get(EPD_v0_X_Changes.class, "v0_0_9_misc_1"),
+                Messages.get(EPD_v0_X_Changes.class, "v0_0_9_misc_2"),
+                Messages.get(EPD_v0_X_Changes.class, "v0_0_9_misc_3")));
+
+        changes.addButton(new ChangeButton(
+                new Image(bugfix), Messages.get(ChangesScene.class, "bugfixes"),
+                Messages.get(EPD_v0_X_Changes.class, "v0_0_9_bugfixes_1"),
+                Messages.get(EPD_v0_X_Changes.class, "v0_0_9_bugfixes_2"),
+                Messages.get(EPD_v0_X_Changes.class, "v0_0_9_bugfixes_3")));
+
+        changes = new ChangeInfo("v0.0.8a", true, "");
         changes.hardlight(Window.TITLE_COLOR);
         changeInfos.add(changes);
 
